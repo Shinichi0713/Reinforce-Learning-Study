@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5f37;&#x5316;&#x5b66;&#x7fd2;&#x306e;&#x5fdc;&#x7528;&#x4f8b;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="強化学習の応用例">強化学習の応用例</h2>
+<p><a href="https://aismiley.co.jp/ai_news/reinforcement-learning-mechanism-and-examples/">強化学習とは？手法やAIロボットなどの活用事例を紹介</a></p>
+<h2 id="イントロの記事">イントロの記事</h2>
+<p><a href="https://www.kaggle.com/code/alexisbcook/deep-reinforcement-learning">Deep Reinforcement Learning</a></p>
+<p>heuristic = 発見的手法</p>
+<h2 id="mdpと強化学習の関係性">MDPと強化学習の関係性</h2>
+<h6 id="マルコフ決定過程-mdp"><strong>マルコフ決定過程 (MDP)</strong></h6>
+<p>MDPは以下の4つの要素で構成されます：</p>
+<ol>
+<li><strong>状態 (State, S)</strong> : エージェントが存在する環境の状態。</li>
+<li><strong>行動 (Action, A)</strong> : エージェントが取ることができる行動。</li>
+<li><strong>遷移確率 (Transition Probability, P)</strong> : ある状態から次の状態への遷移の確率。</li>
+<li><strong>報酬 (Reward, R)</strong> : ある状態で特定の行動を取ったときに得られる報酬。</li>
+</ol>
+<h6 id="強化学習-rl">強化学習 (RL)</h6>
+<p>強化学習では、エージェントは以下のプロセスを通じて学習します：</p>
+<ol>
+<li><strong>観察</strong> : エージェントは現在の状態を観察します。</li>
+<li><strong>行動選択</strong> : エージェントはポリシー（方策）に基づいて行動を選択します。</li>
+<li><strong>報酬受け取り</strong> : 行動の結果として報酬を受け取ります。</li>
+<li><strong>状態遷移</strong> : 行動の結果として次の状態に遷移します。</li>
+<li><strong>更新</strong> : 得られた報酬と次の状態に基づいてポリシーや価値関数を更新します。</li>
+</ol>
+<h6 id="関係性">関係性</h6>
+<p>強化学習は、MDPのフレームワークを利用してエージェントが最適なポリシーを学習するプロセス。MDPの要素（状態、行動、遷移確率、報酬）を用いて、エージェントは試行錯誤を繰り返しながら最適な行動を見つけ出します。</p>
+<p>MDP</p>
+<blockquote>
+<p>マルコフ決定過程（Markov Decision Process, MDP）は、意思決定の問題を数学的にモデル化するためのフレームワークです。MDPは、エージェントが環境と相互作用しながら最適な行動を選択するための基盤を提供します。MDPは以下の4つの要素で構成されます：</p>
+<ol>
+<li><strong>状態 (State, S)</strong> : エージェントが存在する環境の状態の集合。</li>
+<li><strong>行動 (Action, A)</strong> : エージェントが取ることができる行動の集合。</li>
+<li><strong>遷移確率 (Transition Probability, P)</strong> : ある状態から次の状態への遷移の確率。これは、状態と行動の組み合わせに依存します。</li>
+<li><strong>報酬 (Reward, R)</strong> : ある状態で特定の行動を取ったときに得られる報酬。</li>
+</ol>
+<p>MDPの目的は、エージェントが長期的な報酬を最大化するための最適なポリシー（方策）を見つけることです。ポリシーは、各状態でエージェントが取るべき行動を示すルールです。</p>
+<p>※マルコフ過程は、直前の状態と行動のみが、次の状態と行動を生み出す。それより前の状態には影響を受けないというマルコフ性に基づくものとして理論展開されている</p>
+</blockquote>
+<p>アンドレイ・マルコフ</p>
+<blockquote>
+<p><img src="file:///c:\Users\yoshinsh\Documents\python project\personal-trials\reinforce-learning\documents\image\1_intoro\1731221912913.png" alt="1731221912913"></p>
+<ul>
+<li>ロシアの数学者</li>
+<li>特に<a href="https://ja.wikipedia.org/wiki/%E7%A2%BA%E7%8E%87%E9%81%8E%E7%A8%8B" title="確率過程">確率過程</a>論に関する業績で知られる。彼の研究成果は、後に<a href="https://ja.wikipedia.org/wiki/%E3%83%9E%E3%83%AB%E3%82%B3%E3%83%95%E9%80%A3%E9%8E%96" title="マルコフ連鎖">マルコフ連鎖</a>として知られるようになった。</li>
+<li>彼の息子（<a href="https://ja.wikipedia.org/wiki/1903%E5%B9%B4" title="1903年">1903年</a> - <a href="https://ja.wikipedia.org/wiki/1979%E5%B9%B4" title="1979年">1979年</a>）もまた著名な数学者であり、構成的数学や再帰関数論の発展に寄与した。</li>
+</ul>
+</blockquote>
+<h6 id="建付け">建付け</h6>
+<ol>
+<li>行動と状態を定義の上、遷移する確率(方策)を定義することで、行動様式の価値関数を最大化することで、次の行動が決まるというMDPが定義される</li>
+<li>行動価値関数を導出の上、具体的な解法を得るための手段としてベルマン方程式が導出される</li>
+<li>いつも確率モデルが得られるわけではないため、モンテカルロ的な方策により最適行動に収束する強化学習のロジックにつながる</li>
+</ol>
+<h2 id="a3c">A3C</h2>
+<p>A3C（Asynchronous Advantage Actor-Critic）は、深層強化学習の分野で用いられる高度なアルゴリズムの一つ</p>
+<p>複数のエージェントが異なる環境で同時に学習を行い、その経験を共有することで効率的に学習を進める方法です。</p>
+<h3 id="エージェントの役割">エージェントの役割</h3>
+<p>エージェントは、以下のような役割を持ちます：</p>
+<ul>
+<li><strong>観測：</strong> 環境からの情報（状態）を受け取ります。</li>
+<li><strong>行動選択：</strong> 与えられた状態に基づいて、どのような行動を取るかを決定します。</li>
+<li><strong>学習：</strong> 行動の結果として得られる報酬（またはペナルティ）を用いて、より良い行動選択を学習します。</li>
+</ul>
+<h3 id="複数のエージェントの利点">複数のエージェントの利点</h3>
+<p>複数のエージェントを用いることには、以下のような利点があります：</p>
+<ul>
+<li><strong>多様性：</strong> 異なるエージェントが異なる環境や状況で学習することで、より多様な学習経験を得ることができます。</li>
+<li><strong>効率性：</strong> 各エージェントが独立して学習を進めることで、全体としての学習プロセスが高速化されます。</li>
+<li><strong>堅牢性：</strong> 一つのエージェントが失敗しても、他のエージェントが学習を続けることができるため、全体としての学習プロセスがより堅牢になります。</li>
+</ul>
+
+            
+            
+        </body>
+        </html>
