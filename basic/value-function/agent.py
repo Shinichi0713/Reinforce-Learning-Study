@@ -1,8 +1,6 @@
 # エージェントファイル
 import numpy as np
 
-gamma = 0.8
-
 
 class Agent():
 
@@ -30,9 +28,48 @@ class Agent():
         # 変数としてstateを持っているが、実際にはstateには依存しない
         return Agent.pi_dict1[action]
 
-    # 状態価値関数を更新する
-    def update_value_function(self, action, reward):
-        for i, action in enumerate(self.actions):
-            reward = self.pi(self.get_pos(), action)  # Corrected to use self.get_pos() instead of q
-            self.value_function = self.pi(self.get_pos(), action) * \
-                                  (self.value_function + reward) * gamma
+    # 現在位置から移動
+    def move(self, action):
+        # 辞書を参照し、action名から移動量move_coordを取得
+        move_coord = Agent.act_dict[action] 
+
+        pos_new = self.get_pos() + move_coord
+        # グリッドの外には出られない
+        pos_new[0] = np.clip(pos_new[0], 0, 4)
+        pos_new[1] = np.clip(pos_new[1], 0, 4)
+        self.set_pos(pos_new)
+
+    def set_pos(self, array_or_list):
+        if type(array_or_list) == list:
+            array = np.array(array_or_list)
+        else:
+            array = array_or_list
+        assert (array[0] >=0 and array[0] < 5 and \
+                array[1] >=0 and array[1] <5)
+        self.pos = array
+
+    # 現在位置から移動することによる報酬。この関数では移動自体は行わない
+    def reward(self, state, action):
+        # A地点
+        if (state == np.array([0,1])).all():
+            r = 10
+            return r
+        # B地点
+        if (state == np.array([0,3])).all():
+            r = 5
+            return r
+    
+        # グリッドの境界にいて時に壁を抜けようとした時には罰則
+        if (state[0] == 0 and action == 'up'):
+            r = -1
+        elif(state[0] == 4 and action == 'down'):
+            r = -1
+        elif(state[1] == 0 and action == 'left'):
+            r = -1
+        elif(state[1] == 4 and action == 'right'):
+            r = -1
+        # それ以外は報酬0
+        else:
+            r = 0
+        return r
+
