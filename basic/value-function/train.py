@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import environment, agent
 
 # 状態価値関数を更新する
-def update_value_function(agent, env, gamma=0.9, max_iter=1000):
+def update_value_function(agent, env, gamma=0.99, max_iter=100):
     """
     方策評価（policy evaluation）を繰り返して、状態価値関数を計算する
     gamma: 割引率
@@ -13,10 +13,8 @@ def update_value_function(agent, env, gamma=0.9, max_iter=1000):
     """
     V = agent.value_function.copy()
     for iteration in range(max_iter):
-        delta = 0
         for i in range(V.shape[0]):
             for j in range(V.shape[1]):
-                v = V[i, j]
                 new_v = 0
                 state = np.array([i, j])
                 for action in agent.actions:
@@ -29,7 +27,6 @@ def update_value_function(agent, env, gamma=0.9, max_iter=1000):
                     next_state[1] = np.clip(next_state[1], 0, 4)
                     new_v += prob * (reward + gamma * V[next_state[0], next_state[1]])
                 V[i, j] = new_v
-                delta = max(delta, abs(v - new_v))
     agent.value_function = V  # 結果を保存
 
 def display_value_function(value_function):
