@@ -1,31 +1,50 @@
+# 環境
 import numpy as np
+import os
 
-# 迷路の設定
-maze_size = (10, 10)
-gamma = 0.8
+
 reward_goal = 50
 reward_wall = -1
 reward_default = 0
 
-# 迷路を初期化
-maze = np.zeros(maze_size)
-goal_position = (9, 9)  # ゴール位置
-maze[goal_position] = reward_goal
 
-# 状態価値関数を初期化
-value_function = np.zeros(maze_size)
+class Environment:
+    # 迷路を初期化
+    def __init__(self):
+        
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        with open(f'{dir_current}/maze.txt', 'r') as f:
+            maze_read = [s.rstrip().split(' ') for s in f.readlines()]
+        self.maze = np.array(maze_read)
+
+    # エージェントの状態に応じて報酬を返す
+    def give_reward(self, coordinate, move):
+        status, status_next = self.__give_status(coordinate, move)
+        if status_next == '1':
+            return reward_wall  # 壁にぶつかった場合の報酬
+        elif status == '0' and status_next == 'E':
+            return reward_goal  # ゴールに到達した場合の報酬
+        else:
+            return reward_default
+    
+    # エージェントの位置と、移動方向に応じてstatusを返す
+    def __give_status(self, coordinate, move):
+
+        status = self.maze[coordinate]
+        next_coordinate = (coordinate[0] + move[0], coordinate[1] + move[1])
+        status_next = self.maze[next_coordinate] if 0 <= next_coordinate[0] < maze_size[0] and 0 <= next_coordinate[1] < maze_size[1] else '1'
+        return status, status_next
+
+    def show_start_position(self):
+        for i in range(self.maze.shape[0]):
+            for j in range(self.maze.shape[1]):
+                if self.maze[i, j] == 'S':
+                    return [i, j]
+
 
 # 移動可能なアクション
 actions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 右, 下, 左, 上
 
-# 報酬関数
-def get_reward(position, next_position):
-    if next_position[0] < 0 or next_position[0] >= maze_size[0] or next_position[1] < 0 or next_position[1] >= maze_size[1]:
-        return reward_wall  # 壁にぶつかった場合の報酬
-    elif next_position == goal_position:
-        return reward_goal  # ゴールに到達した場合の報酬
-    else:
-        return reward_default  # 通常マス
 
 # 再帰的な状態価値関数
 def compute_value(position, depth=10):
@@ -41,10 +60,8 @@ def compute_value(position, depth=10):
 
     return value
 
-# 全てのセルの状態価値関数を計算
-for i in range(maze_size[0]):
-    for j in range(maze_size[1]):
-        value_function[i, j] = compute_value((i, j))
 
-print("状態価値関数:")
-print(value_function)
+if __name__ == "__main__":
+    env = Environment()
+    start_position = env.show_start_position()
+    print("Start Position:", start_position)
