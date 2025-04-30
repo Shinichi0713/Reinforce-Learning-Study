@@ -17,7 +17,8 @@ class Agent():
 
     def __init__(self, array_size):
         self.pos = [0, 0]   # デフォルトとして定義
-        self.value_function = np.zeros(array_size)        
+        self.value_function = np.zeros(array_size)
+        self.q_function = np.zeros((len(Agent.actions), array_size[0], array_size[1]))      
 
     # 現在位置を返す
     def get_pos(self):
@@ -80,7 +81,6 @@ class Agent():
         # out:返り値用の変数。関数実行時は0を指定
         if n==iter_num:    # 終端状態
             out += self.pi(state, action) * self.reward(state,action)
-            #print("terminal condition")
             return out
         else:
             #out += agent.reward(agent.get_pos(),action) # 報酬
@@ -95,7 +95,8 @@ class Agent():
             ## 価値関数を再帰呼び出し
             for next_action in self.actions:
                 out +=  self.pi(state_before_recursion, next_action) * \
-                        self.Q_pi(state_before_recursion, next_action,  n+1, 0,  iter_num) * GAMMA
+                        self.Q_pi(state_before_recursion, next_action,  n+1, 0,  iter_num) * self.gamma
                 self.set_pos(state) #  再帰先から戻ったらエージェントを元の地点に初期化
                 #print("agent pos set to %s, at n:%d" % (str(state), n))
             return out
+        
