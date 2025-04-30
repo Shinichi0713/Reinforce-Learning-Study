@@ -117,7 +117,6 @@ class Agent():
             # state:関数呼び出し時の状態
             # n:再帰関数の呼び出し回数。関数実行時は1を指定
             # out:返り値用の変数。関数実行時は0を指定
-       
             if n==iter_num:    # 終端状態
                 out += self.pi(state, action) * self.reward(state,action)
                 #print("terminal condition")
