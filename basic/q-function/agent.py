@@ -18,7 +18,7 @@ class Agent():
     def __init__(self, array_size):
         self.pos = [0, 0]   # デフォルトとして定義
         self.value_function = np.zeros(array_size)
-        self.q_function = np.zeros((len(Agent.actions), array_size[0], array_size[1]))      
+        self.q_function = np.zeros((len(self.actions), array_size[0], array_size[1]))      
 
     # 現在位置を返す
     def get_pos(self):
@@ -27,12 +27,12 @@ class Agent():
     # 方策
     def pi(self, state, action):
         # 変数としてstateを持っているが、実際にはstateには依存しない
-        return Agent.pi_dict1[action]
+        return self.pi_dict1[action]
 
     # 現在位置から移動
     def move(self, action):
         # 辞書を参照し、action名から移動量move_coordを取得
-        move_coord = Agent.act_dict[action] 
+        move_coord = self.act_dict[action] 
 
         pos_new = self.get_pos() + move_coord
         # グリッドの外には出られない
@@ -45,8 +45,8 @@ class Agent():
             array = np.array(array_or_list)
         else:
             array = array_or_list
-        assert (array[0] >=0 and array[0] < 5 and \
-                array[1] >=0 and array[1] <5)
+        assert (array[0] >=0 and array[0] < 10 and \
+                array[1] >=0 and array[1] < 10)
         self.pos = array
 
     # 現在位置から移動することによる報酬。この関数では移動自体は行わない

@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 
 class Agent():
-
     ## クラス変数定義
     # アクションと移動を対応させる辞書 
     GAMMA = 0.9
@@ -167,7 +166,7 @@ def Q_value_plot(Q):
             diag = plt.Line2D(xdata=(i,i+1), ydata=(j+1,j),color='k',linewidth=.5)
             ax.add_line(diag)
             # 座標のインデックスの調整
-            x = -j-1 
+            x = -j-1
             y = i
             # text
             plt.text(i+ 0.65, j+0.45, "%s" % (str(q_array_round[0,x,y])), color=max_color_k[0,x,y])
