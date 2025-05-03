@@ -4,30 +4,21 @@ import os
 import agent, environment
 import matplotlib.pyplot as plt
 
-
-# Q関数の更新
-# def update_value_function(agent, env, gamma=0.99, max_iter=100):
-def update_q_function(agent_instance, env, state, action, n, value_act, gamma=0.9, max_iter=8):
+def update_q_function(agent_instance, env, state, action, n, gamma=0.9, max_iter=8):
     move = agent_instance.act_dict[action]
+    reward = env.give_reward(state.tolist(), move)
     if n == max_iter:
-        value_act += agent_instance.pi(state, action) * env.give_reward(state.tolist(), move)
-        return value_act
-    else:
-        reward = env.give_reward(state.tolist(), move)
-        # Q関数の更新
-        value_act += reward
-        # 状態遷移確率は行動によって確実に決まった場所になる=1
-        for direc_action, action_next in enumerate(agent_instance.actions):
-            move = agent_instance.act_dict[action_next]
-            state_next = state + move
-            # 外側のアクションは無効
-            if state_next[0] < 0 or state_next[0] >= env.maze.shape[0] or state_next[1] < 0 or state_next[1] >= env.maze.shape[1]:
-                continue
-            value_act += agent_instance.pi(state_next, action_next) *\
-                    update_q_function(agent_instance, env, state_next, action_next, n + 1, value_act, gamma, max_iter) * gamma
-            # agent_instance.set_pos(state)   # 元の状態基準で計算する
-        return value_act
-
+        return reward
+    # 次の状態へ
+    state_next = state + move
+    if state_next[0] < 0 or state_next[0] >= env.maze.shape[0] or state_next[1] < 0 or state_next[1] >= env.maze.shape[1]:
+        return -10
+    # ゴールや壁などで終了する場合は、その判定をここに入れる
+    q_sum = 0
+    for action_next in agent_instance.actions:
+        # 次の状態での各行動の価値を方策で重み付けして合計
+        q_sum += agent_instance.pi(state_next, action_next) * update_q_function(agent_instance, env, state_next, action_next, n + 1, gamma, max_iter) * gamma
+    return reward + q_sum
 
 # 最適行動に赤色のラベル、他には指定したカラーラベルをつける
 def if_true_color_red(val, else_color):
@@ -80,7 +71,7 @@ def main():
         print(f"action_index: {index}")
         for i in range(env.maze.shape[0]):
             for j in range(env.maze.shape[1]):
-                q_array[index, i, j] = update_q_function(agent_instance, env, state=np.array([i, j]), action=action, n=0, value_act=0, gamma=0.9, max_iter=num_iterative)
+                q_array[index, i, j] = update_q_function(agent_instance, env, state=np.array([i, j]), action=action, n=0, gamma=0.9, max_iter=num_iterative)
     agent_instance.q_function = q_array
     # 結果をコンソールに表示
     print("Qpi")
