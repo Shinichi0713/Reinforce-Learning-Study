@@ -5,7 +5,7 @@ import os
 
 reward_goal = 10
 reward_wall = -1
-reward_default = 1
+reward_default = 0
 
 
 class Environment:

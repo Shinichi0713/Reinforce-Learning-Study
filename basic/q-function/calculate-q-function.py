@@ -7,28 +7,26 @@ import matplotlib.pyplot as plt
 
 # Q関数の更新
 # def update_value_function(agent, env, gamma=0.99, max_iter=100):
-def update_q_function(agent_instance, env, gamma=0.9, max_iter=8):
-    q_array = agent_instance.q_function.copy()
-    for iteration in range(max_iter):
-        for i in range(env.maze.shape[0]):
-            for j in range(env.maze.shape[1]):
-                state = np.array([i, j])
-                for no_action, action in enumerate(agent_instance.actions):
-                    move = agent_instance.act_dict[action]
-                    reward = env.give_reward(state.tolist(), move)
-                    
-                    # Q関数の更新
-                    q_array[no_action, state[0], state[1]] += reward
-                    # 状態遷移確率は行動によって確実に決まった場所になる=1
-                    for direc_action, action_tmp in enumerate(agent_instance.actions):
-                        move = agent_instance.act_dict[action_tmp]
-                        next_state = state + move
-                        # 外側のアクションは無効
-                        if next_state[0] < 0 or next_state[0] >= env.maze.shape[0] or next_state[1] < 0 or next_state[1] >= env.maze.shape[1]:
-                            continue
-                        q_array[no_action, state[0], state[1]] += agent_instance.pi(next_state, action_tmp) * q_array[direc_action, next_state[0], next_state[1]] * gamma
-                        # agent_instance.set_pos(state)   # 元の状態基準で計算する
-    agent_instance.q_function = q_array  # 結果を保存
+def update_q_function(agent_instance, env, state, action, n, value_act, gamma=0.9, max_iter=8):
+    move = agent_instance.act_dict[action]
+    if n == max_iter:
+        value_act += agent_instance.pi(state, action) * env.give_reward(state.tolist(), move)
+        return value_act
+    else:
+        reward = env.give_reward(state.tolist(), move)
+        # Q関数の更新
+        value_act += reward
+        # 状態遷移確率は行動によって確実に決まった場所になる=1
+        for direc_action, action_next in enumerate(agent_instance.actions):
+            move = agent_instance.act_dict[action_next]
+            state_next = state + move
+            # 外側のアクションは無効
+            if state_next[0] < 0 or state_next[0] >= env.maze.shape[0] or state_next[1] < 0 or state_next[1] >= env.maze.shape[1]:
+                continue
+            value_act += agent_instance.pi(state_next, action_next) *\
+                    update_q_function(agent_instance, env, state_next, action_next, n + 1, value_act, gamma, max_iter) * gamma
+            # agent_instance.set_pos(state)   # 元の状態基準で計算する
+        return value_act
 
 
 # 最適行動に赤色のラベル、他には指定したカラーラベルをつける
@@ -70,15 +68,20 @@ def draw_optimal_action(q_function, env):
             elif optimal_actions[x,y] ==3:
                 plt.arrow(i+ 0.5, j+0.5, 0, -0.2, width=0.01,head_width=0.15,\
                     head_length=0.2, color='r')
-
     plt.show()
 
 # Q関数の計算
 def main():
     env = environment.Environment()
     agent_instance = agent.Agent(env.maze.shape)
-    num_iterative = 8
-    update_q_function(agent_instance, env, max_iter=num_iterative)
+    num_iterative = 6
+    q_array = np.zeros((len(agent_instance.actions), env.maze.shape[0], env.maze.shape[1]))
+    for index, action in enumerate(agent_instance.actions):
+        print(f"action_index: {index}")
+        for i in range(env.maze.shape[0]):
+            for j in range(env.maze.shape[1]):
+                q_array[index, i, j] = update_q_function(agent_instance, env, state=np.array([i, j]), action=action, n=0, value_act=0, gamma=0.9, max_iter=num_iterative)
+    agent_instance.q_function = q_array
     # 結果をコンソールに表示
     print("Qpi")
     print(agent_instance.q_function)
