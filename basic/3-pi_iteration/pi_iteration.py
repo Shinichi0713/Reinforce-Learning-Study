@@ -49,17 +49,6 @@ def policy_iteration():
     print("最適状態価値:", agent_instance.value_function)
     return pi_history, agent_instance.pi
 
-# 方策の変化（例：各状態で選択される行動の推移）
-def visualize_policy(pi_history):
-    pi_history_arr = np.array(pi_history)  # (iteration, state)
-    plt.figure(figsize=(10, 5))
-    for state in range(pi_history_arr.shape[1]):
-        plt.plot(pi_history_arr[:, state], label=f"State {state}")
-    plt.xlabel("Iteration")
-    plt.ylabel("Action")
-    plt.title("Policy Evolution")
-    plt.legend()
-    plt.show()
 
 def visualize_policy_1d(pi):
     # pi: shape = (num_states, num_actions)

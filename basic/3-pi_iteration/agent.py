@@ -17,7 +17,7 @@ class Agent:
             return 1
 
     # その段階での行動価値関数を評価
-    def evaluate_pi(self, threthold=1e-5):
+    def evaluate_pi(self, threshold=1e-5):
         while True:
             delta = 0.0
             for i, status in enumerate(self.environment.status):
@@ -36,7 +36,7 @@ class Agent:
                         v_new += 0
                 delta = max(delta, abs(self.value_function[i] - v_new))
                 self.value_function[i] = v_new
-            if delta < threthold:
+            if delta < threshold:
                 break
         return self.value_function
     
@@ -61,12 +61,3 @@ class Agent:
         else:
             return False
     
-if __name__ == "__main__":
-    import environment
-    env = environment.Environment()
-    agent = Agent(env)
-    index_action = agent.effect_action("left")
-    q_function = agent.evaluate_q_function()
-    print("Q function:", q_function)
-    agent.improve_q_function()
-    print(agent.pi)
