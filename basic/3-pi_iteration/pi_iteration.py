@@ -4,25 +4,6 @@ import numpy as np
 import agent, environment
 
 
-# 方策評価→方策改善
-# --- 方策反復プログラム ---
-# def policy_iteration():
-#     env = environment.Environment()
-#     agent_instance = agent.Agent(env)
-#     iteration = 0
-#     while True:
-#         iteration += 1
-#         value_function = agent_instance.evaluate_pi()
-#         is_pi_stable = agent_instance.improve_pi()
-#         print(f"Iteration {iteration}:")
-#         print("Q function:", value_function)
-#         print("pi =", agent_instance.pi)
-#         if is_pi_stable:
-#             break
-#     print("\n最適方策:", agent_instance.pi)
-#     print("最適状態価値:", agent_instance.value_function)
-#     return agent_instance.pi, agent_instance.value_function
-
 def policy_iteration():
     env = environment.Environment()
     agent_instance = agent.Agent(env)
