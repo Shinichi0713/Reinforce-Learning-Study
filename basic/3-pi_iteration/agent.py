@@ -16,25 +16,32 @@ class Agent:
         else:
             return 1
 
-    # その段階での行動価値関数を評価する
-    def evaluate_q_function(self):
-        for i, status in enumerate(self.environment.status):
-            for j, action in enumerate(self.actions):
-                effect_action = self.effect_action(action)
-                reward = self.environment.give_reward(status, effect_action)
-                pi = self.pi[i, j]
-                status_next = status + effect_action
-                p = 1           # 状態遷移は行動が決まれば決定的=1
-                self.value_function[i] += pi * p * reward
-                if status_next >= 0 and status_next < self.value_function.shape[0]:
-                    self.value_function[i] += pi * p * (self.gamma * self.value_function[status_next])
-                # 範囲の外
-                else:
-                    self.value_function[i] += 0
+    # その段階での行動価値関数を評価
+    def evaluate_pi(self, threthold=1e-5):
+        while True:
+            delta = 0.0
+            for i, status in enumerate(self.environment.status):
+                v_new = 0.0
+                for j, action in enumerate(self.actions):
+                    effect_action = self.effect_action(action)
+                    reward = self.environment.give_reward(status, effect_action)
+                    pi = self.pi[i, j]
+                    status_next = status + effect_action
+                    p = 1           # 状態遷移は行動が決まれば決定的=1
+                    v_new += pi * p * reward
+                    if status_next >= 1 and status_next < self.value_function.shape[0]:
+                        v_new += pi * p * (self.gamma * self.value_function[status_next - 1])
+                    # 範囲の外
+                    else:
+                        v_new += 0
+                delta = max(delta, abs(self.value_function[i] - v_new))
+                self.value_function[i] = v_new
+            if delta < threthold:
+                break
         return self.value_function
     
     # 方策改善を行う
-    def improve_q_function(self):
+    def improve_pi(self):
         # 各状態で行動価値を算出する
         for i, status in enumerate(self.environment.status):
             if self.environment.is_terminal(status):
@@ -49,7 +56,7 @@ class Agent:
                 q_function[action] = reward + self.gamma * self.value_function[status_next] if status_next < len(self.value_function) else reward
             best_action = max(q_function, key=q_function.get)
             self.pi[i] = [1 if action == best_action else 0 for action in self.actions]
-        if pi_old == self.pi:
+        if np.array_equal(pi_old, self.pi):
             return True
         else:
             return False
