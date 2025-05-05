@@ -62,34 +62,44 @@ def visualize_policy(pi_history):
     plt.show()
 
 def visualize_policy_1d(pi):
-    # 方策のシンボル
-    def get_symbol(val):
-        if val == 0.0:
-            return "←"
-        elif val == 1.0:
-            return "→"
-        elif val == 0.5:
-            return "・"
-        else:
-            return "?"
+    # pi: shape = (num_states, num_actions)
+    # 0:←, 1:→, 0.5:・
 
-    fig, ax = plt.subplots(figsize=(4, 6))
-    ax.set_xlim(-0.5, pi.shape[1]-0.5)
-    ax.set_ylim(-0.5, pi.shape[0]-0.5)
-    ax.set_xticks(range(pi.shape[1]))
-    ax.set_yticks(range(pi.shape[0]))
-    ax.set_xticklabels([f"列{j}" for j in range(pi.shape[1])])
-    ax.set_yticklabels([f"行{i}" for i in range(pi.shape[0])])
-    ax.invert_yaxis()
-
-    # 方策を各マスに記載
+    # 各状態の最善行動を取得
+    best_actions = np.argmax(pi, axis=1)
+    # もし確率が0.5なら・にする
+    symbols = []
     for i in range(pi.shape[0]):
-        for j in range(pi.shape[1]):
-            symbol = get_symbol(pi[i, j])
-            ax.text(j, i, symbol, fontsize=30, ha='center', va='center')
+        if np.allclose(pi[i, 0], 0.5) and np.allclose(pi[i, 1], 0.5):
+            symbols.append("・")
+        elif best_actions[i] == 0:
+            symbols.append("←")
+        elif best_actions[i] == 1:
+            symbols.append("→")
+        else:
+            symbols.append("?")
 
-    ax.set_title("最適方策（←：0, →：1, ・：0.5）")
-    plt.grid(True)
+    fig, ax = plt.subplots(figsize=(8, 2))
+    ax.set_xlim(-0.5, pi.shape[0]-0.5)
+    ax.set_ylim(-1, 1)
+    ax.set_xticks(range(pi.shape[0]))
+    ax.set_yticks([])
+
+    for i, symbol in enumerate(symbols):
+        if symbol == "←":
+            # 左向き矢印
+            ax.arrow(i+0.2, 0, -0.4, 0, head_width=0.2, head_length=0.15, fc='b', ec='b')
+        elif symbol == "→":
+            # 右向き矢印
+            ax.arrow(i-0.2, 0, 0.4, 0, head_width=0.2, head_length=0.15, fc='r', ec='r')
+        elif symbol == "・":
+            ax.plot(i, 0, "ko", markersize=12)
+        else:
+            ax.text(i, 0, symbol, fontsize=20, ha='center', va='center')
+
+    ax.set_xlabel("status")
+    ax.set_title("best policy")
+    plt.tight_layout()
     plt.show()
 
 # --- 実行 ---
