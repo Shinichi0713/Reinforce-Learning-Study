@@ -33,6 +33,27 @@ class Agent:
                     self.value_function[i] += 0
         return self.value_function
     
+    # 方策改善を行う
+    def improve_q_function(self):
+        # 各状態で行動価値を算出する
+        for i, status in enumerate(self.environment.status):
+            if self.environment.is_terminal(status):
+                continue
+            pi_old = self.pi.copy()
+            # 行動価値関数算出
+            q_function = {}
+            for action in self.actions:
+                status_next = status + self.effect_action(action)
+
+                reward = self.environment.give_reward(status, self.effect_action(action))
+                q_function[action] = reward + self.gamma * self.value_function[status_next] if status_next < len(self.value_function) else reward
+            best_action = max(q_function, key=q_function.get)
+            self.pi[i] = [1 if action == best_action else 0 for action in self.actions]
+        if pi_old == self.pi:
+            return True
+        else:
+            return False
+    
 if __name__ == "__main__":
     import environment
     env = environment.Environment()
@@ -40,4 +61,5 @@ if __name__ == "__main__":
     index_action = agent.effect_action("left")
     q_function = agent.evaluate_q_function()
     print("Q function:", q_function)
-    
+    agent.improve_q_function()
+    print(agent.pi)
