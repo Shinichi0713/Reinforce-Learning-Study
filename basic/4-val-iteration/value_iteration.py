@@ -7,28 +7,13 @@ import agent, environment
 def policy_iteration():
     env = environment.Environment()
     agent_instance = agent.Agent(env)
-    iteration = 0
 
-    # 学習の経過を保存するリスト
-    pi_history = []
-
-    while True:
-        iteration += 1
-        value_function = agent_instance.evaluate_pi()
-        is_pi_stable = agent_instance.improve_pi()
-
-        # deep copyで保存
-        pi_history.append(np.copy(agent_instance.pi))
-
-        print(f"Iteration {iteration}:")
-        print("Value function:", value_function)
-        print("pi =", agent_instance.pi)
-        if is_pi_stable:
-            break
+    # 方策を価値反復法で更新
+    history_value_function = agent_instance.update_pi()
 
     print("\n最適方策:", agent_instance.pi)
     print("最適状態価値:", agent_instance.value_function)
-    return pi_history, agent_instance.pi
+    return history_value_function, agent_instance.pi
 
 
 def visualize_policy_1d(pi):
@@ -68,13 +53,13 @@ def visualize_policy_1d(pi):
             ax.text(i, 0, symbol, fontsize=20, ha='center', va='center')
 
     ax.set_xlabel("status")
-    ax.set_title("best policy with pi-iteration")
+    ax.set_title("best policy with value-iteration")
     plt.tight_layout()
     plt.show()
 
 # --- 実行 ---
 if __name__ == "__main__":
-    pi_history, pi = policy_iteration()
+    history_value_function, pi = policy_iteration()
 
     visualize_policy_1d(pi)
 
