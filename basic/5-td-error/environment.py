@@ -38,3 +38,5 @@ class Environment:
                 state_next = 'S'
         return reward, state_next
         
+    def return_index_status(self, state):
+        return self.states.index(state) if state in self.states else -1
