@@ -11,17 +11,20 @@ class Agent:
         self.V = np.zeros(len(self.env.states))
         
 
-    def calculate_td_error(self, state, action):
+    # td誤差の計算
+    def calculate_td_error(self, state):
         # 次の状態へのtd-eerorを算出
         td_error = 0
-        for i, prob_action in enumerate(self.pi):
-            
-            reward, state_next = self.env.get_action()
-
-            td_error += prob_action * (reward + self.V[state_next] - self.V[state])
+        for i, prob_action in enumerate(self.pi[self.env.return_index_status(state)]):
+            action = self.actions[i]
+            reward, state_next = self.env.get_action(state, action)
+            index_state = self.env.return_index_status(state)
+            index_state_next = self.env.return_index_status(state_next)
+            td_error += prob_action * (reward + self.V[index_state_next] - self.V[index_state])
+        return td_error
 
 if __name__ == "__main__":
     import environment
     env = environment.Environment()
     agent_instance = Agent(env=env)
-    agent_instance.select_action(state=None, action=None)
+    print(agent_instance.calculate_td_error('A'))
