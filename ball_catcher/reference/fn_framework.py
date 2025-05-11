@@ -187,7 +187,7 @@ class Observer():
         return self._env.observation_space
 
     def reset(self):
-        return self.transform(self._env.reset())
+        return self.transform(self._env.reset()[0])
 
     def render(self):
         self._env.render()
