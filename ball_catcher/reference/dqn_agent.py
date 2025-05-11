@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.python import keras as K
 from PIL import Image
 import gym
-import gym_ple
+# import gym_ple
 from fn_framework import FNAgent, Trainer, Observer
 
 class DeepQNetworkAgent(FNAgent):
