@@ -5,7 +5,8 @@ import numpy as np
 from tensorflow.python import keras as K
 from PIL import Image
 import gym
-# import gym_ple
+from ple.games.catcher import Catcher
+from ple.ple import PLE
 from fn_framework import FNAgent, Trainer, Observer
 
 class DeepQNetworkAgent(FNAgent):
@@ -181,13 +182,16 @@ def main(play, is_test):
     path = trainer.logger.path_of(trainer.file_name)
     print('path', path)
     agent_class = DeepQNetworkAgent
-
+    game = Catcher()
+    env = PLE(game, fps=30, display_screen=True)
+    env.init()
     if is_test:
         print("Train on test mode")
-        obs = gym.make("CartPole-v0")
+        obs = gym.make("CartPole-v1")
+        obs = CatcherObserver(env, 80, 80, 4)
         agent_class = DeepQNetworkAgentTest
     else:
-        env = gym.make("Catcher-v0")
+        env = gym.make("CartPole-v1")
         obs = CatcherObserver(env, 80, 80, 4)
         trainer.learning_rate = 1e-4
 
