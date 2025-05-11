@@ -7,7 +7,7 @@ thus, we apply the tech to control Self-discipline system.
 2. documents: that is the note of reinforcement-learning.
 3. pole-problem: that is the code to try the feinforcement learning.
 
-
+![alt text](image.png)
 
 
 # References

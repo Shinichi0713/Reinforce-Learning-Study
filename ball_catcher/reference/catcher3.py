@@ -18,7 +18,7 @@ bins = 20  # 離散化の粒度
 alpha = 0.1     # 学習率
 gamma = 0.99    # 割引率
 epsilon = 0.1   # ε-greedy
-num_episodes = 500
+num_episodes = 1000
 
 # 環境準備
 game = Catcher(width=256, height=256)
@@ -28,6 +28,10 @@ actions = env.getActionSet()  # [左, 何もしない, 右]
 
 # Qテーブル
 Q = {}
+# Qテーブルの読み込み
+with open("catcher_q_table.pkl", "rb") as f:
+    Q = pickle.load(f)
+    print("Qテーブルの読み込み完了")
 
 for episode in range(num_episodes):
     env.reset_game()
@@ -76,4 +80,4 @@ for episode in range(3):
         action = actions[np.argmax(qvals)]
         env.act(action)
         state = discretize_state(game.getGameState(), bins)
-env.close()
+# env.close()
