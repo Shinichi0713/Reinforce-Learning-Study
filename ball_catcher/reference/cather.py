@@ -4,9 +4,13 @@ import random
 from collections import deque
 import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
+from ple import PLE
+from ple.games.catcher import Catcher
 
 # 環境の作成
-env = gym.make("Catcher-v1")
+game = Catcher(width=256, height=256)
+env = PLE(game, fps=30, display_screen=True)
+env.init()
 
 # パラメータ
 state_size = env.observation_space.shape[0]
