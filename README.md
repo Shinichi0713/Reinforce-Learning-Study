@@ -1,6 +1,11 @@
-# RL-study
+# Purpose
+this repogitory is run to study reinforcement learning.
+thus, we apply the tech to control Self-discipline system.
 
-
+# contents
+1. basic: that is the code to check fundamental reinforcement theology.
+2. documents: that is the note of reinforcement-learning.
+3. pole-problem: that is the code to try the feinforcement learning.
 
 
 
