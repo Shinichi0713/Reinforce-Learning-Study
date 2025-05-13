@@ -11,8 +11,7 @@ class Environment:
             ['#', '.', '.', 'G', '.']
         ]
         self.maze = np.array(maze)
-        self.position_start = self.__find('S')
-        self.position_goal = self.__find('G')
+        self.reset()
 
     def __find(self, char):
         for r in range(self.maze.shape[0]):
@@ -22,25 +21,28 @@ class Environment:
         return None
 
     def step(self, status, action):
-        status_next = [status[0] + action[0], status[1] + action[1]]
-        reward = self.give_reward(status_next)
-        return reward, status_next
+        status_next = status + np.array(action)
+        reward, status_next, done = self.give_reward(status_next)
+        if done:
+            self.status = self.reset()
+        return reward, status_next, done
 
     def reset(self):
-        self.position_start = self.__find('S')
-        self.position_goal = self.__find('G')
+        self.position_start = np.array(self.__find('S'))
+        self.position_goal = np.array(self.__find('G'))
         return self.position_start
     
     def give_reward(self, status_next):
         # ゴール
         if status_next == self.position_goal:
-            return 2  # ゴールに到達
+            return 2, status_next  # ゴールに到達
         elif 0 > status_next[0] or 0 > status_next[1] or status_next[0] >= self.maze.shape[0] or status_next[1] >= self.maze.shape[1]:
-            return -2  # 壁に衝突
+            status_next = np.clip(status_next, 0, self.maze.shape[0] - 1)
+            return -2, status_next  # 壁に衝突
         elif self.maze[status_next[0], status_next[1]] == '#':
-            return -1  # 壁に衝突
-        return 0  # それ以外
-    
+            return -1, status_next  # 壁に衝突
+        return 0, status_next  # それ以外
+
 
 if __name__ == "__main__":
     env = Environment()
