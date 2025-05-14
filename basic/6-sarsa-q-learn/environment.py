@@ -34,14 +34,14 @@ class Environment:
     
     def give_reward(self, status_next):
         # ゴール
-        if status_next == self.position_goal:
-            return 2, status_next  # ゴールに到達
+        if status_next.all() == self.position_goal.all():
+            return 2, status_next, True  # ゴールに到達
         elif 0 > status_next[0] or 0 > status_next[1] or status_next[0] >= self.maze.shape[0] or status_next[1] >= self.maze.shape[1]:
             status_next = np.clip(status_next, 0, self.maze.shape[0] - 1)
-            return -2, status_next  # 壁に衝突
+            return -2, status_next, False  # 壁に衝突
         elif self.maze[status_next[0], status_next[1]] == '#':
-            return -1, status_next  # 壁に衝突
-        return 0, status_next  # それ以外
+            return -1, status_next, False  # 壁に衝突
+        return 0, status_next, False  # それ以外
 
 
 if __name__ == "__main__":
