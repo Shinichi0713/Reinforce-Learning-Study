@@ -1,10 +1,7 @@
 
-import os, sys, random
+import os, random
 import numpy as np
-dir_current = os.path.dirname(os.path.abspath(__file__))
-dir_parent = os.path.dirname(dir_current)
-sys.path.append(dir_parent)
-import environment
+
 
 class SarsaAgent:
     def __init__(self, env, alpha=0.5, gamma=0.9, epsilon=0.2):
@@ -42,9 +39,16 @@ class SarsaAgent:
 
     # 行動価値関数を保存する
     def save(self):
+        print("モデルを保存")
         np.save(self.path_sarsa, self.Q)
 
 if __name__ == "__main__":
+    import sys
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    dir_parent = os.path.dirname(dir_current)
+    sys.path.append(dir_parent)
+
+    import environment
     env = environment.Environment()
     agent = SarsaAgent(env)
     for episode in range(1000):
@@ -58,5 +62,6 @@ if __name__ == "__main__":
             action = next_action
             if done:
                 break
+    # 行動価値関数保存
     agent.save()
 
