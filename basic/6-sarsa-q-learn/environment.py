@@ -43,6 +43,9 @@ class Environment:
             return -1, status_next, False  # 壁に衝突
         return 0, status_next, False  # それ以外
 
+    def check_over(self, state):
+        # エピソードが終了したかどうかをチェック
+        return state.all() == self.position_goal.all()
 
 if __name__ == "__main__":
     env = Environment()

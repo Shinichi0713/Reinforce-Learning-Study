@@ -19,8 +19,8 @@ class SarsaAgent:
             self.Q = np.load(self.path_sarsa)
 
     # greedy行動選択
-    def choose_action(self, state):
-        if np.random.rand() < self.epsilon:
+    def choose_action(self, state, is_training=True):
+        if is_training and np.random.rand() < self.epsilon:
             self.epsilon *= 0.99
             return random.choice(self.actions)
         else:

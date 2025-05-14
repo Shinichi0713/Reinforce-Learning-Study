@@ -31,18 +31,17 @@ def evaluate_agent():
     agent = SarsaAgent(env)
     for episode in range(100):
         state = env.reset()
-        action = agent.choose_action(state)
+        action = agent.choose_action(state, is_training=False)
         while True:
-            reward, state_next, done = env.step(state, action)
-            next_action = agent.choose_action(state_next)
-            agent.update(state, action, reward, state_next, next_action)
+            state_next = state + action
+            next_action = agent.choose_action(state_next, is_training=False)
+            done = env.check_over(state_next)
             state = state_next
             action = next_action
             if done:
                 break
-    # 行動価値関数保存
-    agent.save()
 
 if __name__ == "__main__":
-    train_agent()
+    # train_agent()
+    evaluate_agent()
 
