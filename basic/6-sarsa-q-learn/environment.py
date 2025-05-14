@@ -34,7 +34,7 @@ class Environment:
     
     def give_reward(self, status_next):
         # ゴール
-        if status_next.all() == self.position_goal.all():
+        if np.array_equal(status_next, self.position_goal):
             return 2, status_next, True  # ゴールに到達
         elif 0 > status_next[0] or 0 > status_next[1] or status_next[0] >= self.maze.shape[0] or status_next[1] >= self.maze.shape[1]:
             status_next = np.clip(status_next, 0, self.maze.shape[0] - 1)
@@ -45,7 +45,7 @@ class Environment:
 
     def check_over(self, state):
         # エピソードが終了したかどうかをチェック
-        return state.all() == self.position_goal.all()
+        return state.any() == self.position_goal.any()
 
 if __name__ == "__main__":
     env = Environment()
