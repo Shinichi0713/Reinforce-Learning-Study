@@ -45,7 +45,7 @@ class Environment:
 
     def check_over(self, state):
         # エピソードが終了したかどうかをチェック
-        return state.any() == self.position_goal.any()
+        return np.array_equal(state, self.position_goal)
 
 if __name__ == "__main__":
     env = Environment()
