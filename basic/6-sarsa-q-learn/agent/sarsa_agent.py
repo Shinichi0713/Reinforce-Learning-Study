@@ -22,11 +22,11 @@ class SarsaAgent:
     # epsilonの減衰をさせると、今回の課題が解けなくなる
     def choose_action(self, state, is_training=True):
         if is_training and np.random.rand() < self.epsilon:
-            # self.epsilon *= 0.999999
+            self.epsilon *= 0.9999
             return random.choice(self.actions)
         else:
             row, col = state
-            # self.epsilon *= 0.999999
+            self.epsilon *= 0.9999
             return self.actions[np.argmax(self.Q[row, col])]
         
 
