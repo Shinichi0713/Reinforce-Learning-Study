@@ -4,7 +4,7 @@ import numpy as np
 
 
 class SarsaAgent:
-    def __init__(self, env, alpha=0.5, gamma=0.9, epsilon=0.2):
+    def __init__(self, env, alpha=0.5, gamma=0.9, epsilon=0.9):
         self.actions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
         self.env = env
         self.alpha = alpha
@@ -18,14 +18,15 @@ class SarsaAgent:
             print("Loading SARSA from file")
             self.Q = np.load(self.path_sarsa)
 
-    # greedy行動選択
+    # ε-greedy法
+    # epsilonの減衰をさせると、今回の課題が解けなくなる
     def choose_action(self, state, is_training=True):
         if is_training and np.random.rand() < self.epsilon:
-            self.epsilon *= 0.99
+            # self.epsilon *= 0.999999
             return random.choice(self.actions)
         else:
             row, col = state
-            self.epsilon *= 0.99
+            # self.epsilon *= 0.999999
             return self.actions[np.argmax(self.Q[row, col])]
         
 

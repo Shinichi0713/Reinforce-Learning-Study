@@ -42,6 +42,6 @@ def evaluate_agent():
                 break
 
 if __name__ == "__main__":
-    train_agent()
-    # evaluate_agent()
+    # train_agent()
+    evaluate_agent()
 
