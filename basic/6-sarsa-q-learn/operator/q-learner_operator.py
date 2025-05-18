@@ -13,6 +13,8 @@ from agent import QLearner
 def train_agent():
     env = environment.Environment()
     agent = QLearner(env)
+    delta_q = []
+    q_previous = agent.Q.copy()
     for episode in range(1000):
         state = env.reset()
         action = agent.choose_action(state)
@@ -24,8 +26,20 @@ def train_agent():
             action = next_action
             if done:
                 break
+        # Q値の変化を記録
+        delta_q.append(np.max(np.abs(agent.Q - q_previous)))
+        q_previous = agent.Q.copy()
+    plot_q_function(delta_q)
     # 行動価値関数保存
     agent.save()
+
+def plot_q_function(delta_q):
+    plt.plot(delta_q)
+    plt.xlabel("Episode")
+    plt.ylabel("Max Q-Value Change")
+    plt.title("Q-Value Convergence")
+    plt.show()
+
 
 # エージェントを評価する関数
 def evaluate_agent():
@@ -96,6 +110,6 @@ def draw_optimal_action(q_function, env):
     plt.show()
 
 if __name__ == "__main__":
-    # train_agent()
-    evaluate_agent()
+    train_agent()
+    # evaluate_agent()
 
