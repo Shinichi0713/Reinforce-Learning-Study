@@ -13,6 +13,7 @@ class PolicyNetwork(nn.Module):
             nn.Softmax(dim=-1)
         )
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_model = os.path.join(dir_current, "policy_net.pth")
         if os.path.exists(self.path_model):
@@ -20,6 +21,7 @@ class PolicyNetwork(nn.Module):
             self.load(self.path_model)
 
     def forward(self, x):
+        x = x.to(self.device)
         return self.fc(x)
 
     # 行動（action）を選択する処理
