@@ -33,7 +33,7 @@ class PoleGym:
             returns.insert(0, R)
         returns = torch.tensor(returns, dtype=torch.float32)
         # 標準化（学習を安定化させるため）
-        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-6)
         return returns
 
     # エピソードを1つ実行して、軌跡を記録
@@ -58,7 +58,6 @@ if __name__ == "__main__":
     state = env.reset()
     done = False
     for i in range(20):
-        
         action = env.env.action_space.sample()
         next_state, reward, terminated, truncated, info, q_weight = env.step(action)
         env.render()
