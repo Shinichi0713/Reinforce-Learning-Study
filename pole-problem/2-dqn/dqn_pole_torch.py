@@ -110,7 +110,7 @@ class Agent():
 # 環境
 class Env():
     def __init__(self):
-        self.env = gym.make("CartPole-v0")
+        self.env = gym.make('CartPole-v1')
 
         # action_size = self.env.action_space.n
         # print("action_size", action_size)
