@@ -7,12 +7,12 @@ dir_parent = os.path.dirname(dir_current)
 sys.path.append(dir_parent)
 
 import environment
-from agent import SarsaAgent
+from agent import QLearner
 
 # エージェントを訓練する関数
 def train_agent():
     env = environment.Environment()
-    agent = SarsaAgent(env)
+    agent = QLearner(env)
     for episode in range(1000):
         state = env.reset()
         action = agent.choose_action(state)
@@ -30,7 +30,7 @@ def train_agent():
 # エージェントを評価する関数
 def evaluate_agent():
     env = environment.Environment()
-    agent = SarsaAgent(env)
+    agent = QLearner(env)
     for episode in range(3):
         state = env.reset()
         action = agent.choose_action(state, is_training=False)
