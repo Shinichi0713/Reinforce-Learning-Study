@@ -22,7 +22,7 @@ class Environment:
 
     def step(self, status, action):
         status_next = status + np.array(action)
-        reward, status_next, done = self.give_reward(status_next)
+        reward, status_next, done = self.give_reward(status, action)
         if done:
             self.status = self.reset()
         return reward, status_next, done
@@ -31,16 +31,17 @@ class Environment:
         self.position_start = np.array(self.__find('S'))
         self.position_goal = np.array(self.__find('G'))
         return self.position_start
-    
-    def give_reward(self, status_next):
+
+    def give_reward(self, status, action):
+        status_next = status + np.array(action)
         # ゴール
         if np.array_equal(status_next, self.position_goal):
             return 2, status_next, True  # ゴールに到達
         elif 0 > status_next[0] or 0 > status_next[1] or status_next[0] >= self.maze.shape[0] or status_next[1] >= self.maze.shape[1]:
             status_next = np.clip(status_next, 0, self.maze.shape[0] - 1)
-            return -2, status_next, False  # 壁に衝突
+            return -2, status, False  # 壁に衝突
         elif self.maze[status_next[0], status_next[1]] == '#':
-            return -1, status_next, False  # 壁に衝突
+            return -1, status, False  # 壁に衝突
         return 0, status_next, False  # それ以外
 
     def check_over(self, state):
