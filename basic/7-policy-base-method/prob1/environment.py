@@ -12,8 +12,11 @@ class PoleGym:
         self.states, self.actions, self.rewards = [], [], []
         return self.env.reset()
 
-    def step(self, action):
+    def step(self, action, state):
         next_state, reward, terminated, truncated, info = self.env.step(action)
+        self.rewards.append(reward)
+        self.states.append(state)
+        self.actions.append(action)
         self.rewards.append(reward)
         q_weight = self.compute_returns()
         return next_state, reward, terminated, truncated, info, q_weight
@@ -37,19 +40,17 @@ class PoleGym:
         return returns
 
     # エピソードを1つ実行して、軌跡を記録
-    def run_episode(self, env, policy_net, device):
-        state = env.reset()
-        
+    def run_episode(self, policy_net, device):
+        state = self.reset()
+        state = state[0]
         done = False
         while not done:
             state_tensor = torch.FloatTensor(state).to(device)
             probs = policy_net(state_tensor)
             dist = torch.distributions.Categorical(probs)
             action = dist.sample()
-            next_state, reward, done, _ = env.step(action.item())
-            self.states.append(state)
-            self.actions.append(action)
-            self.rewards.append(reward)
+            next_state, reward, done, _, _, q_weight = self.step(action.item(), state)
+            
             state = next_state
         return self.states, self.actions, self.rewards
 
