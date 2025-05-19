@@ -4,8 +4,11 @@ import torch
 
 
 class PoleGym:
-    def __init__(self):
-        self.env = gym.make('CartPole-v1', render_mode="human")
+    def __init__(self, is_train=False):
+        if is_train:
+            self.env = gym.make('CartPole-v1')
+        else:
+            self.env = gym.make('CartPole-v1', render_mode="human")
         self.states, self.actions, self.rewards = [], [], []
 
     def reset(self):

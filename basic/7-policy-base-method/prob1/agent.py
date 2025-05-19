@@ -32,8 +32,8 @@ class PolicyNetwork(nn.Module):
         dist = torch.distributions.Categorical(probs)
         return dist.sample()
 
-    def save(self, filepath):
-        torch.save(self.state_dict(), filepath)
+    def save(self):
+        torch.save(self.state_dict(), self.path_model)
 
-    def load(self, filepath):
-        self.load_state_dict(torch.load(filepath))
+    def load(self):
+        self.load_state_dict(torch.load(self.path_model))
