@@ -19,7 +19,7 @@ def train():
             state_tensor = torch.FloatTensor(logit_state).to(policy_net.device)
             probs = policy_net(state_tensor)
             dist = torch.distributions.Categorical(probs)
-            log_prob = dist.log_prob(action)
+            log_prob = dist.log_prob(torch.tensor(action, dtype=torch.long, device=policy_net.device))
             loss += -log_prob * G  # REINFORCEの損失
         optimizer.zero_grad()
         loss.backward()
@@ -32,13 +32,16 @@ def train():
             print(f"Episode {episode+1}, Reward: {total_reward}")
 
     env.close()
+    policy_net.save()
+    draw_graph(reward_history)
 
-        # for logit_state, action, G in zip(states, actions, returns):
-        #     state_tensor = torch.FloatTensor(logit_state).to(device)
-        #     probs = policy_net(state_tensor)
-        #     dist = torch.distributions.Categorical(probs)
-        #     log_prob = dist.log_prob(action)
-        #     loss += -log_prob * G  # REINFORCEの損失
+def draw_graph(reward_history):
+    import matplotlib.pyplot as plt
+    plt.plot(reward_history)
+    plt.xlabel("Episode")
+    plt.ylabel("Total Reward")
+    plt.title("Training Progress")
+    plt.show()
 
 if __name__ == "__main__":
     train()
