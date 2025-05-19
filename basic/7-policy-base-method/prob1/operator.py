@@ -3,7 +3,7 @@ import torch
 import environment, agent
 
 def train():
-    env = environment.PoleGym()
+    env = environment.PoleGym(is_train=True)
     state_dim = env.env.observation_space.shape[0]
     action_dim = env.env.action_space.n
     policy_net = agent.PolicyNetwork(state_dim, action_dim)
