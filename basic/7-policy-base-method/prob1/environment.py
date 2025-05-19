@@ -31,7 +31,7 @@ class PoleGym:
         self.env.close()
 
     # 割引累積報酬を計算
-    def compute_returns(self, gamma=0.99):
+    def compute_returns(self, gamma=0.98):
         returns = []
         R = 0
         for r in reversed(self.rewards):

@@ -18,7 +18,7 @@ class PolicyNetwork(nn.Module):
         self.path_model = os.path.join(dir_current, "policy_net.pth")
         if os.path.exists(self.path_model):
             print("Loading model from {}".format(self.path_model))
-            self.load(self.path_model)
+            self.load()
 
     def forward(self, x):
         x = x.to(self.device)
