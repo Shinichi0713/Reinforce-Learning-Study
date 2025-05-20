@@ -7,7 +7,7 @@ def train():
     state_dim = env.env.observation_space.shape[0]
     action_dim = env.env.action_space.n
     policy_net = agent.PolicyNetwork(state_dim, action_dim)
-    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-2)
+    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-5)
     reward_history = []
     for episode in range(1000):
         states, actions, rewards = env.run_episode(policy_net, policy_net.device)
@@ -43,5 +43,26 @@ def draw_graph(reward_history):
     plt.title("Training Progress")
     plt.show()
 
+
+def play():
+    env = environment.PoleGym(is_train=False)
+    policy_net = agent.PolicyNetwork(env.env.observation_space.shape[0], env.env.action_space.n)
+    policy_net.load()
+    policy_net.eval()
+    state = env.reset()[0]
+    with torch.no_grad():
+        for _ in range(200):
+            env.render()
+            action = policy_net.get_action(state)
+            # state = torch.tensor(state, dtype=torch.float32)
+            action = action.detach().cpu().numpy()
+            next_state, reward, terminated, truncated, info, q_weight = env.step(action, state)
+            state = next_state
+            if terminated or truncated:
+                break
+    env.close()
+
+
 if __name__ == "__main__":
     train()
+    play()
