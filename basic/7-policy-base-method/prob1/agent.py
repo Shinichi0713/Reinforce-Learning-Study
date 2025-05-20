@@ -9,6 +9,8 @@ class PolicyNetwork(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(state_dim, 128),
             nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
             nn.Linear(128, action_dim),
             nn.Softmax(dim=-1)
         )
@@ -19,6 +21,7 @@ class PolicyNetwork(nn.Module):
         if os.path.exists(self.path_model):
             print("Loading model from {}".format(self.path_model))
             self.load()
+        self.memory = []
 
     def forward(self, x):
         x = x.to(self.device)
