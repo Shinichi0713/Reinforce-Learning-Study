@@ -20,9 +20,8 @@ class PoleGym:
         self.rewards.append(reward)
         self.states.append(state)
         self.actions.append(action)
-        self.rewards.append(reward)
-        q_weight = self.compute_returns()
-        return next_state, reward, terminated, truncated, info, q_weight
+        # q_weight = self.compute_returns()
+        return next_state, reward, terminated, truncated, info
 
     def render(self):
         self.env.render()
@@ -52,10 +51,28 @@ class PoleGym:
             probs = policy_net(state_tensor)
             dist = torch.distributions.Categorical(probs)
             action = dist.sample()
-            next_state, reward, done, _, _, q_weight = self.step(action.item(), state)
+            next_state, reward, done, _, _ = self.step(action.item(), state)
             
             state = next_state
         return self.states, self.actions, self.rewards
+
+# def run_episode(env, policy_net, device):
+    # state = env.reset()[0]
+    # states, actions, rewards = [], [], []
+    # done = False
+    # while not done:
+    #     state_tensor = torch.FloatTensor(state).to(device)
+    #     probs = policy_net(state_tensor)
+    #     dist = torch.distributions.Categorical(probs)
+    #     action = dist.sample()
+    #     next_state, reward, done, _, _ = env.step(action.item())
+    #     states.append(state)
+    #     actions.append(action)
+    #     rewards.append(reward)
+    #     state = next_state
+    # return states, actions, rewards
+
+
 
 if __name__ == "__main__":
     env = PoleGym()

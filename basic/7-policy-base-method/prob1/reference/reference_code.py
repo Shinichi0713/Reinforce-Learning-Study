@@ -21,7 +21,7 @@ class PolicyNetwork(nn.Module):
 
 # エピソードを1つ実行して、軌跡を記録
 def run_episode(env, policy_net, device):
-    state = env.reset()
+    state = env.reset()[0]
     states, actions, rewards = [], [], []
     done = False
     while not done:
@@ -29,7 +29,7 @@ def run_episode(env, policy_net, device):
         probs = policy_net(state_tensor)
         dist = torch.distributions.Categorical(probs)
         action = dist.sample()
-        next_state, reward, done, _ = env.step(action.item())
+        next_state, reward, done, _, _ = env.step(action.item())
         states.append(state)
         actions.append(action)
         rewards.append(reward)
