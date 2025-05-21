@@ -40,6 +40,7 @@ def run_episode(env, policy_net, device):
 def compute_returns(rewards, gamma=0.99):
     returns = []
     R = 0
+    # 累積報酬
     for r in reversed(rewards):
         R = r + gamma * R
         returns.insert(0, R)
