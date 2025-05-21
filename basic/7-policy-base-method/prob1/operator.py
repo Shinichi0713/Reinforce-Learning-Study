@@ -7,7 +7,8 @@ def train():
     state_dim = env.env.observation_space.shape[0]
     action_dim = env.env.action_space.n
     policy_net = agent.PolicyNetwork(state_dim, action_dim)
-    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-5)
+    policy_net.train()
+    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-4)
     reward_history = []
     for episode in range(1000):
         states, actions, rewards = env.run_episode(policy_net, policy_net.device)
@@ -19,7 +20,7 @@ def train():
             state_tensor = torch.FloatTensor(logit_state).to(policy_net.device)
             probs = policy_net(state_tensor)
             dist = torch.distributions.Categorical(probs)
-            log_prob = dist.log_prob(torch.tensor(action, dtype=torch.long, device=policy_net.device))
+            log_prob = dist.log_prob(action)
             loss += -log_prob * G  # REINFORCEの損失
         optimizer.zero_grad()
         loss.backward()
