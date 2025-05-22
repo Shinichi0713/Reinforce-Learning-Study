@@ -2,30 +2,20 @@
 import torch
 import environment, agent
 
+# 学習コード
 def train():
     env = environment.PoleGym(is_train=True)
     state_dim = env.env.observation_space.shape[0]
     action_dim = env.env.action_space.n
-    policy_net = agent.PolicyNetwork(state_dim, action_dim)
+    policy_net = agent.PolicyNetwork(state_dim, action_dim, is_train=True)
     policy_net.train()
-    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-4)
     reward_history = []
     for episode in range(1000):
         states, actions, rewards = env.run_episode(policy_net, policy_net.device)
         returns = env.compute_returns()
 
-        # Policy gradientの計算
-        loss = 0
-        for logit_state, action, G in zip(states, actions, returns):
-            state_tensor = torch.FloatTensor(logit_state).to(policy_net.device)
-            probs = policy_net(state_tensor)
-            dist = torch.distributions.Categorical(probs)
-            log_prob = dist.log_prob(action)
-            loss += -log_prob * G  # REINFORCEの損失
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
+        # Policy gradientの更新
+        policy_net.update(states, actions, returns)
         total_reward = sum(rewards)
         reward_history.append(total_reward)
 
@@ -57,7 +47,7 @@ def play():
             action = policy_net.get_action(state)
             # state = torch.tensor(state, dtype=torch.float32)
             action = action.detach().cpu().numpy()
-            next_state, reward, terminated, truncated, info, q_weight = env.step(action, state)
+            next_state, reward, terminated, truncated, info = env.step(action)
             state = next_state
             if terminated or truncated:
                 break

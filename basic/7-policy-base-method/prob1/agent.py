@@ -4,7 +4,7 @@ import torch.nn as nn
 import os
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim, action_dim, is_train=False):
         super(PolicyNetwork, self).__init__()
         self.fc = nn.Sequential(
             nn.Linear(state_dim, 128),
@@ -22,6 +22,11 @@ class PolicyNetwork(nn.Module):
             print("Loading model from {}".format(self.path_model))
             self.load()
         self.memory = []
+        if is_train:
+            self.optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
+            self.train()
+        else:
+            self.eval()
 
     def forward(self, x):
         x = x.to(self.device)
@@ -40,3 +45,20 @@ class PolicyNetwork(nn.Module):
 
     def load(self):
         self.load_state_dict(torch.load(self.path_model))
+
+    def update(self, states, actions, returns):
+        # Policy gradientの計算
+        loss = 0
+        for state, action, G in zip(states, actions, returns):
+            # 状態テンソル
+            state_tensor = torch.FloatTensor(state).to(self.device)
+            # 行動の確率分布
+            probs = self(state_tensor)
+            # 与えられた確率分布 probs に基づいて「カテゴリ分布（Categorical distribution）」という離散確率分布
+            dist = torch.distributions.Categorical(probs)
+            # log_prob = dist.log_prob(action)
+            log_prob = dist.log_prob(action)
+            loss += -log_prob * G  # REINFORCEの損失
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
