@@ -35,69 +35,93 @@ def get_size_category(w, h):
             return i
     return 0
 
+def min_distance(placed, new_pos, new_size):
+    nx, ny = new_pos
+    nw, nh = new_size
+    min_dist = np.inf
+    for (px, py, pw, ph) in placed:
+        # x方向の距離
+        dx = max(px - (nx + nw), nx - (px + pw), 0)
+        # y方向の距離
+        dy = max(py - (ny + nh), ny - (py + ph), 0)
+        dist = max(dx, dy)
+        if dist < min_dist:
+            min_dist = dist
+    return min_dist if placed else np.inf
+
 def give_reward(placed, rects):
     if not placed:
         return -1  # 配置失敗
     return 1  # 配置成功
 
-NUM_EPISODES = 1000
-ALPHA = 0.1
-GAMMA = 0.9
-EPSILON = 0.2
 
-best_layout = []
-best_count = 0
+def train_q_function():
+    NUM_EPISODES = 1000
+    ALPHA = 0.1
+    GAMMA = 0.9
+    EPSILON = 0.2
 
-for episode in range(NUM_EPISODES):
-    # ランダムな長方形リストを生成（個数もランダム）
-    n_rects = random.randint(3, 12)
-    rects = []
-    for _ in range(n_rects):
-        w = random.randint(20, 120)
-        h = random.randint(20, 120)
-        rects.append((w, h))
+    best_layout = []
+    best_count = 0
 
-    placed = []
-    used_idxs = set()
-    count = 0
-    for step in range(len(rects)):
-        candidates = [i for i in range(len(rects)) if i not in used_idxs]
-        if not candidates:
-            break
-        rect_idx = random.choice(candidates)
-        w, h = rects[rect_idx]
-        cat = get_size_category(w, h)
-        # ε-greedy
-        if random.random() < EPSILON:
-            pos_idx = random.randint(0, len(positions)-1)
-        else:
-            # サイズごとのQ値を考慮
-            qvals = Q[cat].copy()
-            for idx, pos in enumerate(positions):
-                if is_overlap(placed, pos, (w, h)):
-                    qvals[idx] = -np.inf
-            pos_idx = np.argmax(qvals)
-            if qvals[pos_idx] == -np.inf:
+    for episode in range(NUM_EPISODES):
+        print(f"Episode {episode + 1}/{NUM_EPISODES}")
+        # ランダムな長方形リストを生成（個数もランダム）
+        n_rects = random.randint(3, 12)
+        rects = []
+        for _ in range(n_rects):
+            w = random.randint(20, 120)
+            h = random.randint(20, 120)
+            rects.append((w, h))
+
+        placed = []
+        used_idxs = set()
+        count = 0
+        reward_total = 0.0
+        for step in range(len(rects)):
+            candidates = [i for i in range(len(rects)) if i not in used_idxs]
+            if not candidates:
                 break
-        pos = positions[pos_idx]
-        if is_overlap(placed, pos, (w, h)):
-            reward = -10
-            Q[cat, pos_idx] += ALPHA * (reward - Q[cat, pos_idx])
-            break
-        else:
-            reward = 1
-            Q[cat, pos_idx] += ALPHA * (reward + GAMMA * np.max(Q[cat]) - Q[cat, pos_idx])
-            placed.append((pos[0], pos[1], w, h))
-            used_idxs.add(rect_idx)
-            count += 1
-    if count > best_count:
-        best_count = count
-        best_layout = placed.copy()
+            rect_idx = random.choice(candidates)
+            w, h = rects[rect_idx]
+            cat = get_size_category(w, h)
+            # ε-greedy
+            if random.random() < EPSILON:
+                pos_idx = random.randint(0, len(positions)-1)
+            else:
+                # サイズごとのQ値を取得
+                qvals = Q[cat].copy()
+                # 重なる場所は塞いでしまう
+                for idx, pos in enumerate(positions):
+                    if is_overlap(placed, pos, (w, h)):
+                        qvals[idx] = -np.inf
+                pos_idx = np.argmax(qvals)
+                if qvals[pos_idx] == -np.inf:
+                    break
+            pos = positions[pos_idx]
+            if is_overlap(placed, pos, (w, h)):
+                reward = -10
+                Q[cat, pos_idx] += ALPHA * (reward - Q[cat, pos_idx])
+                break
+            else:
+                reward = 1
+                dist = min_distance(placed, pos, (w, h))
+                if dist <= 2:
+                    reward += 2  # 密に詰めたら追加報酬
+                Q[cat, pos_idx] += ALPHA * (reward + GAMMA * np.max(Q[cat]) - Q[cat, pos_idx])
+                placed.append((pos[0], pos[1], w, h))
+                used_idxs.add(rect_idx)
+                count += 1
+            reward_total += reward
+        if count > best_count:
+            best_count = count
+            best_layout = placed.copy()
 
-print(f"最大配置数: {best_count}")
+    print(f"最大配置数: {best_count}")
+    np.save(path_q_table, Q)
+    return best_layout
 
-dir_current = os.path.dirname(__file__)
-np.save(path_q_table, Q)
+best_layout = train_q_function()
 
 # 可視化
 plt.figure(figsize=(6,6))
