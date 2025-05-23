@@ -27,26 +27,35 @@ def get_size_category(w, h):
             return i
     return 0
 
-def min_distance(placed, new_pos, new_size):
+
+def min_edge_distance(placed, new_pos, new_size):
     nx, ny = new_pos
     nw, nh = new_size
     min_dist = np.inf
-
-    dx1_max = np.inf
-    dx2_max = np.inf
-    dy1_max = np.inf
-    dy2_max = np.inf
     for (px, py, pw, ph) in placed:
-        # x方向の距離
-        dx1_max = min(dx1_max, px - (nx + nw))
-        dx2_max = min(dx2_max, (nx - (px + pw)))
-        # y方向の距離
-        dy1_max = min(dy1_max, py - (ny + nh))
-        dy2_max = min(dy2_max, (ny - (py + ph)))
-        dist = max(dx1_max, dx2_max, dy1_max, dy2_max)
-        if dist < min_dist:
-            min_dist = dist
-    return min_dist if placed else np.inf
+        # 上下の辺同士
+        # newの下辺とplacedの上辺
+        if (abs((ny + nh) - py) <= 2) and not (nx + nw <= px or px + pw <= nx):
+            dist = abs((ny + nh) - py)
+            if dist < min_dist:
+                min_dist = dist
+        # newの上辺とplacedの下辺
+        if (abs(ny - (py + ph)) <= 2) and not (nx + nw <= px or px + pw <= nx):
+            dist = abs(ny - (py + ph))
+            if dist < min_dist:
+                min_dist = dist
+        # 左右の辺同士
+        # newの右辺とplacedの左辺
+        if (abs((nx + nw) - px) <= 2) and not (ny + nh <= py or py + ph <= ny):
+            dist = abs((nx + nw) - px)
+            if dist < min_dist:
+                min_dist = dist
+        # newの左辺とplacedの右辺
+        if (abs(nx - (px + pw)) <= 2) and not (ny + nh <= py or py + ph <= ny):
+            dist = abs(nx - (px + pw))
+            if dist < min_dist:
+                min_dist = dist
+    return min_dist if min_dist != np.inf else np.inf
 
 NUM_EPISODES = 1000
 ALPHA = 0.1
@@ -86,7 +95,7 @@ for episode in range(NUM_EPISODES):
             break
         else:
             reward = 1
-            dist = min_distance(placed, pos, (w, h))
+            dist = min_edge_distance(placed, pos, (w, h))
             if dist <= 2:
                 reward += 2  # 密に詰めたら追加報酬
             Q[cat, pos_idx] += ALPHA * (reward + GAMMA * np.max(Q[cat]) - Q[cat, pos_idx])
