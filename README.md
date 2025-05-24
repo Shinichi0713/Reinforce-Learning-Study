@@ -18,3 +18,5 @@ show the reference site.
 [AI compass](https://ai-compass.weeybrid.co.jp/)
 this site indicates many ai knowledge with insight.
 
+[星の本棚](https://yagami12.hatenablog.com/entry/2019/02/22/210608)
+this site shows nice tips about reinforcement learning.
