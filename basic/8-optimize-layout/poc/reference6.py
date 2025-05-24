@@ -31,8 +31,8 @@ class QNet(nn.Module):
         x = x.to(self.device)
         x = self.conv(x)
         x = self.fc(x)
-        return x
-    
+        return torch.softmax(x, dim=1)
+
     def save_to_state_dict(self):
         self.cpu()
         torch.save(self.state_dict(), self.path_nn)
