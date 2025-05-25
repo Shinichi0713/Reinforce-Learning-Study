@@ -9,22 +9,23 @@ class TdLambdaAgent:
         self.lambd = lambd  # λパラメータ
         self.state_action_values = {}  # 状態-行動価値関数
         self.eligibility_trace = {}  # 適合度トレース
+        self.actions = [[-1, 0], [1, 0], [0, -1], [0, 1]]  # 行動のリスト
 
     def get_state_action_value(self, state, action):
         # 状態-行動価値関数を取得
-        return self.state_action_values.get((tuple(state), action), 0.0)
+        return self.state_action_values.get((tuple(state), self.actions.index(action)), 0.0)
     
     def set_state_action_value(self, state, action, value):
         # 状態-行動価値関数を設定
-        self.state_action_values[(tuple(state), action)] = value
+        self.state_action_values[(tuple(state), self.actions.index(action))] = value
 
     def get_eligibility_trace(self, state, action):
         # 適合度トレースを取得
-        return self.eligibility_trace.get((tuple(state), action), 0.0)
+        return self.eligibility_trace.get((tuple(state), self.actions.index(action)), 0.0)
     
     def set_eligibility_trace(self, state, action, value):
         # 適合度トレースを設定
-        self.eligibility_trace[(tuple(state), action)] = value
+        self.eligibility_trace[(tuple(state), self.actions.index(action))] = value
 
     def reset_eligibility_trace(self):
         # 適合度トレースをリセット
@@ -33,10 +34,10 @@ class TdLambdaAgent:
     def select_action(self, state, epsilon=0.1):
         # ε-greedy法で行動を選択
         if np.random.rand() < epsilon:
-            return np.random.choice(self.env.action_space())
+            return self.actions[np.random.choice(range(len(self.actions)))]
         else:
-            q_values = [self.get_state_action_value(state, action) for action in range(self.env.action_space())]
-            return np.argmax(q_values)
+            q_values = [self.get_state_action_value(state, action) for action in self.actions]
+            return self.actions[np.argmax(q_values)]
         
     def update(self, state, action, reward, next_state, done):
         # TD(λ)更新
@@ -52,12 +53,14 @@ class TdLambdaAgent:
 
         # 状態-行動価値関数の更新
         for sa in self.state_action_values.keys():
-            self.set_state_action_value(sa[0], sa[1], self.get_state_action_value(*sa) + 
-                                        self.alpha * td_error * self.get_eligibility_trace(*sa))
+            self.set_state_action_value(sa[0], self.actions[sa[1]], self.get_state_action_value(*sa) + 
+                                        self.alpha * td_error * self.get_eligibility_trace(sa[0], self.actions[sa[1]]))
 
         # 適合度トレースの減衰
+        # ここを検討する
         for sa in self.eligibility_trace.keys():
-            self.set_eligibility_trace(sa[0], sa[1], self.get_eligibility_trace(*sa) * self.gamma * self.lambd)
+            self.set_eligibility_trace(sa[0], self.actions[sa[1]], self.get_eligibility_trace(sa[0], self.actions[sa[1]]) * self.gamma * self.lambd)
 
+        # エピソード終了時に適合度トレースをリセット
         if done:
             self.reset_eligibility_trace()
