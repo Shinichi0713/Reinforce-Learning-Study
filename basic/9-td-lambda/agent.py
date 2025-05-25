@@ -10,6 +10,17 @@ class TdLambdaAgent:
         self.state_action_values = {}  # 状態-行動価値関数
         self.eligibility_trace = {}  # 適合度トレース
         self.actions = [[-1, 0], [1, 0], [0, -1], [0, 1]]  # 行動のリスト
+        self.q_function = np.zeros((env.maze.shape[0], env.maze.shape[1], len(self.actions)))  # 状態-行動価値関数の初期化
+        self.eligibility_trace = np.zeros((env.maze.shape[0], env.maze.shape[1], len(self.actions)))  # eligibility trace
+
+    def state_to_idx(self, state, n_cols):
+        return state[0] * n_cols + state[1]
+
+    def select_action(self, state_idx):
+        if np.random.rand() < self.epsilon:
+            return np.random.choice(4)
+        else:
+            return np.argmax(self.q[state_idx])
 
     def get_state_action_value(self, state, action):
         # 状態-行動価値関数を取得
