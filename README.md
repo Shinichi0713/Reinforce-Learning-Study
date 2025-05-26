@@ -7,7 +7,10 @@ thus, we apply the tech to control Self-discipline system.
 2. documents: that is the note of reinforcement-learning.
 3. pole-problem: that is the code to try the feinforcement learning.
 
-![alt text](image.png)
+## problems
+### ball cather
+this is the behavior of q-learning agent.  
+<img src="image/ball-catch-q-agent.gif" alt="q-learn" width="300px" height="auto">
 
 # cite
 in this repogitory, oss 'pygame-learning-environment' is used.

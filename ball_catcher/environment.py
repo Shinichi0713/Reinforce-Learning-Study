@@ -1,5 +1,9 @@
 
-from ple import PLE
+import sys, os
+dir_root = '/'.join(os.path.dirname(os.path.abspath(__file__)).replace("\\", '/').split("/")[:-1])
+print(dir_root)
+sys.path.append(dir_root + '/ple-cited')
+from ple.ple import PLE
 from ple.games.catcher import Catcher
 import pygame
 pygame.init()
