@@ -59,11 +59,9 @@ def apply_action(state, action, rects):
     grid = state.copy()
     # rect_idx = action % len(rects)
     # pos_idx = action // len(rects)
-    rect_idx = action % Number_of_Rectangles
+    rect_idx = action % len(rects)
     pos_idx = action // Number_of_Rectangles
     x, y = pos_idx % GRID_SIZE, pos_idx // GRID_SIZE
-    if rect_idx >= len(rects) - 1:
-        return grid, -1, False
     w, h = rects[rect_idx]
     if x + w > GRID_SIZE or y + h > GRID_SIZE:
         return grid, -1, False
