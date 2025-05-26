@@ -1,6 +1,11 @@
+
+import sys, os
+dir_root = '/'.join(os.path.dirname(os.path.abspath(__file__)).replace("\\", '/').split("/")[:-2])
+print(dir_root)
+sys.path.append(dir_root + '/ple-cited')
 import pickle
 import numpy as np
-from ple import PLE
+from ple.ple import PLE
 from ple.games.catcher import Catcher
 import time
 
@@ -15,7 +20,8 @@ def discretize_state(state, bins):
 bins = 20
 
 # Qテーブルの読み込み
-with open("catcher_q_table.pkl", "rb") as f:
+dir_current = os.path.dirname(os.path.abspath(__file__))
+with open(dir_current + "/catcher_q_table.pkl", "rb") as f:
     Q = pickle.load(f)
     print("Qテーブルの読み込み完了")
 
