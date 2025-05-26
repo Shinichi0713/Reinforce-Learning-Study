@@ -34,8 +34,26 @@ for i, (w, h) in enumerate(rects):
 ```
 
 2. ネットワーク構成例
-画像（グリッド）: CNNでエンコード
-箱情報（個数・サイズ）: MLPでエンコード
-最終的にconcatして全結合層へ
+- 画像（グリッド）: CNNでエンコード
+- 箱情報（個数・サイズ）: MLPでエンコード
+- 最終的にconcatして全結合層へ
 
+__how to use__
+```python
+max_rects = 5
+# ...略...
+rects_info = np.zeros((max_rects, 2), dtype=np.float32)
+for i, (w, h) in enumerate(rects):
+    rects_info[i] = [w, h]
+rects_info = rects_info.flatten()
+num_rects = len(rects)
+rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
+rects_tensor = torch.tensor(rects_input).unsqueeze(0)  # (1, max_rects*2+1)
+state_tensor = torch.tensor(state).unsqueeze(0)        # (1, 1, H, W)
+probs = policy_net(state_tensor, rects_tensor)
+```
 
+__実装結果__
+非常に改善した！  
+やはりこれが一番良い。  
+![alt text](image-2.png)
