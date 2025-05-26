@@ -9,6 +9,9 @@ thus, we apply the tech to control Self-discipline system.
 
 ![alt text](image.png)
 
+# cite
+in this repogitory, oss 'pygame-learning-environment' is used.
+[https://github.com/ntasfi/PyGame-Learning-Environment](https://github.com/ntasfi/PyGame-Learning-Environment) 
 
 # References
 when studying RL, I refer to any other web-site.  
