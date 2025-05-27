@@ -30,15 +30,29 @@ class PolicyNet(nn.Module):
         )
         # ...（省略: パラメータ保存/ロード等）
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
+        self.__load_state_dict()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
 
     def forward(self, grid, rects_info):
         # grid: (B, 1, H, W)
         # rects_info: (B, max_rects * 2 + 1)
+        grid = grid.to(self.device)
+        rects_info = rects_info.to(self.device)
         grid_feat = self.conv(grid)
         rect_feat = self.rect_encoder(rects_info)
         x = torch.cat([grid_feat, rect_feat], dim=1)
         logits = self.fc(x)
         return torch.softmax(logits, dim=1)
+
+    def save_state_dict(self):
+        self.cpu()
+        torch.save(self.state_dict(), self.path_nn)
+        self.to(self.device)
+
+    def __load_state_dict(self):
+        if os.path.exists(self.path_nn):
+            self.load_state_dict(torch.load(self.path_nn))
 
 
 def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
@@ -77,14 +91,15 @@ def apply_action(state, action, rects):
 
 def train():
     num_episodes = 200
+    # この段階でアクションを生成
+    num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
+    # ここで定義がいただけない
+    policy_net = PolicyNet(num_actions)
     for episode in range(num_episodes):
         # 対象となる箱を生成
         rects = generate_random_rects()
         num_rects = len(rects)
-        # この段階でアクションを生成
-        num_actions = GRID_SIZE * GRID_SIZE * num_rects
-        # ここで定義がいただけない
-        policy_net = PolicyNet(num_actions)
+        
         optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
 
         # 状態初期化
@@ -99,11 +114,11 @@ def train():
             rects_info[i*2:i*2+2] = [w, h]
         # 箱数を追加
         rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
-        rects_tensor = torch.tensor(rects_input).unsqueeze(0)  # (1, MAX_RECTS*2+1)
+        rects_tensor = torch.tensor(rects_input).unsqueeze(0)   # (1, MAX_RECTS*2+1)
         # 画像状態と箱情報をネットワークに通す
         max_steps = random.randint(5, 15)
         for t in range(max_steps):
-            state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
+            state_tensor = torch.tensor(state).unsqueeze(0)     # (1, 1, H, W)
             probs = policy_net(state_tensor, rects_tensor)
             action, log_prob = select_action(probs)
             next_state, reward, success = apply_action(state, action, rects)
@@ -122,6 +137,7 @@ def train():
         optimizer.step()
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f} loss: {loss.item():.3f}")
+            policy_net.save_state_dict()
 
     print("Training finished.")
 
@@ -129,7 +145,7 @@ def train():
 def eval():
     rects = generate_random_rects()
     num_rects = len(rects)
-    num_actions = GRID_SIZE * GRID_SIZE * num_rects
+    num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
     policy_net = PolicyNet(num_actions)
     policy_net.eval()
     state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
