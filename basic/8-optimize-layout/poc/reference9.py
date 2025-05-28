@@ -74,13 +74,15 @@ def apply_action(state, action, rects):
     grid = state.copy()
     num_rects = len(rects)
     num_actions = GRID_SIZE * GRID_SIZE * num_rects
-    rect_idx = action % num_rects
-    pos_idx = action // num_rects
+    rect_idx = action % MAX_RECTS
+    pos_idx = action // MAX_RECTS
     x, y = pos_idx % GRID_SIZE, pos_idx // GRID_SIZE
-    w, h = rects[rect_idx]
+    w, h = int(rects[rect_idx*2]), int(rects[rect_idx*2+1])
     # 範囲外チェック
     if x + w > GRID_SIZE or y + h > GRID_SIZE:
         return grid, -1, False
+    if w == 0 or h == 0:
+        return grid, -2, False
     # 重なりチェック
     if np.any(grid[0, y:y+h, x:x+w] == 1):
         return grid, -2, False
@@ -120,8 +122,8 @@ def train():
         for t in range(max_steps):
             state_tensor = torch.tensor(state).unsqueeze(0)     # (1, 1, H, W)
             probs = policy_net(state_tensor, rects_tensor)
-            action, log_prob = select_action(probs)
-            next_state, reward, success = apply_action(state, action, rects)
+            action, log_prob = select_action(probs)     # 行動の確率値で出力
+            next_state, reward, success = apply_action(state, action, rects_info.tolist())
             log_probs.append(log_prob)
             rewards.append(reward)
             total_reward += reward
@@ -160,7 +162,7 @@ def eval():
         state_tensor = torch.tensor(state).unsqueeze(0)
         probs = policy_net(state_tensor, rects_tensor)
         action, _ = select_action(probs)
-        next_state, reward, success = apply_action(state, action, rects)
+        next_state, reward, success = apply_action(state, action, rects_info.tolist())
         print(f"action: {action}, reward: {reward}")
         state = next_state
 
