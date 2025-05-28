@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random, os
+from collections import deque
 
 GRID_SIZE = 10
 MAX_RECTS = 5  # 最大箱数
@@ -164,12 +165,13 @@ def train():
             for r, done in zip(reversed(rewards), reversed(dones)):
                 if done:
                     G = 0
-                G = r + gamma * G
+                G = torch.tensor(r).float().to(policy_net.device) + gamma * G
                 returns.insert(0, G)
-            returns = torch.tensor(returns).float()
+            returns = torch.tensor(returns).float().to(policy_net.device)
 
             # 方策勾配損失
-            loss = -torch.sum(log_prob_batch * returns)
+            # loss = -torch.sum(log_prob_batch * returns)
+            loss = -torch.stack(log_probs).sum() * G
 
             optimizer.zero_grad()
             loss.backward()
