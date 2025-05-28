@@ -52,6 +52,7 @@ class PolicyNet(nn.Module):
 
     def __load_state_dict(self):
         if os.path.exists(self.path_nn):
+            print("load network parameter")
             self.load_state_dict(torch.load(self.path_nn))
 
 
@@ -65,6 +66,7 @@ def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
     return rects
 
 
+# AIエージェントの予測確率に基づき対数確率を計算する
 def select_action(probs):
     m = torch.distributions.Categorical(probs)
     action = m.sample()
@@ -72,8 +74,8 @@ def select_action(probs):
 
 def apply_action(state, action, rects):
     grid = state.copy()
-    num_rects = len(rects)
-    num_actions = GRID_SIZE * GRID_SIZE * num_rects
+    # num_rects = len(rects)
+    # num_actions = GRID_SIZE * GRID_SIZE * num_rects
     rect_idx = action % MAX_RECTS
     pos_idx = action // MAX_RECTS
     x, y = pos_idx % GRID_SIZE, pos_idx // GRID_SIZE
@@ -85,14 +87,14 @@ def apply_action(state, action, rects):
         return grid, -2, False
     # 重なりチェック
     if np.any(grid[0, y:y+h, x:x+w] == 1):
-        return grid, -2, False
+        return grid, -3, False
     grid[0, y:y+h, x:x+w] = 1
     ratio_filled = np.sum(grid[0] == 1) / (GRID_SIZE * GRID_SIZE)
-    return grid, ratio_filled*10, True
+    return grid, ratio_filled*14, True
 
 
 def train():
-    num_episodes = 200
+    num_episodes = 400
     # この段階でアクションを生成
     num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
     # ここで定義がいただけない
@@ -118,7 +120,7 @@ def train():
         rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)   # (1, MAX_RECTS*2+1)
         # 画像状態と箱情報をネットワークに通す
-        max_steps = random.randint(5, 15)
+        max_steps = random.randint(5, 10)
         for t in range(max_steps):
             state_tensor = torch.tensor(state).unsqueeze(0)     # (1, 1, H, W)
             probs = policy_net(state_tensor, rects_tensor)
