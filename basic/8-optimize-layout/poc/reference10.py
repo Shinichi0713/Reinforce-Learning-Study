@@ -96,55 +96,87 @@ def apply_action(state, action, rects):
     return grid, ratio_filled*14, True
 
 
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
+
+    def push(self, *transition):
+        self.buffer.append(transition)
+
+    def sample(self, batch_size):
+        indices = np.random.choice(len(self.buffer), batch_size, replace=False)
+        batch = [self.buffer[idx] for idx in indices]
+        return zip(*batch)
+
+    def __len__(self):
+        return len(self.buffer)
+
 def train():
     num_episodes = 1000
-    # この段階でアクションを生成
+    batch_size = 32
+    replay_capacity = 10000
     num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
-    # ここで定義がいただけない
     policy_net = PolicyNet(num_actions)
+    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
+    replay_buffer = ReplayBuffer(replay_capacity)
+
     for episode in range(num_episodes):
-        # 対象となる箱を生成
         rects = generate_random_rects()
         num_rects = len(rects)
-        
-        optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
-
-        # 状態初期化
         state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
-        log_probs = []
-        rewards = []
-        total_reward = 0
 
         # 箱情報ベクトル化
         rects_info = np.zeros((MAX_RECTS * 2,), dtype=np.float32)
         for i, (w, h) in enumerate(rects):
             rects_info[i*2:i*2+2] = [w, h]
-        # 箱数を追加
         rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
-        rects_tensor = torch.tensor(rects_input).unsqueeze(0)   # (1, MAX_RECTS*2+1)
-        # 画像状態と箱情報をネットワークに通す
+        rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         max_steps = random.randint(5, 8)
-        loss = 0.0
-        R = 0.0 # 累積報酬
+        total_reward = 0
+        episode_transitions = []
         for t in range(max_steps):
-            state_tensor = torch.tensor(state).unsqueeze(0)     # (1, 1, H, W)
+            state_tensor = torch.tensor(state).unsqueeze(0)
             probs = policy_net(state_tensor, rects_tensor)
-            action, log_prob = select_action(probs)     # 行動の確率値で出力
+            action, log_prob = select_action(probs)
             next_state, reward, success = apply_action(state, action, rects_info.tolist())
-            log_probs.append(log_prob)
-            rewards.append(reward)
             total_reward += reward
+            done = not success or t == max_steps - 1
+            # 状態、行動、log_prob、報酬、次状態、done, rects_info
+            replay_buffer.push(state.copy(), action, log_prob, reward, next_state.copy(), done, rects_input.copy())
             state = next_state
-            R = R * 0.9 + reward
-            loss += -log_prob * R
-        # リターン計算（単純合計）
-        # G = sum(rewards)
-        # loss = -torch.stack(log_probs).sum() * G
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            if done:
+                break
+
+        # バッファが十分溜まったらランダムサンプルで学習
+        if len(replay_buffer) >= batch_size:
+            batch = replay_buffer.sample(batch_size)
+            states, actions, log_probs, rewards, next_states, dones, rects_inputs = batch
+
+            # バッチデータをテンソル化
+            state_batch = torch.tensor(np.array(states)).float()
+            rects_batch = torch.tensor(np.array(rects_inputs)).float()
+            log_prob_batch = torch.stack(log_probs)
+            reward_batch = torch.tensor(rewards).float()
+            # 割引累積報酬計算（ここでは単純な報酬合計でも可）
+            returns = []
+            G = 0
+            gamma = 0.9
+            for r, done in zip(reversed(rewards), reversed(dones)):
+                if done:
+                    G = 0
+                G = r + gamma * G
+                returns.insert(0, G)
+            returns = torch.tensor(returns).float()
+
+            # 方策勾配損失
+            loss = -torch.sum(log_prob_batch * returns)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
         if episode % 10 == 0:
-            print(f"episode {episode} total reward: {total_reward:.2f} loss: {loss.item():.3f}")
+            print(f"episode {episode} total reward: {total_reward:.2f} buffer: {len(replay_buffer)}")
             policy_net.save_state_dict()
 
     print("Training finished.")
