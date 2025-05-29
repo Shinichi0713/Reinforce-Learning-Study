@@ -53,7 +53,8 @@ class CNN_DQN(nn.Module):
         torch.save(self.state_dict(), self.path_nn)
 
     def __load_state_dict(self):
-        if os.path.exists(self.path_nn) is False:
+        if os.path.exists(self.path_nn):
+            print(f"Loading model from {self.path_nn}")
             state_dict = torch.load(self.path_nn)
             self.load_state_dict(state_dict)
 
@@ -77,54 +78,75 @@ def select_action(state, policy_net, n_actions, epsilon):
         q_values = policy_net(state)
         return q_values.argmax(1).item()
 
-env = gym.make('CartPole-v1', render_mode='rgb_array')
-env.reset()
-n_actions = env.action_space.n
-policy_net = CNN_DQN(n_actions)
-target_net = CNN_DQN(n_actions)
-target_net.load_state_dict(policy_net.state_dict())
-target_net.eval()
-optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
-buffer = ReplayBuffer(10000)
-BATCH_SIZE = 32
-GAMMA = 0.99
-EPSILON = 0.8
 
-for episode in range(100):
+def train():
+    env = gym.make('CartPole-v1', render_mode='rgb_array')
+    env.reset()
+    n_actions = env.action_space.n
+    policy_net = CNN_DQN(n_actions)
+    target_net = CNN_DQN(n_actions)
+    target_net.load_state_dict(policy_net.state_dict())
+    target_net.eval()
+    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
+    buffer = ReplayBuffer(10000)
+    BATCH_SIZE = 32
+    GAMMA = 0.99
+    EPSILON = 0.8
+
+    for episode in range(100):
+        state = get_screen(env)
+        total_reward = 0
+        env.reset()
+        for t in range(200):
+            action = select_action(state, policy_net, n_actions, EPSILON)
+            EPSILON *= 0.99  # ε-greedyのεを減衰
+            _, reward, done, truncated, info= env.step(action)
+            next_state = get_screen(env)
+            buffer.push(state, action, reward, next_state, done)
+            state = next_state
+            total_reward += reward
+            if done:
+                break
+            # 学習
+            # print(len(buffer))
+            if len(buffer) >= BATCH_SIZE:
+                transitions = buffer.sample(BATCH_SIZE)
+                batch_state = torch.cat(transitions.state).to(policy_net.device)
+                batch_action = torch.tensor(transitions.action).unsqueeze(1).to(policy_net.device)
+                batch_reward = torch.tensor(transitions.reward, dtype=torch.float32).to(policy_net.device)
+                batch_next_state = torch.cat(transitions.next_state).to(policy_net.device)
+                batch_done = torch.tensor(transitions.done, dtype=torch.bool).to(policy_net.device)
+                q_values = policy_net(batch_state).gather(1, batch_action).squeeze()
+                with torch.no_grad():
+                    max_next_q = target_net(batch_next_state).max(1)[0]
+                    target = batch_reward + GAMMA * max_next_q * (~batch_done)
+                loss = nn.MSELoss()(q_values, target)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+        # ターゲットネットの更新
+        if episode % 10 == 0:
+            policy_net.save_to_state_dict()
+            target_net.load_state_dict(policy_net.state_dict())
+            print(f"Episode {episode}, Total reward: {total_reward}")
+    env.close()
+
+def evaluate():
+    env = gym.make('CartPole-v1', render_mode='human')
+    policy_net = CNN_DQN(env.action_space.n)
+    policy_net.__load_state_dict()
     state = get_screen(env)
     total_reward = 0
-    env.reset()
-    for t in range(200):
-        action = select_action(state, policy_net, n_actions, EPSILON)
-        EPSILON *= 0.99  # ε-greedyのεを減衰
-        _, reward, done, truncated, info= env.step(action)
-        next_state = get_screen(env)
-        buffer.push(state, action, reward, next_state, done)
-        state = next_state
+    done = False
+    while not done:
+        action = select_action(state, policy_net, env.action_space.n, 0.05)  # εを小さく設定
+        state, reward, done, truncated, info = env.step(action)
+        state = get_screen(env)
         total_reward += reward
-        if done:
-            break
-        # 学習
-        # print(len(buffer))
-        if len(buffer) >= BATCH_SIZE:
-            transitions = buffer.sample(BATCH_SIZE)
-            batch_state = torch.cat(transitions.state).to(policy_net.device)
-            batch_action = torch.tensor(transitions.action).unsqueeze(1).to(policy_net.device)
-            batch_reward = torch.tensor(transitions.reward, dtype=torch.float32).to(policy_net.device)
-            batch_next_state = torch.cat(transitions.next_state).to(policy_net.device)
-            batch_done = torch.tensor(transitions.done, dtype=torch.bool).to(policy_net.device)
-            q_values = policy_net(batch_state).gather(1, batch_action).squeeze()
-            with torch.no_grad():
-                max_next_q = target_net(batch_next_state).max(1)[0]
-                target = batch_reward + GAMMA * max_next_q * (~batch_done)
-            loss = nn.MSELoss()(q_values, target)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-    # ターゲットネットの更新
-    if episode % 10 == 0:
-        policy_net.save_to_state_dict()
-        target_net.load_state_dict(policy_net.state_dict())
-        print(f"Episode {episode}, Total reward: {total_reward}")
-env.close()
+        env.render()
+    print(f"Total reward: {total_reward}")
+    env.close()
 
+if __name__ == "__main__":
+    train()
+    evaluate()
