@@ -16,7 +16,9 @@ class PolicyNet(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
             nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
-            nn.Flatten()
+            nn.Conv2d(32, 32, 3, padding=1), nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE, 32 * GRID_SIZE * GRID_SIZE), nn.ReLU()
         )
         # 箱情報用MLP
         self.rect_encoder = nn.Sequential(
@@ -129,14 +131,14 @@ def train():
         for t in range(max_steps):
             state_tensor = torch.tensor(state).unsqueeze(0)     # (1, 1, H, W)
             probs = policy_net(state_tensor, rects_tensor)
-            action, log_prob = select_action(probs)     # 行動の確率値で出力
+            action, log_prob = select_action(probs)             # 行動の確率値で出力
             next_state, reward, success = apply_action(state, action, rects_info.tolist())
             log_probs.append(log_prob)
             rewards.append(reward)
             total_reward += reward
             state = next_state
-            R = R * 0.9 + reward
-            loss += -log_prob * R
+            # R = R * 0.9 + reward  # 報酬の即時性が低下する
+            loss += -log_prob * reward
         # リターン計算（単純合計）
         # G = sum(rewards)
         # loss = -torch.stack(log_probs).sum() * G
@@ -146,6 +148,7 @@ def train():
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f} loss: {loss.item():.3f}")
             policy_net.save_state_dict()
+            policy_net.to(policy_net.device)  # GPUに戻す
 
     print("Training finished.")
 

@@ -112,5 +112,8 @@ print(action)     # 0, 1, 2 のどれかが出る
 print(log_prob)   # そのactionが選ばれる確率の対数値
 ```
 
+
+
+
 ---
 
