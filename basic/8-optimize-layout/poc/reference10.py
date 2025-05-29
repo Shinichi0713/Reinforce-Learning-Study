@@ -10,6 +10,7 @@ GRID_SIZE = 10
 MAX_RECTS = 5  # 最大箱数
 
 
+# 方策ネットワーク
 class PolicyNet(nn.Module):
     def __init__(self, num_actions, max_rects=5):
         super().__init__()
