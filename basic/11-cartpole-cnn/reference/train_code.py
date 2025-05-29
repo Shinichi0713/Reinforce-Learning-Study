@@ -85,7 +85,6 @@ def train():
     n_actions = env.action_space.n
     policy_net = CNN_DQN(n_actions)
     target_net = CNN_DQN(n_actions)
-    target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
     optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
     buffer = ReplayBuffer(10000)
@@ -132,21 +131,28 @@ def train():
     env.close()
 
 def evaluate():
-    env = gym.make('CartPole-v1', render_mode='human')
-    policy_net = CNN_DQN(env.action_space.n)
-    policy_net.__load_state_dict()
-    state = get_screen(env)
-    total_reward = 0
-    done = False
-    while not done:
-        action = select_action(state, policy_net, env.action_space.n, 0.05)  # εを小さく設定
-        state, reward, done, truncated, info = env.step(action)
-        state = get_screen(env)
-        total_reward += reward
-        env.render()
-    print(f"Total reward: {total_reward}")
-    env.close()
+    env = gym.make('CartPole-v1', render_mode='rgb_array')
+    num_actions = env.action_space.n
 
+    policy_net = CNN_DQN(num_actions)
+
+    num_episodes = 5
+    for episode in range(num_episodes):
+        state, _ = env.reset()
+        total_reward = 0
+        done = False
+        while not done:
+            screen = get_screen(env)  # (1, 1, 40, 80)
+            with torch.no_grad():
+                logits = policy_net(screen)
+                probs = torch.softmax(logits, dim=1)
+                action = torch.multinomial(probs, num_samples=1).item()
+            state, reward, terminated, truncated, info = env.step(action)
+            total_reward += reward
+            done = terminated or truncated
+        print(f"Episode {episode}: Total reward = {total_reward}")
+
+    env.close()
 if __name__ == "__main__":
     train()
     evaluate()
