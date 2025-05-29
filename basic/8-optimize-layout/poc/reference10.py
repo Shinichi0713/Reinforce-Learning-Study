@@ -180,7 +180,6 @@ def train():
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f} buffer: {len(replay_buffer)}")
             policy_net.save_state_dict()
-
     print("Training finished.")
 
 
