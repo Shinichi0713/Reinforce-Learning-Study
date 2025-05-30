@@ -70,11 +70,11 @@ def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
 
 
 # AIエージェントの予測確率に基づき対数確率を計算する
-def select_action(probs):
-    m = torch.distributions.Categorical(probs)
-    action = m.sample()
-    # print(torch.max(probs))
-    return action.item(), m.log_prob(action)
+def select_action(q_values, epsilon):
+    if random.random() < epsilon:
+        return random.randrange(q_values.shape[1])
+    else:
+        return q_values.argmax(1).item()
 
 def apply_action(state, action, rects):
     grid = state.copy()
@@ -87,6 +87,7 @@ def apply_action(state, action, rects):
     # 範囲外チェック
     if x + w > GRID_SIZE or y + h > GRID_SIZE:
         return grid, -1, False
+    # サイズチェック
     if w == 0 or h == 0:
         return grid, -2, False
     # 重なりチェック
@@ -97,90 +98,90 @@ def apply_action(state, action, rects):
     return grid, ratio_filled*14, True
 
 
+Transition = namedtuple('Transition', ('state', 'rects', 'action', 'reward', 'next_state', 'next_rects', 'done'))
+
 class ReplayBuffer:
     def __init__(self, capacity):
         self.buffer = deque(maxlen=capacity)
-
-    def push(self, *transition):
-        self.buffer.append(transition)
-
+    def push(self, *args):
+        self.buffer.append(Transition(*args))
     def sample(self, batch_size):
-        indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-        batch = [self.buffer[idx] for idx in indices]
-        return zip(*batch)
-
+        batch = random.sample(self.buffer, batch_size)
+        return Transition(*zip(*batch))
     def __len__(self):
         return len(self.buffer)
 
+
 def train():
     num_episodes = 1000
-    batch_size = 32
-    replay_capacity = 10000
     num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
-    policy_net = PolicyNet(num_actions)
-    optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
-    replay_buffer = ReplayBuffer(replay_capacity)
+    q_net = PolicyNet(num_actions)
+    q_net.train()
+    target_net = PolicyNet(num_actions)
+    target_net.load_state_dict(q_net.state_dict())
+    target_net.eval()
+    optimizer = optim.Adam(q_net.parameters(), lr=1e-3)
+    buffer = ReplayBuffer(10000)
+    BATCH_SIZE = 64
+    GAMMA = 0.99
+    EPSILON = 0.1
+    TARGET_UPDATE = 10
 
     for episode in range(num_episodes):
         rects = generate_random_rects()
         num_rects = len(rects)
         state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
-
-        # 箱情報ベクトル化
         rects_info = np.zeros((MAX_RECTS * 2,), dtype=np.float32)
         for i, (w, h) in enumerate(rects):
             rects_info[i*2:i*2+2] = [w, h]
         rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
-        max_steps = random.randint(5, 8)
         total_reward = 0
-        episode_transitions = []
+        max_steps = random.randint(5, 8)
         for t in range(max_steps):
-            state_tensor = torch.tensor(state).unsqueeze(0)
-            probs = policy_net(state_tensor, rects_tensor)
-            action, log_prob = select_action(probs)
+            state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
+            q_values = q_net(state_tensor, rects_tensor)
+            action = select_action(q_values, EPSILON)
             next_state, reward, success = apply_action(state, action, rects_info.tolist())
-            total_reward += reward
+            next_state_tensor = torch.tensor(next_state).unsqueeze(0)
             done = not success or t == max_steps - 1
-            # 状態、行動、log_prob、報酬、次状態、done, rects_info
-            replay_buffer.push(state.copy(), action, log_prob, reward, next_state.copy(), done, rects_input.copy())
+            buffer.push(state, rects_input, action, reward, next_state, rects_input, done)
             state = next_state
+            total_reward += reward
             if done:
                 break
 
-        # バッファが十分溜まったらランダムサンプルで学習
-        if len(replay_buffer) >= batch_size:
-            batch = replay_buffer.sample(batch_size)
-            states, actions, log_probs, rewards, next_states, dones, rects_inputs = batch
+            # 学習
+            if len(buffer) >= BATCH_SIZE:
+                transitions = buffer.sample(BATCH_SIZE)
+                batch_state = torch.tensor(np.stack(transitions.state)).float().to(q_net.device)
+                batch_rects = torch.tensor(np.stack(transitions.rects)).float().to(q_net.device)
+                batch_action = torch.tensor(transitions.action).unsqueeze(1).to(q_net.device)
+                batch_reward = torch.tensor(transitions.reward).float().to(q_net.device)
+                batch_next_state = torch.tensor(np.stack(transitions.next_state)).float().to(q_net.device)
+                batch_next_rects = torch.tensor(np.stack(transitions.next_rects)).float().to(q_net.device)
+                batch_done = torch.tensor(transitions.done).bool().to(q_net.device)
 
-            # バッチデータをテンソル化
-            state_batch = torch.tensor(np.array(states)).float()
-            rects_batch = torch.tensor(np.array(rects_inputs)).float()
-            log_prob_batch = torch.stack(log_probs)
-            reward_batch = torch.tensor(rewards).float()
-            # 割引累積報酬計算（ここでは単純な報酬合計でも可）
-            with torch.no_grad():
-                returns = []
-                G = 0
-                gamma = 0.9
-                for r, done in zip(reversed(rewards), reversed(dones)):
-                    if done:
-                        G = 0
-                    G = r + gamma * G
-                    returns.insert(0, G)
-                # returns = torch.tensor(returns, dtype=torch.float32, device=policy_net.device)
+                # Double DQNのターゲット計算
+                with torch.no_grad():
+                    next_q = q_net(batch_next_state, batch_next_rects)
+                    next_actions = next_q.argmax(1, keepdim=True)
+                    next_q_target = target_net(batch_next_state, batch_next_rects)
+                    next_q_values = next_q_target.gather(1, next_actions).squeeze(1)
+                    expected_q = batch_reward + GAMMA * next_q_values * (~batch_done)
 
-            # 方策勾配損失
-            loss = sum(-log_prob * ret for log_prob, ret in zip(log_prob_batch, returns))
-            # loss = -torch.stack(log_probs).sum() * G
-            # 勾配計算
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                q_pred = q_net(batch_state, batch_rects).gather(1, batch_action).squeeze(1)
+                loss = nn.MSELoss()(q_pred, expected_q)
 
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+        if episode % TARGET_UPDATE == 0:
+            target_net.load_state_dict(q_net.state_dict())
         if episode % 10 == 0:
-            print(f"episode {episode} total reward: {total_reward:.2f} buffer: {len(replay_buffer)}")
-            policy_net.save_state_dict()
+            q_net.save_state_dict()
+            print(f"episode {episode} total reward: {total_reward:.2f}")
     print("Training finished.")
 
 
@@ -199,9 +200,9 @@ def eval():
     rects_tensor = torch.tensor(rects_input).unsqueeze(0)
 
     for i in range(5):
-        state_tensor = torch.tensor(state).unsqueeze(0)
-        probs = policy_net(state_tensor, rects_tensor)
-        action, _ = select_action(probs)
+        state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
+        q_values = policy_net(state_tensor, rects_tensor)
+        action = select_action(q_values, 0.0)  # 評価時はε=0
         next_state, reward, success = apply_action(state, action, rects_info.tolist())
         print(f"action: {action}, reward: {reward}")
         state = next_state
