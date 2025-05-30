@@ -15,7 +15,7 @@ def get_screen(env):
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Grayscale(),
-        transforms.Resize((40, 80)),
+        transforms.Resize((200, 300)),
         transforms.ToTensor()
     ])
     screen = transform(screen)
@@ -26,16 +26,21 @@ class CNN_DQN(nn.Module):
     def __init__(self, n_actions):
         super().__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(1, 16, 5, stride=2), nn.ReLU(),
-            nn.Conv2d(16, 32, 5, stride=2), nn.ReLU(),
+            nn.Conv2d(1, 16, 3, stride=2), nn.ReLU(),          # 3x3: 基本的な特徴抽出
+            nn.Conv2d(16, 32, 1, stride=1), nn.ReLU(),         # 1x1: チャネル変換
+            nn.Conv2d(32, 32, 5, stride=2, padding=2), nn.ReLU(), # 5x5: 広い特徴抽出（パディングでサイズ調整）
+            nn.Conv2d(32, 32, 1, stride=1), nn.ReLU(),         # 1x1: チャネル変換
+            nn.Conv2d(32, 32, 3, stride=2, padding=1), nn.ReLU(), # 3x3: 追加の特徴抽出
             nn.Flatten()
         )
         # 計算してサイズを合わせる
-        dummy_input = torch.zeros(1, 1, 40, 80)
+        dummy_input = torch.zeros(1, 1, 200, 300)
         n_flatten = self.conv(dummy_input).shape[1]
         self.fc = nn.Sequential(
-            nn.Linear(n_flatten, 128), nn.ReLU(),
-            nn.Linear(128, n_actions)
+            nn.Linear(n_flatten, 128 * 2), nn.ReLU(),
+            # nn.Linear(128 * 2, 128 * 2), nn.ReLU(),
+            # nn.Linear(128 * 2, 128 * 2), nn.ReLU(),
+            nn.Linear(128 * 2, n_actions)
         )
         
         self.path_nn = os.path.join(os.path.dirname(__file__), 'cnn_dqn.pth')
@@ -92,7 +97,7 @@ def train():
     GAMMA = 0.99
     EPSILON = 0.8
 
-    for episode in range(100):
+    for episode in range(200):
         state = get_screen(env)
         total_reward = 0
         env.reset()
@@ -107,7 +112,6 @@ def train():
             if done:
                 break
             # 学習
-            # print(len(buffer))
             if len(buffer) >= BATCH_SIZE:
                 transitions = buffer.sample(BATCH_SIZE)
                 batch_state = torch.cat(transitions.state).to(policy_net.device)
@@ -135,7 +139,7 @@ def evaluate():
     num_actions = env.action_space.n
 
     policy_net = CNN_DQN(num_actions)
-
+    policy_net.eval()
     num_episodes = 5
     for episode in range(num_episodes):
         state, _ = env.reset()

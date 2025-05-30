@@ -74,3 +74,25 @@ m = nn.Conv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2), dilation=(3, 1))
 input = torch.randn(20, 16, 50, 100)
 output = m(input)
 ```
+
+
+## 別取り組みの結果
+
+CartPole-v1について確認すると。
+
+
+https://github.com/lmarza/CartPole-CNN
+
+vision-cnnを用いる場合と、画像を用いない場合での性能の比較は以下のようになった
+
+__画像を用いない場合__  
+![alt text](image-1.png)
+
+
+__画像を用いる場合__  
+![alt text](image-2.png)
+
+## 結論
+1. やはり画像のみでは棒の機微をとらえることが難しかった・・・？
+
+
