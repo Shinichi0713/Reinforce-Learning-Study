@@ -198,7 +198,7 @@ def eval():
         rects_info[i*2:i*2+2] = [w, h]
     rects_input = np.concatenate([rects_info, [num_rects]]).astype(np.float32)
     rects_tensor = torch.tensor(rects_input).unsqueeze(0)
-
+    print(f"Evaluating with {num_rects} rectangles: {rects}")
     for i in range(5):
         state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
         q_values = policy_net(state_tensor, rects_tensor)
