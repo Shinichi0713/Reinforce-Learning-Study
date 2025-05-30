@@ -43,6 +43,59 @@
 
 
 ---
+ご提示のコードでニューラルネットワークが計算しているロス関数は、**Double DQNに基づくQ学習の損失関数（平均二乗誤差：MSELoss）**です。
+
+具体的には、  
+「現時点のQ関数（q_net）が出す行動価値（q_pred）」と  
+「Double DQNのターゲット値（expected_q）」  
+の**平均二乗誤差**を最小化するように学習しています。
+
+---
+
+## 数式で表すと
+
+各サンプルについて、  
+- \( Q(s, a) \)：現ネットワーク（q_net）が出す、状態\( s \)・行動\( a \)のQ値
+- \( r \)：報酬
+- \( s' \)：次状態
+- \( \gamma \)：割引率
+- \( Q_{\text{target}} \)：ターゲットネットワーク
+- \( \text{done} \)：エピソード終了フラグ
+
+Double DQNのターゲット値は
+
+\[
+\text{target} = r + \gamma \cdot Q_{\text{target}}(s', \arg\max_a Q(s', a)) \cdot (1 - \text{done})
+\]
+
+この「target」と「現在のQ値」の平均二乗誤差
+
+\[
+\text{loss} = \frac{1}{N} \sum_{i=1}^{N} \left( Q(s_i, a_i) - \text{target}_i \right)^2
+\]
+
+を最小化するように学習しています。
+
+---
+
+## コード対応
+
+```python
+q_pred = q_net(batch_state, batch_rects).gather(1, batch_action).squeeze(1)  # Q(s, a)
+loss = nn.MSELoss()(q_pred, expected_q)  # MSELoss
+```
+
+---
+
+## まとめ
+
+- **Double DQNのターゲット値**と、**現ネットワークのQ値**との**平均二乗誤差（MSE）**をロス関数として最小化しています。
+- これはDQN系の典型的な損失関数です。
+
+---
+
+
+
 
 今後は、DDQNの各種ハイパーパラメータやネットワーク設計などをさらに工夫することで、さらなる精度向上も期待できます。
 
@@ -51,3 +104,6 @@
 
 Evaluating with 2 rectangles: [(2, 3), (2, 3)]  
 ![alt text](image-6.png)  
+
+
+
