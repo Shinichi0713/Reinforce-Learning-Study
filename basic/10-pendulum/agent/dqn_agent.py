@@ -20,6 +20,10 @@ class DQNNetwork(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
+    def forward(self, x):
+        x = torch.tensor(x, dtype=torch.float32).to(self.device)
+        x = self.fc(x)
+        return self.softmax(x)
 
     def __load_state_dict(self):
         if os.path.exists(self.path_nn):
@@ -27,3 +31,7 @@ class DQNNetwork(nn.Module):
             print(f"Model loaded from {self.path_nn}")
         else:
             print(f"No model found at {self.path_nn}, starting with random weights.")
+
+    def save_model(self):
+        torch.save(self.state_dict(), self.path_nn)
+        print(f"Model saved to {self.path_nn}")
