@@ -9,7 +9,6 @@ GRID_SIZE = 10
 MAX_RECTS = 5  # 最大箱数
 
 
-# 方策ネットワーク
 class PolicyNet(nn.Module):
     def __init__(self, num_actions, max_rects=5):
         super().__init__()
@@ -17,22 +16,22 @@ class PolicyNet(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
             nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
-            nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(),
-            nn.Flatten()
+            nn.Conv2d(32, 32, 3, padding=1), nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE, 32 * GRID_SIZE * GRID_SIZE), nn.ReLU()
         )
         # 箱情報用MLP
         self.rect_encoder = nn.Sequential(
-            nn.Linear(max_rects * 2 + 1, 256 * 2), nn.ReLU(),
-            nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
-            nn.Linear(256 * 2, 64), nn.ReLU()
+            nn.Linear(max_rects * 2 + 1, 64 * 2), nn.ReLU(),
+            nn.Linear(64 * 2, 64 * 2), nn.ReLU(),
+            nn.Linear(64 * 2, 64), nn.ReLU()
         )
         # 結合後のFC
         self.fc = nn.Sequential(
-            nn.Linear(64 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
-            nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
-            nn.Linear(256 * 2, num_actions)
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 256), nn.ReLU(),
+            nn.Linear(256, 256), nn.ReLU(),
+            nn.Linear(256, num_actions)
         )
-        self.batch_normalization = nn.LayerNorm(64 * GRID_SIZE * GRID_SIZE + 64)
         # ...（省略: パラメータ保存/ロード等）
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
         self.__load_state_dict()
@@ -47,9 +46,6 @@ class PolicyNet(nn.Module):
         grid_feat = self.conv(grid)
         rect_feat = self.rect_encoder(rects_info)
         x = torch.cat([grid_feat, rect_feat], dim=1)
-        
-        x = x.view(x.size(0), -1)  # (B, 64 * GRID_SIZE * GRID_SIZE + 64)
-        x = self.batch_normalization(x)
         logits = self.fc(x)
         return torch.softmax(logits, dim=1)
 
@@ -62,6 +58,60 @@ class PolicyNet(nn.Module):
         if os.path.exists(self.path_nn):
             print("load network parameter")
             self.load_state_dict(torch.load(self.path_nn))
+
+# 方策ネットワーク
+# class PolicyNet(nn.Module):
+#     def __init__(self, num_actions, max_rects=5):
+#         super().__init__()
+#         # 画像用CNN
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
+#             nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
+#             nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(),
+#             nn.Flatten()
+#         )
+#         # 箱情報用MLP
+#         self.rect_encoder = nn.Sequential(
+#             nn.Linear(max_rects * 2 + 1, 256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, 64), nn.ReLU()
+#         )
+#         # 結合後のFC
+#         self.fc = nn.Sequential(
+#             nn.Linear(64 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, num_actions)
+#         )
+#         self.batch_normalization = nn.LayerNorm(64 * GRID_SIZE * GRID_SIZE + 64)
+#         # ...（省略: パラメータ保存/ロード等）
+#         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
+#         self.__load_state_dict()
+#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#         self.to(self.device)
+
+#     def forward(self, grid, rects_info):
+#         # grid: (B, 1, H, W)
+#         # rects_info: (B, max_rects * 2 + 1)
+#         grid = grid.to(self.device)
+#         rects_info = rects_info.to(self.device)
+#         grid_feat = self.conv(grid)
+#         rect_feat = self.rect_encoder(rects_info)
+#         x = torch.cat([grid_feat, rect_feat], dim=1)
+        
+#         # x = x.view(x.size(0), -1)  # (B, 64 * GRID_SIZE * GRID_SIZE + 64)
+#         # x = self.batch_normalization(x)
+#         logits = self.fc(x)
+#         return torch.softmax(logits, dim=1)
+
+#     def save_state_dict(self):
+#         self.cpu()
+#         torch.save(self.state_dict(), self.path_nn)
+#         self.to(self.device)
+
+#     def __load_state_dict(self):
+#         if os.path.exists(self.path_nn):
+#             print("load network parameter")
+#             self.load_state_dict(torch.load(self.path_nn))
 
 
 def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
