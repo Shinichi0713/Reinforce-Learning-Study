@@ -1,3 +1,46 @@
+
+import gym
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import random
+from collections import deque
+
+
+N_DISCRETE_ACTIONS = 11
+ACTION_SPACE = np.linspace(-2.0, 2.0, N_DISCRETE_ACTIONS)
+
+
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
+    
+    def push(self, s, a, r, s_, done):
+        self.buffer.append((s, a, r, s_, done))
+    
+    def sample(self, batch_size):
+        batch = random.sample(self.buffer, batch_size)
+        s, a, r, s_, d = zip(*batch)
+        return (np.array(s), np.array(a), np.array(r, dtype=np.float32),
+                np.array(s_), np.array(d, dtype=np.float32))
+    
+    def __len__(self):
+        return len(self.buffer)
+
+class QNetwork(nn.Module):
+    def __init__(self, state_dim, action_dim):
+        super().__init__()
+        self.fc1 = nn.Linear(state_dim, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, action_dim)
+    
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        return self.fc3(x)
+
+
 env = gym.make('Pendulum-v1')
 state_dim = env.observation_space.shape[0]
 action_dim = N_DISCRETE_ACTIONS
