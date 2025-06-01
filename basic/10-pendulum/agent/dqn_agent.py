@@ -14,10 +14,10 @@ class DQNNetwork(nn.Module):
             nn.Linear(128, output_dim)
         )
         self.softmax = nn.Softmax(dim=-1)
-
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.path_nn = os.path.join(os.path.dirname(__file__), 'dqn_model.pth')
         self.__load_state_dict()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
         self.to(self.device)
 
     def forward(self, x):
