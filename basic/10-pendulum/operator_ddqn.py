@@ -7,7 +7,7 @@ import environment
 from agent import DQNNetwork
 from collections import deque
 
-N_DISCRETE_ACTIONS = 21
+N_DISCRETE_ACTIONS = 91
 ACTION_SPACE = np.linspace(-2.0, 2.0, N_DISCRETE_ACTIONS)
 
 # 経験再生バッファ
@@ -21,6 +21,7 @@ class ReplayBuffer:
         return map(np.array, zip(*batch))
     def __len__(self):
         return len(self.buffer)
+
 
 def select_action(q_net, state, epsilon):
     if np.random.rand() < epsilon:
@@ -58,11 +59,11 @@ def train():
     gamma = 0.99
     epsilon = 1.0
     epsilon_min = 0.05
-    epsilon_decay = 0.995
+    epsilon_decay = 0.95
 
     step_episode = 200
     count_train = 0.0
-    interval_update = 2
+    interval_update = 1
 
     num_episodes = 1000
     loss_history = []
@@ -102,12 +103,10 @@ def train():
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                soft_update(target_net, dqn_net, tau=0.005)
 
             if done:
                 break
-        # ターゲットネットワークの更新
-        if (episode + 1) % interval_update == 0:
-            soft_update(target_net, dqn_net, tau=0.005)
         if episode % 10 == 0:
             print(f"Episode {episode}, Total Reward: {total_reward}, Epsilon: {epsilon:.2f}")
             dqn_net.save_model()
@@ -132,8 +131,9 @@ def run_agent():
     state, info = env.reset()
     total_reward = 0
     for step in range(200):
-        action = select_action(dqn_net, state, epsilon=0.0)  # Epsilonを0にして最適行動を選択
-        state_, reward, terminated, truncated, info = env.step(np.array([ACTION_SPACE[action]]))
+        id_action = select_action(dqn_net, state, epsilon=0.0)  # Epsilonを0にして最適行動を選択
+        action = np.array([ACTION_SPACE[id_action]])
+        state_, reward, terminated, truncated, info = env.step(action)
         state = state_
         total_reward += reward
         env.render()
