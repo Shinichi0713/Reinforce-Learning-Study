@@ -25,10 +25,8 @@ class Environment:
         return self.env.close()
 
     def clip_reward(self, reward):
-        if reward < -1.0:
-            return -1.0
-        else:
-            return 1.0
+        reward = np.clip(reward, -4, 4)
+        return reward + 4
 
 
 if __name__ == "__main__":
