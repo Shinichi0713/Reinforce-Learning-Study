@@ -111,8 +111,30 @@ def train():
     write_log(os.path.join(dir_current, "loss_history.txt"), str(loss_history))
     write_log(os.path.join(dir_current, "reward_history.txt"), str(reward_avr_history))
 
+# エージェントを稼働
+def run_agent():
+    env = environment.Environment('human')  # 'human'モードでレンダリング
+    dqn_net = DQNNetwork(input_dim=env.env.observation_space.shape[0], output_dim=len(ACTION_SPACE))
+    dqn_net.eval()  # 評価モードに設定
+    dqn_net.to(dqn_net.device)
+
+    obs, info = env.reset()
+    total_reward = 0
+    for step in range(200):
+        action = select_action(dqn_net, obs, epsilon=0.0)  # Epsilonを0にして最適行動を選択
+        obs_, reward, terminated, truncated, info = env.step(np.array([ACTION_SPACE[action]]))
+        obs = obs_
+        total_reward += reward
+        env.render()
+        print(f"Step: {step}, Action: {action}, Reward: {reward}, Total Reward: {total_reward}")
+
+        if terminated or truncated:
+            break
+
+    print(f"Total Reward: {total_reward}")
+    env.close()
 
 if __name__ == "__main__":
-    train()
-    
+    # train()
+    run_agent()
 
