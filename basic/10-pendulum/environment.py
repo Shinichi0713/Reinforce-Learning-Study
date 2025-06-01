@@ -1,5 +1,6 @@
 # 環境構築する
 import gymnasium as gym
+import numpy as np
 
 class Environment:
     def __init__(self):
@@ -11,6 +12,7 @@ class Environment:
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
+        reward = self.clip_reward(reward)
         return obs, reward, terminated, truncated, info
 
     def render(self, mode='human'):
@@ -18,7 +20,12 @@ class Environment:
 
     def close(self):
         return self.env.close()
-    
+
+    def clip_reward(self, reward):
+        if reward < -1.0:
+            return -1.0
+        else:
+            return 1.0
 
 
 if __name__ == "__main__":
