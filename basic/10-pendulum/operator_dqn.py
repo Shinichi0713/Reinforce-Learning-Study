@@ -4,7 +4,7 @@ import numpy as np
 import random, os
 import environment
 from agent import DQNNetwork
-
+from collections import deque
 
 N_DISCRETE_ACTIONS = 21
 ACTION_SPACE = np.linspace(-2.0, 2.0, N_DISCRETE_ACTIONS)
@@ -12,20 +12,12 @@ ACTION_SPACE = np.linspace(-2.0, 2.0, N_DISCRETE_ACTIONS)
 # 経験再生バッファ
 class ReplayBuffer:
     def __init__(self, capacity):
-        self.buffer = []
-        self.capacity = capacity
-        self.position = 0
-
-    def push(self, s, a, r, s_, done):
-        if len(self.buffer) < self.capacity:
-            self.buffer.append((s, a, r, s_, done))
-        else:
-            self.buffer[self.position] = (s, a, r, s_, done)
-            self.position = (self.position + 1) % self.capacity
-
+        self.buffer = deque(maxlen=capacity)
+    def push(self, *args):
+        self.buffer.append(tuple(args))
     def sample(self, batch_size):
-        return random.sample(self.buffer, batch_size)
-
+        batch = random.sample(self.buffer, batch_size)
+        return map(np.array, zip(*batch))
     def __len__(self):
         return len(self.buffer)
 
@@ -40,7 +32,7 @@ def select_action(q_net, state, epsilon):
 def train():
     env = environment.Environment()
     state_dim = env.env.observation_space.shape[0]
-    action_dim = env.env.action_space.shape[0]
+    action_dim = len(ACTION_SPACE)
 
     # DQNネットワークの初期化
     dqn_net = DQNNetwork(input_dim=state_dim, output_dim=action_dim)
@@ -71,21 +63,22 @@ def train():
             total_reward += reward
 
             if len(buffer) >= batch_size:
-                batch = buffer.sample(batch_size)
-                states, actions, rewards, next_states, dones = zip(*batch)
-
-                states_tensor = torch.tensor(states, dtype=torch.float32).to(dqn_net.device)
-                actions_tensor = torch.tensor(actions, dtype=torch.int64).unsqueeze(1).to(dqn_net.device)
-                rewards_tensor = torch.tensor(rewards, dtype=torch.float32).unsqueeze(1).to(dqn_net.device)
-                next_states_tensor = torch.tensor(next_states, dtype=torch.float32).to(dqn_net.device)
-                dones_tensor = torch.tensor(dones, dtype=torch.float32).unsqueeze(1).to(dqn_net.device)
-                actions_tensor = actions_tensor.squeeze(1)  # shape: [batch_size, 1]
-                q_values = dqn_net(states_tensor)             # shape: [batch_size, action_dim]
+                states, actions, rewards, next_states, dones = buffer.sample(batch_size)
+                states_v = torch.FloatTensor(states).to(dqn_net.device)
+                actions_v = torch.LongTensor(actions).to(dqn_net.device)
+                rewards_v = torch.FloatTensor(rewards).to(dqn_net.device)
+                next_states_v = torch.FloatTensor(next_states).to(dqn_net.device)
+                dones_v = torch.FloatTensor(dones).to(dqn_net.device)
+                actions_tensor = actions_v  # shape: [batch_size, 1]
+                q_values = dqn_net(states_v)               # shape: [batch_size, action_dim]
                 q_values = q_values.gather(1, actions_tensor) # shape: [batch_size, 1]
                 q_values = q_values.squeeze(1)                # shape: [batch_size]
                 with torch.no_grad():
-                    next_q_values = dqn_net(next_states_tensor).max(1)[0].unsqueeze(1)
-                    target_q_values = rewards_tensor + (gamma * next_q_values * (1 - dones_tensor))
+                    next_q_values = dqn_net(next_states_v)  # shape: [batch_size, action_dim]
+                    next_q_values = next_q_values.max(1)[0]  # shape: [batch_size]
+                    next_q_values = next_q_values.unsqueeze(1)  # shape: [batch_size, 1]        
+                    next_q_values = next_q_values.squeeze(1)
+                    target_q_values = rewards_v + (gamma * next_q_values * (1 - dones_v))
 
                 loss = torch.nn.functional.mse_loss(q_values, target_q_values)
 
