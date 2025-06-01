@@ -3,7 +3,7 @@ import gymnasium as gym
 
 class Environment:
     def __init__(self):
-        self.env = gym.make("Pendulum-v1", render_mode="human")
+        self.env = gym.make("Pendulum-v1")
         self.reset()
 
     def reset(self):
