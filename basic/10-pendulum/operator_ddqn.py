@@ -7,7 +7,7 @@ import environment
 from agent import DQNNetwork
 from collections import deque
 
-N_DISCRETE_ACTIONS = 91
+N_DISCRETE_ACTIONS = 101
 ACTION_SPACE = np.linspace(-2.0, 2.0, N_DISCRETE_ACTIONS)
 
 # 経験再生バッファ
@@ -59,7 +59,7 @@ def train():
     gamma = 0.99
     epsilon = 1.0
     epsilon_min = 0.05
-    epsilon_decay = 0.95
+    epsilon_decay = 0.97
 
     step_episode = 200
     count_train = 0.0
@@ -146,6 +146,6 @@ def run_agent():
     env.close()
 
 if __name__ == "__main__":
-    train()
+    # train()
     run_agent()
 

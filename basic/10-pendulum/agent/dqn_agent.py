@@ -7,11 +7,11 @@ class DQNNetwork(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DQNNetwork, self).__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 128),
+            nn.Linear(input_dim, 128*2),
             nn.ReLU(),
-            nn.Linear(128, 128),
+            nn.Linear(128*2, 128*2),
             nn.ReLU(),
-            nn.Linear(128, output_dim)
+            nn.Linear(128*2, output_dim)
         )
         self.softmax = nn.Softmax(dim=-1)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
