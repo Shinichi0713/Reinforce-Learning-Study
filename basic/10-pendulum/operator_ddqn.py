@@ -35,6 +35,10 @@ def write_log(file_path, data):
         f.write(data + '\n')
 
 
+def soft_update(target_net, online_net, tau=0.005):
+    for target_param, online_param in zip(target_net.parameters(), online_net.parameters()):
+        target_param.data.copy_(tau * online_param.data + (1.0 - tau) * target_param.data)
+
 # DQNのトレーニング関数
 def train():
     env = environment.Environment()
@@ -58,24 +62,24 @@ def train():
 
     step_episode = 200
     count_train = 0.0
-    interval_update = 10
+    interval_update = 2
 
     num_episodes = 1000
     loss_history = []
     reward_avr_history = []
     for episode in range(num_episodes):
-        obs, info = env.reset()
+        state, info = env.reset()
         total_reward = 0
         loss_total = 0
 
         for step in range(step_episode):
-            id_action = select_action(dqn_net, obs, epsilon)
+            id_action = select_action(dqn_net, state, epsilon)
             action = np.array([ACTION_SPACE[id_action]])
-            obs_, reward, terminated, truncated, info = env.step(action)
+            state_, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             # 経験をバッファに保存
-            buffer.push(obs, id_action, reward, obs_, done)
-            obs = obs_
+            buffer.push(state, id_action, reward, state_, done)
+            state = state_
             total_reward += reward
 
             if len(buffer) >= batch_size:
@@ -89,8 +93,7 @@ def train():
                 q_values = dqn_net(states_v)               # shape: [batch_size, action_dim]
                 q_values = q_values.gather(1, actions_tensor).squeeze(1)  # shape: [batch_size]
                 with torch.no_grad():
-                    next_q_values = dqn_net(next_states_v)  # shape: [batch_size, action_dim]
-                    next_q_values = next_q_values.max(1)[0]  # shape: [batch_size]
+                    next_q_values = target_net(next_states_v).max(1)[0]   # shape: [batch_size, action_dim]
                     target_q_values = rewards_v + (gamma * next_q_values * (1 - dones_v))
 
                 loss = torch.nn.functional.mse_loss(q_values, target_q_values)
@@ -102,6 +105,9 @@ def train():
 
             if done:
                 break
+        # ターゲットネットワークの更新
+        if (episode + 1) % interval_update == 0:
+            soft_update(target_net, dqn_net, tau=0.005)
         if episode % 10 == 0:
             print(f"Episode {episode}, Total Reward: {total_reward}, Epsilon: {epsilon:.2f}")
             dqn_net.save_model()
@@ -123,12 +129,12 @@ def run_agent():
     dqn_net.eval()  # 評価モードに設定
     dqn_net.to(dqn_net.device)
 
-    obs, info = env.reset()
+    state, info = env.reset()
     total_reward = 0
     for step in range(200):
-        action = select_action(dqn_net, obs, epsilon=0.0)  # Epsilonを0にして最適行動を選択
-        obs_, reward, terminated, truncated, info = env.step(np.array([ACTION_SPACE[action]]))
-        obs = obs_
+        action = select_action(dqn_net, state, epsilon=0.0)  # Epsilonを0にして最適行動を選択
+        state_, reward, terminated, truncated, info = env.step(np.array([ACTION_SPACE[action]]))
+        state = state_
         total_reward += reward
         env.render()
         print(f"Step: {step}, Action: {action}, Reward: {reward}, Total Reward: {total_reward}")
@@ -140,6 +146,6 @@ def run_agent():
     env.close()
 
 if __name__ == "__main__":
-    # train()
+    train()
     run_agent()
 
