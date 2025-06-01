@@ -3,8 +3,11 @@ import gymnasium as gym
 import numpy as np
 
 class Environment:
-    def __init__(self):
-        self.env = gym.make("Pendulum-v1")
+    def __init__(self, mode=None):
+        if mode is None:
+            self.env = gym.make("Pendulum-v1")
+        else:
+            self.env = gym.make("Pendulum-v1", render_mode=mode)
         self.reset()
 
     def reset(self):
@@ -15,8 +18,8 @@ class Environment:
         reward = self.clip_reward(reward)
         return obs, reward, terminated, truncated, info
 
-    def render(self, mode='human'):
-        return self.env.render(mode=mode)
+    def render(self):
+        return self.env.render()
 
     def close(self):
         return self.env.close()
