@@ -32,7 +32,6 @@ class PolicyNet(nn.Module):
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, num_actions)
         )
-        self.batch_normalization = nn.LayerNorm(64 * GRID_SIZE * GRID_SIZE + 64)
         # ...（省略: パラメータ保存/ロード等）
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
         self.__load_state_dict()
@@ -41,17 +40,15 @@ class PolicyNet(nn.Module):
 
     def forward(self, grid, rects_info):
         # grid: (B, 1, H, W)
-        # rects_info: (B, max_rects * 2 + 1)
+        # rects_info: (B, max_rects * 2 + 3)
         grid = grid.to(self.device)
         rects_info = rects_info.to(self.device)
         grid_feat = self.conv(grid)
         rect_feat = self.rect_encoder(rects_info)
         x = torch.cat([grid_feat, rect_feat], dim=1)
         
-        # x = x.view(x.size(0), -1)  # (B, 64 * GRID_SIZE * GRID_SIZE + 64)
-        # x = self.batch_normalization(x)
         logits = self.fc(x)
-        return torch.softmax(logits, dim=1)
+        return logits
 
     def save_state_dict(self):
         self.cpu()
@@ -106,7 +103,6 @@ def apply_action(state, action, rects):
 def update_soft_target(target_net, source_net, tau=0.03):
     for target_param, param in zip(target_net.parameters(), source_net.parameters()):
         target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
-    return target_net
 
 
 Transition = namedtuple('Transition', ('state', 'rects', 'action', 'reward', 'next_state', 'next_rects', 'done'))
@@ -162,10 +158,10 @@ def train():
             state = next_state
             total_reward += reward
             # if done:
-            action_last = 0
-            reward_last = 0
-            rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
-            rects_tensor = torch.tensor(rects_input).unsqueeze(0)
+            # action_last = 0
+            # reward_last = 0
+            # rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
+            # rects_tensor = torch.tensor(rects_input).unsqueeze(0)
             # 学習
             if len(buffer) >= BATCH_SIZE:
                 transitions = buffer.sample(BATCH_SIZE)
@@ -187,13 +183,13 @@ def train():
 
                 q_pred = q_net(batch_state, batch_rects).gather(1, batch_action).squeeze(1)
                 loss = nn.MSELoss()(q_pred, expected_q)
-
+                # print(f"episode {episode}, step {t}, loss: {loss.item():.4f}, reward: {reward:.2f}")
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
                 # Soft targetネットワークの更新
-                target_net = update_soft_target(target_net, q_net, tau=0.1)
+                update_soft_target(target_net, q_net, tau=0.16)
 
         if episode % 10 == 0:
             q_net.save_state_dict()
