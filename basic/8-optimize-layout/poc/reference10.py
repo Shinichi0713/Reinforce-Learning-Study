@@ -48,8 +48,8 @@ class PolicyNet(nn.Module):
         rect_feat = self.rect_encoder(rects_info)
         x = torch.cat([grid_feat, rect_feat], dim=1)
         
-        x = x.view(x.size(0), -1)  # (B, 64 * GRID_SIZE * GRID_SIZE + 64)
-        x = self.batch_normalization(x)
+        # x = x.view(x.size(0), -1)  # (B, 64 * GRID_SIZE * GRID_SIZE + 64)
+        # x = self.batch_normalization(x)
         logits = self.fc(x)
         return torch.softmax(logits, dim=1)
 
@@ -101,6 +101,12 @@ def apply_action(state, action, rects):
     grid[0, y:y+h, x:x+w] = 1
     ratio_filled = np.sum(grid[0] == 1) / (GRID_SIZE * GRID_SIZE)
     return grid, ratio_filled*18, True
+
+
+def update_soft_target(target_net, source_net, tau=0.03):
+    for target_param, param in zip(target_net.parameters(), source_net.parameters()):
+        target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
+    return target_net
 
 
 Transition = namedtuple('Transition', ('state', 'rects', 'action', 'reward', 'next_state', 'next_rects', 'done'))
@@ -186,8 +192,9 @@ def train():
                 loss.backward()
                 optimizer.step()
 
-        if episode % TARGET_UPDATE == 0:
-            target_net.load_state_dict(q_net.state_dict())
+                # Soft targetネットワークの更新
+                target_net = update_soft_target(target_net, q_net, tau=0.1)
+
         if episode % 10 == 0:
             q_net.save_state_dict()
             print(f"episode {episode} total reward: {total_reward:.2f}")
