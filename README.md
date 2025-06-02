@@ -9,12 +9,14 @@ thus, we apply the tech to control Self-discipline system.
 
 ## problems
 ### ball cather
-this is the behavior of q-learning agent.  
-<img src="image/ball-catch-q-agent.gif" alt="q-learn" width="300px" height="auto">
+this is the behavior of q-learning agent. 
+
+<img src="image/ball-catch-q-agent.gif" alt="q-learn" width="300px" height="auto">  
 
 ### pendulum
 this is the behavior of SAC.
-<img src="image/pendulum.gif" alt="q-learn" width="300px" height="auto">
+
+<img src="image/pendulum.gif" alt="q-learn" width="300px" height="auto">  
 
 
 # cite
