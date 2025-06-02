@@ -99,7 +99,6 @@ loss = nn.MSELoss()(q_pred, expected_q)  # MSELoss
 
 今後は、DDQNの各種ハイパーパラメータやネットワーク設計などをさらに工夫することで、さらなる精度向上も期待できます。
 
-
 ![alt text](image-5.png)  
 
 Evaluating with 2 rectangles: [(2, 3), (2, 3)]  
