@@ -146,6 +146,6 @@ def run_agent():
     env.close()
 
 if __name__ == "__main__":
-    # train()
+    train()
     run_agent()
 
