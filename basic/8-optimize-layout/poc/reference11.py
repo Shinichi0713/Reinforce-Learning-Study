@@ -121,7 +121,7 @@ class ReplayBuffer:
 
 
 def train():
-    num_episodes = 40000
+    num_episodes = 30000
     num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
     q_net = PolicyNet(num_actions)
     q_net.train()
@@ -234,6 +234,6 @@ def eval():
 
 
 if __name__ == "__main__":
-    # train()
+    train()
     eval()
 
