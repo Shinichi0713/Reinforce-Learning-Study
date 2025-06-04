@@ -197,8 +197,8 @@ def train():
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=200, gamma=0.96)
 
     buffer = ReplayBuffer(10000)
-    BATCH_SIZE = 64
-    GAMMA = 0.5         # 割引率: デフォルト 0.99
+    BATCH_SIZE = 32
+    GAMMA = 0.9         # 割引率: デフォルト 0.99
     EPSILON = 0.9
     TARGET_UPDATE = 10
 
