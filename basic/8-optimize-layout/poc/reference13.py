@@ -100,7 +100,12 @@ def apply_action(state, action, rects):
     ratio_filled = np.sum(grid[0] == 1) / (GRID_SIZE * GRID_SIZE)
     # 箱の中身を空白か
     rects[rect_idx*2:rect_idx*2+2] = [0, 0]  # 箱を空にする
-    return grid, ratio_filled*18, True
+    # 箱の中身が全て0か
+    if all(r == 0 for r in rects):
+        reward_complete = 10
+    else:
+        reward_complete = 0
+    return grid, ratio_filled*18 + reward_complete, True
 
 
 def update_soft_target(target_net, source_net, tau=0.03):
@@ -152,7 +157,7 @@ def train():
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         total_reward = 0
         max_steps = random.randint(5, 9)
-        for t in range(num_rects):
+        for i in range(num_rects):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
             q_values = q_net(state_tensor, rects_tensor)
             action = select_action(q_values, EPSILON)
@@ -161,10 +166,10 @@ def train():
 
             next_state, reward, success = apply_action(state, action, rects_info)
             next_state_tensor = torch.tensor(next_state).unsqueeze(0)
-            rects_input = np.concatenate([rects_info.copy(), [num_rects, action_last/100, reward_last]]).astype(np.float32)
+            rects_input = np.concatenate([rects_info.copy(), [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
             rects_tensor = torch.tensor(rects_input).unsqueeze(0)
-            
-            done = not success or t == max_steps - 1
+
+            done = not success or i == max_steps - 1
             buffer.push(state, rects_input, action, reward, next_state, rects_input, done)
             state = next_state
             total_reward += reward
@@ -227,6 +232,9 @@ def eval():
         q_values = policy_net(state_tensor, rects_tensor)
         action = select_action(q_values, 0.0)  # 評価時はε=0
         next_state, reward, success = apply_action(state, action, rects_info.tolist())
+        rects_input = np.concatenate([rects_info, [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
+        rects_tensor = torch.tensor(rects_input).unsqueeze(0)
+
         print(f"action: {action}, reward: {reward}")
         state = next_state
 
