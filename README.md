@@ -18,6 +18,10 @@ this is the behavior of SAC.
 
 <img src="image/pendulum.gif" alt="q-learn" width="300px" height="auto">  
 
+### arranging boxes
+when using ddqn, ai agent can arrange boxes toward restricted space.  
+
+![alt text](image/arranging-boxes.png)
 
 # cite
 in this repogitory, oss 'pygame-learning-environment' is used.
