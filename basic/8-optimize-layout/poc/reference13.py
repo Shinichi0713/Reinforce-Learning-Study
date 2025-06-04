@@ -10,14 +10,65 @@ MAX_RECTS = 5  # 最大箱数
 
 
 # 方策ネットワーク
+import torch
+import torch.nn as nn
+import os
+
+# バッチノルムはダメ
+# class PolicyNet(nn.Module):
+#     def __init__(self, num_actions, max_rects=5):
+#         super().__init__()
+#         # 画像用CNN
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(1, 16, 3, padding=1), nn.BatchNorm2d(16), nn.ReLU(),
+#             nn.Conv2d(16, 32, 3, padding=1), nn.BatchNorm2d(32), nn.ReLU(),
+#             nn.Conv2d(32, 64, 3, padding=1), nn.BatchNorm2d(64), nn.ReLU(),
+#             nn.Flatten()
+#         )
+#         # 箱情報用MLP
+#         self.rect_encoder = nn.Sequential(
+#             nn.Linear(max_rects * 2 + 3, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(), 
+#             nn.Linear(256 * 2, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, 64), nn.LayerNorm(64), nn.ReLU()
+#         )
+#         # 結合後のFC
+#         self.fc = nn.Sequential(
+#             nn.Linear(64 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
+#             nn.Linear(256 * 2, num_actions)
+#         )
+#         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
+#         self.__load_state_dict()
+#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#         self.to(self.device)
+
+#     def forward(self, grid, rects_info):
+#         grid = grid.to(self.device)
+#         rects_info = rects_info.to(self.device)
+#         grid_feat = self.conv(grid)
+#         rect_feat = self.rect_encoder(rects_info)
+#         x = torch.cat([grid_feat, rect_feat], dim=1)
+#         logits = self.fc(x)
+#         return logits
+
+#     def save_state_dict(self):
+#         self.cpu()
+#         torch.save(self.state_dict(), self.path_nn)
+#         self.to(self.device)
+
+#     def __load_state_dict(self):
+#         if os.path.exists(self.path_nn):
+#             print("load network parameter")
+#             self.load_state_dict(torch.load(self.path_nn))
+
 class PolicyNet(nn.Module):
-    def __init__(self, num_actions, max_rects=5):
+    def __init__(self, size_grid, max_rects=5):
         super().__init__()
         # 画像用CNN
         self.conv = nn.Sequential(
             nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
             nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
-            nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(),
+            # nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(),
             nn.Flatten()
         )
         # 箱情報用MLP
@@ -27,10 +78,15 @@ class PolicyNet(nn.Module):
             nn.Linear(256 * 2, 64), nn.ReLU()
         )
         # 結合後のFC
-        self.fc = nn.Sequential(
-            nn.Linear(64 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
+        self.select_box = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
-            nn.Linear(256 * 2, num_actions)
+            nn.Linear(256 * 2, max_rects)
+        )
+        self.place_box = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
+            nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
+            nn.Linear(256 * 2, size_grid)
         )
         # ...（省略: パラメータ保存/ロード等）
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
@@ -47,8 +103,10 @@ class PolicyNet(nn.Module):
         rect_feat = self.rect_encoder(rects_info)
         x = torch.cat([grid_feat, rect_feat], dim=1)
         
-        logits = self.fc(x)
-        return logits
+        logits_box = self.select_box(x)
+        logits_place = self.place_box(x)
+
+        return logits_box, logits_place
 
     def save_state_dict(self):
         self.cpu()
@@ -72,19 +130,19 @@ def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
 
 
 # AIエージェントの予測確率に基づき対数確率を計算する
-def select_action(q_values, epsilon):
+def select_action(logits_box, logits_place, epsilon):
     if random.random() < epsilon:
-        return random.randrange(q_values.shape[1])
+        return random.randrange(logits_box.shape[1]), random.randrange(logits_place.shape[1])
     else:
-        return q_values.argmax(1).item()
+        return logits_box.argmax(1).item(), logits_place.argmax(1).item()
 
 
-def apply_action(state, action, rects):
+def apply_action(state, rects, index_box, index_place):
     grid = state.copy()
     # num_rects = len(rects)
     # num_actions = GRID_SIZE * GRID_SIZE * num_rects
-    rect_idx = action % MAX_RECTS
-    pos_idx = action // MAX_RECTS
+    rect_idx = index_box
+    pos_idx = index_place
     x, y = pos_idx % GRID_SIZE, pos_idx // GRID_SIZE
     w, h = int(rects[rect_idx*2]), int(rects[rect_idx*2+1])
     # 範囲外チェック
@@ -113,7 +171,7 @@ def update_soft_target(target_net, source_net, tau=0.03):
         target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
 
 
-Transition = namedtuple('Transition', ('state', 'rects', 'action', 'reward', 'next_state', 'next_rects', 'done'))
+Transition = namedtuple('Transition', ('state', 'rects', 'index_box', 'index_place', 'reward', 'next_state', 'next_rects', 'done'))
 
 class ReplayBuffer:
     def __init__(self, capacity):
@@ -129,10 +187,10 @@ class ReplayBuffer:
 
 def train():
     num_episodes = 30000
-    num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
-    q_net = PolicyNet(num_actions)
+    size_grid = GRID_SIZE * GRID_SIZE
+    q_net = PolicyNet(size_grid, MAX_RECTS)
     q_net.train()
-    target_net = PolicyNet(num_actions)
+    target_net = PolicyNet(size_grid, MAX_RECTS)
     target_net.eval()
     optimizer = optim.AdamW(q_net.parameters(), lr=2e-4)
     # 学習率は減衰させる
@@ -156,21 +214,19 @@ def train():
         rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         total_reward = 0
-        max_steps = random.randint(5, 9)
+        # max_steps = random.randint(5, 9)
         for i in range(num_rects):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
-            q_values = q_net(state_tensor, rects_tensor)
-            action = select_action(q_values, EPSILON)
-            
-            
+            logits_box, logits_place = q_net(state_tensor, rects_tensor)
+            index_box, index_place = select_action(logits_box, logits_place, EPSILON)
 
-            next_state, reward, success = apply_action(state, action, rects_info)
+            next_state, reward, success = apply_action(state, rects_info, index_box, index_place)
             next_state_tensor = torch.tensor(next_state).unsqueeze(0)
             rects_input = np.concatenate([rects_info.copy(), [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
             rects_tensor = torch.tensor(rects_input).unsqueeze(0)
 
-            done = not success or i == max_steps - 1
-            buffer.push(state, rects_input, action, reward, next_state, rects_input, done)
+            done = not success or i == num_rects - 1
+            buffer.push(state, rects_input, index_box, index_place, reward, next_state, rects_input, done)
             state = next_state
             total_reward += reward
             # 学習
@@ -178,7 +234,8 @@ def train():
                 transitions = buffer.sample(BATCH_SIZE)
                 batch_state = torch.tensor(np.stack(transitions.state)).float().to(q_net.device)
                 batch_rects = torch.tensor(np.stack(transitions.rects)).float().to(q_net.device)
-                batch_action = torch.tensor(transitions.action).unsqueeze(1).to(q_net.device)
+                batch_index_box = torch.tensor(transitions.index_box).unsqueeze(1).to(q_net.device)
+                batch_index_place = torch.tensor(transitions.index_place).unsqueeze(1).to(q_net.device)
                 batch_reward = torch.tensor(transitions.reward).float().to(q_net.device)
                 batch_next_state = torch.tensor(np.stack(transitions.next_state)).float().to(q_net.device)
                 batch_next_rects = torch.tensor(np.stack(transitions.next_rects)).float().to(q_net.device)
@@ -186,14 +243,17 @@ def train():
 
                 # Double DQNのターゲット計算
                 with torch.no_grad():
-                    next_q = q_net(batch_next_state, batch_next_rects)
-                    next_actions = next_q.argmax(1, keepdim=True)
-                    next_q_target = target_net(batch_next_state, batch_next_rects)
-                    next_q_values = next_q_target.gather(1, next_actions).squeeze(1)
-                    expected_q = batch_reward + GAMMA * next_q_values * (~batch_done)
-
-                q_pred = q_net(batch_state, batch_rects).gather(1, batch_action).squeeze(1)
-                loss = nn.MSELoss()(q_pred, expected_q)
+                    logits_box, logits_place = q_net(batch_next_state, batch_next_rects)
+                    next_choice_box = logits_box.argmax(1, keepdim=True)
+                    next_choice_place = logits_place.argmax(1, keepdim=True)
+                    next_q_target_box, next_q_target_place = target_net(batch_next_state, batch_next_rects)
+                    next_q_target_box = next_q_target_box.gather(1, next_choice_box).squeeze(1)
+                    next_q_target_place = next_q_target_place.gather(1, next_choice_place).squeeze(1)
+                    expected_q = batch_reward + GAMMA * next_q_target_box + GAMMA * next_q_target_place
+                q_pred_box, q_pred_place = q_net(batch_state, batch_rects)
+                q_pred_box = q_pred_box.gather(1, batch_index_box).squeeze(1)
+                q_pred_place = q_pred_place.gather(1, batch_index_place).squeeze(1)
+                loss = nn.MSELoss()(q_pred_box + q_pred_place, expected_q)
                 # print(f"episode {episode}, step {t}, loss: {loss.item():.4f}, reward: {reward:.2f}")
                 optimizer.zero_grad()
                 loss.backward()
@@ -204,11 +264,10 @@ def train():
                 # Soft targetネットワークの更新
                 update_soft_target(target_net, q_net, tau=0.1)
 
-        EPSILON *= 0.99  # ε-greedyの減衰
-
         if episode % 10 == 0:
+            EPSILON *= 0.999  # ε-greedyの減衰
             q_net.save_state_dict()
-            print(f"episode {episode} total reward: {total_reward:.2f}")
+            print(f"episode {episode} total reward: {total_reward:.2f} epsilon: {EPSILON:.2f}")
     print("Training finished.")
 
 
@@ -227,11 +286,11 @@ def eval():
     rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
     rects_tensor = torch.tensor(rects_input).unsqueeze(0)
     print(f"Evaluating with {num_rects} rectangles: {rects}")
-    for i in range(8):
+    for i in range(num_rects):
         state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
         q_values = policy_net(state_tensor, rects_tensor)
         action = select_action(q_values, 0.0)  # 評価時はε=0
-        next_state, reward, success = apply_action(state, action, rects_info.tolist())
+        next_state, reward, success = apply_action(state, action, rects_info)
         rects_input = np.concatenate([rects_info, [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
 
@@ -250,5 +309,5 @@ def eval():
 
 if __name__ == "__main__":
     train()
-    eval()
+    # eval()
 
