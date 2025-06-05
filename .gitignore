@@ -175,3 +175,5 @@ cython_debug/
 *.pth
 *.pt
 *.bin
+
+*luna-env/
