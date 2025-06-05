@@ -112,5 +112,13 @@ There are four discrete actions available:
 - 2: fire main engine
 - 3: fire right orientation engine
 
+## エージェント設計
+制御が連続なため、連続制御に適した強化学習法を選定したい。
 
+| アルゴリズム名 | 特徴・説明 |
+|---|---|
+| **DDPG (Deep Deterministic Policy Gradient)** | 連続アクション空間に対応したActor-Critic型の手法。オフポリシー。 |
+| **TD3 (Twin Delayed Deep Deterministic Policy Gradient)** | DDPGの改良版。より安定で高精度。オフポリシー。 |
+| **SAC (Soft Actor-Critic)** | エントロピー正則化を導入し、探索性と安定性が高い。近年人気。オフポリシー。 |
+| **PPO (Proximal Policy Optimization)** | オンポリシー。連続・離散どちらも対応。安定しやすい。 |
 
