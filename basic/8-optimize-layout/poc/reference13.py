@@ -68,7 +68,6 @@ class PolicyNet(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
             nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
-            # nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(),
             nn.Flatten()
         )
         # 箱情報用MLP
@@ -77,12 +76,13 @@ class PolicyNet(nn.Module):
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, 64), nn.ReLU()
         )
-        # 結合後のFC
+        # 配置予定の箱を選択
         self.select_box = nn.Sequential(
             nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, max_rects)
         )
+        # 配置位置を決定
         self.place_box = nn.Sequential(
             nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
@@ -207,11 +207,9 @@ def train():
         num_rects = len(rects)
         state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
         rects_info = np.zeros((MAX_RECTS * 2,), dtype=np.float32)
-        action_last = 0
-        reward_last = 0
         for i, (w, h) in enumerate(rects):
             rects_info[i*2:i*2+2] = [w, h]
-        rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
+        rects_input = np.concatenate([rects_info, [num_rects, 0.0, 0.0]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         total_reward = 0
         # max_steps = random.randint(5, 9)
@@ -222,11 +220,12 @@ def train():
 
             next_state, reward, success = apply_action(state, rects_info, index_box, index_place)
             next_state_tensor = torch.tensor(next_state).unsqueeze(0)
-            rects_input = np.concatenate([rects_info.copy(), [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
-            rects_tensor = torch.tensor(rects_input).unsqueeze(0)
+            count_rects = ((rects_info != 0).sum().item()) // 2
+            rects_input_next = np.concatenate([rects_info.copy(), [count_rects, index_box, 0.0]]).astype(np.float32)
+            rects_tensor = torch.tensor(rects_input_next).unsqueeze(0)
 
             done = not success or i == num_rects - 1
-            buffer.push(state, rects_input, index_box, index_place, reward, next_state, rects_input, done)
+            buffer.push(state, rects_input, index_box, index_place, reward, next_state, rects_input_next, done)
             state = next_state
             total_reward += reward
             # 学習
@@ -274,27 +273,29 @@ def train():
 def eval():
     rects = generate_random_rects()
     num_rects = len(rects)
-    num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
-    policy_net = PolicyNet(num_actions)
-    policy_net.eval()
+    size_grid = GRID_SIZE * GRID_SIZE
+    q_net = PolicyNet(size_grid, MAX_RECTS)
+    q_net.eval()
     state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
     action_last = 0
     reward_last = 0
     rects_info = np.zeros((MAX_RECTS * 2,), dtype=np.float32)
     for i, (w, h) in enumerate(rects):
         rects_info[i*2:i*2+2] = [w, h]
-    rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
+    count_rects = ((rects_info != 0).sum().item()) // 2
+    rects_input = np.concatenate([rects_info, [count_rects, action_last/100, reward_last]]).astype(np.float32)
     rects_tensor = torch.tensor(rects_input).unsqueeze(0)
     print(f"Evaluating with {num_rects} rectangles: {rects}")
     for i in range(num_rects):
         state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
-        q_values = policy_net(state_tensor, rects_tensor)
-        action = select_action(q_values, 0.0)  # 評価時はε=0
-        next_state, reward, success = apply_action(state, action, rects_info)
+        logits_box, logits_place = q_net(state_tensor, rects_tensor)
+        index_box, index_place = select_action(logits_box, logits_place, 0.0)
+        # apply_action(state, rects, index_box, index_place)
+        next_state, reward, success = apply_action(state, rects_info, index_box, index_place)
         rects_input = np.concatenate([rects_info, [num_rects-i-1, action_last/100, reward_last]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
 
-        print(f"action: {action}, reward: {reward}")
+        print(f"choice_box: {index_box}, arrange_box: {index_place}, reward: {reward}")
         state = next_state
 
         # action_last = action
@@ -309,5 +310,5 @@ def eval():
 
 if __name__ == "__main__":
     train()
-    # eval()
+    eval()
 

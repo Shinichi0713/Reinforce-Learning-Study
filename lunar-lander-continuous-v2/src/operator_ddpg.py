@@ -15,7 +15,7 @@ def train():
     for i in range(1000):
         done = False
         score = 0
-        obs, _ = env.reset()
+        obs = env.reset()
         while not done:
             print(obs.shape)
             act = agent.choose_action(obs)
@@ -49,7 +49,7 @@ def load_trained():
     for i in range(50):
         done = False
         score = 0
-        obs, _ = env.reset()
+        obs = env.reset()
         while not done:
             act = agent.choose_action(obs)
             new_state, reward, terminated, truncated, info = env.step(act)
