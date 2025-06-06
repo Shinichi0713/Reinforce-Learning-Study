@@ -248,11 +248,15 @@ def train():
                     next_q_target_box, next_q_target_place = target_net(batch_next_state, batch_next_rects)
                     next_q_target_box = next_q_target_box.gather(1, next_choice_box).squeeze(1)
                     next_q_target_place = next_q_target_place.gather(1, next_choice_place).squeeze(1)
-                    expected_q = batch_reward + GAMMA * next_q_target_box + GAMMA * next_q_target_place
+                    expected_box = batch_reward + GAMMA * next_q_target_box
+                    expected_place = batch_reward + GAMMA * next_q_target_place
+
                 q_pred_box, q_pred_place = q_net(batch_state, batch_rects)
                 q_pred_box = q_pred_box.gather(1, batch_index_box).squeeze(1)
                 q_pred_place = q_pred_place.gather(1, batch_index_place).squeeze(1)
-                loss = nn.MSELoss()(q_pred_box + q_pred_place, expected_q)
+                loss_box = nn.MSELoss()(q_pred_box, expected_box)
+                loss_place = nn.MSELoss()(q_pred_place, expected_place)
+                loss = loss_box + loss_place
                 # print(f"episode {episode}, step {t}, loss: {loss.item():.4f}, reward: {reward:.2f}")
                 optimizer.zero_grad()
                 loss.backward()
