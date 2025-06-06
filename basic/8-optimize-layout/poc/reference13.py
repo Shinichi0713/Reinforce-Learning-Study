@@ -213,7 +213,7 @@ def train():
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         total_reward = 0
         # max_steps = random.randint(5, 9)
-        for i in range(num_rects):
+        for i in range(num_rects + 1):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
             logits_box, logits_place = q_net(state_tensor, rects_tensor)
             index_box, index_place = select_action(logits_box, logits_place, EPSILON)
@@ -266,6 +266,10 @@ def train():
 
                 # Soft targetネットワークの更新
                 update_soft_target(target_net, q_net, tau=0.1)
+
+            # 残り箱がないなら終了
+            if count_rects == 0:
+                break
 
         if episode % 10 == 0:
             EPSILON *= 0.999  # ε-greedyの減衰
