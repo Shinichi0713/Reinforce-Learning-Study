@@ -17,10 +17,12 @@ def train():
         score = 0
         obs = env.reset()
         while not done:
-            # print(obs.shape)
+            # 行動出力
             act = agent.choose_action(obs)
+            # 環境からの応答を取得
             new_state, reward, terminated, truncated, info = env.step(act)
             done = terminated or truncated
+            # 経験メモリー
             agent.remember(obs, act, reward, new_state, int(done))
             agent.learn()
             score += reward
