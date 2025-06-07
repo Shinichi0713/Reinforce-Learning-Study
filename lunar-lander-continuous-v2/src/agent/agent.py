@@ -165,6 +165,7 @@ class ActorNetwork(nn.Module):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
 
+# 学習用のエージェント
 class AgentDdpg(object):
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99, n_actions=2, max_size=1000000, layer1_size=400, layer2_size=300, batch_size=64):
         self.gamma = gamma
@@ -174,7 +175,7 @@ class AgentDdpg(object):
 
         self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name="actor")
         self.critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name="critic")
-
+        # ここはDDQNの考え方
         self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name="target_actor")
         self.target_critic = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name="target_critic")
 
@@ -182,9 +183,11 @@ class AgentDdpg(object):
         
         self.update_network_parameters(tau=1)
 
+    # モデルより行動を選択するメソッド
     def choose_action(self, observation):
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
+        # アクターからの決定論的行動
         mu = self.actor(observation).to(self.actor.device)
         mu_prime = mu + T.tensor(self.noise(), dtype=T.float).to(self.actor.device)
         self.actor.train()
@@ -196,22 +199,27 @@ class AgentDdpg(object):
     def learn(self):
         if self.memory.mem_cntr < self.batch_size:
             return
+        # 経験リプレイ
         state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
         reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
         done = T.tensor(done).to(self.critic.device)
         new_state = T.tensor(new_state, dtype=T.float).to(self.critic.device)
         action = T.tensor(action, dtype=T.float).to(self.critic.device)
         state = T.tensor(state, dtype=T.float).to(self.critic.device)
-
+        # ターゲットはネットワーク固定
         self.target_actor.eval()
         self.target_critic.eval()
         self.critic.eval()
-
+        # 次の行動出力
         target_actions = self.target_actor.forward(new_state)
+        # 状態と行動により価値を出力
+        # 次の価値
         critic_value_ = self.target_critic.forward(new_state, target_actions)
+        # 現在の価値
         critic_value = self.critic.forward(state, action)
 
         target = []
+        # 教師信号の計算(=ターゲット、未来から生成)
         for j in range(self.batch_size):
             target.append(reward[j] + self.gamma*critic_value_[j]*done[j])
         target = T.tensor(target).to(self.critic.device)
@@ -219,6 +227,7 @@ class AgentDdpg(object):
     
         self.critic.train()
         self.critic.optimizer.zero_grad()
+        # ToBeの教師信号と、現在価値のMSE損失を計算
         critic_loss = F.mse_loss(target, critic_value)
         critic_loss.backward()
         self.critic.optimizer.step()
