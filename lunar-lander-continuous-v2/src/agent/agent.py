@@ -65,6 +65,8 @@ class CriticNetwork(nn.Module):
         self.n_actions = n_actions
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_ddpg')
+        if os.path.exists(self.checkpoint_dir) is False:
+            os.makedirs(self.checkpoint_dir)
         self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)
         f1 = 1./np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
@@ -84,7 +86,7 @@ class CriticNetwork(nn.Module):
 
         self.optimizer = optim.Adam(self.parameters(), lr=beta, weight_decay=0.01)
         self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
-
+        
         self.to(self.device)
 
     def forward(self, state, action):
@@ -118,6 +120,8 @@ class ActorNetwork(nn.Module):
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
         self.checkpoint_dir = chkpt_dir
+        if os.path.exists(self.checkpoint_dir) is False:
+            os.makedirs(self.checkpoint_dir)
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_ddpg')
 
         self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)

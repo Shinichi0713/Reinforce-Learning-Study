@@ -17,7 +17,7 @@ def train():
         score = 0
         obs = env.reset()
         while not done:
-            print(obs.shape)
+            # print(obs.shape)
             act = agent.choose_action(obs)
             new_state, reward, terminated, truncated, info = env.step(act)
             done = terminated or truncated

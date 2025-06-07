@@ -186,7 +186,7 @@ class ReplayBuffer:
 
 
 def train():
-    num_episodes = 30000
+    num_episodes = 80000
     size_grid = GRID_SIZE * GRID_SIZE
     q_net = PolicyNet(size_grid, MAX_RECTS)
     q_net.train()
@@ -199,7 +199,7 @@ def train():
     buffer = ReplayBuffer(10000)
     BATCH_SIZE = 32
     GAMMA = 0.9         # 割引率: デフォルト 0.99
-    EPSILON = 0.9
+    EPSILON = 0.95
     TARGET_UPDATE = 10
 
     for episode in range(num_episodes):
@@ -213,7 +213,7 @@ def train():
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
         total_reward = 0
         # max_steps = random.randint(5, 9)
-        for i in range(num_rects + 1):
+        for i in range(num_rects + 3):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
             logits_box, logits_place = q_net(state_tensor, rects_tensor)
             index_box, index_place = select_action(logits_box, logits_place, EPSILON)
