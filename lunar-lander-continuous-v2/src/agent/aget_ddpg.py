@@ -60,3 +60,75 @@ class ReplayBuffer(object):
         return states, actions, rewards, new_states, terminal
 
 
+
+class CriticNet(nn.Module):
+    def __init__(self, dim_input, dim_actions):
+        super(CriticNet, self).__init__()
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_nn = os.path.join(dir_current, 'nn_critic_ddpg.pth')
+        dim_nn = 256 * 2
+        self.fc = nn.Sequential(
+            nn.Linear(dim_input, dim_nn),
+            nn.LayerNorm(dim_nn),
+            nn.ReLU(),
+            nn.Linear(dim_nn, 1),
+            nn.LayerNorm(1),
+            nn.Mish(),
+        )
+        self.load_checkpoint()
+        self.device = T.device('cuda' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+
+    def forward(self, state, action):
+        x = T.cat((state, action), dim=1)
+        x = self.fc(x)
+        return x
+
+    def save_checkpoint(self):
+        T.save(self.state_dict(), self.path_nn)
+        print('...critic network saved...')
+
+    def load_checkpoint(self):
+        if os.path.isfile(self.path_nn):
+            self.load_state_dict(T.load(self.path_nn))
+            print('...critic network loaded...')
+        else:
+            print('...no critic network found...')
+
+
+class ActorNet(nn.Module):
+    def __init__(self, dim_input, dim_actions):
+        super(ActorNet, self).__init__()
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_nn = os.path.join(dir_current, 'nn_actor_ddpg.pth')
+        dim_nn = 256 * 2
+        self.fc = nn.Sequential(
+            nn.Linear(dim_input, dim_nn),
+            nn.LayerNorm(dim_nn),
+            nn.ReLU(),
+            nn.Linear(dim_nn, dim_actions),
+            nn.Tanh(),
+        )
+        self.load_checkpoint()
+        self.device = T.device('cuda' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+
+    def forward(self, state):
+        x = self.fc(state)
+        return x
+
+    def save_checkpoint(self):
+        T.save(self.state_dict(), self.path_nn)
+        print('...actor network saved...')
+
+    def load_checkpoint(self):
+        if os.path.isfile(self.path_nn):
+            self.load_state_dict(T.load(self.path_nn))
+            print('...actor network loaded...')
+        else:
+            print('...no actor network found...')
+
+if __name__ == "__main__":
+    critic = CriticNet(dim_input=8, dim_actions=4)
+    actor = ActorNet(dim_input=8, dim_actions=4)
+    
