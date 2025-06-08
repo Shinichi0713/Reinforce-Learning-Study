@@ -62,10 +62,13 @@ class ReplayBuffer(object):
 
 # インスタンス時の次元は状態＋行動
 class CriticNet(nn.Module):
-    def __init__(self, dim_input):
+    def __init__(self, dim_input, name_save=None):
         super(CriticNet, self).__init__()
         dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.path_nn = os.path.join(dir_current, 'nn_critic_ddpg.pth')
+        if name_save is not None:
+            self.path_nn = os.path.join(dir_current, name_save)
+        else:
+            self.path_nn = os.path.join(dir_current, 'nn_critic_ddpg.pth')
         dim_nn = 256 * 2
         self.fc = nn.Sequential(
             nn.Linear(dim_input, dim_nn),
@@ -98,10 +101,13 @@ class CriticNet(nn.Module):
 
 
 class ActorNet(nn.Module):
-    def __init__(self, dim_input, dim_actions):
+    def __init__(self, dim_input, dim_actions, name_save=None):
         super(ActorNet, self).__init__()
         dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.path_nn = os.path.join(dir_current, 'nn_actor_ddpg.pth')
+        if name_save is not None:
+            self.path_nn = os.path.join(dir_current, name_save)
+        else:
+            self.path_nn = os.path.join(dir_current, 'nn_actor_ddpg.pth')
         dim_nn = 256 * 2
         self.fc = nn.Sequential(
             nn.Linear(dim_input, dim_nn),
@@ -148,8 +154,8 @@ class AgentDdpg(object):
         self.critic = CriticNet(dim_input=self.n_states + self.n_actions)
 
         # Target networks
-        self.target_actor = ActorNet(dim_input=self.n_states, dim_actions=self.n_actions)
-        self.target_critic = CriticNet(dim_input=self.n_states + self.n_actions)
+        self.target_actor = ActorNet(dim_input=self.n_states, dim_actions=self.n_actions, name_save='target_actor_ddpg.pth')
+        self.target_critic = CriticNet(dim_input=self.n_states + self.n_actions, name_save='target_critic_ddpg.pth')
 
         # Optimizers
         self.actor_optimizer = optim.AdamW(self.actor.parameters(), lr=self.alpha)

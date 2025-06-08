@@ -7,12 +7,12 @@ from environment import Environment
 def train():
     env = Environment()
     # (self, alpha, beta, tau, env, batch_size)
-    agent = AgentDdpg(alpha=0.000025, beta=0.00025, tau=0.001, env=env, batch_size=64)
+    agent = AgentDdpg(alpha=0.000025, beta=0.00025, tau=0.03, env=env, batch_size=64)
 
     np.random.seed(0)
     score_history = []
 
-    for i in range(1000):
+    for i in range(3000):
         done = False
         score = 0
         obs = env.reset()
@@ -39,11 +39,10 @@ def train():
     plt.ylabel('Score')
     plt.show()
 
-def load_trained():
+def eval():
     env = Environment(is_train=False)
 
-    agent = AgentDdpg(alpha=0.000025, beta=0.00025, input_dims=[8], tau=0.001, env=env, batch_size=64, layer1_size=400, layer2_size=300, n_actions=4)
-    agent.load_models()
+    agent = AgentDdpg(alpha=0.000025, beta=0.00025, tau=0.03, env=env, batch_size=64)
 
     np.random.seed(0)
     score_history = []
@@ -74,4 +73,4 @@ def load_trained():
 
 if __name__ == "__main__":
     train()
-    # load_trained()
+    eval()
