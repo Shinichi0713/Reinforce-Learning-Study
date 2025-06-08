@@ -18,6 +18,13 @@ this is the behavior of SAC.
 
 <img src="image/pendulum.gif" alt="q-learn" width="300px" height="auto">  
 
+### luna-landing
+this is the behavior of SAC.
+DDPG can't work well.
+
+<img src="image/luna-landing.gif" alt="sac" width="300px" height="auto">  
+
+
 ### arranging boxes
 when using ddqn, ai agent can arrange boxes toward restricted space.  
 
