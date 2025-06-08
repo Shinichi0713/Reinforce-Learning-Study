@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from collections import deque
-import random
+import random, os
 
 # --- 環境クラス（質問で提示されたものをそのまま使用） ---
 class Environment:
@@ -113,6 +113,7 @@ class SACAgent:
         self.gamma = 0.99
         self.tau = 0.005
 
+
     def select_action(self, state, evaluate=False):
         state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
         if evaluate:
@@ -123,6 +124,19 @@ class SACAgent:
             action, _ = self.actor.sample(state)
             action = action.cpu().detach().numpy()[0]
         return action * self.act_limit
+
+    def save_models(self):
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.actor.cpu()
+        self.critic1.cpu()
+        self.critic2.cpu()
+        # print("Saving models...")
+        torch.save(self.actor.state_dict(), f"{dir_current}/sac_actor.pth")
+        torch.save(self.critic1.state_dict(), f"{dir_current}/sac_critic1.pth")
+        torch.save(self.critic2.state_dict(), f"{dir_current}/sac_critic2.pth")
+        self.actor.to(self.device)
+        self.critic1.to(self.device)
+        self.critic2.to(self.device)
 
     def update(self, replay_buffer, batch_size):
         state, action, reward, next_state, done = replay_buffer.sample(batch_size)
@@ -218,7 +232,37 @@ def train_sac():
             for _ in range(update_every):
                 agent.update(replay_buffer, batch_size)
 
+        agent.save_models()
+    env.close()
+
+def eval_sac():
+    env = Environment(is_train=False)
+    obs_dim = env.env.observation_space.shape[0]
+    act_dim = env.env.action_space.shape[0]
+    act_limit = float(env.env.action_space.high[0])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    agent = SACAgent(obs_dim, act_dim, act_limit, device)
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    agent.actor.load_state_dict(torch.load(f"{dir_current}/sac_actor.pth"))
+    agent.critic1.load_state_dict(torch.load(f"{dir_current}/sac_critic1.pth"))
+    agent.critic2.load_state_dict(torch.load(f"{dir_current}/sac_critic2.pth"))
+
+    for i in range(5):
+        state = env.reset()
+        episode_reward = 0
+        done = False
+
+        while not done:
+            action = agent.select_action(state, evaluate=True)
+            next_state, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
+            episode_reward += reward
+            state = next_state
+
+        print(f"Episode Reward: {episode_reward:.2f}")
     env.close()
 
 if __name__ == "__main__":
-    train_sac()
+    # train_sac()
+    eval_sac()
