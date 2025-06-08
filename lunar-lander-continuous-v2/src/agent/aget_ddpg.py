@@ -60,9 +60,9 @@ class ReplayBuffer(object):
         return states, actions, rewards, new_states, terminal
 
 
-
+# インスタンス時の次元は状態＋行動
 class CriticNet(nn.Module):
-    def __init__(self, dim_input, dim_actions):
+    def __init__(self, dim_input):
         super(CriticNet, self).__init__()
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_nn = os.path.join(dir_current, 'nn_critic_ddpg.pth')
@@ -128,7 +128,123 @@ class ActorNet(nn.Module):
         else:
             print('...no actor network found...')
 
-if __name__ == "__main__":
-    critic = CriticNet(dim_input=8, dim_actions=4)
-    actor = ActorNet(dim_input=8, dim_actions=4)
+
+class AgentDdpg(object):
+    def __init__(self, alpha, beta, tau, env, batch_size):
+        self.alpha = alpha
+        self.beta = beta
+        self.tau = tau
+        self.batch_size = batch_size
+        
+        self.env = env
+        self.n_actions = self.env.env.action_space.shape[0]
+        self.n_states = self.env.env.observation_space.shape[0]
+
+        self.memory = ReplayBuffer(10000, self.n_states, self.n_actions)
+        self.actor = ActorNet(dim_input=self.n_states, dim_actions=self.n_actions)
+        self.critic = CriticNet(dim_input=self.n_states + self.n_actions)
+
+        # Target networks
+        self.target_actor = ActorNet(dim_input=self.n_states, dim_actions=self.n_actions)
+        self.target_critic = CriticNet(dim_input=self.n_states + self.n_actions)
+
+        # Optimizers
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.alpha)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=self.beta)
+
+        # Noise for exploration
+        mu = np.zeros(self.n_actions)
+        sigma = 0.15 * np.ones(self.n_actions)
+        theta = 0.2
+        self.noise = OUActionNoise(mu=mu, sigma=sigma, theta=theta)
+
+    # モデルより行動を選択するメソッド
+    def choose_action(self, observation):
+        self.actor.eval()
+        state = T.tensor(observation, dtype=T.float).to(self.actor.device)
+        action = self.actor(state).to(self.actor.device)
+        mu_prime = action + T.tensor(self.noise(), dtype=T.float).to(self.actor.device)
+        self.actor.train()
+        return mu_prime.cpu().detach().numpy()
+
+    def remember(self, state, action, reward, new_state, done):
+        self.memory.store_transition(state, action, reward, new_state, done)
+
+    def learn(self):
+        if self.memory.mem_cntr < self.batch_size:
+            return
+        # 経験リプレイ
+        state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
+        reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
+        done = T.tensor(done).to(self.critic.device)
+        new_state = T.tensor(new_state, dtype=T.float).to(self.critic.device)
+        action = T.tensor(action, dtype=T.float).to(self.critic.device)
+        state = T.tensor(state, dtype=T.float).to(self.critic.device)
+        # ターゲットはネットワーク固定
+        self.target_actor.eval()
+        self.target_critic.eval()
+        self.critic.eval()
+        # 次の行動出力
+        target_actions = self.target_actor.forward(new_state)
+        # 状態と行動により価値を出力
+        # 次の価値
+        critic_value_ = self.target_critic.forward(new_state, target_actions)
+        # 現在の価値
+        critic_value = self.critic.forward(state, action)
+
+        target = []
+        # 教師信号の計算(=ターゲット、未来から生成)
+        for j in range(self.batch_size):
+            target.append(reward[j] + self.gamma*critic_value_[j]*done[j])
+        target = T.tensor(target).to(self.critic.device)
+        target = target.view(self.batch_size, 1)   
     
+        self.critic.train()
+        self.critic.optimizer.zero_grad()
+        # ToBeの教師信号と、現在価値のMSE損失を計算
+        critic_loss = F.mse_loss(target, critic_value)
+        critic_loss.backward()
+        self.critic.optimizer.step()
+        self.critic.eval()
+        # アクターの更新
+        self.actor.optimizer.zero_grad()
+        mu = self.actor.forward(state)
+        self.actor.train()
+        actor_loss = -self.critic.forward(state, mu)
+        actor_loss = T.mean(actor_loss)
+        actor_loss.backward()
+        self.actor.optimizer.step()
+
+        self.update_network_parameters()
+
+    def update_network_parameters(self):
+        
+        actor_params = self.actor.named_parameters()
+        critic_params = self.critic.named_parameters()
+        target_actor_params = self.target_actor.named_parameters()
+        target_critic_params = self.target_critic.named_parameters()
+
+        critic_state_dict = dict(critic_params)
+        actor_state_dict = dict(actor_params)
+        target_critic_state_dict = dict(target_critic_params)
+        target_actor_state_dict = dict(target_actor_params)
+
+        for name in critic_state_dict:
+            critic_state_dict[name] = self.tau*critic_state_dict[name].clone() + (1-self.tau)*target_critic_state_dict[name].clone()
+
+        self.target_critic.load_state_dict(critic_state_dict)
+        
+        for name in actor_state_dict:
+            actor_state_dict[name] = self.tau*actor_state_dict[name].clone() + (1-self.tau)*target_actor_state_dict[name].clone()
+
+        self.target_actor.load_state_dict(actor_state_dict)
+
+    def save_models(self):
+        self.actor.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_critic.save_checkpoint()
+
+if __name__ == "__main__":
+    critic = CriticNet(dim_input=8)
+    actor = ActorNet(dim_input=8, dim_actions=4)

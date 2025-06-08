@@ -232,7 +232,7 @@ class AgentDdpg(object):
         critic_loss.backward()
         self.critic.optimizer.step()
         self.critic.eval()
-    
+        # アクターの更新
         self.actor.optimizer.zero_grad()
         mu = self.actor.forward(state)
         self.actor.train()
