@@ -78,6 +78,7 @@ class CriticNet(nn.Module):
         self.load_checkpoint()
         self.device = T.device('cuda' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
+        self.optimizer = optim.AdamW(self.parameters(), lr=0.00025)
 
     def forward(self, state, action):
         x = T.cat((state, action), dim=1)
@@ -112,6 +113,7 @@ class ActorNet(nn.Module):
         self.load_checkpoint()
         self.device = T.device('cuda' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
+        self.optimizer = optim.AdamW(self.parameters(), lr=0.000025)
 
     def forward(self, state):
         x = self.fc(state)
@@ -131,6 +133,7 @@ class ActorNet(nn.Module):
 
 class AgentDdpg(object):
     def __init__(self, alpha, beta, tau, env, batch_size):
+        self.gamma = 0.99  # 割引率
         self.alpha = alpha
         self.beta = beta
         self.tau = tau
@@ -140,7 +143,7 @@ class AgentDdpg(object):
         self.n_actions = self.env.env.action_space.shape[0]
         self.n_states = self.env.env.observation_space.shape[0]
 
-        self.memory = ReplayBuffer(10000, self.n_states, self.n_actions)
+        self.memory = ReplayBuffer(10000, [self.n_states], self.n_actions)
         self.actor = ActorNet(dim_input=self.n_states, dim_actions=self.n_actions)
         self.critic = CriticNet(dim_input=self.n_states + self.n_actions)
 
@@ -149,8 +152,8 @@ class AgentDdpg(object):
         self.target_critic = CriticNet(dim_input=self.n_states + self.n_actions)
 
         # Optimizers
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.alpha)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=self.beta)
+        self.actor_optimizer = optim.AdamW(self.actor.parameters(), lr=self.alpha)
+        self.critic_optimizer = optim.AdamW(self.critic.parameters(), lr=self.beta)
 
         # Noise for exploration
         mu = np.zeros(self.n_actions)
