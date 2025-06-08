@@ -13,6 +13,11 @@ this is the behavior of q-learning agent.
 
 <img src="image/ball-catch-q-agent.gif" alt="q-learn" width="300px" height="auto">  
 
+### pole cart
+with using dqn, the motion is completed.
+
+<img src="image/pole-cart.gif" alt="q-learn" width="300px" height="auto">
+
 ### pendulum
 this is the behavior of SAC.
 

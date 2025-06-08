@@ -184,7 +184,7 @@ class Env():
         agent.model.eval()
         state = self.__init_env()
         with torch.no_grad():
-            for _ in range(200):
+            for _ in range(400):
                 self.env.render()
                 action = agent.get_action(state, 1.0)
                 next_state, reward, done, info, _ = self.env.step(action)
