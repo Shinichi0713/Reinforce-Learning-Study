@@ -130,3 +130,8 @@ There are four discrete actions available:
 
 
 
+__学習の推移__  
+DDPGによるエージェントのスコアの推移をプロットした。  
+ノイズがあるため、完全に収束することはないものと考えられる。  
+
+![alt text](image.png)
