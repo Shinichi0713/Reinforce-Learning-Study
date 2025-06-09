@@ -14,52 +14,6 @@ import torch
 import torch.nn as nn
 import os
 
-# バッチノルムはダメ
-# class PolicyNet(nn.Module):
-#     def __init__(self, num_actions, max_rects=5):
-#         super().__init__()
-#         # 画像用CNN
-#         self.conv = nn.Sequential(
-#             nn.Conv2d(1, 16, 3, padding=1), nn.BatchNorm2d(16), nn.ReLU(),
-#             nn.Conv2d(16, 32, 3, padding=1), nn.BatchNorm2d(32), nn.ReLU(),
-#             nn.Conv2d(32, 64, 3, padding=1), nn.BatchNorm2d(64), nn.ReLU(),
-#             nn.Flatten()
-#         )
-#         # 箱情報用MLP
-#         self.rect_encoder = nn.Sequential(
-#             nn.Linear(max_rects * 2 + 3, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(), 
-#             nn.Linear(256 * 2, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
-#             nn.Linear(256 * 2, 64), nn.LayerNorm(64), nn.ReLU()
-#         )
-#         # 結合後のFC
-#         self.fc = nn.Sequential(
-#             nn.Linear(64 * GRID_SIZE * GRID_SIZE + 64, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
-#             nn.Linear(256 * 2, 256 * 2), nn.LayerNorm(256 * 2), nn.ReLU(),
-#             nn.Linear(256 * 2, num_actions)
-#         )
-#         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path_nn.pth')
-#         self.__load_state_dict()
-#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#         self.to(self.device)
-
-#     def forward(self, grid, rects_info):
-#         grid = grid.to(self.device)
-#         rects_info = rects_info.to(self.device)
-#         grid_feat = self.conv(grid)
-#         rect_feat = self.rect_encoder(rects_info)
-#         x = torch.cat([grid_feat, rect_feat], dim=1)
-#         logits = self.fc(x)
-#         return logits
-
-#     def save_state_dict(self):
-#         self.cpu()
-#         torch.save(self.state_dict(), self.path_nn)
-#         self.to(self.device)
-
-#     def __load_state_dict(self):
-#         if os.path.exists(self.path_nn):
-#             print("load network parameter")
-#             self.load_state_dict(torch.load(self.path_nn))
 
 class PolicyNet(nn.Module):
     def __init__(self, size_grid, max_rects=5):
