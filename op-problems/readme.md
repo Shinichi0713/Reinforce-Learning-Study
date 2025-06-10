@@ -83,3 +83,7 @@
 [Basic Usage - PettingZoo Documentation](https://pettingzoo.farama.org/content/basic_usage/)
 
 ということでマルチエージェント強化学習エージェントを研究する場合、利用することになる。
+
+```python
+python run.py --graph_size 20 --baseline rollout --run_name 'tsp20_rollout'
+```
