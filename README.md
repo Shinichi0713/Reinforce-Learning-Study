@@ -9,12 +9,10 @@ thus, we apply the tech to control Self-discipline system.
 2. documents: that is the note of reinforcement-learning.
 3. pole-problem: that is the code to try the feinforcement learning.
 
-
 Using Environment
 
 - Open Gym
 - Or Gym
-
 
 ## problems
 
@@ -53,6 +51,13 @@ when using ddqn, ai agent can arrange boxes toward restricted space.
 
 in this repogitory, oss 'pygame-learning-environment' is used.
 [https://github.com/ntasfi/PyGame-Learning-Environment](https://github.com/ntasfi/PyGame-Learning-Environment)
+
+
+deep mind archives!
+
+very nice site!
+
+[google-deepmind/deepmind-research: This repository contains implementations and illustrative code to accompany DeepMind publications](https://github.com/google-deepmind/deepmind-research/tree/master)
 
 # References
 
