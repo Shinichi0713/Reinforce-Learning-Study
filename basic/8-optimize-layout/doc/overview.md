@@ -57,3 +57,52 @@ __修正点__
 3. モデルに引き渡す情報に、直前選択した箱の番号も入れる
 
 ![alt text](image-9.png)
+
+## reference14
+学習アルゴリズムをSACに変更。
+
+だいぶ学習の効率は改善したが、最後一押しがやはり出来てない
+
+## reference15
+モデルの構造が良くないことに気づいた
+
+__もともと__  
+1. 現状のレイアウトの状態と、箱の情報を入力後、まとめてCNNと全結合層で順電波
+
+
+```python
+class ActorNet(nn.Module):
+    def __init__(self, size_grid, max_rects=5):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 16, 3, padding=1), nn.ReLU(),
+            nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
+            nn.Flatten()
+        )
+        self.rect_encoder = nn.Sequential(
+            nn.Linear(max_rects * 2 + 3, 256 * 2), nn.ReLU(),
+            nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
+            nn.Linear(256 * 2, 64), nn.ReLU()
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 512), nn.ReLU()
+        )
+        self.box_head = nn.Linear(512, max_rects)
+        self.place_head = nn.Linear(512, size_grid)
+
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_model = os.path.join(dir_current, "model_actor.pth")
+
+    def forward(self, grid, rects_info):
+        grid = grid.to(DEVICE)
+        rects_info = rects_info.to(DEVICE)
+        grid_feat = self.conv(grid)
+        rect_feat = self.rect_encoder(rects_info)
+        x = torch.cat([grid_feat, rect_feat], dim=1)
+        x = self.fc(x)
+        box_logits = self.box_head(x)
+        place_logits = self.place_head(x)
+        box_probs = torch.softmax(box_logits, dim=1)
+        place_probs = torch.softmax(place_logits, dim=1)
+        return box_probs, place_probs
+```
