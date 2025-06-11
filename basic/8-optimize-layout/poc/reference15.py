@@ -24,11 +24,16 @@ class ActorNet(nn.Module):
             nn.Linear(256 * 2, 64), nn.ReLU()
         )
         self.fc = nn.Sequential(
-            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 512), nn.ReLU()
-        )
-        self.box_head = nn.Linear(512, max_rects)
-        self.place_head = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 64, 512), nn.ReLU(),
             nn.Linear(512, 512), nn.GELU(),
+        )
+        self.box_head = nn.Sequential(
+            nn.Linear(512, 512), nn.GELU(),
+            nn.Linear(512, 512), nn.GELU(),
+            nn.Linear(512, max_rects)
+        )
+        self.place_head = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 2, 512), nn.GELU(),
             nn.Linear(512, 512), nn.GELU(),
             nn.Linear(512, 512), nn.GELU(),
             nn.Linear(512, size_grid)
@@ -40,14 +45,37 @@ class ActorNet(nn.Module):
     def forward(self, grid, rects_info):
         grid = grid.to(DEVICE)
         rects_info = rects_info.to(DEVICE)
-        grid_feat = self.conv(grid)
-        rect_feat = self.rect_encoder(rects_info)
+        batch_size = grid.shape[0]
+
+        # grid特徴量
+        grid_feat = self.conv(grid)  # [B, 32*GRID_SIZE*GRID_SIZE]
+
+        # rects特徴量
+        rect_feat = self.rect_encoder(rects_info)  # [B, 64]
+
+        # grid+rectsでボックス選択
         x = torch.cat([grid_feat, rect_feat], dim=1)
-        x = self.fc(x)
-        box_logits = self.box_head(x)
-        place_logits = self.place_head(x)
+        x = self.fc(x)  # [B, 512]
+        box_logits = self.box_head(x)  # [B, max_rects]
         box_probs = torch.softmax(box_logits, dim=1)
+        index_box = torch.argmax(box_logits, dim=1)  # [B]
+
+        # バッチごとに該当ボックスサイズを抽出
+        # rects_info: [B, max_rects*2 + 3] → boxごとに(x, y)が並ぶと仮定
+        # 例: [x0, y0, x1, y1, ...] なので、index_box*2, index_box*2+1でx, y
+        box_size = []
+        for b in range(batch_size):
+            idx = index_box[b]
+            x_val = rects_info[b, idx*2]
+            y_val = rects_info[b, idx*2+1]
+            box_size.append(torch.stack([x_val, y_val]))
+        box_size = torch.stack(box_size, dim=0)  # [B, 2]
+
+        # grid特徴量 + box_sizeで配置位置推定
+        place_input = torch.cat([grid_feat, box_size], dim=1)
+        place_logits = self.place_head(place_input)
         place_probs = torch.softmax(place_logits, dim=1)
+
         return box_probs, place_probs
 
     def save_model(self):
@@ -277,8 +305,8 @@ def train():
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f}")
 
-    save_log(reward_history, "reward_history_reference14.txt")
-    save_log(loss_history, "loss_history_reference14.txt")
+    save_log(reward_history, "reward_history_reference15.txt")
+    save_log(loss_history, "loss_history_reference15.txt")
     print("Training finished.")
 
 # リストのログを保存するための関数

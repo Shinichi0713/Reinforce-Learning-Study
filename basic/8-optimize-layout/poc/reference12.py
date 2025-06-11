@@ -37,6 +37,9 @@ class ActorNet(BaseNet):
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, num_actions)
         )
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_model = os.path.join(dir_current, "model_actor.pth")
+        self.load_model()
         self.to(DEVICE)
 
     def forward(self, grid, rects_info):
@@ -48,15 +51,31 @@ class ActorNet(BaseNet):
         logits = self.fc(x)
         probs = torch.softmax(logits, dim=-1)  # (B, num_actions)
         return probs
+    
+    def save_model(self):
+        self.cpu()
+        torch.save(self.state_dict(), self.path_model)
+        self.to(DEVICE)
+
+    def load_model(self):
+        if os.path.exists(self.path_model):
+            print(f"Loading model from {self.path_model}")
+            self.load_state_dict(torch.load(self.path_model, map_location=DEVICE))
+        else:
+            print(f"Model file {self.path_model} does not exist. Skipping load.")
 
 class CriticNet(BaseNet):
-    def __init__(self, num_actions, max_rects=5):
+    def __init__(self, num_actions, max_rects=5, name ="critic"):
         super().__init__(num_actions, max_rects)
         self.fc = nn.Sequential(
             nn.Linear(self.fc_in_dim, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, 256 * 2), nn.ReLU(),
             nn.Linear(256 * 2, num_actions)
         )
+        
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_model = os.path.join(dir_current, f"model_{name}.pth")
+        self.load_model()
         self.to(DEVICE)
 
     def forward(self, grid, rects_info):
@@ -67,6 +86,17 @@ class CriticNet(BaseNet):
         x = torch.cat([grid_feat, rect_feat], dim=1)
         q_values = self.fc(x)
         return q_values
+    
+    def save_model(self):
+        self.cpu()
+        torch.save(self.state_dict(), self.path_model)
+        self.to(DEVICE)
+
+    def load_model(self):
+        if os.path.exists(self.path_model):
+            self.load_state_dict(torch.load(self.path_model, map_location=DEVICE))
+        else:
+            print(f"Model file {self.path_model} does not exist. Skipping load.")
 
 # --- 環境・バッファ ---
 def generate_random_rects(min_n=2, max_n=MAX_RECTS, min_size=1, max_size=4):
@@ -123,15 +153,15 @@ class ReplayBuffer:
 
 # --- メイン学習ループ ---
 def train():
-    num_episodes = 1000
+    num_episodes = 10000
     num_actions = GRID_SIZE * GRID_SIZE * MAX_RECTS
-    actor = ActorNet(num_actions)
-    critic1 = CriticNet(num_actions)
-    critic2 = CriticNet(num_actions)
-    target_critic1 = CriticNet(num_actions)
-    target_critic2 = CriticNet(num_actions)
-    target_critic1.load_state_dict(critic1.state_dict())
-    target_critic2.load_state_dict(critic2.state_dict())
+    actor = ActorNet(num_actions, MAX_RECTS).to(DEVICE)
+    critic1 = CriticNet(num_actions, MAX_RECTS, name="critic1").to(DEVICE)
+    critic2 = CriticNet(num_actions, MAX_RECTS, name="critic2").to(DEVICE)
+    target_critic1 = CriticNet(num_actions, MAX_RECTS, name="target_critic1").to(DEVICE)
+    target_critic2 = CriticNet(num_actions, MAX_RECTS, name="target_critic2").to(DEVICE)
+    # target_critic1.load_state_dict(critic1.state_dict())
+    # target_critic2.load_state_dict(critic2.state_dict())
 
     actor_optimizer = optim.AdamW(actor.parameters(), lr=1e-4)
     critic1_optimizer = optim.AdamW(critic1.parameters(), lr=1e-3)
@@ -154,8 +184,10 @@ def train():
             rects_info[i*2:i*2+2] = [w, h]
         rects_input = np.concatenate([rects_info, [num_rects, action_last/100, reward_last]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
+        
         total_reward = 0
         max_steps = random.randint(5, 9)
+        
         for t in range(max_steps):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
             probs = actor(state_tensor, rects_tensor)
@@ -167,7 +199,9 @@ def train():
             buffer.push(state, rects_input, action, reward, next_state, rects_input, done)
             state = next_state
             total_reward += reward
-
+            count_rects = ((rects_info != 0).sum().item()) // 2
+            if count_rects == 0:
+                break
             # --- 学習 ---
             if len(buffer) >= BATCH_SIZE:
                 transitions = buffer.sample(BATCH_SIZE)
@@ -222,6 +256,12 @@ def train():
 
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f}")
+        if episode % 100 == 0:
+            actor.save_model()
+            critic1.save_model()
+            critic2.save_model()
+            target_critic1.save_model()
+            target_critic2.save_model()
     print("Training finished.")
 
 if __name__ == "__main__":
