@@ -140,7 +140,7 @@ class ReplayBuffer:
 
 
 def train():
-    num_episodes = 80000
+    num_episodes = 20000
     size_grid = GRID_SIZE * GRID_SIZE
     q_net = PolicyNet(size_grid, MAX_RECTS)
     q_net.train()
@@ -234,6 +234,9 @@ def train():
             q_net.save_state_dict()
             print(f"episode {episode} total reward: {total_reward:.2f} epsilon: {EPSILON:.2f}")
     print("Training finished.")
+    save_log(reward_history, 'reward_history_13.txt')
+    save_log(loss_history, 'loss_history_13.txt')
+
 
 # リストのログを保存するための関数
 def save_log(log, filename):
