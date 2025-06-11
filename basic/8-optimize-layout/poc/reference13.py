@@ -155,7 +155,8 @@ def train():
     GAMMA = 0.9         # 割引率: デフォルト 0.99
     EPSILON = 0.95
     TARGET_UPDATE = 10
-
+    reward_history = []
+    loss_history = []
     for episode in range(num_episodes):
         rects = generate_random_rects()
         num_rects = len(rects)
@@ -165,8 +166,8 @@ def train():
             rects_info[i*2:i*2+2] = [w, h]
         rects_input = np.concatenate([rects_info, [num_rects, 0.0, 0.0]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
-        total_reward = 0
-        # max_steps = random.randint(5, 9)
+        total_reward = 0.0
+        total_loss = 0.0
         for i in range(num_rects + 3):
             state_tensor = torch.tensor(state).unsqueeze(0)  # (1, 1, H, W)
             logits_box, logits_place = q_net(state_tensor, rects_tensor)
@@ -211,13 +212,16 @@ def train():
                 loss_box = nn.MSELoss()(q_pred_box, expected_box)
                 loss_place = nn.MSELoss()(q_pred_place, expected_place)
                 loss = loss_box + loss_place
+                
                 # print(f"episode {episode}, step {t}, loss: {loss.item():.4f}, reward: {reward:.2f}")
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
                 scheduler.step()  # 学習率の更新
-
+                total_loss += loss.item()
+                loss_history.append(loss.item())
+                reward_history.append(total_reward)
                 # Soft targetネットワークの更新
                 update_soft_target(target_net, q_net, tau=0.1)
 
@@ -231,6 +235,14 @@ def train():
             print(f"episode {episode} total reward: {total_reward:.2f} epsilon: {EPSILON:.2f}")
     print("Training finished.")
 
+# リストのログを保存するための関数
+def save_log(log, filename):
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    path_log = os.path.join(dir_current, filename)
+    with open(path_log, 'w') as f:
+        for item in log:
+            f.write(f"{item}\n")
+    print(f"Log saved to {path_log}")
 
 def eval():
     rects = generate_random_rects()
