@@ -28,6 +28,10 @@ class ActorNet(nn.Module):
         )
         self.box_head = nn.Linear(512, max_rects)
         self.place_head = nn.Linear(512, size_grid)
+        self.place_head = nn.Sequential(
+            nn.Linear(32 * GRID_SIZE * GRID_SIZE + 2, 512), nn.ReLU(),
+            nn.Linear(512, size_grid)
+        )
 
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_model = os.path.join(dir_current, "model_actor.pth")
@@ -35,14 +39,37 @@ class ActorNet(nn.Module):
     def forward(self, grid, rects_info):
         grid = grid.to(DEVICE)
         rects_info = rects_info.to(DEVICE)
-        grid_feat = self.conv(grid)
-        rect_feat = self.rect_encoder(rects_info)
+        batch_size = grid.shape[0]
+
+        # grid特徴量
+        grid_feat = self.conv(grid)  # [B, 32*GRID_SIZE*GRID_SIZE]
+
+        # rects特徴量
+        rect_feat = self.rect_encoder(rects_info)  # [B, 64]
+
+        # grid+rectsでボックス選択
         x = torch.cat([grid_feat, rect_feat], dim=1)
-        x = self.fc(x)
-        box_logits = self.box_head(x)
-        place_logits = self.place_head(x)
+        x = self.fc(x)  # [B, 512]
+        box_logits = self.box_head(x)  # [B, max_rects]
         box_probs = torch.softmax(box_logits, dim=1)
+        index_box = torch.argmax(box_logits, dim=1)  # [B]
+
+        # バッチごとに該当ボックスサイズを抽出
+        # rects_info: [B, max_rects*2 + 3] → boxごとに(x, y)が並ぶと仮定
+        # 例: [x0, y0, x1, y1, ...] なので、index_box*2, index_box*2+1でx, y
+        box_size = []
+        for b in range(batch_size):
+            idx = index_box[b]
+            x_val = rects_info[b, idx*2]
+            y_val = rects_info[b, idx*2+1]
+            box_size.append(torch.stack([x_val, y_val]))
+        box_size = torch.stack(box_size, dim=0)  # [B, 2]
+
+        # grid特徴量 + box_sizeで配置位置推定
+        place_input = torch.cat([grid_feat, box_size], dim=1)
+        place_logits = self.place_head(place_input)
         place_probs = torch.softmax(place_logits, dim=1)
+
         return box_probs, place_probs
 
     def save_model(self):
@@ -172,7 +199,8 @@ def train():
     BATCH_SIZE = 32
     GAMMA = 0.99
     ALPHA = 0.2 # エントロピー正則化係数
-
+    reward_history = []
+    loss_history = []
     for episode in range(num_episodes):
         rects = generate_random_rects()
         num_rects = len(rects)
@@ -182,7 +210,8 @@ def train():
             rects_info[i*2:i*2+2] = [w, h]
         rects_input = np.concatenate([rects_info, [num_rects, 0.0, 0.0]]).astype(np.float32)
         rects_tensor = torch.tensor(rects_input).unsqueeze(0)
-        total_reward = 0
+        total_reward = 0.0
+        total_loss = 0.0
         for t in range(num_rects + 3):
             state_tensor = torch.tensor(state).unsqueeze(0)
             box_probs, place_probs = actor(state_tensor, rects_tensor)
@@ -252,6 +281,9 @@ def train():
                 actor_optim.zero_grad()
                 loss_actor.backward()
                 actor_optim.step()
+                total_loss += loss_actor.item()
+                loss_history.append(total_loss)
+                reward_history.append(total_reward)
 
                 # --- ターゲットネットワークの更新 ---
                 for target_param, param in zip(target_critic1.parameters(), critic1.parameters()):
@@ -267,7 +299,19 @@ def train():
         if episode % 10 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f}")
 
+    save_log(reward_history, "reward_history_reference14.txt")
+    save_log(loss_history, "loss_history_reference14.txt")
     print("Training finished.")
+
+# リストのログを保存するための関数
+def save_log(log, filename):
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    path_log = os.path.join(dir_current, filename)
+    with open(path_log, 'w') as f:
+        for item in log:
+            f.write(f"{item}\n")
+    print(f"Log saved to {path_log}")
+
 
 def eval():
     # 省略：train()と同様にActorNetで推論
