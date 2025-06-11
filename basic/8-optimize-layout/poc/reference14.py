@@ -52,6 +52,7 @@ class ActorNet(nn.Module):
 
     def load_model(self):
         if os.path.exists(self.path_model):
+            print(f"Loading model from {self.path_model}")
             self.load_state_dict(torch.load(self.path_model, map_location=DEVICE))
         else:
             print(f"Model file {self.path_model} does not exist. Skipping load.")
@@ -270,7 +271,37 @@ def train():
 
 def eval():
     # 省略：train()と同様にActorNetで推論
-    pass
+    size_grid = GRID_SIZE * GRID_SIZE
+    actor = ActorNet(size_grid, MAX_RECTS).to(DEVICE)
+    actor.load_model()
+    
+    rects = generate_random_rects()
+    num_rects = len(rects)
+    state = np.zeros((1, GRID_SIZE, GRID_SIZE), dtype=np.float32)
+    rects_info = np.zeros((MAX_RECTS * 2,), dtype=np.float32)
+    for i, (w, h) in enumerate(rects):
+        rects_info[i*2:i*2+2] = [w, h]
+    rects_input = np.concatenate([rects_info, [num_rects, 0.0, 0.0]]).astype(np.float32)
+    rects_tensor = torch.tensor(rects_input).unsqueeze(0)
+    total_reward = 0
+    for t in range(num_rects + 3):
+        state_tensor = torch.tensor(state).unsqueeze(0)
+        box_probs, place_probs = actor(state_tensor, rects_tensor)
+        index_box, index_place = select_action(box_probs, place_probs)
+        next_state, reward, success = apply_action(state, rects_info, index_box, index_place)
+        print(f"Step {t+1}: index_box={index_box}, index_place={index_place}, rects_info={rects_info}")
+        count_rects = ((rects_info != 0).sum().item()) // 2
+        rects_input_next = np.concatenate([rects_info.copy(), [count_rects, index_box, 0.0]]).astype(np.float32)
+        next_rects_tensor = torch.tensor(rects_input_next).unsqueeze(0)
+        done = not success or count_rects == 0
+        state = next_state
+        rects_tensor = next_rects_tensor
+
+    import matplotlib.pyplot as plt
+    plt.imshow(state[0])
+    plt.title('Final arrangement')
+    plt.show()
 
 if __name__ == "__main__":
     train()
+    eval()
