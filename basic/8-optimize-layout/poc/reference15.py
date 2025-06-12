@@ -231,7 +231,7 @@ def train():
             state = next_state
             rects_tensor = next_rects_tensor
             total_reward += reward
-            if count_rects == 0:
+            if done == 0:
                 break
 
             # 学習
