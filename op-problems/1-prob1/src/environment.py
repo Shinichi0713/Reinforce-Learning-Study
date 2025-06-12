@@ -1,7 +1,7 @@
 import numpy as np
 
 class TSPEnv:
-    def __init__(self, num_cities=10, seed=None):
+    def __init__(self, num_cities=10, seed=14):
         self.num_cities = num_cities
         self.seed = seed
         self.rng = np.random.RandomState(seed)
