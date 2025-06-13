@@ -22,6 +22,7 @@ class PointerNet(nn.Module):
         for _ in range(seq_len):
             dec_h, dec_c = self.decoder(dec_input, (dec_h, dec_c))
             scores = torch.bmm(enc_out, dec_h.unsqueeze(2)).squeeze(2)
+            # maskより選択されないようにする
             scores = scores.masked_fill(mask.bool(), float('-inf'))
             probs = torch.softmax(scores, dim=1)
             idx = probs.multinomial(1).squeeze(1)
