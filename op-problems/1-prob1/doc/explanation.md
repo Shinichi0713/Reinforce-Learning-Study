@@ -32,3 +32,67 @@
 
 
 参考サイト：https://github.com/ast0414/pointer-networks-pytorch/blob/master/model.py
+
+---
+# attentionクラス
+
+この `Attention` クラスは、**シーケンス・ツー・シーケンス（Seq2Seq）モデルなどで使われる「アドオン型アテンション機構」の実装**です。  
+主に、**デコーダの状態とエンコーダの出力から「どの入力単語に注目すべきか（アテンションスコア）」を計算**します。
+
+## 各部分の意味と流れ
+
+### 1. 初期化部分
+```python
+self.W1 = nn.Linear(hidden_size, hidden_size, bias=False)
+self.W2 = nn.Linear(hidden_size, hidden_size, bias=False)
+self.vt = nn.Linear(hidden_size, 1, bias=False)
+```
+- **W1, W2, vt**は、アテンション計算に使う重み行列（全てバイアスなし）。
+- これは「Additive Attention（Bahdanau Attention）」の一般的な実装方法です。
+
+
+### 2. forwardメソッド
+
+#### (1) エンコーダ出力の変換
+```python
+encoder_transform = self.W1(encoder_outputs)
+```
+- エンコーダの各時刻の出力（系列全体）を線形変換。
+
+#### (2) デコーダ状態の変換
+```python
+decoder_transform = self.W2(decoder_state).unsqueeze(1)
+```
+- デコーダの現在の状態（通常は1つのベクトル）を線形変換し、系列次元にbroadcastできるようunsqueeze。
+
+#### (3) アテンションスコア（未正規化）の計算
+```python
+u_i = self.vt(torch.tanh(encoder_transform + decoder_transform)).squeeze(-1)
+```
+- エンコーダ出力とデコーダ状態を足し合わせてtanh、さらに線形変換してスカラー値に。
+- これが「各入力単語に対するアテンションの生スコア（未正規化）」。
+
+#### (4) マスク付きlog-softmax
+```python
+log_score = masked_log_softmax(u_i, mask, dim=-1)
+```
+- パディング部分を除外するためのマスク付きlog-softmax（対数ソフトマックス）を適用。
+- これにより**パディング部分はスコア計算に含まれない**。
+
+## 結果
+
+- **log_score**は、各バッチ・各入力単語ごとに「どれだけ注目するか（log確率）」を表すテンソルです。
+- これを使って、エンコーダ出力の加重平均（コンテキストベクトル）を計算したりします。
+
+
+## まとめ
+
+- **このクラスは「Additive（Bahdanau）Attention」のスコア計算部分を実装しています**
+- デコーダ状態とエンコーダ出力から、各入力単語へのアテンションlogスコアを計算します
+- マスク付きでパディング部分を除外し、数値的安定性のためlog-softmaxを使っています
+
+
+もしこの後、「アテンション重みからコンテキストベクトルを計算する部分」や「masked_log_softmaxの実装」など、さらに詳しく知りたい場合はご質問ください。
+---
+
+
