@@ -40,7 +40,7 @@ def masked_max(vector: torch.Tensor,
     A ``torch.Tensor`` of including the maximum values.
     """
     one_minus_mask = (1.0 - mask).byte()
-    replaced_vector = vector.masked_fill(one_minus_mask, min_val)
+    replaced_vector = vector.masked_fill(one_minus_mask.to(torch.bool), min_val)
     max_value, max_index = replaced_vector.max(dim=dim, keepdim=keepdim)
     return max_value, max_index
 
@@ -64,6 +64,7 @@ class Attention(nn.Module):
         self.w1 = nn.Linear(hidden_dim, hidden_dim, bias=False)
         self.w2 = nn.Linear(hidden_dim, hidden_dim, bias=False)
         self.vt = nn.Linear(hidden_dim, 1, bias=False)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def forward(self, decorder_state, enc_out, mask):
         # エンコーダ出力の変換
@@ -73,19 +74,24 @@ class Attention(nn.Module):
         # アテンションスコアの計算
         u_i = self.vt(torch.tanh(encoder_transformer + decoder_transformer)).squeeze(-1)
         # log-softmaxはPyTorchや多くのライブラリで数値的に安定した方法で実装されています
-        log_score = masked_log_softmax(u_i, mask, dim=-1)
+        log_score = masked_log_softmax(u_i, mask.to(self.device), dim=-1)
         return log_score
 
 class PointerNet(nn.Module):
     def __init__(self, input_dim, embedding_dim, hidden_dim):
         super(PointerNet, self).__init__()
         self.hidden_size = hidden_dim
+        self.num_layers = 1
+        self.num_directions = 2  # 双方向RNN
         self.embedding = nn.Linear(input_dim, embedding_dim, bias=False)
         self.encoder = Encoder(embedding_dim, hidden_dim, num_layers=1)
         self.decoding_rnn = nn.LSTMCell(input_size=hidden_dim, hidden_size=hidden_dim)
         self.attention = Attention(hidden_dim)
 
         self.__init_nn__()
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
 
     def __init_nn__(self):
         for m in self.modules():
@@ -94,6 +100,9 @@ class PointerNet(nn.Module):
                     torch.nn.init.zeros_(m.bias)
 
     def forward(self, input_seq, input_lengths):
+        input_seq = input_seq.to(self.device)
+        # input_lengths = input_lengths.to(self.device)
+
         # 入力シーケンスサイズ
         batch_size, seq_len, _ = input_seq.size()
 
@@ -130,7 +139,7 @@ class PointerNet(nn.Module):
             # スコアを保存
             pointer_log_scores.append(log_pointer_score)
 
-            _, masked_argmax = masked_max(log_pointer_score, sub_mask, dim=1, keepdim=True)
+            _, masked_argmax = masked_max(log_pointer_score, sub_mask.to(self.device), dim=1, keepdim=True)
             # 最大のポインタを取得
             pointer_argmaxs.append(masked_argmax)
             index_tensor = masked_argmax.unsqueeze(-1).expand(batch_size, 1, self.hidden_size)
@@ -144,3 +153,5 @@ class PointerNet(nn.Module):
         pointer_argmaxs = torch.stack(pointer_argmaxs, dim=1)
 
         return pointer_log_scores, pointer_argmaxs, mask_tensor
+
+
