@@ -30,7 +30,7 @@ class AverageMeter(object):
 def masked_accuracy(output, target, mask):
     """Computes a batch accuracy with a mask (for padded sequences) """
     with torch.no_grad():
-        masked_output = torch.masked_select(output, mask)
+        masked_output = torch.masked_select(output.squeeze(-1), mask)
         masked_target = torch.masked_select(target, mask)
         accuracy = masked_output.eq(masked_target).float().mean()
 
@@ -41,9 +41,9 @@ def train():
     # env = TSPEnvironment(num_cities=10, seed=42)
 
     # PointerNetの初期化
-    train_set = IntegerSortDataset(num_samples=3000)
+    train_set = IntegerSortDataset(num_samples=30000)
     train_loader = DataLoader(dataset=train_set, batch_size=16, shuffle=True, num_workers=1, collate_fn=sparse_seq_collate_fn)
-    test_set = IntegerSortDataset(num_samples=100)
+    test_set = IntegerSortDataset(num_samples=1000)
     test_loader = DataLoader(dataset=test_set, batch_size=16, shuffle=False, num_workers=1, collate_fn=sparse_seq_collate_fn)
 
     model = PointerNet(input_dim=100, embedding_dim=64, hidden_dim=64)
@@ -86,8 +86,14 @@ def train():
             test_loss.update(loss.item(), seq.size(0))
 
             mask = mask[:, 0, :]
-            test_accuracy.update(masked_accuracy(argmax_pointer, target, mask).item(), mask.int().sum().item())
+            test_accuracy.update(masked_accuracy(argmax_pointer.to(model.device), target.to(model.device), mask.to(model.device)).item(), mask.int().sum().item())
         print('Epoch {}: Test\tLoss: {:.6f}\tAccuracy: {:.6f}'.format(epoch, test_loss.avg, test_accuracy.avg))
+
+        model.save_to_state_dict()
+        train_loss.reset()
+        train_accuracy.reset()
+        test_loss.reset()
+        test_accuracy.reset()
 
     print("Training completed.")
 
