@@ -1,6 +1,7 @@
 
 import torch
 import torch.nn as nn
+import os
 
 # Adopted from allennlp (https://github.com/allenai/allennlp/blob/master/allennlp/nn/util.py)
 def masked_log_softmax(vector: torch.Tensor, mask: torch.Tensor, dim: int = -1) -> torch.Tensor:
@@ -93,6 +94,9 @@ class PointerNet(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_nn = os.path.join(dir_current, "nn_pointer.pt")
+
     def __init_nn__(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
@@ -154,4 +158,7 @@ class PointerNet(nn.Module):
 
         return pointer_log_scores, pointer_argmaxs, mask_tensor
 
-
+    def save_to_state_dict(self):
+        self.cpu()
+        torch.save(self.state_dict(), self.path_nn)
+        self.to(self.device)
