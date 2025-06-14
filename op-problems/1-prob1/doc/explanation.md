@@ -95,4 +95,68 @@ log_score = masked_log_softmax(u_i, mask, dim=-1)
 もしこの後、「アテンション重みからコンテキストベクトルを計算する部分」や「masked_log_softmaxの実装」など、さらに詳しく知りたい場合はご質問ください。
 ---
 
+この `Encoder` クラスは、**RNN（ここではLSTM）を使ったエンコーダ**の典型的な実装例です。  
+主に、**可変長の系列データ（例：単語列）をまとめてエンコードする役割**を持っています。
+
+---
+
+## 各部分の意味・流れ
+
+### 1. 初期化部分
+```python
+def __init__(self, embedding_dim, hidden_size, num_layers=1, batch_first=True, bidirectional=True):
+    ...
+    self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers,
+                       batch_first=batch_first, bidirectional=bidirectional)
+```
+- **LSTM層（RNN）** を定義しています。
+  - 入力サイズは `embedding_dim`（埋め込みベクトルの次元）
+  - 隠れ状態サイズは `hidden_size`
+  - 層数やバッチ次元の扱い、双方向（bidirectional）かどうかも指定可能
+
+
+### 2. forwardメソッド
+
+#### (1) パディングされた系列のパック
+```python
+packed = nn.utils.rnn.pack_padded_sequence(embedded_inputs, input_lengths, batch_first=self.batch_first)
+```
+- **可変長系列**を効率的に処理するため、  
+  パディング部分を無視してRNNに入力できるよう「パック」します。
+
+#### (2) LSTMへの入力
+```python
+outputs, hidden = self.rnn(packed)
+```
+- パックされた系列をLSTMに入力して、出力と最終隠れ状態を取得します。
+
+#### (3) パックを元に戻す（アンパック）
+```python
+outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs, batch_first=self.batch_first)
+```
+- LSTMの出力を、**元の系列長＋パディング**の形に戻します。
+
+#### (4) 出力と隠れ状態を返す
+```python
+return outputs, hidden
+```
+- **outputs**: 各時刻ごとの出力（系列全体の特徴量）
+- **hidden**: 最終時刻の隠れ状態（要約ベクトル）
+
+
+## まとめ
+
+- **可変長の系列データ（例：単語列）をLSTMでエンコードするクラス**
+- パディング部分を無視して効率的にRNNを計算するため「pack/unpack」処理を行っている
+- 出力は「各時刻ごとの特徴量（outputs）」と「全体の要約（hidden）」の2つ
+
+
+### どんな時に使う？
+
+- シーケンス・ツー・シーケンス（Seq2Seq）モデルのエンコーダ
+- 機械翻訳、要約、対話、音声認識など「系列→系列」タスクの入力側
+
+---
+
+
 
