@@ -16,6 +16,34 @@ def masked_log_softmax(vector: torch.Tensor, mask: torch.Tensor, dim: int = -1) 
         vector = vector + (mask + 1e-45).log()
     return torch.nn.functional.log_softmax(vector, dim=dim)
 
+def masked_max(vector: torch.Tensor,
+			   mask: torch.Tensor,
+			   dim: int,
+			   keepdim: bool = False,
+			   min_val: float = -1e7):
+    """
+    To calculate max along certain dimensions on masked values
+    Parameters
+    ----------
+    vector : ``torch.Tensor``
+        The vector to calculate max, assume unmasked parts are already zeros
+    mask : ``torch.Tensor``
+        The mask of the vector. It must be broadcastable with vector.
+    dim : ``int``
+        The dimension to calculate max
+    keepdim : ``bool``
+        Whether to keep dimension
+    min_val : ``float``
+        The minimal value for paddings
+    Returns
+    -------
+    A ``torch.Tensor`` of including the maximum values.
+    """
+    one_minus_mask = (1.0 - mask).byte()
+    replaced_vector = vector.masked_fill(one_minus_mask, min_val)
+    max_value, max_index = replaced_vector.max(dim=dim, keepdim=keepdim)
+    return max_value, max_index
+
 class Encoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers=1):
         super(Encoder, self).__init__()
@@ -54,7 +82,7 @@ class PointerNet(nn.Module):
         self.hidden_size = hidden_dim
         self.embedding = nn.Linear(input_dim, embedding_dim, bias=False)
         self.encoder = Encoder(embedding_dim, hidden_dim, num_layers=1)
-        self.decoder = nn.LSTMCell(input_size=hidden_dim, hidden_size=hidden_dim)
+        self.decoding_rnn = nn.LSTMCell(input_size=hidden_dim, hidden_size=hidden_dim)
         self.attention = Attention(hidden_dim)
 
         self.__init_nn__()
@@ -70,10 +98,49 @@ class PointerNet(nn.Module):
         batch_size, seq_len, _ = input_seq.size()
 
         embedded = self.embedding(input_seq)
-        enc_out, (encoder_h_n, encoder_c_n) = self.encoder(embedded, input_lengths)
+        encoder_outputs, (encoder_h_n, encoder_c_n) = self.encoder(embedded, input_lengths)
 
         # 双方向
-        enc_out = enc_out[:, :, :self.hidden_size] + enc_out[:, :, self.hidden_size:]
+        encoder_outputs = encoder_outputs[:, :, :self.hidden_size] + encoder_outputs[:, :, self.hidden_size:]
         encoder_h_n = encoder_h_n.view(self.num_layers, self.num_directions, batch_size, self.hidden_size)
         encoder_c_n = encoder_c_n.view(self.num_layers, self.num_directions, batch_size, self.hidden_size)
+
+        decoder_input = encoder_outputs.new_zeros(torch.Size((batch_size, self.hidden_size)))
+        decoder_hidden = (encoder_h_n[-1, 0, :, :].squeeze(), encoder_c_n[-1, 0, :, :].squeeze())
+
+        range_tensor = torch.arange(seq_len, device=input_lengths.device, dtype=input_lengths.dtype).expand(batch_size, seq_len, seq_len)
+        each_len_tensor = input_lengths.view(-1, 1, 1).expand(batch_size, seq_len, seq_len)
         
+        row_mask_tensor = (range_tensor < each_len_tensor)
+        col_mask_tensor = row_mask_tensor.transpose(1, 2)
+        mask_tensor = row_mask_tensor * col_mask_tensor
+
+        pointer_log_scores = []
+        pointer_argmaxs = []
+
+        for i in range(seq_len):
+            sub_mask = mask_tensor[:, i, :].float()
+
+            # デコーダの状態を更新
+            h_i, c_i = self.decoding_rnn(decoder_input, decoder_hidden)
+            # 次の状態
+            decoder_hidden = (h_i, c_i)
+            # アテンションスコアを計算
+            log_pointer_score = self.attention(h_i, encoder_outputs, sub_mask)
+            # スコアを保存
+            pointer_log_scores.append(log_pointer_score)
+
+            _, masked_argmax = masked_max(log_pointer_score, sub_mask, dim=1, keepdim=True)
+            # 最大のポインタを取得
+            pointer_argmaxs.append(masked_argmax)
+            index_tensor = masked_argmax.unsqueeze(-1).expand(batch_size, 1, self.hidden_size)
+
+            # 次の入力として最大値のインデックスを使用
+            decoder_input = torch.gather(encoder_outputs, dim=1, index=index_tensor).squeeze(1)
+
+        # スコアを結合
+        pointer_log_scores = torch.stack(pointer_log_scores, dim=1)
+        # ポインタのインデックスを結合
+        pointer_argmaxs = torch.stack(pointer_argmaxs, dim=1)
+
+        return pointer_log_scores, pointer_argmaxs, mask_tensor
