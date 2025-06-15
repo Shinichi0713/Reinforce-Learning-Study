@@ -41,6 +41,12 @@ DDPG can't work well.
 
 <img src="image/luna-landing.gif" alt="sac" width="300px" height="auto">
 
+### robo-walking
+
+this is the behavior of actor-critic.
+
+<img src="image/robo-walking.gif" alt="sac" width="300px" height="auto">
+
 
 ### TSP
 
