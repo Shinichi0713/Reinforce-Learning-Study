@@ -41,6 +41,15 @@ DDPG can't work well.
 
 <img src="image/luna-landing.gif" alt="sac" width="300px" height="auto">
 
+
+### TSP
+
+this is the behavior of PointerNet.
+not good....
+
+<img src="image/TSP.png" alt="sac" width="300px" height="auto">
+
+
 ### arranging boxes
 
 when using ddqn, ai agent can arrange boxes toward restricted space.
