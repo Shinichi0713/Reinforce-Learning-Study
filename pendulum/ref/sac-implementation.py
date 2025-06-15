@@ -8,8 +8,8 @@ import random, os
 # --- パラメータ ---
 ENV_NAME = "Pendulum-v1"
 SEED = 42
-EPISODES = 300
-MAX_STEPS = 300
+EPISODES = 1000
+MAX_STEPS = 1000
 BATCH_SIZE = 256
 MEMORY_SIZE = 1000000
 GAMMA = 0.99
@@ -166,9 +166,12 @@ class SACAgent:
 
     def __load_networks(self):
         dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.actor.load_state_dict(torch.load(f"{dir_current}/actor.pth"))
-        self.critic.load_state_dict(torch.load(f"{dir_current}/critic.pth"))
-        self.critic_target.load_state_dict(torch.load(f"{dir_current}/critic_target.pth"))
+        if os.path.exists(f"{dir_current}/actor.pth"):
+            self.actor.load_state_dict(torch.load(f"{dir_current}/actor.pth"))
+        if os.path.exists(f"{dir_current}/critic.pth"):
+            self.critic.load_state_dict(torch.load(f"{dir_current}/critic.pth"))
+        if os.path.exists(f"{dir_current}/critic_target.pth"):
+            self.critic_target.load_state_dict(torch.load(f"{dir_current}/critic_target.pth"))
         print("Networks loaded successfully.")
 
 # --- メインループ ---
@@ -189,6 +192,7 @@ def train():
         state, _ = env.reset()
         episode_return = 0
         actor_loss_total, critic_loss_total = 0, 0
+        count_learn = 0
         for t in range(MAX_STEPS):
             action = agent.select_action(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
@@ -201,13 +205,14 @@ def train():
                 actor_loss, critic_loss = agent.update(replay_buffer, BATCH_SIZE)
                 actor_loss_total += actor_loss
                 critic_loss_total += critic_loss
+                count_learn += 1
 
             if done:
                 break
 
-        reward_history.append(episode_return)
-        loss_actor_history.append(actor_loss_total)
-        loss_critic_history.append(critic_loss_total)
+        reward_history.append(episode_return / MAX_STEPS)
+        loss_actor_history.append(actor_loss_total / (count_learn + 1e-6))
+        loss_critic_history.append(critic_loss_total / (count_learn + 1e-6))
         if episode % 10 == 0:
             avg_return = np.mean(reward_history[-10:])
             print(f"Episode {episode}: Return {episode_return:.2f}, Avg(10) {avg_return:.2f}")
@@ -248,5 +253,5 @@ def eval():
 
 
 if __name__ == "__main__":
-    # train()
+    train()
     eval()
