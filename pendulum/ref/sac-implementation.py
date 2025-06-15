@@ -155,6 +155,8 @@ class SACAgent:
         # Soft update
         for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
             target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
+        
+        return actor_loss.item(), critic_loss.item()
 
     def save_networks(self):
         dir_current = os.path.dirname(os.path.abspath(__file__))
@@ -179,11 +181,14 @@ def train():
     agent = SACAgent(state_dim, action_dim, max_action)
     replay_buffer = ReplayBuffer(MEMORY_SIZE)
 
-    returns = []
+    reward_history = []
+    loss_critic_history = []
+    loss_actor_history = []
 
     for episode in range(EPISODES):
         state, _ = env.reset()
         episode_return = 0
+        actor_loss_total, critic_loss_total = 0, 0
         for t in range(MAX_STEPS):
             action = agent.select_action(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
@@ -193,19 +198,31 @@ def train():
             episode_return += reward
 
             if len(replay_buffer) > BATCH_SIZE:
-                agent.update(replay_buffer, BATCH_SIZE)
+                actor_loss, critic_loss = agent.update(replay_buffer, BATCH_SIZE)
+                actor_loss_total += actor_loss
+                critic_loss_total += critic_loss
 
             if done:
                 break
 
-        returns.append(episode_return)
+        reward_history.append(episode_return)
+        loss_actor_history.append(actor_loss_total)
+        loss_critic_history.append(critic_loss_total)
         if episode % 10 == 0:
-            avg_return = np.mean(returns[-10:])
+            avg_return = np.mean(reward_history[-10:])
             print(f"Episode {episode}: Return {episode_return:.2f}, Avg(10) {avg_return:.2f}")
     agent.save_networks()
+
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    write_log(os.path.join(dir_current, "reward_history.txt"), str(reward_history))
+    write_log(os.path.join(dir_current, "loss_actor_history.txt"), str(loss_actor_history))
+    write_log(os.path.join(dir_current, "loss_critic_history.txt"), str(loss_critic_history))
     print("Training completed.")
     env.close()
 
+def write_log(file_path, data):
+    with open(file_path, 'a') as f:
+        f.write(data + '\n')
 
 def eval():
     env = gym.make(ENV_NAME, render_mode="human")
