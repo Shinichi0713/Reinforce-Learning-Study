@@ -1,0 +1,6 @@
+Option Name,Option Value
+interval,10000
+num_batches,40000
+gamma,0.99
+batch_size,50
+multi_step_td,True
