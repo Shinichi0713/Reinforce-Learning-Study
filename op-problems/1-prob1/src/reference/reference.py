@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 class PointerNet(nn.Module):
     def __init__(self, input_dim, hidden_dim):
@@ -117,6 +118,47 @@ def evaluate(model, num_batches=100, batch_size=64, seq_len=10):
     print(f"Evaluation: Average tour length over {total_samples} samples: {avg_length:.4f}")
     return avg_length
 
+def evaluate_and_plot(model, num_batches=100, batch_size=64, seq_len=10):
+    model.eval()
+    all_lengths = []
+
+    with torch.no_grad():
+        for _ in range(num_batches):
+            coords = torch.rand(batch_size, seq_len, 2).to(model.device)
+            tour_idx = model(coords)
+            tour_len = compute_tour_length(coords, tour_idx)
+            all_lengths.extend(tour_len.cpu().numpy())
+
+    avg_length = sum(all_lengths) / len(all_lengths)
+    print(f"Evaluation: Average tour length over {len(all_lengths)} samples: {avg_length:.4f}")
+
+    # 可視化: ツアー長のヒストグラム
+    plt.hist(all_lengths, bins=30, color='skyblue', edgecolor='black')
+    plt.xlabel('Tour Length')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of Tour Lengths')
+    plt.show()
+
+    return avg_length, all_lengths
+
+def plot_sample_tour(model, seq_len=10):
+    model.eval()
+    with torch.no_grad():
+        coords = torch.rand(1, seq_len, 2).to(model.device)
+        tour_idx = model(coords)
+        coords_np = coords.squeeze(0).cpu().numpy()
+        tour_idx_np = tour_idx.squeeze(0).cpu().numpy()
+        tour_coords = coords_np[tour_idx_np]
+
+        plt.figure(figsize=(6, 6))
+        plt.scatter(coords_np[:, 0], coords_np[:, 1], c='red', label='Cities')
+        plt.plot(tour_coords[:, 0], tour_coords[:, 1], '-o', label='Tour')
+        # 始点と終点をつなぐ
+        plt.plot([tour_coords[-1, 0], tour_coords[0, 0]], [tour_coords[-1, 1], tour_coords[0, 1]], 'o-', c='blue')
+        plt.title('Sample Tour')
+        plt.legend()
+        plt.show()
+
 
 if __name__ == "__main__":
     train()
@@ -132,4 +174,5 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(path_nn, map_location=model.device))
     model.to(model.device)
 
-    evaluate(model, num_batches=100, batch_size=batch_size, seq_len=seq_len)
+    avg_length, all_lengths = evaluate_and_plot(model, num_batches=100, batch_size=64, seq_len=10)
+    plot_sample_tour(model, seq_len=10)
