@@ -71,7 +71,8 @@ def train():
             tour_idx = model(coords)
             tour_len = compute_tour_length(coords.to(model.device), tour_idx.to(model.device))
             reward = -tour_len  # 距離が短いほど報酬が高い
-
+            baseline = reward.mean()
+            advantage = reward - baseline
             # log_prob計算
             enc_out, (h, c) = model.encoder(coords.to(model.device))
             dec_input = torch.zeros(batch_size, enc_out.size(2)).to(model.device)
@@ -90,9 +91,11 @@ def train():
                 dec_input = enc_out[torch.arange(batch_size), idx, :]
             log_probs = torch.stack(log_probs, dim=1).sum(1)
 
-            loss = -(reward * log_probs).mean()
+            loss = -(advantage * log_probs).mean()
+            # loss = -(reward * log_probs).mean()
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)  # 勾配クリッピング
             optimizer.step()
 
             if epoch % 100 == 0:
@@ -163,8 +166,6 @@ def plot_sample_tour(model, seq_len=10):
 
 if __name__ == "__main__":
     # train()
-    
-
     input_dim = 2
     hidden_dim = 128
     seq_len = 10

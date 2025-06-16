@@ -55,6 +55,9 @@ not good....
 
 <img src="image/TSP.png" alt="sac" width="300px" height="auto">
 
+this is the result with using 3 methods.
+
+<img src="image/TSP-2.png" alt="sac" width="300px" height="auto">
 
 ### arranging boxes
 
