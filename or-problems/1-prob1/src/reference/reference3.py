@@ -7,46 +7,21 @@ import os
 import matplotlib.pyplot as plt
 import random
 from collections import deque
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'  # GPUを使用する場合は適宜設定
 
 
 def make_input(obs):
-    # obs: dict from TSPEnv
-    cities = obs['cities']  # (N, 2)
-    visited = obs['visited'].astype(np.float32).reshape(-1, 1)  # (N, 1)
-    current_city = obs['current_city']
-    current_flag = np.zeros((len(cities), 1), dtype=np.float32)
-    current_flag[current_city, 0] = 1.0
-    # 入力: [都市座標, visited, current]
-    inp = np.concatenate([cities, visited, current_flag], axis=1)  # (N, 4)
-    return inp
-
-def generate_batch(env_class, batch_size, num_cities):
-    batch_inputs = []
-    batch_tours = []
-    batch_lens = []
-    for _ in range(batch_size):
-        env = env_class(num_cities)
-        obs = env.reset()
-        inp_seq = []
-        tour = []
-        done = False
-        while not done:
-            inp = make_input(obs)
-            inp_seq.append(inp)
-            # ランダム方策（模倣学習なら最適行動をここで選ぶ）
-            unvisited = np.where(~obs['visited'])[0]
-            if len(unvisited) == 0:
-                break
-            action = np.random.choice(unvisited)
-            tour.append(action)
-            obs, reward, done, _ = env.step(action)
-        inp_seq = np.stack(inp_seq, axis=0)  # (N, num_cities, 4)
-        batch_inputs.append(inp_seq)
-        batch_tours.append(tour)
-        batch_lens.append(env.total_distance)
-    # パディング・テンソル化は省略（seq_len一定なら不要）
-    return np.array(batch_inputs), np.array(batch_tours), np.array(batch_lens)
+    # obs: dict with 'cities', 'visited', 'current_city'
+    # 入力ベクトルは [x, y, visited_flag, is_current]
+    cities = obs['cities']
+    visited = obs['visited']
+    current = obs['current_city']
+    num_cities = cities.shape[0]
+    input_vec = np.zeros((num_cities, 4), dtype=np.float32)
+    input_vec[:, 0:2] = cities
+    input_vec[:, 2] = visited.astype(np.float32)
+    input_vec[:, 3] = 0
+    input_vec[current, 3] = 1  # 現在地
+    return input_vec
 
 class PointerNet(nn.Module):
     def __init__(self, input_dim, hidden_dim):
@@ -90,27 +65,6 @@ class PointerNet(nn.Module):
     def load_nn(self):
         if os.path.exists(self.path_nn):
             self.load_state_dict(torch.load(self.path_nn, map_location=self.device))
-
-
-def compute_tour_length(coords, tour_idx):
-    batch_size, seq_len, _ = coords.size()
-    tour = torch.gather(coords, 1, tour_idx.unsqueeze(2).expand(-1, -1, 2))
-    tour_shift = torch.roll(tour, shifts=-1, dims=1)
-    length = ((tour - tour_shift) ** 2).sum(2).sqrt().sum(1)
-    return length
-
-class ReplayBuffer:
-    def __init__(self, capacity=10000):
-        self.buffer = deque(maxlen=capacity)
-
-    def push(self, episode):
-        self.buffer.append(episode)
-
-    def sample(self, batch_size):
-        return random.sample(self.buffer, batch_size)
-
-    def __len__(self):
-        return len(self.buffer)
 
 class TSPEnv:
     def __init__(self, num_cities=10, seed=14):
@@ -182,85 +136,21 @@ class TSPEnv:
         plt.title(f'Total distance: {self.total_distance:.2f}')
         plt.show()
 
-
 def train_with_env():
     input_dim = 4
     hidden_dim = 128
     seq_len = 10
     batch_size = 32
     num_epochs = 10000
-    buffer_capacity = 10000
     model = PointerNet(input_dim, hidden_dim)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     model.train()
 
-    replay_buffer = ReplayBuffer(capacity=buffer_capacity)
-
-    # まずバッファを満たす
-    print("Filling replay buffer...")
-    while len(replay_buffer) < batch_size * 10:
-        env = TSPEnv(num_cities=seq_len)
-        obs = env.reset()
-        mask = np.zeros(seq_len, dtype=bool)
-        tour = []
-        log_probs = []
-        done = False
-
-        for t in range(seq_len):
-            inp = make_input(obs)
-            inp_tensor = torch.tensor(inp[None, :, :], dtype=torch.float32, device=model.device)
-            with torch.no_grad():
-                enc_out, (h, c) = model.encoder(inp_tensor)
-            dec_input = torch.zeros(1, enc_out.size(2), device=model.device)
-            dec_h, dec_c = h[-1], c[-1]
-            mask_torch = torch.tensor(mask[None, :], dtype=torch.bool, device=model.device)
-            for _t in range(t):
-                idx = tour[_t]
-                dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
-                dec_input = enc_out[:, idx, :]
-            dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
-            scores = torch.bmm(enc_out, dec_h.unsqueeze(2)).squeeze(2)
-            scores = scores.masked_fill(mask_torch, float('-inf'))
-            probs = torch.softmax(scores, dim=1)
-            idx = probs.multinomial(1).item()
-            log_prob = torch.log(probs[0, idx] + 1e-8)
-            log_probs.append(log_prob)
-            tour.append(idx)
-            mask[idx] = True
-            obs, reward, done, _ = env.step(idx)
-            if done:
-                break
-
-        episode = {
-            'log_probs': torch.stack(log_probs),
-            'reward': -env.total_distance  # 報酬は距離のマイナス
-        }
-        replay_buffer.push(episode)
-
-    print("Replay buffer filled.")
-
     for epoch in range(num_epochs):
-        # 経験からサンプリング
-        batch = replay_buffer.sample(batch_size)
         log_probs_all = []
         rewards_all = []
+        tour_lengths = []
 
-        for episode in batch:
-            log_probs_all.append(episode['log_probs'].sum())
-            rewards_all.append(episode['reward'])
-
-        rewards_all = torch.tensor(rewards_all, dtype=torch.float32, device=model.device)
-        log_probs_all = torch.stack(log_probs_all)
-        baseline = rewards_all.mean()
-        advantage = rewards_all - baseline
-        loss = -(advantage * log_probs_all).mean()
-
-        optimizer.zero_grad()
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
-        optimizer.step()
-
-        # 新しい経験も追加
         for _ in range(batch_size):
             env = TSPEnv(num_cities=seq_len)
             obs = env.reset()
@@ -269,18 +159,20 @@ def train_with_env():
             log_probs = []
             done = False
 
-            for t in range(seq_len):
-                inp = make_input(obs)
-                inp_tensor = torch.tensor(inp[None, :, :], dtype=torch.float32, device=model.device)
+            for t in range(seq_len - 1):  # 最後の都市は自動的に決まる
+                inp = make_input(obs)  # (N, 4)
+                inp_tensor = torch.tensor(inp[None, :, :], dtype=torch.float32, device=model.device)  # (1, N, 4)
                 with torch.no_grad():
                     enc_out, (h, c) = model.encoder(inp_tensor)
                 dec_input = torch.zeros(1, enc_out.size(2), device=model.device)
                 dec_h, dec_c = h[-1], c[-1]
                 mask_torch = torch.tensor(mask[None, :], dtype=torch.bool, device=model.device)
+                # すでに選択した都市ぶんデコーダを進める
                 for _t in range(t):
                     idx = tour[_t]
                     dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
                     dec_input = enc_out[:, idx, :]
+                # 次の都市を選ぶ
                 dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
                 scores = torch.bmm(enc_out, dec_h.unsqueeze(2)).squeeze(2)
                 scores = scores.masked_fill(mask_torch, float('-inf'))
@@ -294,15 +186,24 @@ def train_with_env():
                 if done:
                     break
 
-            episode = {
-                'log_probs': torch.stack(log_probs),
-                'reward': -env.total_distance
-            }
-            replay_buffer.push(episode)
+            log_probs_all.append(torch.stack(log_probs).sum())
+            rewards_all.append(-env.total_distance)  # 報酬は距離のマイナス
+            tour_lengths.append(env.total_distance)
+
+        # ベースライン（バッチ平均）を使ったREINFORCE
+        rewards_all = torch.tensor(rewards_all, dtype=torch.float32, device=model.device)
+        log_probs_all = torch.stack(log_probs_all)
+        baseline = rewards_all.mean()
+        advantage = rewards_all - baseline
+        loss = -(advantage * log_probs_all).mean()
+
+        optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
+        optimizer.step()
 
         if epoch % 50 == 0:
-            avg_tour_length = -rewards_all.mean().item()
-            print(f"Epoch {epoch}, Loss {loss.item():.4f}, Avg tour length {avg_tour_length:.4f}")
+            print(f"Epoch {epoch}, Loss {loss.item():.4f}, Avg tour length {np.mean(tour_lengths):.4f}")
 
         if epoch % 200 == 0:
             model.save_nn()
@@ -311,13 +212,9 @@ def train_with_env():
     model.save_nn()
 
 
-
-def eval():
-    env = TSPEnv(num_cities=10)
-    model = PointerNet(input_dim=4, hidden_dim=128)
-    env.reset()
-    env.render()
-
 if __name__ == "__main__":
     train_with_env()
-    # eval()
+    # model = PointerNet(input_dim, hidden_dim)
+    # model.load_nn()  # モデルのロード
+    # evaluate(model)  # 評価関数を呼び出す
+    # evaluate_and_plot(model)  # 評価とプロットを行う
