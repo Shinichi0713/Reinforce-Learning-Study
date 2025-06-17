@@ -45,3 +45,15 @@
 
 これらは全て、**状態・行動・報酬**を明確に設計できるため、強化学習でのアプローチが可能です。
 
+
+indexは異なる
+
+![alt text](image.png)
+
+
+![alt text](image-1.png)
+
+
+中身はこれ
+
+![alt text](image-2.png)
