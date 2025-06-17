@@ -1,27 +1,9 @@
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import random
-from collections import deque
-
-
-def make_input(obs):
-    # obs: dict with 'cities', 'visited', 'current_city'
-    # 入力ベクトルは [x, y, visited_flag, is_current]
-    cities = obs['cities']
-    visited = obs['visited']
-    current = obs['current_city']
-    num_cities = cities.shape[0]
-    input_vec = np.zeros((num_cities, 4), dtype=np.float32)
-    input_vec[:, 0:2] = cities
-    input_vec[:, 2] = visited.astype(np.float32)
-    input_vec[:, 3] = 0
-    input_vec[current, 3] = 1  # 現在地
-    return input_vec
 
 class PointerNet(nn.Module):
     def __init__(self, input_dim, hidden_dim):
@@ -66,62 +48,29 @@ class PointerNet(nn.Module):
         if os.path.exists(self.path_nn):
             self.load_state_dict(torch.load(self.path_nn, map_location=self.device))
 
+
 class TSPEnv:
-    def __init__(self, num_cities=10, seed=14):
+    def __init__(self, batch_size, num_cities=10):
+        self.batch_size = batch_size
         self.num_cities = num_cities
-        self.seed = seed
-        self.rng = np.random.RandomState(seed)
         self.cities = None
         self.visited = None
-        self.current_city = None
-        self.total_distance = None
-        self.step_count = None
 
     def reset(self):
         # 都市座標をランダム生成（[0,1]区間）
-        self.cities = self.rng.rand(self.num_cities, 2)
-        self.visited = np.zeros(self.num_cities, dtype=bool)
-        self.current_city = self.rng.randint(self.num_cities)
-        self.visited[self.current_city] = True
-        self.total_distance = 0.0
-        self.step_count = 0
-        return self._get_obs()
+        self.cities = np.random.rand(self.batch_size, self.num_cities, 2)
+        self.cities = torch.tensor(self.cities, dtype=torch.float32)
+        self.visited = np.zeros((self.batch_size, self.num_cities), dtype=bool)
+        self.current_city = np.random.randint(self.num_cities)
+        self.visited[np.arange(self.batch_size), self.current_city] = True
+        return self.cities
 
-    def _get_obs(self):
-        # 状態: [都市座標, 訪問フラグ, 現在地]
-        return {
-            'cities': self.cities.copy(),  # (num_cities, 2)
-            'visited': self.visited.copy(),  # (num_cities,)
-            'current_city': self.current_city
-        }
-
-    def step(self, action):
-        # action: 次に移動する都市のインデックス
-        if self.visited[action]:
-            # 既に訪問済み都市を選んだ場合は大きなペナルティ
-            reward = -100.0
-            done = True
-            return self._get_obs(), reward, done, {}
-
-        # 距離計算
-        prev_city = self.current_city
-        dist = np.linalg.norm(self.cities[prev_city] - self.cities[action])
-        self.total_distance += dist
-        self.current_city = action
-        self.visited[action] = True
-        self.step_count += 1
-
-        done = self.step_count == self.num_cities - 1
-        reward = -dist  # 距離のマイナスを報酬
-
-        if done:
-            # 最後はスタート地点に戻る
-            start_city = np.where(self.visited)[0][0]
-            dist_return = np.linalg.norm(self.cities[self.current_city] - self.cities[start_city])
-            self.total_distance += dist_return
-            reward -= dist_return
-
-        return self._get_obs(), reward, done, {}
+    def compute_tour_length(self, tour_idx):
+        # batch_size, seq_len, _ = self.cities.size()
+        tour = torch.gather(self.cities.to(tour_idx.device), 1, tour_idx.unsqueeze(2).expand(-1, -1, 2))
+        tour_shift = torch.roll(tour, shifts=-1, dims=1)
+        length = ((tour - tour_shift) ** 2).sum(2).sqrt().sum(1)
+        return length
 
     def render(self):
         import matplotlib.pyplot as plt
@@ -136,144 +85,126 @@ class TSPEnv:
         plt.title(f'Total distance: {self.total_distance:.2f}')
         plt.show()
 
-def train_with_env():
-    input_dim = 4
+
+def train():
+    input_dim = 2
     hidden_dim = 128
     seq_len = 10
-    batch_size = 32
-    num_epochs = 10000
+    batch_size = 64
     model = PointerNet(input_dim, hidden_dim)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    model.train()
 
-    for epoch in range(num_epochs):
-        log_probs_all = []
-        rewards_all = []
-        tour_lengths = []
-
-        for _ in range(batch_size):
-            env = TSPEnv(num_cities=seq_len)
-            obs = env.reset()
-            mask = np.zeros(seq_len, dtype=bool)
-            tour = []
+    for episode in range(10):
+        for epoch in range(1000):
+            env = TSPEnv(batch_size, seq_len)
+            coords = env.reset()
+            tour_idx = model(coords)
+            tour_len = env.compute_tour_length(tour_idx.to(model.device))
+            reward = -tour_len  # 距離が短いほど報酬が高い
+            baseline = reward.mean()
+            advantage = reward - baseline
+            # log_prob計算
+            enc_out, (h, c) = model.encoder(coords.to(model.device))
+            dec_input = torch.zeros(batch_size, enc_out.size(2)).to(model.device)
+            dec_h, dec_c = h[-1], c[-1]
+            mask = torch.zeros(batch_size, seq_len).to(model.device)
             log_probs = []
-            done = False
-
-            for t in range(seq_len - 1):  # 最後の都市は自動的に決まる
-                inp = make_input(obs)  # (N, 4)
-                inp_tensor = torch.tensor(inp[None, :, :], dtype=torch.float32, device=model.device)  # (1, N, 4)
-                with torch.no_grad():
-                    enc_out, (h, c) = model.encoder(inp_tensor)
-                dec_input = torch.zeros(1, enc_out.size(2), device=model.device)
-                dec_h, dec_c = h[-1], c[-1]
-                mask_torch = torch.tensor(mask[None, :], dtype=torch.bool, device=model.device)
-                # すでに選択した都市ぶんデコーダを進める
-                for _t in range(t):
-                    idx = tour[_t]
-                    dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
-                    dec_input = enc_out[:, idx, :]
-                # 次の都市を選ぶ
+            for t in range(seq_len):
                 dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
                 scores = torch.bmm(enc_out, dec_h.unsqueeze(2)).squeeze(2)
-                scores = scores.masked_fill(mask_torch, float('-inf'))
+                scores = scores.masked_fill(mask.bool(), float('-inf'))
                 probs = torch.softmax(scores, dim=1)
-                idx = probs.multinomial(1).item()
-                log_prob = torch.log(probs[0, idx] + 1e-8)
+                idx = tour_idx[:, t]
+                log_prob = torch.log(probs[torch.arange(batch_size), idx] + 1e-8)
                 log_probs.append(log_prob)
-                tour.append(idx)
-                mask[idx] = True
-                obs, reward, done, _ = env.step(idx)
-                if done:
-                    break
+                mask[torch.arange(batch_size), idx] = 1
+                dec_input = enc_out[torch.arange(batch_size), idx, :]
+            log_probs = torch.stack(log_probs, dim=1).sum(1)
 
-            log_probs_all.append(torch.stack(log_probs).sum())
-            rewards_all.append(-env.total_distance)  # 報酬は距離のマイナス
-            tour_lengths.append(env.total_distance)
+            loss = -(advantage * log_probs).mean()
+            # loss = -(reward * log_probs).mean()
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)  # 勾配クリッピング
+            optimizer.step()
 
-        # ベースライン（バッチ平均）を使ったREINFORCE
-        rewards_all = torch.tensor(rewards_all, dtype=torch.float32, device=model.device)
-        log_probs_all = torch.stack(log_probs_all)
-        baseline = rewards_all.mean()
-        advantage = rewards_all - baseline
-        loss = -(advantage * log_probs_all).mean()
-
-        optimizer.zero_grad()
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
-        optimizer.step()
-
-        if epoch % 50 == 0:
-            print(f"Epoch {epoch}, Loss {loss.item():.4f}, Avg tour length {np.mean(tour_lengths):.4f}")
-
-        if epoch % 200 == 0:
-            model.save_nn()
-
+            if epoch % 100 == 0:
+                print(f"Epoch {epoch}, Loss {loss.item():.4f}, Avg tour length {tour_len.mean().item():.4f}")
+        # モデルの保存
+        model.save_nn()
     print("Training complete.")
-    model.save_nn()
 
 
-def predict_tour_with_env(model, num_cities=10, seed=None, render=True):
-    """
-    学習済みモデルを使ってTSPEnvで順に都市を選択し、ツアーを作る
-    """
+def evaluate(model, num_batches=100, batch_size=64, seq_len=10):
     model.eval()
-    env = TSPEnv(num_cities=num_cities, seed=seed if seed is not None else np.random.randint(10000))
-    obs = env.reset()
-    mask = np.zeros(num_cities, dtype=bool)
-    tour = []
-    total_log_prob = 0.0
+    total_length = 0
+    total_samples = 0
 
-    for t in range(num_cities - 1):  # 最後の都市は自動的に決まる
-        inp = make_input(obs)  # (N, 4)
-        inp_tensor = torch.tensor(inp[None, :, :], dtype=torch.float32, device=model.device)  # (1, N, 4)
-        with torch.no_grad():
-            enc_out, (h, c) = model.encoder(inp_tensor)
-        dec_input = torch.zeros(1, enc_out.size(2), device=model.device)
-        dec_h, dec_c = h[-1], c[-1]
-        mask_torch = torch.tensor(mask[None, :], dtype=torch.bool, device=model.device)
-        # すでに選択した都市ぶんデコーダを進める
-        for _t in range(t):
-            idx = tour[_t]
-            dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
-            dec_input = enc_out[:, idx, :]
-        # 次の都市を選ぶ
-        dec_h, dec_c = model.decoder(dec_input, (dec_h, dec_c))
-        scores = torch.bmm(enc_out, dec_h.unsqueeze(2)).squeeze(2)
-        scores = scores.masked_fill(mask_torch, float('-inf'))
-        probs = torch.softmax(scores, dim=1)
-        idx = torch.argmax(probs, dim=1).item()  # greedy（確率最大）で選択
-        # idx = probs.multinomial(1).item()  # サンプリングしたい場合はこちら
-        log_prob = torch.log(probs[0, idx] + 1e-8)
-        total_log_prob += log_prob.item()
-        tour.append(idx)
-        mask[idx] = True
-        obs, reward, done, _ = env.step(idx)
-        if done:
-            break
+    with torch.no_grad():
+        for _ in range(num_batches):
+            coords = torch.rand(batch_size, seq_len, 2).to(model.device)
+            tour_idx = model(coords)
+            tour_len = compute_tour_length(coords, tour_idx)
+            total_length += tour_len.sum().item()
+            total_samples += batch_size
 
-    # 最終結果
-    tour_order = [env.current_city for i in range(num_cities) if mask[i]]
-    tour_order = [np.where(env.visited)[0][0]] + tour  # スタート都市＋巡回順
+    avg_length = total_length / total_samples
+    print(f"Evaluation: Average tour length over {total_samples} samples: {avg_length:.4f}")
+    return avg_length
 
-    print(f"Predicted Tour: {tour}")
-    print(f"Total Distance: {env.total_distance:.4f}")
+def evaluate_and_plot(model, num_batches=100, batch_size=64, seq_len=10):
+    model.eval()
+    all_lengths = []
 
-    if render:
-        env.render()
+    with torch.no_grad():
+        for _ in range(num_batches):
+            coords = torch.rand(batch_size, seq_len, 2).to(model.device)
+            tour_idx = model(coords)
+            tour_len = compute_tour_length(coords, tour_idx)
+            all_lengths.extend(tour_len.cpu().numpy())
 
-    return tour, env.total_distance
+    avg_length = sum(all_lengths) / len(all_lengths)
+    print(f"Evaluation: Average tour length over {len(all_lengths)} samples: {avg_length:.4f}")
+
+    # 可視化: ツアー長のヒストグラム
+    plt.hist(all_lengths, bins=30, color='skyblue', edgecolor='black')
+    plt.xlabel('Tour Length')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of Tour Lengths')
+    plt.show()
+
+    return avg_length, all_lengths
+
+def plot_sample_tour(model, seq_len=10):
+    model.eval()
+    with torch.no_grad():
+        coords = torch.rand(1, seq_len, 2).to(model.device)
+        tour_idx = model(coords)
+        coords_np = coords.squeeze(0).cpu().numpy()
+        tour_idx_np = tour_idx.squeeze(0).cpu().numpy()
+        tour_coords = coords_np[tour_idx_np]
+
+        plt.figure(figsize=(6, 6))
+        plt.scatter(coords_np[:, 0], coords_np[:, 1], c='red', label='Cities')
+        plt.plot(tour_coords[:, 0], tour_coords[:, 1], '-o', label='Tour')
+        # 始点と終点をつなぐ
+        plt.plot([tour_coords[-1, 0], tour_coords[0, 0]], [tour_coords[-1, 1], tour_coords[0, 1]], 'o-', c='blue')
+        plt.title('Sample Tour')
+        plt.legend()
+        plt.show()
 
 
 if __name__ == "__main__":
-    train_with_env()
-    # model = PointerNet(input_dim, hidden_dim)
-    # model.load_nn()  # モデルのロード
-    # evaluate(model)  # 評価関数を呼び出す
-    # evaluate_and_plot(model)  # 評価とプロットを行う
-    input_dim = 4
+    train()
+    input_dim = 2
     hidden_dim = 128
-    model = PointerNet(input_dim, hidden_dim)
-    model.load_nn()  # 学習済みパラメータをロード
+    seq_len = 10
+    batch_size = 64
 
-    # 予測を1回実行
-    predict_tour_with_env(model, num_cities=10, render=True)
+    model = PointerNet(input_dim, hidden_dim)
+    path_nn = os.path.join(os.path.dirname(__file__), 'path_nn.pt')
+    model.load_state_dict(torch.load(path_nn, map_location=model.device))
+    model.to(model.device)
+
+    avg_length, all_lengths = evaluate_and_plot(model, num_batches=100, batch_size=64, seq_len=10)
+    plot_sample_tour(model, seq_len=10)
