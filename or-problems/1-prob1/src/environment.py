@@ -1,10 +1,8 @@
 import numpy as np
 
 class TSPEnv:
-    def __init__(self, num_cities=10, seed=14):
+    def __init__(self, num_cities=10):
         self.num_cities = num_cities
-        self.seed = seed
-        self.rng = np.random.RandomState(seed)
         self.cities = None
         self.visited = None
         self.current_city = None
@@ -13,9 +11,9 @@ class TSPEnv:
 
     def reset(self):
         # 都市座標をランダム生成（[0,1]区間）
-        self.cities = self.rng.rand(self.num_cities, 2)
+        self.cities = np.random.rand(self.num_cities, 2)
         self.visited = np.zeros(self.num_cities, dtype=bool)
-        self.current_city = self.rng.randint(self.num_cities)
+        self.current_city = np.random.randint(self.num_cities)
         self.visited[self.current_city] = True
         self.total_distance = 0.0
         self.step_count = 0
@@ -72,7 +70,7 @@ class TSPEnv:
 
 # 使い方例
 if __name__ == '__main__':
-    env = TSPEnv(num_cities=5, seed=42)
+    env = TSPEnv(num_cities=5)
     obs = env.reset()
     print('都市座標:', obs['cities'])
     for _ in range(4):
