@@ -165,7 +165,7 @@ def plot_sample_tour(model, seq_len=10):
 
 
 if __name__ == "__main__":
-    train()
+    # train()
     input_dim = 2
     hidden_dim = 128
     seq_len = 10
