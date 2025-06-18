@@ -1,84 +1,63 @@
+import torch
 import numpy as np
+import matplotlib.pyplot as plt
 
+# TSP環境クラス
 class TSPEnv:
-    def __init__(self, num_cities=10):
+    def __init__(self, batch_size, num_cities=10):
+        self.batch_size = batch_size
         self.num_cities = num_cities
         self.cities = None
         self.visited = None
-        self.current_city = None
-        self.total_distance = None
-        self.step_count = None
 
     def reset(self):
         # 都市座標をランダム生成（[0,1]区間）
-        self.cities = np.random.rand(self.num_cities, 2)
-        self.visited = np.zeros(self.num_cities, dtype=bool)
+        self.cities = np.random.rand(self.batch_size, self.num_cities, 2)
+        self.cities = torch.tensor(self.cities, dtype=torch.float32)
+        self.visited = np.zeros((self.batch_size, self.num_cities), dtype=bool)
         self.current_city = np.random.randint(self.num_cities)
-        self.visited[self.current_city] = True
-        self.total_distance = 0.0
-        self.step_count = 0
-        return self._get_obs()
+        self.visited[np.arange(self.batch_size), self.current_city] = True
+        return self.cities
 
-    def _get_obs(self):
-        # 状態: [都市座標, 訪問フラグ, 現在地]
-        return {
-            'cities': self.cities.copy(),  # (num_cities, 2)
-            'visited': self.visited.copy(),  # (num_cities,)
-            'current_city': self.current_city
-        }
+    # 巡回経路の長さを計算
+    # 長さの負の数を報酬と定義
+    def compute_tour_length(self, tour_idx):
+        tour = torch.gather(self.cities.to(tour_idx.device), 1, tour_idx.unsqueeze(2).expand(-1, -1, 2))
+        tour_shift = torch.roll(tour, shifts=-1, dims=1)
+        length = ((tour - tour_shift) ** 2).sum(2).sqrt().sum(1)
+        return length
 
-    def step(self, action):
-        # action: 次に移動する都市のインデックス
-        if self.visited[action]:
-            # 既に訪問済み都市を選んだ場合は大きなペナルティ
-            reward = -100.0
-            done = True
-            return self._get_obs(), reward, done, {}
+    # エージェントが選択した順序をもとに描画
+    def render(self, tour_idx):
+        """
+        tour_idx: (batch_size, seq_len) 各バッチごとの巡回都市順インデックス
+        """
+        ncols = min(4, self.batch_size)
+        nrows = (self.batch_size + ncols - 1) // ncols
 
-        # 距離計算
-        prev_city = self.current_city
-        dist = np.linalg.norm(self.cities[prev_city] - self.cities[action])
-        self.total_distance += dist
-        self.current_city = action
-        self.visited[action] = True
-        self.step_count += 1
+        fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows))
+        axes = np.array(axes).reshape(-1)  # 1次元配列化
 
-        done = self.step_count == self.num_cities - 1
-        reward = -dist  # 距離のマイナスを報酬
+        for b in range(self.batch_size):
+            ax = axes[b]
+            cities_b = self.cities[b].cpu().numpy()  # (num_cities, 2)
+            order = tour_idx[b].cpu().numpy()        # (seq_len,)
+            path = cities_b[order]
+            # 都市を点で描画
+            ax.scatter(cities_b[:, 0], cities_b[:, 1], c='blue')
+            # 巡回経路を線で描画
+            ax.plot(path[:, 0], path[:, 1], c='red', marker='o')
+            # スタートとゴールを強調
+            ax.scatter(path[0, 0], path[0, 1], c='green', s=100, label='Start')
+            ax.scatter(path[-1, 0], path[-1, 1], c='orange', s=100, label='End')
+            # 始点と終点をつなぐ
+            ax.plot([path[-1, 0], path[0, 0]], [path[-1, 1], path[0, 1]], 'o-', c='blue')
+            ax.set_title(f'Batch {b}')
+            ax.legend()
 
-        if done:
-            # 最後はスタート地点に戻る
-            start_city = np.where(self.visited)[0][0]
-            dist_return = np.linalg.norm(self.cities[self.current_city] - self.cities[start_city])
-            self.total_distance += dist_return
-            reward -= dist_return
+        # 不要なsubplotを消す
+        for b in range(self.batch_size, nrows * ncols):
+            fig.delaxes(axes[b])
 
-        return self._get_obs(), reward, done, {}
-
-    def render(self):
-        import matplotlib.pyplot as plt
-        plt.scatter(self.cities[:,0], self.cities[:,1], c='blue')
-        order = [np.where(self.visited)[0][0]]  # スタート地点
-        for i, v in enumerate(self.visited):
-            if v and i not in order:
-                order.append(i)
-        order.append(order[0])  # return to start
-        path = self.cities[order]
-        plt.plot(path[:,0], path[:,1], c='red')
-        plt.title(f'Total distance: {self.total_distance:.2f}')
+        plt.tight_layout()
         plt.show()
-
-# 使い方例
-if __name__ == '__main__':
-    env = TSPEnv(num_cities=5)
-    obs = env.reset()
-    print('都市座標:', obs['cities'])
-    for _ in range(4):
-        # ランダムに未訪問都市を選択
-        unvisited = np.where(~obs['visited'])[0]
-        action = np.random.choice(unvisited)
-        obs, reward, done, _ = env.step(action)
-        print(f'都市{action}へ移動, 報酬: {reward:.2f}')
-        if done:
-            break
-    env.render()
