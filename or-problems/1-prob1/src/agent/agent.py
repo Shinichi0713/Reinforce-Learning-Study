@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import os
 
-
 # PointerNetの実装
 class PointerNet(nn.Module):
     def __init__(self, input_dim, hidden_dim):
