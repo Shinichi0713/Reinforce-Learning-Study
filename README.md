@@ -59,6 +59,17 @@ this is the result with using 3 methods.
 
 <img src="image/TSP-2.png" alt="sac" width="300px" height="auto">
 
+### JSSP
+using Actor-critc framework.
+and, the model is composed with Transformer Network.
+learn how short the total job become.
+
+<img src="image/JSSP-1.png" alt="jssp-1" width="300px" height="auto">
+
+<img src="image/JSSP-2.png" alt="jssp-2" width="300px" height="auto">
+
+<img src="image/JSSP-3.png" alt="jssp-3" width="300px" height="auto">
+
 ### arranging boxes
 
 when using ddqn, ai agent can arrange boxes toward restricted space.
