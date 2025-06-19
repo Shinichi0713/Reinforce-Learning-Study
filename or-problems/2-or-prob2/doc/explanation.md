@@ -8,3 +8,10 @@
 ![alt text](image.png)
 
 
+## モデル精度
+1. AttentionNetを使って学習
+dim = 32 →全然ダメ
+このサイズではさすがに探索できないか？
+というかほとんど改善してないような。。。
+![alt text](image-1.png)
+

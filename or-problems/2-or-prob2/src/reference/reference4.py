@@ -11,9 +11,13 @@ class JobShopEnv:
         self.n_machines = n_machines
         self.reset()
 
+    # 環境リセット
     def reset(self):
+        # 所要時間はランダム
         self.proc_times = np.random.randint(1, 10, size=self.n_jobs)
+        # アサインされていない
         self.assigned = np.zeros(self.n_jobs, dtype=bool)
+        # 各マシンの現在の空き時間
         self.machine_times = np.zeros(self.n_machines)
         self.schedule = []
         return self.proc_times.copy()
@@ -30,7 +34,7 @@ class JobShopEnv:
         reward = -(new_makespan - prev_makespan)
         if done:
             reward += -new_makespan  # 最終的にもmakespan最小化を促す
-        return self.get_state(), reward, done, {}
+        return self.get_state(), reward, done
 
     def get_state(self):
         # 各ジョブごとに [proc_time, assigned_flag] を返す
@@ -72,6 +76,7 @@ class TransformerPolicy(nn.Module):
         job_probs = F.softmax(scores, dim=-1)
         return job_probs
 
+    # 各マシンの待ち時間が小さいほど高い確率で選択
     def select_machine(self, machine_times):
         machine_times = machine_times.to(self.device)
         scores = -machine_times  # 小さいほど良い
@@ -91,8 +96,8 @@ def train():
     n_jobs, n_machines = 5, 2
     env = JobShopEnv(n_jobs, n_machines)
     policy = TransformerPolicy(n_jobs, n_machines)
-    optimizer = optim.Adam(policy.parameters(), lr=1e-3)
-    num_episodes = 15000
+    optimizer = optim.Adam(policy.parameters(), lr=1e-4)
+    num_episodes = 25000
     gamma = 0.99
     all_returns = []
     entropy_coef = 0.01  # エントロピー正則化
@@ -115,7 +120,7 @@ def train():
             machine_dist = torch.distributions.Categorical(machine_probs)
             machine = machine_dist.sample()
 
-            (next_proc_times_np, next_assigned_np, next_machine_times_np), reward, done, _ = env.step(job.item(), machine.item())
+            (next_proc_times_np, next_assigned_np, next_machine_times_np), reward, done = env.step(job.item(), machine.item())
             # 状態更新
             proc_times = torch.tensor(next_proc_times_np, dtype=torch.float32)
             assigned = torch.tensor(next_assigned_np, dtype=torch.float32)
@@ -139,6 +144,7 @@ def train():
 
         log_probs = torch.stack(log_probs).to(policy.device)
         entropies = torch.stack(entropies).to(policy.device)
+        # 勾配方策よりロス計算
         loss = -torch.sum(log_probs * advantages.to(policy.device)) - entropy_coef * entropies.sum()
 
         optimizer.zero_grad()
@@ -152,5 +158,33 @@ def train():
             print(f"Episode {ep+1}, avg makespan (last 100): {avg_makespan:.2f}, loss: {loss.item():.2f}")
             policy.save_to_state_dict()
 
+def eval():
+    n_jobs, n_machines = 5, 2
+    env = JobShopEnv(n_jobs, n_machines)
+    policy = TransformerPolicy(n_jobs, n_machines)
+    policy.eval()
+
+    with torch.no_grad():
+        proc_times_np, assigned_np, machine_times_np = env.reset(), np.zeros(n_jobs), np.zeros(n_machines)
+        proc_times = torch.tensor(proc_times_np, dtype=torch.float32).to(policy.device)
+        assigned = torch.tensor(assigned_np, dtype=torch.float32).to(policy.device)
+        machine_times = torch.tensor(machine_times_np, dtype=torch.float32).to(policy.device)
+        done = False
+        while not done:
+            job_probs = policy(proc_times, assigned, machine_times)
+            # job_dist = torch.distributions.Categorical(job_probs)
+            job = torch.max(job_probs, dim=0)[1]  # 最大確率のジョブを選択
+            # job = job_dist.sample()
+            machine_probs = policy.select_machine(machine_times)
+            machine_dist = torch.distributions.Categorical(machine_probs)
+            machine = machine_dist.sample()
+
+            (next_proc_times_np, next_assigned_np, next_machine_times_np), reward, done = env.step(job.item(), machine.item())
+            # 状態更新
+            proc_times = torch.tensor(next_proc_times_np, dtype=torch.float32).to(policy.device)
+            assigned = torch.tensor(next_assigned_np, dtype=torch.float32).to(policy.device)
+            machine_times = torch.tensor(next_machine_times_np, dtype=torch.float32).to(policy.device)
+
 if __name__ == "__main__":
-    train()
+    # train()
+    eval()
