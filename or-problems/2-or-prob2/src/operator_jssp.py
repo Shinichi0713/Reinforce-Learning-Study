@@ -69,9 +69,9 @@ def train(baseline_type='critic'):
             states.append((proc_times, assigned, machine_times))
 
         makespan = env.machine_times.max()
-        reward = -makespan.to(policy.device)
+        reward = -makespan
         rewards = [0.0] * (len(log_probs) - 1) + [reward]
-        returns = torch.tensor(rewards, dtype=torch.float32)
+        returns = torch.tensor(rewards, dtype=torch.float32).to(policy.device)
 
         # --- baselineの計算 ---
         if baseline_type == 'moving_average':
@@ -89,7 +89,7 @@ def train(baseline_type='critic'):
         else:
             baseline = returns.mean() * torch.ones_like(returns)
 
-        advantages = returns - baseline
+        advantages = returns - baseline.to(policy.device)
 
         log_probs = torch.stack(log_probs).to(policy.device)
         entropies = torch.stack(entropies).to(policy.device)
@@ -103,7 +103,7 @@ def train(baseline_type='critic'):
         # Criticの学習
         if baseline_type == 'critic':
             critic_pred = critic(*states[-1])
-            critic_loss = F.mse_loss(critic_pred, torch.tensor(reward, dtype=torch.float32))
+            critic_loss = F.mse_loss(critic_pred, torch.tensor(reward, dtype=torch.float32).to(policy.device))
             critic_optimizer.zero_grad()
             critic_loss.backward()
             critic_optimizer.step()
@@ -119,7 +119,7 @@ def train(baseline_type='critic'):
         loss_actor_history.append(loss.item())
         if baseline_type == 'critic':
             loss_critic_history.append(critic_loss.item())
-        reward_history.append(reward)
+        reward_history.append(reward.tolist())
 
     dir_current = os.path.dirname(os.path.abspath(__file__))
     write_log(os.path.join(dir_current, "loss_actor_history.txt"), str(loss_actor_history))
