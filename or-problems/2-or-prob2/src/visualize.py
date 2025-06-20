@@ -14,8 +14,8 @@ def display_result_loss(loss_actor, loss_critic):
     ax1.set_ylabel('Actor Loss')
     ax2.set_ylabel('Critic Loss')
     ax1.set_title('Training Result(loss shift of JSSP)')
-    ax1.legend()
-    ax2.legend()
+    ax1.legend(loc='upper left', bbox_to_anchor=(0.7, 0.77))
+    ax2.legend(loc='upper left', bbox_to_anchor=(0.7, 0.7))
     dir_current = os.path.dirname(os.path.abspath(__file__))
     path_loss_jssp = os.path.join(dir_current, "loss_history_jssp.png")
     plt.savefig(path_loss_jssp)
@@ -55,4 +55,4 @@ if __name__ == "__main__":
     display_result_loss(read_result(path_loss_actor), read_result(path_loss_critic))
 
     path_reward = os.path.join(dir_current, "reward_history.txt")
-    display_result_reward(read_result(path_reward))
+    # display_result_reward(read_result(path_reward))

@@ -46,7 +46,11 @@ class ActorNet(nn.Module):
         grid = grid.to(DEVICE)
         rects_info = rects_info.to(DEVICE)
         batch_size = grid.shape[0]
-
+        contents_rect = rects_info[:, :10]
+        # 偶数番目（2i番目）だけ取り出す
+        even_idx_values = contents_rect[:, ::2]
+        # 0以外なら1、0なら0
+        mask = (even_idx_values != 0).long()
         # grid特徴量
         grid_feat = self.conv(grid)  # [B, 32*GRID_SIZE*GRID_SIZE]
 
@@ -58,8 +62,9 @@ class ActorNet(nn.Module):
         x = self.fc(x)  # [B, 512]
         box_logits = self.box_head(x)  # [B, max_rects]
         box_probs = torch.softmax(box_logits, dim=1)
+        
+        box_logits = torch.where(mask.bool(), box_logits, torch.tensor(float('-inf')))
         index_box = torch.argmax(box_logits, dim=1)  # [B]
-
         # バッチごとに該当ボックスサイズを抽出
         # rects_info: [B, max_rects*2 + 3] → boxごとに(x, y)が並ぶと仮定
         # 例: [x0, y0, x1, y1, ...] なので、index_box*2, index_box*2+1でx, y
@@ -302,7 +307,7 @@ def train():
             critic2.save_model()
             target_critic1.save_model()
             target_critic2.save_model()
-        if episode % 10 == 0:
+        if episode % 100 == 0:
             print(f"episode {episode} total reward: {total_reward:.2f}")
 
     save_log(reward_history, "reward_history_reference15.txt")
