@@ -4,8 +4,6 @@ import numpy as np
 import time, os
 
 
-
-
 class Env():
     def __init__(self, is_train=False):
         if is_train:
