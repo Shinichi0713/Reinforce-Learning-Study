@@ -61,9 +61,8 @@ class ActorNet(nn.Module):
         x = torch.cat([grid_feat, rect_feat], dim=1)
         x = self.fc(x)  # [B, 512]
         box_logits = self.box_head(x)  # [B, max_rects]
-        box_probs = torch.softmax(box_logits, dim=1)
-        
         box_logits = torch.where(mask.bool(), box_logits, torch.tensor(float('-inf')))
+        box_probs = torch.softmax(box_logits, dim=1)
         index_box = torch.argmax(box_logits, dim=1)  # [B]
         # バッチごとに該当ボックスサイズを抽出
         # rects_info: [B, max_rects*2 + 3] → boxごとに(x, y)が並ぶと仮定
@@ -358,5 +357,5 @@ def eval():
     plt.show()
 
 if __name__ == "__main__":
-    train()
+    # train()
     eval()
