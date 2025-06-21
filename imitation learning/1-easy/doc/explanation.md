@@ -137,6 +137,7 @@ def imitation_learning(env, num_episodes=500, epochs=10, batch_size=64):
 
 ---
 
-ご参考になれば幸いです。
+### 実験結果
 
-以上です。
+
+![alt text](image.png)
