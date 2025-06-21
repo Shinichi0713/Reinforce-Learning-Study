@@ -11,6 +11,8 @@ class Env():
         else:
             self.env = gym.make('CartPole-v1', render_mode='human')
         self.reset()
+        self.dim_state = self.env.observation_space.shape[0]
+        self.dim_action = self.env.action_space.n
 
     def reset(self):
         state = self.env.reset()
@@ -24,6 +26,11 @@ class Env():
         self.env.render()
         time.sleep(0.01)
 
+    def close(self):
+        self.env.close()
+
+    def get_dims(self):
+        return self.dim_state, self.dim_action
 
 if __name__ == "__main__":
     env = Env()
