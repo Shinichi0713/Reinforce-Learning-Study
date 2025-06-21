@@ -25,71 +25,60 @@ class ReplayMemory:
 
 # 行動するActor
 class Actor(nn.Module):
-    def __init__(self, state_size=4, action_size=2, hidden_size=100):
-        super(Actor, self).__init__()
-        self.model = nn.Sequential(
-            nn.Linear(state_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, action_size)
+    def __init__(self, state_dim, action_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_dim, 128), nn.ReLU(),
+            nn.Linear(128, action_dim), nn.Softmax(dim=-1)
         )
-        dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.path_nn = f"{dir_current}/nn_parameter_actor.pth"
-
+        self.path_nn = f"{os.path.dirname(os.path.abspath(__file__))}/nn_parameter_actor.pth"
         self.__load_nn()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+        self.net.to(self.device)
 
     def forward(self, x):
-        x = torch.tensor(x, dtype=torch.float32).to(self.device)
-        x = self.model(x)
-        x = torch.softmax(x, dim=-1)
-        return x
+        x = x.to(self.device)
+        return self.net(x)
 
     def save_nn(self):
         self.cpu()
-        torch.save(self.model.state_dict(), self.path_nn)
+        torch.save(self.net.state_dict(), self.path_nn)
         self.to(self.device)
     
     def __load_nn(self):
         if os.path.exists(self.path_nn):
-            self.model.load_state_dict(torch.load(self.path_nn))
+            self.net.load_state_dict(torch.load(self.path_nn))
         else:
             print(f"Model file {self.path_nn} does not exist. Skipping load.")
 
 
 # 行動価値を評価するためのCriticクラス
 class Critic(nn.Module):
-    def __init__(self, state_size=4, action_size=2, hidden_size=100):
+    def __init__(self, state_dim=4):
         super(Critic, self).__init__()
-        self.model = nn.Sequential(
-            nn.Linear(state_size + action_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, 1)
+        self.net = nn.Sequential(
+            nn.Linear(state_dim, 128), nn.ReLU(),
+            nn.Linear(128, 1)
         )
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_nn = f"{dir_current}/nn_parameter_critic.pth"
 
         self.__load_nn()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+        self.net.to(self.device)
 
-    def forward(self, state, action):
-        x = torch.cat([torch.tensor(state, dtype=torch.float32).to(self.device), 
-                       torch.tensor(action, dtype=torch.float32).to(self.device)], dim=-1)
-        return self.model(x)
+    def forward(self, x):
+        x = x.to(self.device)
+        return self.net(x).squeeze(-1)
 
     def save_nn(self):
         self.cpu()
-        torch.save(self.model.state_dict(), self.path_nn)
+        torch.save(self.net.state_dict(), self.path_nn)
         self.to(self.device)
 
     def __load_nn(self):
         if os.path.exists(self.path_nn):
-            self.model.load_state_dict(torch.load(self.path_nn))
+            self.net.load_state_dict(torch.load(self.path_nn))
         else:
             print(f"Model file {self.path_nn} does not exist. Skipping load.")
 

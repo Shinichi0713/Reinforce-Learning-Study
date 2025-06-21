@@ -1,5 +1,4 @@
 
-import gym
 import numpy as np
 import time, os
 import torch
@@ -12,99 +11,95 @@ from agent import Actor, Critic, ReplayMemory
 
 def train():
     env = Env(is_train=True)
-    actor = Actor()
-    critic = Critic()
-    replay_memory = ReplayMemory()
-    action_size = env.env.action_space.n
-    state_size = env.env.observation_space.shape[0]
+    state_dim, action_dim = env.get_dims()
 
-    # 学習の設定
-    num_episodes = 5000
-    batch_size = 64
-    max_grad_norm = 1   # 勾配クリッピングの最大値
-    gamma = 0.8  # 割引率
-    actor.train()
-    critic.train()
-    optimizer_actor = torch.optim.Adam(actor.parameters(), lr=0.001)
-    optimizer_critic = torch.optim.Adam(critic.parameters(), lr=0.001)
+    actor = Actor(state_dim, action_dim)
+    critic = Critic(state_dim)
+    actor_optim = torch.optim.Adam(actor.parameters(), lr=1e-3)
+    critic_optim = torch.optim.Adam(critic.parameters(), lr=1e-3)
+
+    gamma = 0.99
+    num_episodes = 2000
+    reward_history = []
     # 記録
     reward_history = []
     loss_actor_history = []
     loss_critic_history = []
+
     for episode in range(num_episodes):
         state, _ = env.reset()
-        episode_reward = 0
         done = False
+        episode_reward = 0
 
-        loss_actor_total = 0.0
-        loss_critic_total = 0.0
-        count_train = 0
+        states = []
+        actions = []
+        rewards = []
+        next_states = []
+        dones = []
 
         while not done:
+            state_tensor = torch.FloatTensor(state).unsqueeze(0)
             with torch.no_grad():
-                state_tensor = torch.from_numpy(np.array(state)).float().unsqueeze(0)
-                action_prob = actor(state_tensor)[0]
-            action = np.random.choice(action_size, p=action_prob.detach().cpu().numpy())
-            state_next, reward, done = env.step(action)
-            replay_memory.push((state, action, reward, state_next, done))
+                probs = actor(state_tensor).cpu().squeeze(0).numpy()
+            action = np.random.choice(action_dim, p=probs)
+            next_state, reward, done = env.step(action)
 
-            state = state_next
+            # 記録
+            states.append(state)
+            actions.append(action)
+            rewards.append(reward)
+            next_states.append(next_state)
+            dones.append(done)
+
+            state = next_state
             episode_reward += reward
 
-            if len(replay_memory) > batch_size:
-                transitions = replay_memory.sample(batch_size)
-                batch = list(zip(*transitions))
-                state_batch = torch.from_numpy(np.array(batch[0])).float().to(actor.device)
-                action_batch = torch.tensor(batch[1], dtype=torch.int64).to(actor.device)
-                reward_batch = torch.tensor(batch[2], dtype=torch.float32).to(actor.device)
-                state_next_batch = torch.from_numpy(np.array(batch[3])).float().to(actor.device)
-                done_batch = torch.tensor(batch[4], dtype=torch.float32).to(actor.device)
+        # 学習（エピソード終了後に一括）
+        states_tensor = torch.FloatTensor(states).to(actor.device)
+        actions_tensor = torch.LongTensor(actions).to(actor.device)
+        rewards_tensor = torch.FloatTensor(rewards).to(actor.device)
+        next_states_tensor = torch.FloatTensor(next_states).to(actor.device)
+        dones_tensor = torch.FloatTensor(dones).to(actor.device)
 
-                # Criticの更新
-                with torch.no_grad():
-                    next_action_prob = actor(state_next_batch)
-                    next_action = next_action_prob.argmax(dim=1)
-                    next_action_onehot = torch.nn.functional.one_hot(next_action, num_classes=action_size).float()
-                    target_q = critic(state_next_batch, next_action_onehot).detach().squeeze(-1)
-                    target = reward_batch + gamma * target_q * (1 - done_batch)
+        # Criticのターゲット（1-step TD）
+        with torch.no_grad():
+            next_state_values = critic(next_states_tensor)
+            targets = rewards_tensor + gamma * next_state_values * (1 - dones_tensor)
 
-                actions_onehot = torch.nn.functional.one_hot(action_batch, action_size).float()
-                q_values = critic(state_batch, actions_onehot).squeeze(-1)
-                critic_loss = nn.MSELoss()(q_values, target)
-                optimizer_critic.zero_grad()
-                critic_loss.backward()
-                torch.nn.utils.clip_grad_norm_(critic.parameters(), max_grad_norm)
-                optimizer_critic.step()
+        values = critic(states_tensor)
+        critic_loss = nn.MSELoss()(values, targets)
 
-                # Actorの更新
-                optimizer_actor.zero_grad()
-                action_prob = actor(state_batch)
-                action_sampled = torch.multinomial(action_prob, num_samples=1).squeeze(1)
-                action_sampled_onehot = torch.nn.functional.one_hot(action_sampled, num_classes=action_size).float()
-                actor_loss = -critic(state_batch, action_sampled_onehot).mean()
-                actor_loss.backward()
-                torch.nn.utils.clip_grad_norm_(actor.parameters(), max_grad_norm)
-                optimizer_actor.step()
+        critic_optim.zero_grad()
+        critic_loss.backward()
+        critic_optim.step()
 
-                loss_actor_total += actor_loss.item()
-                loss_critic_total += critic_loss.item()
-                count_train += 1
+        # Advantage計算
+        advantage = (targets - values).detach()
 
-        # 記録
+        # Actorの損失
+        probs = actor(states_tensor)
+        log_probs = torch.log(probs.gather(1, actions_tensor.unsqueeze(1)).clamp(min=1e-8))
+        actor_loss = -(log_probs.squeeze() * advantage).mean()
+
+        actor_optim.zero_grad()
+        actor_loss.backward()
+        actor_optim.step()
+
         reward_history.append(episode_reward)
-        loss_actor_history.append(loss_actor_total / max(1, count_train))
-        loss_critic_history.append(loss_critic_total / max(1, count_train))
-        if (episode + 1) % 100 == 0:
-            print(f"Episode {episode+1}: reward {episode_reward} , actor loss {loss_actor_total / max(1, count_train):.4f}, critic loss {loss_critic_total / max(1, count_train):.4f}")
+        if (episode + 1) % 10 == 0:
+            print(f"Episode {episode+1}, reward: {episode_reward}, avg(10): {np.mean(reward_history[-10:]):.1f}")
             actor.save_nn()
             critic.save_nn()
-    
+        loss_actor_history.append(actor_loss.item())
+        loss_critic_history.append(critic_loss.item())
+
     # 結果の保存
     dir_current = os.path.dirname(os.path.abspath(__file__))
     write_log(f"{dir_current}/reward_history.npy", reward_history)
     write_log(f"{dir_current}/loss_actor_history.npy", loss_actor_history)
     write_log(f"{dir_current}/loss_critic_history.npy", loss_critic_history)
-    env.env.close()
+    env.close()
+
 
 # ログファイルに書き込む関数
 def write_log(path, data):
@@ -115,7 +110,8 @@ def write_log(path, data):
 # 評価
 def evaluate():
     env = Env(is_train=False)
-    actor = Actor()
+    state_dim, action_dim = env.get_dims()
+    actor = Actor(state_dim, action_dim)
     actor.eval()
     state, _ = env.reset()
     done = False
@@ -128,6 +124,8 @@ def evaluate():
         action = np.random.choice(env.env.action_space.n, p=action_prob.detach().cpu().numpy())
         state, reward, done = env.step(action)
         total_reward += reward
+        env.env.render()
+        time.sleep(0.01)
 
     print(f"Total reward in evaluation: {total_reward}")
     env.env.close()
