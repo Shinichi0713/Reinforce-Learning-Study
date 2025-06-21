@@ -19,13 +19,18 @@ def train():
     state_size = env.env.observation_space.shape[0]
 
     # 学習の設定
-    num_episodes = 1000
+    num_episodes = 5000
     batch_size = 64
-    gamma = 0.99  # 割引率
+    max_grad_norm = 1   # 勾配クリッピングの最大値
+    gamma = 0.8  # 割引率
     actor.train()
     critic.train()
     optimizer_actor = torch.optim.Adam(actor.parameters(), lr=0.001)
     optimizer_critic = torch.optim.Adam(critic.parameters(), lr=0.001)
+    # 記録
+    reward_history = []
+    loss_actor_history = []
+    loss_critic_history = []
     for episode in range(num_episodes):
         state, _ = env.reset()
         episode_reward = 0
@@ -68,6 +73,7 @@ def train():
                 critic_loss = nn.MSELoss()(q_values, target)
                 optimizer_critic.zero_grad()
                 critic_loss.backward()
+                torch.nn.utils.clip_grad_norm_(critic.parameters(), max_grad_norm)
                 optimizer_critic.step()
 
                 # Actorの更新
@@ -77,20 +83,57 @@ def train():
                 action_sampled_onehot = torch.nn.functional.one_hot(action_sampled, num_classes=action_size).float()
                 actor_loss = -critic(state_batch, action_sampled_onehot).mean()
                 actor_loss.backward()
+                torch.nn.utils.clip_grad_norm_(actor.parameters(), max_grad_norm)
                 optimizer_actor.step()
 
                 loss_actor_total += actor_loss.item()
                 loss_critic_total += critic_loss.item()
                 count_train += 1
 
+        # 記録
+        reward_history.append(episode_reward)
+        loss_actor_history.append(loss_actor_total / max(1, count_train))
+        loss_critic_history.append(loss_critic_total / max(1, count_train))
         if (episode + 1) % 100 == 0:
             print(f"Episode {episode+1}: reward {episode_reward} , actor loss {loss_actor_total / max(1, count_train):.4f}, critic loss {loss_critic_total / max(1, count_train):.4f}")
             actor.save_nn()
             critic.save_nn()
+    
+    # 結果の保存
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    write_log(f"{dir_current}/reward_history.npy", reward_history)
+    write_log(f"{dir_current}/loss_actor_history.npy", loss_actor_history)
+    write_log(f"{dir_current}/loss_critic_history.npy", loss_critic_history)
     env.env.close()
 
+# ログファイルに書き込む関数
+def write_log(path, data):
+    with open(path, 'a') as f:
+        for d in data:
+            f.write(str(d) + '\n')
+
+# 評価
+def evaluate():
+    env = Env(is_train=False)
+    actor = Actor()
+    actor.eval()
+    state, _ = env.reset()
+    done = False
+    total_reward = 0
+
+    while not done:
+        with torch.no_grad():
+            state_tensor = torch.from_numpy(np.array(state)).float().unsqueeze(0)
+            action_prob = actor(state_tensor)[0]
+        action = np.random.choice(env.env.action_space.n, p=action_prob.detach().cpu().numpy())
+        state, reward, done = env.step(action)
+        total_reward += reward
+
+    print(f"Total reward in evaluation: {total_reward}")
+    env.env.close()
 
 
 if __name__ == "__main__":
     print("start dqn pole problem")
     train()
+    evaluate()
