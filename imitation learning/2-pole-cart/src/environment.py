@@ -14,7 +14,7 @@ class Env():
 
     def reset(self):
         state = self.env.reset()
-        return state, 0
+        return state
     
     def step(self, action):
         state, reward, done, _, _ = self.env.step(action)

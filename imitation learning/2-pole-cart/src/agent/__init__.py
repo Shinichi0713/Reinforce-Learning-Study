@@ -1,3 +1,3 @@
-from .agent_dqn import AgentDQN
+from .agent_actor_critic import Actor, Critic, ReplayMemory
 
-__all__ = ["AgentDQN"]
+__all__ = ["Actor", "Critic", "ReplayMemory"]

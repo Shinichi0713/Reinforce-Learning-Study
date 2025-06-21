@@ -23,7 +23,7 @@ class ReplayMemory:
         return len(self.memory)
 
 
-# ニューラルネットワークの定義
+# 行動するActor
 class Actor(nn.Module):
     def __init__(self, state_size=4, action_size=2, hidden_size=100):
         super(Actor, self).__init__()
@@ -35,7 +35,7 @@ class Actor(nn.Module):
             nn.Linear(hidden_size, action_size)
         )
         dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.path_nn = f"{dir_current}/nn_parameter.pth"
+        self.path_nn = f"{dir_current}/nn_parameter_actor.pth"
 
         self.__load_nn()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,7 +43,9 @@ class Actor(nn.Module):
 
     def forward(self, x):
         x = torch.tensor(x, dtype=torch.float32).to(self.device)
-        return self.model(x)
+        x = self.model(x)
+        x = torch.softmax(x, dim=-1)
+        return x
 
     def save_nn(self):
         self.cpu()
@@ -52,11 +54,12 @@ class Actor(nn.Module):
     
     def __load_nn(self):
         if os.path.exists(self.path_nn):
-            self.model.load_state_dict(torch.load(self.path_nn, map_location=self.device))
+            self.model.load_state_dict(torch.load(self.path_nn))
         else:
             print(f"Model file {self.path_nn} does not exist. Skipping load.")
 
 
+# 行動価値を評価するためのCriticクラス
 class Critic(nn.Module):
     def __init__(self, state_size=4, action_size=2, hidden_size=100):
         super(Critic, self).__init__()
@@ -68,7 +71,7 @@ class Critic(nn.Module):
             nn.Linear(hidden_size, 1)
         )
         dir_current = os.path.dirname(os.path.abspath(__file__))
-        self.path_nn = f"{dir_current}/nn_parameter.pth"
+        self.path_nn = f"{dir_current}/nn_parameter_critic.pth"
 
         self.__load_nn()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -86,7 +89,7 @@ class Critic(nn.Module):
 
     def __load_nn(self):
         if os.path.exists(self.path_nn):
-            self.model.load_state_dict(torch.load(self.path_nn, map_location=self.device))
+            self.model.load_state_dict(torch.load(self.path_nn))
         else:
             print(f"Model file {self.path_nn} does not exist. Skipping load.")
 
