@@ -29,6 +29,7 @@ class Actor(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(state_dim, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
             nn.Linear(128, action_dim), nn.Softmax(dim=-1)
         )
         self.path_nn = f"{os.path.dirname(os.path.abspath(__file__))}/nn_parameter_actor.pth"
@@ -58,6 +59,7 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.net = nn.Sequential(
             nn.Linear(state_dim, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
             nn.Linear(128, 1)
         )
         dir_current = os.path.dirname(os.path.abspath(__file__))
