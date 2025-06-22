@@ -9,7 +9,7 @@ env = gym.make('CartPole-v1')
 
 expert_obs = []
 expert_acts = []
-
+## ここでエキスパートデータの収集
 for episode in range(30):  # 30エピソード分データ収集
     obs = env.reset()
     done = False

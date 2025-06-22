@@ -1,8 +1,6 @@
 # エージェント
 import torch
 import torch.nn as nn
-from statistics import mean, median
-import matplotlib.pyplot as plt
 from collections import deque
 import os
 import numpy as np
