@@ -19,7 +19,7 @@ def train():
     critic_optim = torch.optim.Adam(critic.parameters(), lr=1e-3)
 
     gamma = 0.99
-    num_episodes = 2000
+    num_episodes = 2400
     reward_history = []
     # 記録
     reward_history = []
@@ -84,20 +84,20 @@ def train():
         actor_optim.zero_grad()
         actor_loss.backward()
         actor_optim.step()
-
-        reward_history.append(episode_reward)
+        
         if (episode + 1) % 10 == 0:
             print(f"Episode {episode+1}, reward: {episode_reward}, avg(10): {np.mean(reward_history[-10:]):.1f}")
             actor.save_nn()
             critic.save_nn()
         loss_actor_history.append(actor_loss.item())
         loss_critic_history.append(critic_loss.item())
+        reward_history.append(episode_reward)
 
     # 結果の保存
     dir_current = os.path.dirname(os.path.abspath(__file__))
-    write_log(f"{dir_current}/reward_history.npy", reward_history)
-    write_log(f"{dir_current}/loss_actor_history.npy", loss_actor_history)
-    write_log(f"{dir_current}/loss_critic_history.npy", loss_critic_history)
+    write_log(f"{dir_current}/reward_history.txt", reward_history)
+    write_log(f"{dir_current}/loss_actor_history.txt", loss_actor_history)
+    write_log(f"{dir_current}/loss_critic_history.txt", loss_critic_history)
     env.close()
 
 
@@ -133,5 +133,5 @@ def evaluate():
 
 if __name__ == "__main__":
     print("start dqn pole problem")
-    train()
+    # train()
     evaluate()
