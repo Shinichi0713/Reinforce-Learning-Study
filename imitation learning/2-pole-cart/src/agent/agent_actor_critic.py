@@ -2,23 +2,31 @@
 import torch
 import torch.nn as nn
 from collections import deque
-import os
+import os, random
 import numpy as np
 
-# 経験再生用のメモリ
-class ReplayMemory:
-    def __init__(self, capacity=1000):
-        self.memory = deque(maxlen=capacity)
 
-    def push(self, transition):
-        self.memory.append(transition)
+# Experience Replay Buffer
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
+
+    def push(self, state, action, reward, next_state, done):
+        self.buffer.append((
+            np.array(state, dtype=np.float32),  # 明示的にnp.array化
+            action,
+            reward,
+            np.array(next_state, dtype=np.float32),
+            done
+        ))
 
     def sample(self, batch_size):
-        indices = np.random.choice(len(self.memory), batch_size, replace=False)
-        return [self.memory[i] for i in indices]
+        batch = random.sample(self.buffer, batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
+        return np.array(states), actions, rewards, np.array(next_states), dones
 
     def __len__(self):
-        return len(self.memory)
+        return len(self.buffer)
 
 
 # 行動するActor
