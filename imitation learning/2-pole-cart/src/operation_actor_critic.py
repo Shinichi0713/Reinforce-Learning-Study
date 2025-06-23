@@ -7,7 +7,7 @@ from statistics import mean, median
 import matplotlib.pyplot as plt
 from collections import deque
 from environment import Env
-from agent import Actor, Critic, ReplayMemory
+from agent import Actor, Critic
 
 def train():
     env = Env(is_train=True)
