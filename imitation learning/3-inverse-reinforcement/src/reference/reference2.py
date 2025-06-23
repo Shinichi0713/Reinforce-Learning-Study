@@ -3,6 +3,7 @@ import gym
 
 # 環境の初期化
 env = gym.make('FrozenLake-v1', is_slippery=False)
+env.reset()
 n_states = env.observation_space.n
 n_actions = env.action_space.n
 
@@ -16,13 +17,13 @@ F = feature_matrix()
 def generate_expert_trajectories(env, policy, n_trajs=20, max_steps=20):
     trajs = []
     for _ in range(n_trajs):
-        s = env.reset()
+        s, _ = env.reset()  # ←ここを修正
         traj = []
         for _ in range(max_steps):
             a = policy[s]
+            s, r, terminated, truncated, _ = env.step(a)  # ←ここも修正
             traj.append((s, a))
-            s, r, done, _, _ = env.step(a)
-            if done:
+            if terminated or truncated:
                 break
         trajs.append(traj)
     return trajs
@@ -98,19 +99,36 @@ def soft_value_iteration(w, F, env, gamma=0.9, eps=1e-4):
         policy[s] /= np.sum(policy[s])
     return policy
 
-def sample_trajectories(env, policy, n_trajs=20, max_steps=20):
+def generate_expert_trajectories(env, policy, n_trajs=20, max_steps=20):
     trajs = []
     for _ in range(n_trajs):
-        s = env.reset()
+        s, _ = env.reset()  # ← sだけ取り出す
         traj = []
         for _ in range(max_steps):
-            a = np.random.choice(n_actions, p=policy[s])
+            a = policy[s]
+            s_, r, terminated, truncated, _ = env.step(a)
             traj.append((s, a))
-            s, r, done, _, _ = env.step(a)
-            if done:
+            s = s_  # ← 状態を更新
+            if terminated or truncated:
                 break
         trajs.append(traj)
     return trajs
+
+def sample_trajectories(env, policy, n_trajs=20, max_steps=20):
+    trajs = []
+    for _ in range(n_trajs):
+        s, _ = env.reset()  # ← sだけ取り出す
+        traj = []
+        for _ in range(max_steps):
+            a = np.random.choice(n_actions, p=policy[s])
+            s_, r, terminated, truncated, _ = env.step(a)
+            traj.append((s, a))
+            s = s_  # ← 状態を更新
+            if terminated or truncated:
+                break
+        trajs.append(traj)
+    return trajs
+
 
 # IRL学習ループ
 lr = 0.1
