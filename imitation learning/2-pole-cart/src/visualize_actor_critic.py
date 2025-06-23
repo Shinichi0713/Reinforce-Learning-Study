@@ -13,22 +13,22 @@ def display_result_loss(loss_actor, loss_critic):
     ax1.set_xlabel('Episode')
     ax1.set_ylabel('Actor Loss')
     ax2.set_ylabel('Critic Loss')
-    ax1.set_title('Training Result(loss shift of JSSP)')
+    ax1.set_title('Training Result(loss shift of Actor and Critic)')
     ax1.legend(loc='upper left', bbox_to_anchor=(0.7, 0.77))
     ax2.legend(loc='upper left', bbox_to_anchor=(0.7, 0.7))
     dir_current = os.path.dirname(os.path.abspath(__file__))
-    path_loss_jssp = os.path.join(dir_current, "loss_history_jssp.png")
-    plt.savefig(path_loss_jssp)
+    path_loss_actor_critic = os.path.join(dir_current, "loss_history_actor-critic.png")
+    plt.savefig(path_loss_actor_critic)
 
 def display_result_reward(result):
     # 結果をプロット
     plt.plot(np.arange(len(result)), result)
     plt.xlabel('Episode')
     plt.ylabel('Reward')
-    plt.title('Training Result(reward shift of JSSP)')
+    plt.title('Training Result(reward shift of Actor and Critic)')
     dir_current = os.path.dirname(os.path.abspath(__file__))
-    path_reward_sac = os.path.join(dir_current, "reward_history_jssp.png")
-    plt.savefig(path_reward_sac)
+    path_reward_actor_critic = os.path.join(dir_current, "reward_history_actor-critic.png")
+    plt.savefig(path_reward_actor_critic)
 
 def read_result(file_path):
     try:

@@ -60,12 +60,12 @@ def train_ddqn(env, episodes=300, batch_size=64):
     target_net = AgentImitation(state_dim, action_dim)
     target_net.eval()
 
-    optimizer = torch.optim.Adam(policy_net.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(policy_net.parameters(), lr=2e-4)
     buffer = ReplayBuffer(10000)
     gamma = 0.99
-    epsilon_start = 0.98
+    epsilon_start = 0.90
     epsilon_final = 0.01
-    epsilon_decay = episodes
+    epsilon_decay = episodes / 5
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     policy_net.to(device)
@@ -112,16 +112,17 @@ def train_ddqn(env, episodes=300, batch_size=64):
                 # Double DQN: 次の行動はpolicy_net、Q値はtarget_net
                 next_actions = policy_net(next_states).argmax(1, keepdim=True)
                 next_q_values = target_net(next_states).gather(1, next_actions)
-                expected_q = rewards_ + (1 - dones) * gamma * next_q_values
+                expected_q = rewards_ + gamma * next_q_values
 
                 loss = nn.MSELoss()(q_values, expected_q.detach())
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                loss_total += loss.item()
+                count_total += 1
 
         # ターゲットネットの更新
-        if episode % 10 == 0:
-            target_net.load_state_dict(policy_net.state_dict())
+        soft_update(target_net, policy_net, tau=0.01)
 
         # ε-greedyの減衰
         epsilon = epsilon_final + (epsilon_start - epsilon_final) * np.exp(-1. * episode / epsilon_decay)
@@ -138,6 +139,10 @@ def train_ddqn(env, episodes=300, batch_size=64):
     policy_net.save_nn()
     return policy_net, reward_history, loss_history
 
+def soft_update(target, source, tau):
+    for target_param, param in zip(target.parameters(), source.parameters()):
+        target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
+
 def train_imitation():
     env = Env(is_train=True)
     state_dim, action_dim = env.get_dims()
@@ -145,7 +150,7 @@ def train_imitation():
     agent_optim = torch.optim.Adam(agent_imitation.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
 
-    num_episodes = 500
+    num_episodes = 5000
     num_episodes_imitation = 50
     reward_history = []
     loss_history_imitate = []
@@ -188,7 +193,7 @@ def train_imitation():
     write_log(f"{dir_current}/loss_history_imitation.txt", loss_history)
 
 def write_log(path, data):
-    with open(path, 'a') as f:
+    with open(path, 'w') as f:
         for d in data:
             f.write(str(d) + '\n')
 

@@ -70,6 +70,17 @@ learn how short the total job become.
 
 <img src="image/JSSP-3.png" alt="jssp-3" width="300px" height="auto">
 
+### imitation learning - behavior clone
+
+when imitation learning is utilized, i check the effect.  
+in this case, reward is improved when using imitation learning.  
+
+<img src="image/reward_history_imitation_0.png" alt="jssp-1" width="300px" height="auto">
+
+<img src="image/reward_history_imitation_50.png" alt="jssp-2" width="300px" height="auto">
+
+<img src="image/reward_history_imitation_300.png" alt="jssp-3" width="300px" height="auto">
+
 ### arranging boxes
 
 when using ddqn, ai agent can arrange boxes toward restricted space.
