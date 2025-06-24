@@ -170,3 +170,87 @@ while not done:
 **まとめ**：  
 IRLは「報酬が不明だけど、良い行動のデモがある」状況で使うものです。  
 デモがなければ、人間や既存方策などからデモを集める工夫をしましょう。
+
+
+### 逆強化学習の手法
+この記事では逆強化学習の手法としてよく取り上げられる手法の中で以下の3つについて解説したいと思います。
+
+- 線形計画法を用いた逆強化学習
+- Maximum Entropy IRL
+- Maximum Entropy Deep IRL
+
+MDPの報酬分布は以下のようになった。
+
+![alt text](image-1.png)
+
+この状態で価値反復法を用いて、GridWorldを行うと以下のようになる。
+
+```python
+def value_iteration(trans_probs, reward, gamma=0.9, epsilon=0.001):
+    """Solving an MDP by value iteration."""
+    n_states, n_actions, _ = trans_probs.shape
+    U1 = {s: 0 for s in range(n_states)}
+    while True:
+        U = U1.copy()
+        delta = 0
+        for s in range(n_states):
+            Rs = reward[s]
+            U1[s] = Rs + gamma * max([sum([p * U[s1] for s1, p in enumerate(trans_probs[s, a, :])])
+                                      for a in range(n_actions)])
+            delta = max(delta, abs(U1[s] - U[s]))
+        if delta < epsilon * (1 - gamma) / gamma:
+            return U
+```
+
+![alt text](image-2.png)
+
+### 線形計画法を用いた逆強化学習
+逆強化学習では各状態における最適な行動が既知＝方策が既知とおく。
+このときに、各状態における報酬を表すベクトル$R$を求める。
+
+![alt text](image-3.png)
+
+
+![alt text](image-4.png)
+
+この目的関数は$a_1$との期待報酬の差が最も小さい行動との期待報酬の差を最も大きくする報酬ベクトルを求めている。
+
+この状態で線形計画問題として扱うことができないので、新たに$t_i$、$u_i$という変数を用意し、以下のように変換する。
+
+![alt text](image-5.png)
+
+```python
+import numpy as np
+from scipy.optimize import linprog
+
+def lp_irl(trans_probs, policy, gamma=0.2, l1=1.5, Rmax=5.0):
+    """
+    Solve Linear programming for Inverse Reinforcement Learning
+    """
+    n_states, n_actions, _ = trans_probs.shape
+    A = set(range(n_actions))
+    tp = np.transpose(trans_probs, (1, 0, 2))
+    ones_s = np.ones(n_states)
+    eye_ss = np.eye(n_states)
+    zero_s = np.zeros(n_states)
+    zero_ss = np.zeros((n_states, n_states))
+    T = lambda a, s: np.dot(tp[policy[s], s] - tp[a, s], np.linalg.inv(eye_ss - gamma * tp[policy[s]]))
+
+    c = -np.r_[zero_s, ones_s, -l1 * ones_s]
+    zero_stack = np.zeros((n_states * (n_actions - 1), n_states))
+    T_stack = np.vstack([-T(a, s) for s in range(n_states) for a in A - {policy[s]}])
+    I_stack = np.vstack([np.eye(1, n_states, s) for s in range(n_states) for a in A - {policy[s]}])
+
+    A_ub = np.bmat([[T_stack, I_stack, zero_stack],    # -TR <= t
+                    [T_stack, zero_stack, zero_stack], # -TR <= 0
+                    [-eye_ss, zero_ss, -eye_ss],  # -R <= u
+                    [eye_ss, zero_ss, -eye_ss],   # R <= u
+                    [-eye_ss, zero_ss, zero_ss],  # -R <= Rmax
+                    [eye_ss, zero_ss, zero_ss]])  # R <= Rmax
+    b = np.vstack([np.zeros((n_states * (n_actions-1) * 2 + 2 * n_states, 1)),
+                   Rmax * np.ones((2 * n_states, 1))])
+    results = linprog(c, A_ub, b)
+
+    return results["x"][:n_states]
+```
+
