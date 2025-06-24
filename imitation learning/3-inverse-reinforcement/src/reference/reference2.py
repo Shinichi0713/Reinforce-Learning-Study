@@ -142,4 +142,17 @@ for it in range(30):
     print(f"Iter {it}: ||grad||={np.linalg.norm(grad):.4f}")
 
 # 学習した報酬
+import matplotlib.pyplot as plt
+
 print("Learned reward:", w.reshape(4,4))
+# --- 結果の可視化 ---
+plt.imshow(w.reshape(4,4))
+plt.colorbar()
+plt.title("Recovered Reward")
+plt.show()
+
+"""
+Learned reward: [[49.52453723 -5.04453093 -1.28035062 -2.0666169 ]
+ [-1.77078926  0.21384259 -1.00230605  0.22454173]
+ [ 0.44180976 -0.88529756  0.16931089  0.08238014]
+ [-0.91228947  0.22185799 -1.26040765 -0.94330021]]"""
