@@ -24,31 +24,9 @@ for tup in trajectories:
     traj = Trajectory(obs=obs_input, acts=act, infos=[{}], terminal=bool(done[0]))
     trajectories_input.append(traj)
 
-# def ensure_array(x):
-#     # すでに配列ならそのまま、スカラーなら長さ1配列に
-#     if isinstance(x, np.ndarray):
-#         return x if x.ndim > 0 else np.array([x])
-#     else:
-#         return np.array([x])
 
-# def convert_to_trajectory(tup):
-#     obs, acts, rews, next_obs, dones = tup
-#     obs = ensure_array(obs)
-#     acts = ensure_array(acts)
-#     dones = ensure_array(dones)
-#     infos = [{} for _ in range(len(acts))]
-#     return Trajectory(obs=obs, acts=acts, infos=infos, terminal=dones)
-
-# trajectories = [convert_to_trajectory(tup) for tup in trajectories]
 # Create the environment
 env = DummyVecEnv([lambda: gym.make("CartPole-v1")])
-# SEED = 42
-# env = make_vec_env(
-#     "seals:seals/CartPole-v0",
-#     rng=np.random.default_rng(SEED),
-#     n_envs=8,
-#     post_wrappers=[lambda env, _: RolloutInfoWrapper(env)],  # to compute rollouts
-# )
 
 reward_net = BasicRewardNet(
     observation_space=env.observation_space,
