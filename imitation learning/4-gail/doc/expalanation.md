@@ -260,6 +260,41 @@ loaded_model = GAIL.load("gail_cartpole")
 This example demonstrates how to use GAIL with Stable-Baselines3 to imitate expert behavior. You can adapt it to your specific environment and expert data.
 
 
+学習が通るようになった！
 
+![alt text](image.png)
 
+__effect of learning__
+
+-----------------------------------------------------
+| mean/                               |             |
+|    disc/disc_acc                    | 0.68        |
+|    disc/disc_acc_expert             | 0.984       |
+|    disc/disc_acc_gen                | 0.375       |
+|    disc/disc_entropy                | 0.692       |
+|    disc/disc_loss                   | 0.673       |
+|    disc/disc_proportion_expert_pred | 0.805       |
+|    disc/disc_proportion_expert_true | 0.5         |
+|    disc/global_step                 | 4           |
+|    disc/n_expert                    | 32          |
+|    disc/n_generated                 | 32          |
+|    gen/rollout/ep_rew_wrapped_mean  | 25.6        |
+|    gen/time/fps                     | 412         |
+|    gen/time/iterations              | 1           |
+|    gen/time/time_elapsed            | 4           |
+|    gen/time/total_timesteps         | 8.19e+03    |
+|    gen/train/approx_kl              | 0.009067494 |
+|    gen/train/clip_fraction          | 0.0816      |
+|    gen/train/clip_range             | 0.2         |
+|    gen/train/entropy_loss           | -0.614      |
+|    gen/train/explained_variance     | 0.392       |
+|    gen/train/learning_rate          | 0.0003      |
+|    gen/train/loss                   | 7.05        |
+|    gen/train/n_updates              | 40          |
+|    gen/train/policy_gradient_loss   | -0.0165     |
+|    gen/train/value_loss             | 26.1        |
+-----------------------------------------------------
+round: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 4/4 [00:25<00:00,  6.32s/it] 
+mean reward after training: 427.49
+mean reward before training: 9.27
 
