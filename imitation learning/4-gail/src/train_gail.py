@@ -6,6 +6,7 @@ from imitation.util.networks import RunningNorm
 import numpy as np
 import gymnasium as gym
 import pickle
+import torch
 import os
 from stable_baselines3.common.evaluation import evaluate_policy
 
@@ -57,6 +58,8 @@ learner_rewards_after_training, _ = evaluate_policy(
 print("mean reward after training:", np.mean(learner_rewards_after_training))
 print("mean reward before training:", np.mean(learner_rewards_before_training))
 
-# Save the trained model
+# 行動生成器の保存
 learner.save(os.path.join(dir_current, "gail_cartpole_ppo"))
+# 識別器の保存
+torch.save(reward_net.state_dict(), os.path.join(dir_current, "gail_cartpole_reward_net.pth"))
 print("train complete and model saved.")
