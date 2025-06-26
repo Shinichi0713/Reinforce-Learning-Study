@@ -22,6 +22,7 @@ acts_list = []
 dones_list = []
 infos_list = []
 
+"""obs, action, reward, next_obs, done"""
 for tup in trajectories:
     obs, act, rew, next_obs, done = tup
     obs_list.append(obs)

@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import gymnasium as gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -11,6 +12,13 @@ from imitation.policies.serialize import load_policy
 from imitation.rewards.reward_nets import BasicRewardNet
 from imitation.util.networks import RunningNorm
 from imitation.util.util import make_vec_env
+import ssl
+import urllib3
+# 全てのSSLコンテキストで証明書検証を無効化
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# requestsの警告も非表示に
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SEED = 42
 
@@ -20,8 +28,9 @@ env = make_vec_env(
     n_envs=8,
     post_wrappers=[lambda env, _: RolloutInfoWrapper(env)],  # to compute rollouts
 )
+dir_current = os.path.dirname(os.path.abspath(__file__))
 expert = load_policy(
-    "ppo-huggingface",
+    os.path.join(dir_current, "ppo-seals-CartPole-v0.zip"),
     organization="HumanCompatibleAI",
     env_name="seals-CartPole-v0",
     venv=env,
