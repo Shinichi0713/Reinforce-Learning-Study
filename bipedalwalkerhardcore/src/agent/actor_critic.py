@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import deque
 import numpy as np
+import random
 
 # 経験再生用のメモリ
 class ReplayBuffer:
@@ -17,10 +18,13 @@ class ReplayBuffer:
         self.buffer.append(experience)
 
     def sample(self):
-        idx = np.random.choice(len(self.buffer), size=self.batch_size, replace=False)
-        return [self.buffer[ii] for ii in idx]
-    
-    def len(self):
+        # idx = np.random.choice(len(self.buffer), size=self.batch_size, replace=False)
+        # return [self.buffer[ii] for ii in idx]
+        batch = random.sample(self.buffer, self.batch_size)
+        state, action, reward, next_state, done = map(np.stack, zip(*batch))
+        return state, action, reward, next_state, done
+
+    def __len__(self):
         return len(self.buffer)
 
 # アクターネットワーク
