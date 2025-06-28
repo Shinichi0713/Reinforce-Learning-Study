@@ -12,7 +12,8 @@ class Environment:
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        return observation, reward, terminated, truncated, info
+        done = terminated or truncated
+        return observation, reward, done, info
 
     def reset(self):
         self.observation, self.info = self.env.reset()

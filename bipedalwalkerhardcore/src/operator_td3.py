@@ -6,69 +6,50 @@ from agent import Actor, Critic, ReplayBuffer
 from environment import Environment
 import torch.nn.functional as F
 
-def train_td3():
-    # 環境の初期化
-    env = Environment(is_train=True)
-    state_dim, action_dim = env.get_dimensions()
-    max_action = float(env.env.action_space.high[0])
-    min_action = float(env.env.action_space.low[0])
 
-    # ネットワークの初期化
-    actor = Actor(state_dim, action_dim, max_action)
-    critic = Critic(state_dim, action_dim)
+class Trainer:
+    def __init__(self, state_dim, action_dim, max_action, min_action):
+        self.actor = Actor(state_dim, action_dim, max_action)
+        self.critic = Critic(state_dim, action_dim)
+        self.max_action = max_action
+        self.min_action = min_action
+        self.replay_buffer = ReplayBuffer(size_max=1000000, batch_size=64)
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=1e-3)
 
-    # オプティマイザの設定
-    actor_optimizer = torch.optim.Adam(actor.parameters(), lr=1e-3)
-    critic_optimizer = torch.optim.Adam(critic.parameters(), lr=1e-3)
+    def save_models(self):
+        self.actor.save()
+        self.critic.save()
 
-    # リプレイバッファの初期化
-    replay_buffer = ReplayBuffer(size_max=1000000, batch_size=64)
+    def select_action(self, state, noise=0.1):
+        state = torch.FloatTensor(state.reshape(1, -1)).to(self.actor.device)
+        action = self.actor(state).detach().cpu().numpy()[0]
+        if noise != 0:
+            action = action + np.random.normal(0, noise, size=action.shape)
+        return np.clip(action, self.min_action, self.max_action)
 
-    # 訓練ループ
-    for episode in range(1000):
-        state = env.reset()
-        done = False
-        episode_reward = 0
-
-        while not done:
-            action = actor(torch.FloatTensor(state)).detach().numpy()
-            next_state, reward, done, _, _ = env.step(action)
-            replay_buffer.add((state, action, reward, next_state, done))
-
-            if replay_buffer.len() > 1000:
-                # バッチサンプリング
-                batch = replay_buffer.sample()
-                states, actions, rewards, next_states, dones = zip(*batch)
-
-                states = torch.FloatTensor(states)
-                actions = torch.FloatTensor(actions)
-                rewards = torch.FloatTensor(rewards).unsqueeze(1)
-                next_states = torch.FloatTensor(next_states)
-                dones = torch.FloatTensor(dones).unsqueeze(1)
-
-                # クリティックの更新
-                with torch.no_grad():
-                    target_actions = actor(next_states)
-                    target_q1, target_q2 = critic(next_states, target_actions)
-                    target_q = rewards + (1 - dones) * 0.99 * torch.min(target_q1, target_q2)
-
-                current_q1, current_q2 = critic(states, actions)
-                critic_loss = F.mse_loss(current_q1, target_q) + F.mse_loss(current_q2, target_q)
-
-                critic_optimizer.zero_grad()
-                critic_loss.backward()
-                critic_optimizer.step()
-
-                # アクターの更新
-                actor_loss = -critic.Q1(states, actor(states)).mean()
-
-                actor_optimizer.zero_grad()
-                actor_loss.backward()
-                actor_optimizer.step()
-
+    def train_td3(self):
+        # 環境の初期化
+        env = Environment(is_train=True)
+        state_dim, action_dim = env.get_dimensions()
+        max_action = float(env.env.action_space.high[0])
+        min_action = float(env.env.action_space.low[0])
+        episodes = 1000
+        for ep in range(episodes):
+            state = env.reset()
+            episode_reward = 0
+            done = False
+            with torch.no_grad():
+                while not done:
+                    action = self.select_action(state)
+                    next_state, reward, done, _ = env.step(action)
+                    self.replay_buffer.add((state, action, reward, next_state, float(done)))
+                    state = next_state
+                    episode_reward += reward
 
 if __name__ == "__main__":
-    train_td3()
+    trainer = Trainer(state_dim=24, action_dim=4, max_action=1.0, min_action=-1.0)
+    trainer.train_td3()
+    trainer.save_models()
     print("Training completed.")
     
 
