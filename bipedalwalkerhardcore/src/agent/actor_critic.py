@@ -1,6 +1,26 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from collections import deque
+import numpy as np
+
+# 経験再生用のメモリ
+class ReplayBuffer:
+    """経験再生用のバッファークラス"""
+    def __init__(self, size_max=5000, batch_size=64):
+        # バッファーの初期化
+        self.buffer = deque(maxlen=size_max)
+        self.batch_size = batch_size
+
+    def add(self, experience):
+        self.buffer.append(experience)
+
+    def sample(self):
+        idx = np.random.choice(len(self.buffer), size=self.batch_size, replace=False)
+        return [self.buffer[ii] for ii in idx]
+    
+    def len(self):
+        return len(self.buffer)
 
 # アクターネットワーク
 class Actor(nn.Module):
