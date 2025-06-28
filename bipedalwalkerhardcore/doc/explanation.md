@@ -89,3 +89,7 @@ It has various important advantages: increased speed of learning, reduced correl
 2. TD3 is model-free, which means that the agent learns the best policy directly from the interactions with environment. Consequently, it does not require knowledge of environment’s dynamics.
 
 ![alt text](image-3.png)
+
+run training!!
+
+![alt text](image-4.png)
