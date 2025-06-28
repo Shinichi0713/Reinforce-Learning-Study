@@ -55,6 +55,37 @@ BipedalWalkerHardcoreは、連続値の行動空間を持つ高難易度のロ�
 - 大規模並列学習と分布的強化学習による高い性能。
 - より複雑な環境や大規模なタスクにも適用可能。
 
+今回TD3を学習したことがないのでTD3を実装する。
+
+## TD3とは
+TD3（Twin Delayed Deep Deterministic Policy Gradient）は、連続行動空間を持つ環境における強化学習のためのオフポリシー型アクター・クリティックアルゴリズムです。2018年に発表され、DDPG（Deep Deterministic Policy Gradient）の改良版として知られています。
+
+### TD3の特徴
+#### 1. 過大評価バイアスの抑制
+DDPGでは、Q関数（価値関数）の推定が過大になる傾向（過大評価バイアス）があり、学習が不安定になることがありました。TD3では、2つの独立したQネットワーク（クリティック）を用意し、2つのQ値のうち小さい方をターゲット値として使用することで、過大評価を抑制します。
+
+#### 2. ターゲットポリシーのスムージング
+ターゲット値を計算する際、ターゲットアクションに小さなノイズを加えてスムージングします。これにより、値関数の過学習や過剰な鋭敏さを防ぎます。
+
+#### 3. 遅延更新（Delayed Policy Updates）
+アクターネットワーク（ポリシー）の更新頻度をクリティックよりも遅くします。これにより、より安定した価値推定のもとでポリシーが更新され、学習が安定します。
+
+### TD3の基本的な流れ
+1. 2つのクリティックネットワークでQ値を計算。
+2. ターゲットアクションにノイズを加えてスムージング。
+3. ターゲットQ値は2つのクリティックの小さい方を利用。
+4. アクター（ポリシー）ネットワークは遅延して更新。
 
 
+![alt text](image-1.png)
 
+https://medium.com/@joanna.z.gryczka/td3-tutorial-and-implementation-682f16b56699
+
+![alt text](image-2.png)
+
+
+1. The algorithm also uses the Replay Buffer, a data structure where past experiences are stored, allowing the agent to learn from its history.
+It has various important advantages: increased speed of learning, reduced correlation between experiences, and reduced chance of catastrophic forgetting by reusing past experiences.
+2. TD3 is model-free, which means that the agent learns the best policy directly from the interactions with environment. Consequently, it does not require knowledge of environment’s dynamics.
+
+![alt text](image-3.png)
