@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,12 +31,28 @@ class Actor(nn.Module):
         self.l2 = nn.Linear(400, 300)
         self.l3 = nn.Linear(300, action_dim)
         self.max_action = max_action
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_nn = os.path.join(dir_current, 'nn_actor_td3.pth')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.__load_state_dict()
+        self.to(self.device)
 
     def forward(self, state):
         a = F.relu(self.l1(state))
         a = F.relu(self.l2(a))
         a = torch.tanh(self.l3(a))
         return self.max_action * a
+
+    def save(self):
+        """モデルのパラメータを保存"""
+        self.cpu()
+        torch.save(self.state_dict(), self.path_nn)
+        self.to(self.device)
+
+    def __load_state_dict(self, strict=True, assign=False):
+        if os.path.isfile(self.path_nn):
+            self.load_state_dict(torch.load(self.path_nn, map_location=self.device), strict=strict)
+            print('...actor network loaded...')
 
 # クリティックネットワーク（Q関数）
 class Critic(nn.Module):
@@ -50,6 +67,12 @@ class Critic(nn.Module):
         self.l4 = nn.Linear(state_dim + action_dim, 400)
         self.l5 = nn.Linear(400, 300)
         self.l6 = nn.Linear(300, 1)
+
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        self.path_nn = os.path.join(dir_current, 'nn_critic_td3.pth')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.__load_state_dict()
+        self.to(self.device)
 
     def forward(self, state, action):
         sa = torch.cat([state, action], 1)
@@ -73,3 +96,17 @@ class Critic(nn.Module):
         q1 = F.relu(self.l2(q1))
         q1 = self.l3(q1)
         return q1
+
+    def save(self):
+        """モデルのパラメータを保存"""
+        self.cpu()
+        torch.save(self.state_dict(), self.path_nn)
+        self.to(self.device)
+
+    def __load_state_dict(self, strict=True):
+        """モデルのパラメータをロード"""
+        if os.path.isfile(self.path_nn):
+            self.load_state_dict(torch.load(self.path_nn), strict=strict)
+            print('...critic network loaded...')
+        else:
+            print('...no critic network found...')

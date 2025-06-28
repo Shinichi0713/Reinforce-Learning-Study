@@ -1,3 +1,3 @@
-from actor_critic import Actor, Critic, ReplayBuffer
+from .actor_critic import Actor, Critic, ReplayBuffer
 
 
