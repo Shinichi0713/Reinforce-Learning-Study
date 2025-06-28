@@ -47,6 +47,8 @@ this is the behavior of actor-critic.
 
 <img src="image/robo-walking.gif" alt="sac" width="300px" height="auto">
 
+### BipedalWalkerHardcore
+now working...
 
 ### TSP
 
@@ -80,6 +82,16 @@ in this case, reward is improved when using imitation learning.
 <img src="image/reward_history_imitation_50.png" alt="jssp-2" width="300px" height="auto">
 
 <img src="image/reward_history_imitation_300.png" alt="jssp-3" width="300px" height="auto">
+
+### IRL-GAIL
+with using stable_baselines3 and imitation, agent is trained with gail.
+the reward is given as below.
+
+| trial no | reward |
+| ------- | ------- |
+| 1st | 289.0 |
+| 2nd | 295.0 |
+| 3rd | 278.0 |
 
 ### arranging boxes
 
