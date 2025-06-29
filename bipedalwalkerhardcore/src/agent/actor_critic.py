@@ -32,8 +32,9 @@ class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action):
         super(Actor, self).__init__()
         self.l1 = nn.Linear(state_dim, 400)
-        self.l2 = nn.Linear(400, 300)
-        self.l3 = nn.Linear(300, action_dim)
+        self.l2 = nn.Linear(400, 400)
+        self.l3 = nn.Linear(400, 300)
+        self.l4 = nn.Linear(300, action_dim)
         self.max_action = max_action
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_nn = os.path.join(dir_current, 'nn_actor_td3.pth')
@@ -44,7 +45,8 @@ class Actor(nn.Module):
     def forward(self, state):
         a = F.relu(self.l1(state))
         a = F.relu(self.l2(a))
-        a = torch.tanh(self.l3(a))
+        a = F.relu(self.l3(a))
+        a = torch.tanh(self.l4(a))
         return self.max_action * a
 
     def save(self):
@@ -53,7 +55,7 @@ class Actor(nn.Module):
         torch.save(self.state_dict(), self.path_nn)
         self.to(self.device)
 
-    def __load_state_dict(self, strict=True, assign=False):
+    def __load_state_dict(self, strict=False, assign=False):
         if os.path.isfile(self.path_nn):
             self.load_state_dict(torch.load(self.path_nn, map_location=self.device), strict=strict)
             print('...actor network loaded...')
@@ -65,12 +67,14 @@ class Critic(nn.Module):
         # Q1 architecture
         self.l1 = nn.Linear(state_dim + action_dim, 400)
         self.l2 = nn.Linear(400, 300)
-        self.l3 = nn.Linear(300, 1)
+        self.l3 = nn.Linear(300, 300)
+        self.l4 = nn.Linear(300, 1)
 
         # Q2 architecture
-        self.l4 = nn.Linear(state_dim + action_dim, 400)
-        self.l5 = nn.Linear(400, 300)
-        self.l6 = nn.Linear(300, 1)
+        self.l5 = nn.Linear(state_dim + action_dim, 400)
+        self.l6 = nn.Linear(400, 300)
+        self.l7 = nn.Linear(300, 300)
+        self.l8 = nn.Linear(300, 1)
 
         dir_current = os.path.dirname(os.path.abspath(__file__))
         self.path_nn = os.path.join(dir_current, 'nn_critic_td3.pth')
@@ -84,12 +88,14 @@ class Critic(nn.Module):
         # Q1 forward
         q1 = F.relu(self.l1(sa))
         q1 = F.relu(self.l2(q1))
-        q1 = self.l3(q1)
+        q1 = F.relu(self.l3(q1))
+        q1 = self.l4(q1)
 
         # Q2 forward
-        q2 = F.relu(self.l4(sa))
-        q2 = F.relu(self.l5(q2))
-        q2 = self.l6(q2)
+        q2 = F.relu(self.l5(sa))
+        q2 = F.relu(self.l6(q2))
+        q2 = F.relu(self.l7(q2))
+        q2 = self.l8(q2)
 
         return q1, q2
 
@@ -107,7 +113,7 @@ class Critic(nn.Module):
         torch.save(self.state_dict(), self.path_nn)
         self.to(self.device)
 
-    def __load_state_dict(self, strict=True):
+    def __load_state_dict(self, strict=False):
         """モデルのパラメータをロード"""
         if os.path.isfile(self.path_nn):
             self.load_state_dict(torch.load(self.path_nn), strict=strict)
