@@ -7,12 +7,12 @@ import torch.nn.functional as F
 import copy
 
 class Trainer:
-    def __init__(self, state_dim, action_dim, max_action, min_action):
+    def __init__(self, max_action, min_action):
         self.env = Environment(is_train=True)
         state_dim, action_dim = self.env.get_dimensions()
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.actor = Actor(state_dim, action_dim, max_action)
+        self.actor = Actor(state_dim, action_dim, self.action_dim)
         self.actor_target = copy.deepcopy(self.actor)
         self.critic = Critic(state_dim, action_dim)
         self.critic_target = copy.deepcopy(self.critic)
@@ -82,7 +82,7 @@ class Trainer:
             for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
                 target_param.data.copy_(tau * param.data + (1 - tau) * target_param.data)
 
-    def train_td3(self, episodes=1000, start_timesteps=10000, expl_noise=0.1):
+    def train_td3(self, episodes=10000, start_timesteps=4000, expl_noise=0.1):
         for ep in range(episodes):
             state = self.env.reset()
             episode_reward = 0
@@ -104,9 +104,34 @@ class Trainer:
                 self.save_models()
                 print(f"Episode {ep + 1}/{episodes}, Reward: {episode_reward}")
 
+def eval():
+    env = Environment(is_train=False)
+    max_action=1.0
+    state_dim, action_dim = env.get_dimensions()
+    actor = Actor(state_dim, action_dim, max_action)
+    actor.eval()
+    # 評価のためのコードをここに追加
+    for ep in range(10):
+        state = env.reset()
+        episode_reward = 0
+        done = False
+        with torch.no_grad():
+            while not done:
+                state = torch.FloatTensor(state.reshape(1, -1)).to(actor.device)
+                action = actor(state)
+                next_state, reward, done, _ = env.step(action.cpu().numpy()[0])
+                state = next_state
+                episode_reward += reward
+                env.render()
+        print(f"Episode {ep + 1}, Reward: {episode_reward}")
+    env.close()
+
 if __name__ == "__main__":
-    trainer = Trainer(state_dim=24, action_dim=4, max_action=1.0, min_action=-1.0)
+    trainer = Trainer(max_action=1.0, min_action=-1.0)
     trainer.train_td3()
     trainer.save_models()
     print("Training completed.")
+
+    eval()
+    print("Evaluation completed.")
 
