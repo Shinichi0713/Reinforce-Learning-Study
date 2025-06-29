@@ -139,8 +139,8 @@ def eval():
     env.close()
 
 if __name__ == "__main__":
-    trainer = Trainer(max_action=1.0, min_action=-1.0)
-    trainer.train_td3()
+    # trainer = Trainer(max_action=1.0, min_action=-1.0)
+    # trainer.train_td3()
     print("Training completed.")
 
     eval()
