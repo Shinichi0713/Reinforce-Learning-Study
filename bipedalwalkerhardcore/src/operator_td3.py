@@ -64,9 +64,10 @@ class Trainer:
         # クリティック損失
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
 
-        # クリティックの更新
+        # クリティックの更新 + 勾配クリッピング
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), max_norm=1.0)
         self.critic_optimizer.step()
 
         # アクターの更新（delayed policy update）
@@ -74,6 +75,7 @@ class Trainer:
             actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
             self.actor_optimizer.zero_grad()
             actor_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), max_norm=1.0)
             self.actor_optimizer.step()
 
             # ターゲットネットワークのsoft update
@@ -82,7 +84,12 @@ class Trainer:
             for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
                 target_param.data.copy_(tau * param.data + (1 - tau) * target_param.data)
 
-    def train_td3(self, episodes=10000, start_timesteps=4000, expl_noise=0.1):
+    def train_td3(self, episodes=10000, start_timesteps=0, expl_noise=0.1, reward_scale=1.0):
+        expl_noise_initial = expl_noise
+        expl_noise_final = 0.01
+        expl_noise_decay = (expl_noise_initial - expl_noise_final) / (episodes * 0.5)
+        expl_noise = expl_noise_initial
+
         for ep in range(episodes):
             state = self.env.reset()
             episode_reward = 0
@@ -93,12 +100,17 @@ class Trainer:
                 else:
                     action = self.select_action(state, noise=expl_noise)
                 next_state, reward, done, _ = self.env.step(action)
+                reward /= reward_scale  # リワード正規化
                 self.replay_buffer.add((state, action, reward, next_state, float(done)))
                 state = next_state
                 episode_reward += reward
 
                 # 学習
                 self.train_once()
+
+            # ノイズ減衰
+            if expl_noise > expl_noise_final:
+                expl_noise -= expl_noise_decay
 
             if ep % 10 == 0:
                 self.save_models()
@@ -129,7 +141,6 @@ def eval():
 if __name__ == "__main__":
     trainer = Trainer(max_action=1.0, min_action=-1.0)
     trainer.train_td3()
-    trainer.save_models()
     print("Training completed.")
 
     eval()
