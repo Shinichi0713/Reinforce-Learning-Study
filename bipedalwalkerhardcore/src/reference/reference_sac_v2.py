@@ -38,24 +38,33 @@ class ReplayBuffer:
 class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action):
         super().__init__()
-        self.l1 = nn.Linear(state_dim, 256)
-        self.l2 = nn.Linear(256, 256)
         self.mean = nn.Linear(256, action_dim)
         self.log_std = nn.Linear(256, action_dim)
         self.max_action = max_action
+        self.mid_layer = nn.Sequential(
+            nn.Linear(state_dim, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.LayerNorm(256)
+        )
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nn_actor_sac.pth')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.__load_state_dict()
         self.to(self.device)
 
     def forward(self, state):
-        x = F.relu(self.l1(state))
-        x = F.relu(self.l2(x))
+        x = self.mid_layer(state)
         mean = self.mean(x)
         log_std = self.log_std(x)
         log_std = torch.clamp(log_std, -20, 2)
         return mean, log_std
 
+    # SACを確率論的な分布に基づき行動選択
     def sample(self, state):
         mean, log_std = self.forward(state)
         std = log_std.exp()
@@ -80,18 +89,67 @@ class Actor(nn.Module):
             self.load_state_dict(torch.load(self.path_nn, map_location=self.device), strict=strict)
             print('...actor network loaded...')
 
+# Vネットワークの追加
+class ValueNetwork(nn.Module):
+    def __init__(self, state_dim):
+        super().__init__()
+        self.l1 = nn.Linear(state_dim, 256)
+        self.l2 = nn.Linear(256, 256)
+        self.v = nn.Linear(256, 1)
+
+        self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nn_value_sac.pth')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.__load_state_dict()
+        self.to(self.device)
+
+    def forward(self, state):
+        x = F.relu(self.l1(state))
+        x = F.relu(self.l2(x))
+        v = self.v(x)
+        return v
+
+    def save(self):
+        """モデルのパラメータを保存"""
+        self.cpu()
+        torch.save(self.state_dict(), self.path_nn)
+        self.to(self.device)
+
+    def __load_state_dict(self, strict=False, assign=False):
+        if os.path.isfile(self.path_nn):
+            self.load_state_dict(torch.load(self.path_nn, map_location=self.device), strict=strict)
+            print('...value network loaded...')
+
+
 # SAC用クリティックネットワーク
 class Critic(nn.Module):
     def __init__(self, state_dim, action_dim):
         super().__init__()
         # Q1
-        self.l1 = nn.Linear(state_dim + action_dim, 256)
-        self.l2 = nn.Linear(256, 256)
-        self.l3 = nn.Linear(256, 1)
+        self.mid_layer_q1 = nn.Sequential(
+            nn.Linear(state_dim + action_dim, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.LayerNorm(256)
+        )
+        self.fc_q1 = nn.Linear(256, 1)
         # Q2
-        self.l4 = nn.Linear(state_dim + action_dim, 256)
-        self.l5 = nn.Linear(256, 256)
-        self.l6 = nn.Linear(256, 1)
+        self.mid_layer_q2 = nn.Sequential(
+            nn.Linear(state_dim + action_dim, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.Linear(256, 256),
+            nn.GELU(),
+            nn.LayerNorm(256)
+        )
+        self.fc_q2 = nn.Linear(256, 1)
 
         self.path_nn = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nn_critic_sac.pth')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -100,13 +158,11 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         sa = torch.cat([state, action], 1)
-        q1 = F.relu(self.l1(sa))
-        q1 = F.relu(self.l2(q1))
-        q1 = self.l3(q1)
+        q1 = self.mid_layer_q1(sa)
+        q1 = self.fc_q1(q1)
 
-        q2 = F.relu(self.l4(sa))
-        q2 = F.relu(self.l5(q2))
-        q2 = self.l6(q2)
+        q2 = self.mid_layer_q2(sa)
+        q2 = F.relu(self.fc_q2(q2))
         return q1, q2
 
     def save(self):
@@ -125,11 +181,14 @@ class SACAgent:
     def __init__(self, state_dim, action_dim, max_action, device):
         self.actor = Actor(state_dim, action_dim, max_action).to(device)
         self.critic = Critic(state_dim, action_dim).to(device)
+        self.value_net = ValueNetwork(state_dim).to(device)
+        self.value_target = ValueNetwork(state_dim).to(device)
         self.critic_target = Critic(state_dim, action_dim).to(device)
         self.critic_target.load_state_dict(self.critic.state_dict())
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=3e-4)
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=3e-4)
-
+        self.value_optimizer = optim.Adam(self.value_net.parameters(), lr=3e-4)
+        self.value_target.load_state_dict(self.value_net.state_dict())
         self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
         self.alpha_optimizer = optim.Adam([self.log_alpha], lr=3e-4)
         self.target_entropy = -action_dim
@@ -157,12 +216,24 @@ class SACAgent:
         next_state = torch.FloatTensor(next_state).to(self.device)
         done = torch.FloatTensor(done).unsqueeze(1).to(self.device)
 
-        # Critic update
+        # --- 1. Valueネットワークの更新 ---
         with torch.no_grad():
-            next_action, next_log_prob = self.actor.sample(next_state)
-            target_q1, target_q2 = self.critic_target(next_state, next_action)
-            target_q = torch.min(target_q1, target_q2) - torch.exp(self.log_alpha) * next_log_prob
-            target_q = reward + (1 - done) * self.gamma * target_q
+            new_action, new_log_prob = self.actor.sample(state)
+            q1_new, q2_new = self.critic(state, new_action)
+            min_q_new = torch.min(q1_new, q2_new)
+            v_target = min_q_new - torch.exp(self.log_alpha) * new_log_prob
+
+        v = self.value_net(state)
+        value_loss = F.mse_loss(v, v_target)
+
+        self.value_optimizer.zero_grad()
+        value_loss.backward()
+        self.value_optimizer.step()
+
+        # --- 2. Criticネットワークの更新 ---
+        with torch.no_grad():
+            next_v = self.value_target(next_state)
+            target_q = reward + (1 - done) * self.gamma * next_v
 
         current_q1, current_q2 = self.critic(state, action)
         critic_loss = F.mse_loss(current_q1, target_q) + F.mse_loss(current_q2, target_q)
@@ -171,25 +242,31 @@ class SACAgent:
         critic_loss.backward()
         self.critic_optimizer.step()
 
-        # Actor update
+        # アクターの更新
         new_action, log_prob = self.actor.sample(state)
         q1_new, q2_new = self.critic(state, new_action)
-        actor_loss = (torch.exp(self.log_alpha) * log_prob - torch.min(q1_new, q2_new)).mean()
+        v = self.value_net(state).detach()
+        advantage = torch.min(q1_new, q2_new) - v
+        actor_loss = (torch.exp(self.log_alpha) * log_prob - advantage).mean()
 
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
 
-        # Alpha update
+        # --- 4. Alphaの更新 ---
         alpha_loss = -(self.log_alpha * (log_prob + self.target_entropy).detach()).mean()
 
         self.alpha_optimizer.zero_grad()
         alpha_loss.backward()
         self.alpha_optimizer.step()
 
-        # Target network update
+        # --- 5. ターゲットネットワークのソフトアップデート ---
         for param, target_param in zip(self.critic.parameters(), self.critic_target.parameters()):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
+        for param, target_param in zip(self.value_net.parameters(), self.value_target.parameters()):
+            target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
+
+        return actor_loss, critic_loss, alpha_loss
 
     def save_models(self):
         self.actor.save()
@@ -211,8 +288,12 @@ def main():
     start_timesteps = 10000
     batch_size = 256
     episode_rewards = []
-
+    mode_exploration = True  # 初期は探索モード
     total_steps = 0
+
+    loss_actor_history = []
+    loss_critic_history = []
+    loss_alpha_history = []
     for episode in range(episodes):
         # reset
         reset_result = env.reset()
@@ -222,12 +303,17 @@ def main():
             state = reset_result
         state = np.array(state, dtype=np.float32)
         episode_reward = 0
+        episode_loss_actor = 0
+        episode_loss_critic = 0
+        episode_loss_alpha = 0
+        count_episode = 1e-4
         done = False
         while not done:
             if total_steps < start_timesteps:
                 action = env.action_space.sample()
             else:
                 action = agent.select_action(state)
+                mode_exploration = False  # 探索モードを終了
             action = np.clip(action, env.action_space.low, env.action_space.high)
             # actionの選択
             # action = agent.select_action(state)
@@ -246,15 +332,39 @@ def main():
             total_steps += 1
 
             if total_steps >= start_timesteps and len(replay_buffer) > batch_size:
-                agent.train(replay_buffer, batch_size)
-
+                actor_loss, critic_loss, alpha_loss = agent.train(replay_buffer, batch_size)
+                episode_loss_actor += actor_loss.item()
+                episode_loss_critic += critic_loss.item()
+                episode_loss_alpha += alpha_loss.item()
+                count_episode += 1
+                
         episode_rewards.append(episode_reward)
-        print(f"Episode {episode}, Reward: {episode_reward}")
+        loss_actor_history.append(episode_loss_actor / count_episode)
+        loss_critic_history.append(episode_loss_critic / count_episode)
+        loss_alpha_history.append(episode_loss_alpha / count_episode)
+
+        # 進捗の表示(探索モードかではないかはわかるようにする)
+        if mode_exploration:
+            print(f"Exploration mode: Episode {episode}, Reward: {episode_reward}")
+        else:
+            print(f"Episode {episode}, Reward: {episode_reward}")
 
         # 100エピソードごとに平均報酬を表示
         if (episode + 1) % 100 == 0:
             print(f"Last 100 episodes average reward: {np.mean(episode_rewards[-100:])}")
             agent.save_models()
+
+    # ログファイルに書き込む
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    write_log(os.path.join(dir_current, 'loss_sac_actor.txt'), loss_actor_history)
+    write_log(os.path.join(dir_current, 'loss_sac_critic.txt'), loss_critic_history)
+    write_log(os.path.join(dir_current, 'loss_sac_alpha.txt'), loss_alpha_history)
+    write_log(os.path.join(dir_current, 'reward_sac.txt'), episode_rewards)
+
+# ログファイルに書き込む関数
+def write_log(file_path, data):
+    with open(file_path, 'w' , encoding='utf-8') as f:
+        f.writelines([f"{item}\n" for item in data])
 
 if __name__ == "__main__":
     main()
