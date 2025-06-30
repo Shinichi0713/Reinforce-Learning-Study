@@ -271,6 +271,7 @@ class SACAgent:
     def save_models(self):
         self.actor.save()
         self.critic.save()
+        self.value_net.save()
 
 # --- メイン学習ループ ---
 
@@ -284,8 +285,8 @@ def main():
     agent = SACAgent(state_dim, action_dim, max_action, device)
     replay_buffer = ReplayBuffer(size_max=1000000, batch_size=256)
 
-    episodes = 1000
-    start_timesteps = 10000
+    episodes = 10000
+    start_timesteps = 20000
     batch_size = 256
     episode_rewards = []
     mode_exploration = True  # 初期は探索モード
