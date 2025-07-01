@@ -275,7 +275,31 @@ class SACAgent:
 
 # --- メイン学習ループ ---
 
-def main():
+
+def eval():
+    env = gym.make('BipedalWalkerHardcore-v3', render_mode='human')
+    state_dim = env.observation_space.shape[0]
+    action_dim = env.action_space.shape[0]
+    max_action = float(env.action_space.high[0])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    agent = SACAgent(state_dim, action_dim, max_action, device)
+    agent.eval()
+
+    episodes = 10
+    for episode in range(episodes):
+        state = env.reset()
+        done = False
+        while not done:
+            state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            action = agent(state)
+            next_state, reward, done, _ = env.step(action.cpu().data.numpy())
+            agent.replay_buffer.add((state, action, reward, next_state, done))
+            state = next_state
+            env.render()
+
+
+def train():
     env = gym.make('BipedalWalkerHardcore-v3')
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
@@ -369,3 +393,5 @@ def write_log(file_path, data):
 
 if __name__ == "__main__":
     main()
+
+    eval()
