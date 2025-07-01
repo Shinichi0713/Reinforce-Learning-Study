@@ -7,6 +7,7 @@ import torch.optim as optim
 import numpy as np
 import random
 from collections import deque
+import pickle
 
 # --- ReplayBufferはご提示のものを使ってください ---
 class ReplayBuffer:
@@ -108,6 +109,8 @@ class Memory:  # stored as ( s, a, r, s_ ) in SumTree
     def __init__(self, capacity):
         self.tree = SumTree(capacity)
         self.capacity = capacity
+        self.path_memory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'memory.pkl')
+        self.__load()  # Load existing memory if available
 
     def _get_priority(self, error):
         return (np.abs(error) + self.e) ** self.a
@@ -146,6 +149,33 @@ class Memory:  # stored as ( s, a, r, s_ ) in SumTree
     def update(self, idx, error):
         p = self._get_priority(error)
         self.tree.update(idx, p)
+
+    def save(self):
+        # pickleで保存するデータをdictにまとめる
+        save_dict = {
+            'tree': self.tree.tree,
+            'data': self.tree.data,
+            'write': self.tree.write,
+            'n_entries': self.tree.n_entries,
+            'capacity': self.capacity,
+            'beta': self.beta,
+        }
+        with open(self.path_memory, 'wb') as f:
+            pickle.dump(save_dict, f)
+
+    def __load(self):
+        if os.path.exists(self.path_memory) is False:
+            print(f"Memory file {self.path_memory} does not exist. Initializing new memory.")
+            return
+        with open(self.path_memory, 'rb') as f:
+            load_dict = pickle.load(f)
+        self.capacity = load_dict['capacity']
+        self.tree = SumTree(self.capacity)
+        self.tree.tree = load_dict['tree']
+        self.tree.data = load_dict['data']
+        self.tree.write = load_dict['write']
+        self.tree.n_entries = load_dict['n_entries']
+        self.beta = load_dict.get('beta', 0.4)  # 互換性のため
 
 
 # SAC用アクターネットワーク
@@ -512,6 +542,7 @@ def train():
         if (episode + 1) % 100 == 0:
             print(f"Last 100 episodes average reward: {np.mean(episode_rewards[-100:])}")
             agent.save_models()
+            replay_buffer.save()  # メモリの保存
 
     # ログファイルに書き込む
     dir_current = os.path.dirname(os.path.abspath(__file__))
