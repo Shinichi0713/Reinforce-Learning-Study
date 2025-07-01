@@ -34,6 +34,120 @@ class ReplayBuffer:
 
     def __len__(self):
         return len(self.buffer)
+    
+
+class SumTree:
+    write = 0
+
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.tree = np.zeros(2 * capacity - 1)
+        self.data = np.zeros(capacity, dtype=object)
+        self.n_entries = 0
+
+    # update to the root node
+    def _propagate(self, idx, change):
+        parent = (idx - 1) // 2
+
+        self.tree[parent] += change
+
+        if parent != 0:
+            self._propagate(parent, change)
+
+    # find sample on leaf node
+    def _retrieve(self, idx, s):
+        left = 2 * idx + 1
+        right = left + 1
+
+        if left >= len(self.tree):
+            return idx
+
+        if s <= self.tree[left]:
+            return self._retrieve(left, s)
+        else:
+            return self._retrieve(right, s - self.tree[left])
+
+    def total(self):
+        return self.tree[0]
+
+    # store priority and sample
+    def add(self, p, data):
+        idx = self.write + self.capacity - 1
+
+        self.data[self.write] = data
+        self.update(idx, p)
+
+        self.write += 1
+        if self.write >= self.capacity:
+            self.write = 0
+
+        if self.n_entries < self.capacity:
+            self.n_entries += 1
+
+    # update priority
+    def update(self, idx, p):
+        change = p - self.tree[idx]
+
+        self.tree[idx] = p
+        self._propagate(idx, change)
+
+    # get priority and sample
+    def get(self, s):
+        idx = self._retrieve(0, s)
+        dataIdx = idx - self.capacity + 1
+
+        return (idx, self.tree[idx], self.data[dataIdx])
+
+
+class Memory:  # stored as ( s, a, r, s_ ) in SumTree
+    e = 0.01
+    a = 0.6
+    beta = 0.4
+    beta_increment_per_sampling = 0.001
+
+    def __init__(self, capacity):
+        self.tree = SumTree(capacity)
+        self.capacity = capacity
+
+    def _get_priority(self, error):
+        return (np.abs(error) + self.e) ** self.a
+
+    def __len__(self):
+        return self.tree.n_entries
+
+    def add(self, error, sample):
+        p = self._get_priority(error)
+        self.tree.add(p, sample)
+
+    def sample(self, n=64):
+        batch = []
+        idxs = []
+        segment = self.tree.total() / n
+        priorities = []
+
+        self.beta = np.min([1., self.beta + self.beta_increment_per_sampling])
+
+        for i in range(n):
+            a = segment * i
+            b = segment * (i + 1)
+
+            s = random.uniform(a, b)
+            (idx, p, data) = self.tree.get(s)
+            priorities.append(p)
+            batch.append(data)
+            idxs.append(idx)
+
+        sampling_probabilities = priorities / self.tree.total()
+        is_weight = np.power(self.tree.n_entries * sampling_probabilities, -self.beta)
+        is_weight /= is_weight.max()
+
+        return batch, idxs, is_weight
+
+    def update(self, idx, error):
+        p = self._get_priority(error)
+        self.tree.update(idx, p)
+
+
 # SAC用アクターネットワーク
 class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action):
@@ -195,8 +309,8 @@ class SACAgent:
 
         self.device = device
         self.max_action = max_action
-        self.gamma = 0.99
-        self.tau = 0.005
+        self.gamma = 0.90
+        self.tau = 0.012
 
     def select_action(self, state, eval=False):
         state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
@@ -208,23 +322,29 @@ class SACAgent:
             action, _ = self.actor.sample(state)
             return action.cpu().data.numpy().flatten()
 
-    def train(self, replay_buffer, batch_size=256):
-        state, action, reward, next_state, done = replay_buffer.sample()
-        state = torch.FloatTensor(state).to(self.device)
-        action = torch.FloatTensor(action).to(self.device)
-        reward = torch.FloatTensor(reward).unsqueeze(1).to(self.device)
-        next_state = torch.FloatTensor(next_state).to(self.device)
-        done = torch.FloatTensor(done).unsqueeze(1).to(self.device)
+    def train(self, memory, batch_size=256):
+        # state, action, reward, next_state, done = replay_buffer.sample()
+        # PERからサンプル
+        batch, idxs, is_weights = memory.sample(batch_size)
+        states, actions, rewards, next_states, dones = map(np.stack, zip(*batch))
+
+        # テンソル化
+        states = torch.FloatTensor(states).to(self.device)
+        actions = torch.FloatTensor(actions).to(self.device)
+        rewards = torch.FloatTensor(rewards).unsqueeze(1).to(self.device)
+        next_states = torch.FloatTensor(next_states).to(self.device)
+        dones = torch.FloatTensor(dones).unsqueeze(1).to(self.device)
+        is_weights = torch.FloatTensor(is_weights).unsqueeze(1).to(self.device)
 
         # --- 1. Valueネットワークの更新 ---
         with torch.no_grad():
-            new_action, new_log_prob = self.actor.sample(state)
-            q1_new, q2_new = self.critic(state, new_action)
+            new_action, new_log_prob = self.actor.sample(states)
+            q1_new, q2_new = self.critic(states, new_action)
             min_q_new = torch.min(q1_new, q2_new)
             v_target = min_q_new - torch.exp(self.log_alpha) * new_log_prob
 
-        v = self.value_net(state)
-        value_loss = F.mse_loss(v, v_target)
+        v = self.value_net(states)
+        value_loss = (F.mse_loss(v, v_target, reduction='none') * is_weights).mean()
 
         self.value_optimizer.zero_grad()
         value_loss.backward()
@@ -232,20 +352,25 @@ class SACAgent:
 
         # --- 2. Criticネットワークの更新 ---
         with torch.no_grad():
-            next_v = self.value_target(next_state)
-            target_q = reward + (1 - done) * self.gamma * next_v
+            next_v = self.value_target(next_states)
+            target_q = rewards + (1 - dones) * self.gamma * next_v
 
-        current_q1, current_q2 = self.critic(state, action)
-        critic_loss = F.mse_loss(current_q1, target_q) + F.mse_loss(current_q2, target_q)
+        current_q1, current_q2 = self.critic(states, actions)
+        td_error1 = torch.abs(current_q1.detach() - target_q)
+        td_error2 = torch.abs(current_q2.detach() - target_q)
+        td_error = (td_error1 + td_error2) / 2
+
+        critic_loss = ((F.mse_loss(current_q1, target_q, reduction='none') + 
+                        F.mse_loss(current_q2, target_q, reduction='none')) * is_weights).mean()
 
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
         self.critic_optimizer.step()
 
-        # アクターの更新
-        new_action, log_prob = self.actor.sample(state)
-        q1_new, q2_new = self.critic(state, new_action)
-        v = self.value_net(state).detach()
+        # --- 3. アクターの更新 ---
+        new_action, log_prob = self.actor.sample(states)
+        q1_new, q2_new = self.critic(states, new_action)
+        v = self.value_net(states).detach()
         advantage = torch.min(q1_new, q2_new) - v
         actor_loss = (torch.exp(self.log_alpha) * log_prob - advantage).mean()
 
@@ -266,7 +391,12 @@ class SACAgent:
         for param, target_param in zip(self.value_net.parameters(), self.value_target.parameters()):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
 
-        return actor_loss, critic_loss, alpha_loss
+        # --- 6. PERの優先度更新 ---
+        # サンプルごとにTD誤差で更新
+        td_errors = td_error.cpu().data.numpy().flatten()
+        for idx, error in zip(idxs, td_errors):
+            memory.update(idx, error)
+        return actor_loss.item(), critic_loss.item(), alpha_loss.item()
 
     def save_models(self):
         self.actor.save()
@@ -274,8 +404,6 @@ class SACAgent:
         self.value_net.save()
 
 # --- メイン学習ループ ---
-
-
 def eval():
     env = gym.make('BipedalWalkerHardcore-v3', render_mode='human')
     state_dim = env.observation_space.shape[0]
@@ -283,18 +411,22 @@ def eval():
     max_action = float(env.action_space.high[0])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    agent = SACAgent(state_dim, action_dim, max_action, device)
+    agent = Actor(state_dim, action_dim, max_action).to(device)
     agent.eval()
 
     episodes = 10
     for episode in range(episodes):
-        state = env.reset()
+        state = env.reset()[0]
         done = False
         while not done:
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
-            action = agent(state)
-            next_state, reward, done, _ = env.step(action.cpu().data.numpy())
-            agent.replay_buffer.add((state, action, reward, next_state, done))
+            action, _ = agent(state)
+            step_result = env.step(action.cpu().data.numpy().flatten())
+            if len(step_result) == 5:
+                next_state, reward, terminated, truncated, info = step_result
+                done = terminated or truncated
+            else:
+                next_state, reward, done, info = step_result
             state = next_state
             env.render()
 
@@ -307,7 +439,8 @@ def train():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     agent = SACAgent(state_dim, action_dim, max_action, device)
-    replay_buffer = ReplayBuffer(size_max=1000000, batch_size=256)
+    # replay_buffer = ReplayBuffer(size_max=100000, batch_size=256)
+    replay_buffer = Memory(capacity=100000)
 
     episodes = 10000
     start_timesteps = 20000
@@ -351,16 +484,17 @@ def train():
             next_state = np.array(next_state, dtype=np.float32)
 
             # bufferに格納
-            replay_buffer.add((state, action, reward, next_state, float(done)))
+            # replay_buffer.add((state, action, reward, next_state, float(done)))
+            replay_buffer.add(error=1.0, sample=(state, action, reward, next_state, float(done)))
             state = next_state
             episode_reward += reward
             total_steps += 1
 
             if total_steps >= start_timesteps and len(replay_buffer) > batch_size:
                 actor_loss, critic_loss, alpha_loss = agent.train(replay_buffer, batch_size)
-                episode_loss_actor += actor_loss.item()
-                episode_loss_critic += critic_loss.item()
-                episode_loss_alpha += alpha_loss.item()
+                episode_loss_actor += actor_loss
+                episode_loss_critic += critic_loss
+                episode_loss_alpha += alpha_loss
                 count_episode += 1
                 
         episode_rewards.append(episode_reward)
@@ -392,6 +526,6 @@ def write_log(file_path, data):
         f.writelines([f"{item}\n" for item in data])
 
 if __name__ == "__main__":
-    main()
+    train()
 
     eval()

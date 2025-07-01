@@ -48,7 +48,9 @@ this is the behavior of actor-critic.
 <img src="image/robo-walking.gif" alt="sac" width="300px" height="auto">
 
 ### BipedalWalkerHardcore
-now working...
+with using sac, the agent gradually walk...
+
+<img src="image/bipedal_walker_v1.gif" alt="sac" width="300px" height="auto">
 
 ### TSP
 
