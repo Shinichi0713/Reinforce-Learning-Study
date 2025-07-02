@@ -1,0 +1,7 @@
+Box2D
+gym
+matplotlib
+numpy
+PyYAML>=5.4
+torch
+Pillow>=8.2.0
