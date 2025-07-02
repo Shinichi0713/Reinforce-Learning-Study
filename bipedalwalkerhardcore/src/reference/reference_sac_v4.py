@@ -1,3 +1,4 @@
+# sacによる成功コード
 import numpy as np
 import torch
 import random
@@ -26,11 +27,12 @@ EPS = 0.003
 
 class ReplayBuffer:
     """Simle experience replay buffer for deep reinforcement algorithms."""
-    def __init__(self, action_size, buffer_size, batch_size, device):
+    def __init__(self, action_size, buffer_size, batch_size, device, seq_len=18):
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  
         self.device = device
         self.batch_size = batch_size
+        self.seq_len = seq_len
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         
     
@@ -39,15 +41,16 @@ class ReplayBuffer:
         self.memory.append(e)
     
     def sample(self):
-        experiences = random.sample(self.memory, k=self.batch_size)
-
-        states = torch.from_numpy(np.stack([e.state for e in experiences if e is not None], axis=0)).float().to(self.device)
-        actions = torch.from_numpy(np.stack([e.action for e in experiences if e is not None], axis=0)).float().to(self.device)
-        rewards = torch.from_numpy(np.stack([e.reward for e in experiences if e is not None], axis=0)).float().unsqueeze(-1).to(self.device)
-        next_states = torch.from_numpy(np.stack([e.next_state for e in experiences if e is not None], axis=0)).float().to(self.device)
-        dones = torch.from_numpy(np.stack([e.done for e in experiences if e is not None], axis=0).astype(np.uint8)).float().unsqueeze(-1).to(self.device)
-
-        return (states, actions, rewards, next_states, dones)
+        batch = random.sample(self.memory, self.batch_size)
+        state_seq, action, reward, next_state, done = map(np.stack, zip(*batch))
+        # state_seq: [batch, 18, 24]
+        return (
+            torch.from_numpy(state_seq).float(),      # [batch, 18, 24]
+            torch.from_numpy(action).float(),
+            torch.from_numpy(reward).unsqueeze(1).float(),
+            torch.from_numpy(next_state).float(),
+            torch.from_numpy(done).unsqueeze(1).float()
+        )
 
     def __len__(self):
         return len(self.memory)
@@ -123,7 +126,11 @@ class SACAgent():
     def learn(self, exp):
         self.learn_call+=1
         states, actions, rewards, next_states, done = exp
-        
+        states = states.to(self.device)
+        actions = actions.to(self.device)
+        rewards = rewards.to(self.device)
+        next_states = next_states.to(self.device)
+        done = done.to(self.device)
         #update critic
         with torch.no_grad():
             next_actions, next_entropies = self.train_actor(next_states)
@@ -255,21 +262,35 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
     scores_deque = deque(maxlen=100)
     scores = []
     test_scores = []
+    seq_len = 18
     max_score = -np.inf
     for i_episode in range(1, n_episodes+1):
         state = env.reset()[0]
-        score = 0
+        state_history = deque(maxlen=seq_len)
+        state_history.append(state)
         done = False
-        agent.train_mode()
-        t = int(0)
-        while not done and t < max_t_step:    
-            t += int(1)
-            action = agent.get_action(state, explore=True)
-            action = action.clip(min=env.action_space.low, max=env.action_space.high)
+        score = 0.0
+        while not done:
+            # 履歴をパディングしてActorに渡す
+            action = get_action_with_padding(agent, state_history, state_dim, seq_len, agent.device)
             next_state, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
-            agent.memory.add(state, action, reward, next_state, done)
 
+            # 次の履歴を用意
+            next_state_history = deque(state_history, maxlen=seq_len)
+            next_state_history.append(next_state)
+
+            if len(state_history) == seq_len:
+                agent.memory.add(
+                    list(state_history),         # 現在の履歴
+                    action,
+                    reward,
+                    list(next_state_history),    # 次の履歴
+                    done
+                )
+
+            state_history.append(next_state)
+            state = next_state
             state = next_state
             score += reward
             agent.step_end()
@@ -278,8 +299,7 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
 
         if i_episode>explore_episode:
             agent.episode_end()
-            for i in range(t):
-                agent.learn_one_step()
+            agent.learn_one_step()
 
         scores_deque.append(score)
         avg_score_100 = np.mean(scores_deque)
@@ -299,6 +319,21 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
     return np.array(scores).transpose()
     # return np.array(scores).transpose(), np.array(test_scores).transpose()
 
+
+def get_action_with_padding(agent, state_history, state_dim, seq_len, device, explore=True):
+    # state_history: deque([state, ...], maxlen=seq_len)
+    # state_dim: 24
+    # seq_len: 18
+    history = list(state_history)
+    # パディング
+    if len(history) < seq_len:
+        pad = [history[0]] * (seq_len - len(history))  # 最初の状態で埋める
+        history = pad + history
+    states_arr = np.stack(history)  # [seq_len, state_dim]
+    states_arr = states_arr[np.newaxis, ...]  # [1, seq_len, state_dim]
+    states_tensor = torch.from_numpy(states_arr).float().to(device)
+    action, _ = agent.train_actor(states_tensor, explore=explore)
+    return action.cpu().data.numpy()[0]
 
 # --- 実行例 ---
 if __name__ == "__main__":
