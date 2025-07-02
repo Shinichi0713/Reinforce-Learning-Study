@@ -385,7 +385,7 @@ class SACAgent:
         rewards = torch.FloatTensor(rewards).unsqueeze(1).to(self.device)
         next_states = torch.FloatTensor(next_states).to(self.device)
         dones = torch.FloatTensor(dones).unsqueeze(1).to(self.device)
-        is_weights = torch.FloatTensor(is_weights).unsqueeze(1).to(self.device)
+        # is_weights = torch.FloatTensor(is_weights).unsqueeze(1).to(self.device)
 
         # --- 1. Valueネットワークの更新 ---
         with torch.no_grad():
@@ -395,7 +395,8 @@ class SACAgent:
             v_target = min_q_new - torch.exp(self.log_alpha) * new_log_prob
 
         v = self.value_net(states)
-        value_loss = (F.mse_loss(v, v_target, reduction='none') * is_weights).mean()
+        # value_loss = (F.mse_loss(v, v_target, reduction='none') * is_weights).mean()
+        value_loss = F.mse_loss(v, v_target)
 
         self.value_optimizer.zero_grad()
         value_loss.backward()
@@ -411,8 +412,10 @@ class SACAgent:
         td_error2 = torch.abs(current_q2.detach() - target_q)
         td_error = (td_error1 + td_error2) / 2
 
-        critic_loss = ((F.mse_loss(current_q1, target_q, reduction='none') + 
-                        F.mse_loss(current_q2, target_q, reduction='none')) * is_weights).mean()
+        # critic_loss = ((F.mse_loss(current_q1, target_q, reduction='none') + 
+        #                 F.mse_loss(current_q2, target_q, reduction='none')) * is_weights).mean()
+        critic_loss = (F.mse_loss(current_q1, target_q, reduction='none') + 
+                        F.mse_loss(current_q2, target_q, reduction='none')).mean()
 
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
