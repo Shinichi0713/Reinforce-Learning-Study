@@ -94,21 +94,23 @@ class SACAgent():
         self.clip_low = torch.tensor(clip_low)
         self.clip_high = torch.tensor(clip_high)
 
-        self.train_actor = Actor(stochastic=True).to(self.device)
+        self.train_actor = Actor(stochastic=True).cpu()
         self.actor_optim = torch.optim.AdamW(self.train_actor.parameters(), lr=lr, weight_decay=weight_decay, amsgrad=True)
         print(f'Number of paramters of Actor Net: {sum(p.numel() for p in self.train_actor.parameters())}')
         
-        self.train_critic_1 = Critic().to(self.device)
+        self.train_critic_1 = Critic().cpu()
         self.target_critic_1 = Critic().to(self.device).eval()
         self.hard_update(self.train_critic_1, self.target_critic_1) # hard update at the beginning
         self.critic_1_optim = torch.optim.AdamW(self.train_critic_1.parameters(), lr=lr, weight_decay=weight_decay, amsgrad=True)
 
-        self.train_critic_2 = Critic().to(self.device)
+        self.train_critic_2 = Critic().cpu()
         self.target_critic_2 = Critic().to(self.device).eval()
         self.hard_update(self.train_critic_2, self.target_critic_2) # hard update at the beginning
         self.critic_2_optim = torch.optim.AdamW(self.train_critic_2.parameters(), lr=lr, weight_decay=weight_decay, amsgrad=True)
         print(f'Number of paramters of Single Critic Net: {sum(p.numel() for p in self.train_critic_2.parameters())}')
         
+        # load
+        self.load_ckpt()
         self.memory= ReplayBuffer(action_size= action_size, buffer_size= buffer_size, \
             batch_size= self.batch_size, device=self.device)
 
@@ -193,24 +195,35 @@ class SACAgent():
             target_param.data.copy_(local_param.data)
 
     def save_ckpt(self, model_type, env_type, prefix='last'):
-        actor_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "actor.pth"]))
-        critic_1_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_1.pth"]))
-        critic_2_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_2.pth"]))
+        dir_current = os.path.abspath(os.path.dirname(__file__))
+        actor_file = os.path.join(dir_current, "actor.pth")
+        critic_1_file = os.path.join(dir_current, "critic_1.pth")
+        critic_2_file = os.path.join(dir_current, "critic_2.pth")
+        self.train_actor.cpu()
+        self.train_critic_1.cpu()
+        self.train_critic_2.cpu()
         torch.save(self.train_actor.state_dict(), actor_file)
         torch.save(self.train_critic_1.state_dict(), critic_1_file)
         torch.save(self.train_critic_2.state_dict(), critic_2_file)
+        self.train_actor.to(self.device)
+        self.train_critic_1.to(self.device)
+        self.train_critic_2.to(self.device)
 
-    def load_ckpt(self, model_type, env_type, prefix='last'):
-        actor_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "actor.pth"]))
-        critic_1_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_1.pth"]))
-        critic_2_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_2.pth"]))
+    def load_ckpt(self):
+        dir_current = os.path.dirname(os.path.abspath(__file__))
+        actor_file = os.path.join(dir_current, "actor.pth")
+        critic_1_file = os.path.join(dir_current, "critic_1.pth")
+        critic_2_file = os.path.join(dir_current, "critic_2.pth")
         try:
-            self.train_actor.load_state_dict(torch.load(actor_file, map_location=self.device))
+            self.train_actor.load_state_dict(torch.load(actor_file))
+            self.train_actor.to(self.device)
         except:
             print("Actor checkpoint cannot be loaded.")
         try:
-            self.train_critic_1.load_state_dict(torch.load(critic_1_file, map_location=self.device))
-            self.train_critic_2.load_state_dict(torch.load(critic_2_file, map_location=self.device))
+            self.train_critic_1.load_state_dict(torch.load(critic_1_file))
+            self.train_critic_1.to(self.device)
+            self.train_critic_2.load_state_dict(torch.load(critic_2_file))
+            self.train_critic_2.to(self.device)
         except:
             print("Critic checkpoints cannot be loaded.")              
 
@@ -306,15 +319,15 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
         scores.append((i_episode, score, avg_score_100))
         print('\rEpisode {}\tAverage Score: {:.2f}\tScore: {:.2f}'.format(i_episode, avg_score_100, score), end="")
 
-        # if i_episode % test_f == 0 or avg_score_100>score_limit:
+        if i_episode % 100 == 0:
         #     print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)))
         #     agent.eval_mode() # test in eval mode.
         #     test_score = test(env, agent, render=False, n_times=20)
         #     test_scores.append((i_episode, test_score))
-        #     agent.save_ckpt(model_type, env_type,'ep'+str(int(i_episode)))
+            agent.save_ckpt(model_type, env_type,'ep'+str(int(i_episode)))
         #     if avg_score_100>score_limit:
         #         break
-        #     agent.train_mode() # when the test done, come back to train mode.
+            agent.train_mode() # when the test done, come back to train mode.
 
     return np.array(scores).transpose()
     # return np.array(scores).transpose(), np.array(test_scores).transpose()
