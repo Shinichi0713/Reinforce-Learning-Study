@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import random
-from collections import deque
+from collections import deque, namedtuple
 import os
 from itertools import chain
 import gym
@@ -25,64 +25,46 @@ EPS = 0.003
 
 
 class ReplayBuffer:
-    """経験再生用のバッファークラス"""
-    def __init__(self, buffer_size=5000, batch_size=64, action_size=None, device=None):
-        self.buffer = deque(maxlen=buffer_size)
+    """Simle experience replay buffer for deep reinforcement algorithms."""
+    def __init__(self, action_size, buffer_size, batch_size, device):
+        self.action_size = action_size
+        self.memory = deque(maxlen=buffer_size)  
+        self.device = device
         self.batch_size = batch_size
-
-    def add(self, state_seq, action, reward, next_state, done):
-        # state_seq: list of n_steps state (each state_dim)
-        self.buffer.append((np.array(state_seq), action, reward, next_state, done))
-
+        self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
+        
+    
+    def add(self, state, action, reward, next_state, done):
+        e = self.experience(state, action, reward, next_state, done)
+        self.memory.append(e)
+    
     def sample(self):
-        batch = random.sample(self.buffer, self.batch_size)
-        state_seq, action, reward, next_state, done = map(np.stack, zip(*batch))
-        # state_seq: [batch, n_steps, state_dim]
-        return (
-            torch.from_numpy(state_seq).float(),
-            torch.from_numpy(action).float(),
-            torch.from_numpy(reward).unsqueeze(1).float(),
-            torch.from_numpy(next_state).float(),
-            torch.from_numpy(done).unsqueeze(1).float()
-        )
+        experiences = random.sample(self.memory, k=self.batch_size)
+
+        states = torch.from_numpy(np.stack([e.state for e in experiences if e is not None], axis=0)).float().to(self.device)
+        actions = torch.from_numpy(np.stack([e.action for e in experiences if e is not None], axis=0)).float().to(self.device)
+        rewards = torch.from_numpy(np.stack([e.reward for e in experiences if e is not None], axis=0)).float().unsqueeze(-1).to(self.device)
+        next_states = torch.from_numpy(np.stack([e.next_state for e in experiences if e is not None], axis=0)).float().to(self.device)
+        dones = torch.from_numpy(np.stack([e.done for e in experiences if e is not None], axis=0).astype(np.uint8)).float().unsqueeze(-1).to(self.device)
+
+        return (states, actions, rewards, next_states, dones)
 
     def __len__(self):
-        return len(self.buffer)
+        return len(self.memory)
 
-    def save(self, filepath):
-        with open(filepath, 'wb') as f:
-            pickle.dump({
-                'buffer': list(self.buffer),
-                'maxlen': self.buffer.maxlen,
-                'batch_size': self.batch_size
-            }, f)
+    # def save(self, filepath):
+    #     with open(filepath, 'wb') as f:
+    #         pickle.dump({
+    #             'buffer': list(self.buffer),
+    #             'maxlen': self.buffer.maxlen,
+    #             'batch_size': self.batch_size
+    #         }, f)
 
-    def load(self, filepath):
-        with open(filepath, 'rb') as f:
-            data = pickle.load(f)
-            self.buffer = deque(data['buffer'], maxlen=data['maxlen'])
-            self.batch_size = data['batch_size']
-
-# --- ダミーActor, Criticクラス ---
-class DummyActor(torch.nn.Module):
-    def __init__(self, state_size=24, action_size=4, stochastic=True):
-        super().__init__()
-        self.fc = torch.nn.Linear(state_size, action_size)
-        self.stochastic = stochastic
-
-    def forward(self, state, explore=True):
-        action = self.fc(state)
-        entropy = torch.zeros((state.shape[0], 1))  # ダミー
-        return action, entropy
-
-class DummyCritic(torch.nn.Module):
-    def __init__(self, state_size=24, action_size=4):
-        super().__init__()
-        self.fc = torch.nn.Linear(state_size + action_size, 1)
-
-    def forward(self, state, action):
-        x = torch.cat([state, action], dim=-1)
-        return self.fc(x)
+    # def load(self, filepath):
+    #     with open(filepath, 'rb') as f:
+    #         data = pickle.load(f)
+    #         self.buffer = deque(data['buffer'], maxlen=data['maxlen'])
+    #         self.batch_size = data['batch_size']
 
 # --- SACAgent（ご提示のまま、ReplayBufferの使い方だけ修正） ---
 class SACAgent():
@@ -115,12 +97,12 @@ class SACAgent():
         
         self.train_critic_1 = Critic().to(self.device)
         self.target_critic_1 = Critic().to(self.device).eval()
-        self.hard_update(self.train_critic_1, self.target_critic_1)
+        self.hard_update(self.train_critic_1, self.target_critic_1) # hard update at the beginning
         self.critic_1_optim = torch.optim.AdamW(self.train_critic_1.parameters(), lr=lr, weight_decay=weight_decay, amsgrad=True)
 
         self.train_critic_2 = Critic().to(self.device)
         self.target_critic_2 = Critic().to(self.device).eval()
-        self.hard_update(self.train_critic_2, self.target_critic_2)
+        self.hard_update(self.train_critic_2, self.target_critic_2) # hard update at the beginning
         self.critic_2_optim = torch.optim.AdamW(self.train_critic_2.parameters(), lr=lr, weight_decay=weight_decay, amsgrad=True)
         print(f'Number of paramters of Single Critic Net: {sum(p.numel() for p in self.train_critic_2.parameters())}')
         
@@ -136,8 +118,6 @@ class SACAgent():
     def learn_one_step(self):
         if(len(self.memory)>self.batch_size):
             exp=self.memory.sample()
-            # tensorをdeviceに転送
-            exp = tuple(e.to(self.device) for e in exp)
             self.learn(exp)        
             
     def learn(self, exp):
@@ -151,19 +131,24 @@ class SACAgent():
             Q_targets_next_2 = self.target_critic_2(next_states, next_actions)
             Q_targets_next = torch.min(Q_targets_next_1, Q_targets_next_2) + self.alpha * next_entropies
             Q_targets = rewards + (self.gamma * Q_targets_next * (1-done))
+            #Q_targets = rewards + (self.gamma * Q_targets_next)
 
         Q_expected_1 = self.train_critic_1(states, actions)
         critic_1_loss = self.mse_loss(Q_expected_1, Q_targets)
+        #critic_1_loss = torch.nn.SmoothL1Loss()(Q_expected_1, Q_targets)
         
         self.critic_1_optim.zero_grad(set_to_none=True)
         critic_1_loss.backward()
+        #torch.nn.utils.clip_grad_norm_(self.train_critic_1.parameters(), 1)
         self.critic_1_optim.step()
 
         Q_expected_2 = self.train_critic_2(states, actions)   
         critic_2_loss = self.mse_loss(Q_expected_2, Q_targets)
+        #critic_2_loss = torch.nn.SmoothL1Loss()(Q_expected_2, Q_targets)
         
         self.critic_2_optim.zero_grad(set_to_none=True)
         critic_2_loss.backward()
+        #torch.nn.utils.clip_grad_norm_(self.train_critic_2.parameters(), 1)
         self.critic_2_optim.step()
 
         #update actor
@@ -173,18 +158,23 @@ class SACAgent():
         
         self.actor_optim.zero_grad(set_to_none=True)
         actor_loss.backward()
+        #torch.nn.utils.clip_grad_norm_(self.train_actor.parameters(), 1)
         self.actor_optim.step()
 
         if self.learn_call % self.update_freq == 0:
             self.learn_call = 0        
+            #using soft upates
             self.soft_update(self.train_critic_1, self.target_critic_1)
             self.soft_update(self.train_critic_2, self.target_critic_2)
 
     @torch.no_grad()        
     def get_action(self, state, explore=True):
+        #self.train_actor.eval()
         state = torch.from_numpy(state).unsqueeze(0).float().to(self.device)
+        #with torch.no_grad():
         action, entropy = self.train_actor(state, explore=explore)
         action = action.cpu().data.numpy()[0]
+        #self.train_actor.train()
         return action
     
     def soft_update(self, local_model, target_model):
@@ -196,7 +186,6 @@ class SACAgent():
             target_param.data.copy_(local_param.data)
 
     def save_ckpt(self, model_type, env_type, prefix='last'):
-        os.makedirs(os.path.join("models", self.rl_type, env_type), exist_ok=True)
         actor_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "actor.pth"]))
         critic_1_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_1.pth"]))
         critic_2_file = os.path.join("models", self.rl_type, env_type, "_".join([prefix, model_type, "critic_2.pth"]))
@@ -262,18 +251,13 @@ def test(env, agent, render=True, max_t_step=1000, explore=False, n_times=1):
     return mean_score
 
 # --- train関数（ご提示のまま） ---
-def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_limit=300.0, explore_episode=50, test_f=200, max_t_step=750, n_steps=18):
-    from collections import deque
+def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_limit=300.0, explore_episode=50, test_f=200, max_t_step=750):
     scores_deque = deque(maxlen=100)
     scores = []
     test_scores = []
     max_score = -np.inf
-    state_dim = env.observation_space.shape[0]
-    state_history = deque(maxlen=n_steps)
     for i_episode in range(1, n_episodes+1):
         state = env.reset()[0]
-        state_history.clear()
-        state_history.append(state)
         score = 0
         done = False
         agent.train_mode()
@@ -282,18 +266,17 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
             t += int(1)
             action = agent.get_action(state, explore=True)
             action = action.clip(min=env.action_space.low, max=env.action_space.high)
-            observation, reward, terminated, truncated, info = env.step(action)
+            next_state, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
-            state_history.append(observation)
-            # 履歴がn_steps分たまったら保存
-            if len(state_history) == n_steps:
-                agent.memory.add(list(state_history), action, reward, observation, done)
+            agent.memory.add(state, action, reward, next_state, done)
 
-            state = observation
+            state = next_state
             score += reward
             agent.step_end()
+            #if i_episode>explore_episode:
+            #    env.render()
 
-        if i_episode > explore_episode:
+        if i_episode>explore_episode:
             agent.episode_end()
             for i in range(t):
                 agent.learn_one_step()
@@ -303,12 +286,15 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
         scores.append((i_episode, score, avg_score_100))
         print('\rEpisode {}\tAverage Score: {:.2f}\tScore: {:.2f}'.format(i_episode, avg_score_100, score), end="")
 
-        if (i_episode + 1) % 50 == 0:
-            dir_current = os.path.join("models", agent.rl_type, env_type)
-            os.makedirs(dir_current, exist_ok=True)
-            torch.save(agent.train_actor.state_dict(), os.path.join(dir_current, f"actor_{i_episode}.pth"))
-            torch.save(agent.train_critic_1.state_dict(), os.path.join(dir_current, f"critic_1_{i_episode}.pth"))
-            torch.save(agent.train_critic_2.state_dict(), os.path.join(dir_current, f"critic_2_{i_episode}.pth"))
+        # if i_episode % test_f == 0 or avg_score_100>score_limit:
+        #     print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)))
+        #     agent.eval_mode() # test in eval mode.
+        #     test_score = test(env, agent, render=False, n_times=20)
+        #     test_scores.append((i_episode, test_score))
+        #     agent.save_ckpt(model_type, env_type,'ep'+str(int(i_episode)))
+        #     if avg_score_100>score_limit:
+        #         break
+        #     agent.train_mode() # when the test done, come back to train mode.
 
     return np.array(scores).transpose()
     # return np.array(scores).transpose(), np.array(test_scores).transpose()
