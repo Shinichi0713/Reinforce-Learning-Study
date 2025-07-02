@@ -339,3 +339,11 @@ SACにすると学習が安定化しだした。
 残念ながら、あまりよくないアイデアだったみたい。
 
 
+
+## うまくいったコード
+
+https://github.com/ugurcanozalp/td3-sac-bipedal-walker-hardcore-v3
+
+中身はほぼ同じ
+ただし、Transormerを使ってた。
+
