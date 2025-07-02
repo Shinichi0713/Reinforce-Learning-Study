@@ -46,21 +46,25 @@ class MyWalkerWrapper(gym.Wrapper):
         
     def step(self, action):
         total_reward = 0
+        terminated = False
+        truncated = False
         for i in range(self._skip):
-            # obs, reward, done, info = self.env.step(action)
-            obs, reward, terminated, truncated, info = self.env.step(action)
+            obs, reward, t, tr, info = self.env.step(action)
+            # 新APIならt, trが入ってくる
+            terminated = terminated or t
+            truncated = truncated or tr
             done = terminated or truncated
             if self.env.game_over:
                 reward = -10.0
                 info["dead"] = True
             else:
-            	info["dead"] = False
+                info["dead"] = False
             self._obs_buffer.append(obs)
             total_reward += reward
             if done:
                 break
-        
-        return obs, total_reward, done, info
+
+        return obs, total_reward, terminated, truncated, info
 
     def reset(self):
         return self.env.reset()

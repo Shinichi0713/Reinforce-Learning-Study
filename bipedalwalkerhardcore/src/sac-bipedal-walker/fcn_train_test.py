@@ -20,7 +20,12 @@ def train(env, agent, n_episodes=8000, model_type='unk', env_type='unk', score_l
             t += int(1)
             action = agent.get_action(state, explore=True)
             action = action.clip(min=env.action_space.low, max=env.action_space.high)
-            next_state, reward, done, info = env.step(action)
+            step_result = env.step(action)
+            if len(step_result) == 5:
+                next_state, reward, terminated, truncated, info = step_result
+                done = terminated or truncated
+            else:
+                next_state, reward, done, info = step_result
             agent.memory.add(state, action, reward, next_state, info["dead"])
 
             state = next_state
