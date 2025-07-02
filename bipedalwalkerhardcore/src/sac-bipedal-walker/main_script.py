@@ -9,6 +9,22 @@ from td3_agent import TD3Agent
 from sac_agent import SACAgent
 from fcn_train_test import train, test
 from env_wrappers import BoxToHistoryBox, MyWalkerWrapper
+
+import sys
+
+# 例: train、hardcore、trsf、sacを指定
+sys.argv = [
+    'main.py',               # スクリプト名は何でもOK
+    '--flag', 'train',
+    '--env', 'hardcore',
+    '--model_type', 'trsf',
+    '--rl_type', 'sac',
+    '--history_length', '18',
+    '--batch_size', '64',
+    '--explore_episode', '50',
+    # 必要に応じて他の引数もここで指定
+]
+
 import argparse
 import os
 
