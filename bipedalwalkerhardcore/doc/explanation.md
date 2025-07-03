@@ -346,4 +346,15 @@ https://github.com/ugurcanozalp/td3-sac-bipedal-walker-hardcore-v3
 
 中身はほぼ同じ
 ただし、Transormerを使ってた。
+→できるようになった。
+
+
+## ここまでの経緯
+
+×TD3とFNNの解法
+×sacとFNNの解法
+×リプレイメモリをpriority memoryへ→余計悪くなった
+〇モデルをtransformerでsac
+
+初期の探索不足がちょっと足を引っ張った感があるが、そこが改善されれば良い結果になりそうに感じた。
 
