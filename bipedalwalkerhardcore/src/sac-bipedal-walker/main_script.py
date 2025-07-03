@@ -54,14 +54,12 @@ elif args.model_type=='trsf':
     from archs.trsf_models import Actor, Critic
 elif args.model_type=='mlp':
     from archs.mlp_models import Actor, Critic
-elif args.model_type=='rnn':
-    from archs.rnn_models import Actor, Critic
 elif args.model_type=='lstm':
     from archs.lstm_models import Actor, Critic
 elif args.model_type=='bilstm':
     from archs.bilstm_models import Actor, Critic
 else:
-    print('Wrong model type!'); exit(0);
+    print('Wrong model type!'); exit(0)
 
 if args.env == 'classic':
     env = gym.make('BipedalWalker-v3')
@@ -70,6 +68,7 @@ elif args.env == 'hardcore':
     env = gym.make('BipedalWalkerHardcore-v3')
     env = MyWalkerWrapper(env, skip=2)
     
+# ここがtrsf用の系列データと化す
 if args.model_type in ['rnn', 'lstm', 'bilstm', 'trsf']:
     env = BoxToHistoryBox(env, h=args.history_length)
     env_type = args.env + "-" + str(args.history_length)
@@ -84,9 +83,9 @@ elif args.rl_type=='td3':
 elif args.rl_type=='sac':
     agent = SACAgent(Actor, Critic, clip_low=-1, clip_high=+1, state_size = env.observation_space.shape[-1], action_size=env.action_space.shape[-1],lr=args.lr, weight_decay=args.wd, gamma=args.gamma, alpha=args.alpha, batch_size=args.batch_size, device=args.device)
 else:
-    print('Wrong learning algorithm type!'); exit(0);
+    print('Wrong learning algorithm type!'); exit(0)
 
-agent.load_ckpt(args.model_type, env_type, args.ckpt)
+agent.load_ckpt()
 
 print("Action dimension : ",env.action_space.shape)
 print("State  dimension : ",env.observation_space.shape)
@@ -119,18 +118,9 @@ elif args.flag == 'test' or args.flag == 'test-exp':
     scores = test(env, agent, explore=explore)
     env.close()
 
-elif args.flag == 'test-record':
-    # sudo apt-get install ffmpeg
-    agent.eval_mode()
-    #env.seed(0)
-    env = Monitor(env, os.path.join('.', 'results', 'video'), force=False)
-    scores = test(env, agent)
-    env.close()
-
 elif args.flag == 'test-100':
     agent.eval_mode()
     #env.seed(0)
     scores = test(env, agent, render=False, explore=False, n_times=100)
-
 else:
     print('Wrong flag!')

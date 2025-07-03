@@ -50,7 +50,15 @@ this is the behavior of actor-critic.
 ### BipedalWalkerHardcore
 with using sac, the agent gradually walk...
 
+the agent of this walker is based on just fnn model.
+essencially, the progress of train isn't proceed well.
+
 <img src="image/bipedal_walker_v1.gif" alt="sac" width="300px" height="auto">
+
+at the next, the agent is composed based on transformer.
+this agent size isn't large.
+but, the progress of train proceed as expected.
+so that, i find ,in RL , the architecture is important.
 
 ### TSP
 

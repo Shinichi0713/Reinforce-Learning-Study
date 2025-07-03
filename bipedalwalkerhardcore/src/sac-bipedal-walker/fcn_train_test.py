@@ -68,7 +68,12 @@ def test(env, agent, render=True, max_t_step=1000, explore=False, n_times=1):
             action = agent.get_action(state, explore=explore)
             action = action.clip(min=env.action_space.low, max=env.action_space.high)
             #print(action)
-            next_state, reward, done, info = env.step(action)
+            step_result = env.step(action)
+            if len(step_result) == 5:
+                next_state, reward, terminated, truncated, info = step_result
+                done = terminated or truncated
+            else:
+                next_state, reward, done, info = step_result
             state = next_state
             score += reward
             if render:
