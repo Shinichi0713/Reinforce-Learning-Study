@@ -64,6 +64,10 @@ this would be owing to short of exploration.
 
 <img src="image/bipedalwalkerhardcore.gif" alt="sac" width="300px" height="auto">
 
+
+<img src="image/bipewalker_another.gif" alt="sac" width="300px" height="auto">
+
+
 ### TSP
 
 this is the behavior of PointerNet.
