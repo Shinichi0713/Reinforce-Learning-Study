@@ -21,7 +21,7 @@ sys.argv = [
     '--rl_type', 'sac',
     '--history_length', '18',
     '--batch_size', '64',
-    '--explore_episode', '50',
+    '--explore_episode', '4000',
     # 必要に応じて他の引数もここで指定
 ]
 
