@@ -1,6 +1,11 @@
+# 環境とリプレイバッファの定義
 import gymnasium as gym
+from collections import deque
+import random
+import numpy as np
 
-# 環境コード
+
+# --- 環境クラス ---
 class Environment:
     def __init__(self, is_train=True):
         if is_train:
@@ -24,18 +29,19 @@ class Environment:
         return self.env.render()
 
 
-if __name__ == "__main__":
-    # 環境の作成
-    env = Environment(is_train=False)  # is_train=Trueで学習用、Falseでテスト用
-    
-    for step in range(500):  # 500ステップだけ実行
-        # ランダムなアクションを選択
-        action = env.env.action_space.sample()
-        # アクションを実行
-        observation, reward, terminated, truncated, info = env.step(action)
-        
-        if terminated or truncated:
-            observation = env.reset()
+# --- リプレイバッファ ---
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
 
-    env.close()
+    def push(self, state, action, reward, next_state, done):
+        self.buffer.append((state, action, reward, next_state, done))
+
+    def sample(self, batch_size):
+        batch = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = map(np.stack, zip(*batch))
+        return state, action, reward, next_state, done
+
+    def __len__(self):
+        return len(self.buffer)
 
