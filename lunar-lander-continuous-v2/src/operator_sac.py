@@ -1,109 +1,110 @@
+import gymnasium as gym
 import numpy as np
-from agent import SACAgent, ReplayBuffer
-# from environment import make_env, set_seed
-from environment import Environment
-import matplotlib.pyplot as plt
-import os
-
-# --- パラメータ ---
-ENV_NAME = "Pendulum-v1"
-SEED = 42
-EPISODES = 10000
-MAX_STEPS = 300
-BATCH_SIZE = 256
-MEMORY_SIZE = 1000000
-
-def train():
-    env = Environment(is_train=True)  # 学習用環境の作成
-    state_dim = env.env.observation_space.shape[0]
-    action_dim = env.env.action_space.shape[0]
-    max_action = float(env.env.action_space.high[0])
-    agent = SACAgent(state_dim, action_dim, max_action)
-    replay_buffer = ReplayBuffer(MEMORY_SIZE)
-
-    returns = []
-    rewards_history = []
-    losses_history = []
-    
-    for episode in range(EPISODES):
-        state = env.reset()
-        episode_return = 0
-        reward_total = 0
-        loss_total = 0
-        for t in range(MAX_STEPS):
-            action = agent.select_action(state)
-            next_state, reward, terminated, truncated, _ = env.step(action)
-            done = terminated or truncated
-            replay_buffer.push(state, action, reward, next_state, float(done))
-            state = next_state
-            episode_return += reward
-            reward_total += reward
-
-            if len(replay_buffer) > BATCH_SIZE:
-                loss = agent.update(replay_buffer, BATCH_SIZE)
-                loss_total += loss
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import random, os
+from environment import Environment, ReplayBuffer
+from agent.sac_agent import SACAgent
 
 
-            if done:
-                break
-        rewards_history.append(reward_total)
-        losses_history.append(loss_total)
-        returns.append(episode_return)
-        if episode % 10 == 0:
-            avg_return = np.mean(returns[-10:])
-            print(f"Episode {episode}: Return {episode_return:.2f}, Avg(10) {avg_return:.2f}")
-    # ヒストリを画像化
-    visualize_graph(rewards_history, losses_history)
 
-    agent.save_networks()
-    print("Training completed.")
-    env.close()
+# --- 学習ループ ---
+def train_sac():
+    env = Environment(is_train=True)
+    obs_dim = env.env.observation_space.shape[0]
+    act_dim = env.env.action_space.shape[0]
+    act_limit = float(env.env.action_space.high[0])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def visualize_graph(rewards_history, losses_history):
-    dir_current = os.path.dirname(os.path.abspath(__file__))
-    # 報酬の履歴をグラフ化して保存
-    plt.figure(figsize=(10, 4))
-    plt.plot(rewards_history, label="Episode Reward")
-    plt.xlabel("Episode")
-    plt.ylabel("Reward")
-    plt.title("Episode Rewards History")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(os.path.join(dir_current, "rewards_history.png"))
-    plt.close()
+    agent = SACAgent(obs_dim, act_dim, act_limit, device)
+    replay_buffer = ReplayBuffer(1000000)
+    batch_size = 256
+    total_steps = 200000
+    start_steps = 10000
+    update_after = 1000
+    update_every = 50
+    episode_rewards = []
 
-    # Lossの履歴をグラフ化して保存
-    plt.figure(figsize=(10, 4))
-    plt.plot(losses_history, label="Episode Loss")
-    plt.xlabel("Episode")
-    plt.ylabel("Loss")
-    plt.title("Episode Losses History")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(os.path.join(dir_current, "losses_history.png"))
-    plt.close()
-
-def eval():
-    env = Environment(is_train=False)  # 学習用環境の作成
-    state_dim = env.env.observation_space.shape[0]
-    action_dim = env.env.action_space.shape[0]
-    max_action = float(env.env.action_space.high[0])
-    agent = SACAgent(state_dim, action_dim, max_action)
+    # 追加: ロス推移格納用リスト
+    actor_losses = []
+    critic1_losses = []
+    critic2_losses = []
 
     state = env.reset()
-    total_reward = 0
-    for _ in range(MAX_STEPS):
-        action = agent.select_action(state, eval_mode=True)
-        next_state, reward, terminated, truncated, _ = env.step(action)
-        done = terminated or truncated
-        total_reward += reward
-        state = next_state
-        if done:
-            break
+    episode_reward = 0
+    episode_steps = 0
 
-    print(f"Total Reward: {total_reward:.2f}")
+    for t in range(total_steps):
+        if t < start_steps:
+            action = env.env.action_space.sample()
+        else:
+            action = agent.select_action(state)
+
+        next_state, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
+
+        replay_buffer.push(state, action, reward, next_state, done)
+        state = next_state
+        episode_reward += reward
+        episode_steps += 1
+
+        if done:
+            state = env.reset()
+            episode_rewards.append(episode_reward)
+            print(f"Step: {t}, Episode Reward: {episode_reward:.2f}")
+            episode_reward = 0
+            episode_steps = 0
+
+        # 学習・ロス記録
+        if t >= update_after and t % update_every == 0:
+            for _ in range(update_every):
+                actor_loss, critic1_loss, critic2_loss = agent.update(replay_buffer, batch_size)
+                actor_losses.append(actor_loss)
+                critic1_losses.append(critic1_loss)
+                critic2_losses.append(critic2_loss)
+
+        agent.save_models()
+
+    # --- 追加: ロス・報酬推移をファイル保存 ---
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    np.savetxt(f"{dir_current}/actor_losses.txt", np.array(actor_losses))
+    np.savetxt(f"{dir_current}/critic1_losses.txt", np.array(critic1_losses))
+    np.savetxt(f"{dir_current}/critic2_losses.txt", np.array(critic2_losses))
+    np.savetxt(f"{dir_current}/episode_rewards.txt", np.array(episode_rewards))
+
+    env.close()
+
+def eval_sac():
+    env = Environment(is_train=False)
+    obs_dim = env.env.observation_space.shape[0]
+    act_dim = env.env.action_space.shape[0]
+    act_limit = float(env.env.action_space.high[0])
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    agent = SACAgent(obs_dim, act_dim, act_limit, device)
+    dir_current = os.path.dirname(os.path.abspath(__file__))
+    agent.actor.load_state_dict(torch.load(f"{dir_current}/sac_actor.pth"))
+    agent.critic1.load_state_dict(torch.load(f"{dir_current}/sac_critic1.pth"))
+    agent.critic2.load_state_dict(torch.load(f"{dir_current}/sac_critic2.pth"))
+
+    for i in range(5):
+        state = env.reset()
+        episode_reward = 0
+        done = False
+
+        while not done:
+            action = agent.select_action(state, evaluate=True)
+            next_state, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
+            episode_reward += reward
+            state = next_state
+
+        print(f"Episode Reward: {episode_reward:.2f}")
     env.close()
 
 if __name__ == "__main__":
-    train()
-    eval()
+    # train_sac()
+    eval_sac()
+
