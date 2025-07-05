@@ -85,9 +85,12 @@ def eval_sac():
 
     agent = SACAgent(obs_dim, act_dim, act_limit, device)
     dir_current = os.path.dirname(os.path.abspath(__file__))
-    agent.actor.load_state_dict(torch.load(f"{dir_current}/sac_actor.pth"))
-    agent.critic1.load_state_dict(torch.load(f"{dir_current}/sac_critic1.pth"))
-    agent.critic2.load_state_dict(torch.load(f"{dir_current}/sac_critic2.pth"))
+    if os.path.exists(f"{dir_current}/sac_actor.pth"):
+        agent.actor.load_state_dict(torch.load(f"{dir_current}/sac_actor.pth"))
+    if os.path.exists(f"{dir_current}/sac_critic1.pth"):
+        agent.critic1.load_state_dict(torch.load(f"{dir_current}/sac_critic1.pth"))
+    if os.path.exists(f"{dir_current}/sac_critic2.pth"):
+        agent.critic2.load_state_dict(torch.load(f"{dir_current}/sac_critic2.pth"))
 
     for i in range(5):
         state = env.reset()
@@ -105,6 +108,6 @@ def eval_sac():
     env.close()
 
 if __name__ == "__main__":
-    # train_sac()
-    eval_sac()
+    train_sac()
+    # eval_sac()
 

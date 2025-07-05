@@ -19,8 +19,8 @@ class Actor(nn.Module):
         self.log_std = nn.Linear(hidden_dim, act_dim)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = F.gelu(self.fc1(x))
+        x = F.gelu(self.fc2(x))
         mean = self.mean(x)
         log_std = self.log_std(x)
         log_std = torch.clamp(log_std, LOG_STD_MIN, LOG_STD_MAX)
@@ -46,8 +46,8 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         x = torch.cat([state, action], 1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = F.gelu(self.fc1(x))
+        x = F.gelu(self.fc2(x))
         q = self.q(x)
         return q
 
@@ -70,8 +70,8 @@ class SACAgent:
         self.critic2_optimizer = optim.Adam(self.critic2.parameters(), lr=3e-4)
 
         self.alpha = 0.2
-        self.gamma = 0.99
-        self.tau = 0.005
+        self.gamma = 0.98
+        self.tau = 0.01
 
     def select_action(self, state, evaluate=False):
         state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
