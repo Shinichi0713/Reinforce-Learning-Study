@@ -61,7 +61,7 @@ if __name__ == "__main__":
     loss_critic1 = read_result(path_loss_critic1)
     path_loss_critic2 = os.path.join(dir_current, "critic2_losses.txt")
     loss_critic2 = read_result(path_loss_critic2)
-    # display_result_loss(loss_actor, loss_critic1, loss_critic2)
+    display_result_loss(loss_actor, loss_critic1, loss_critic2)
 
     # path_reward_sac = os.path.join(dir_current, "episode_rewards.txt")
     # display_result_reward(read_result(path_reward_sac))
