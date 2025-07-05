@@ -6,7 +6,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import random, os
 from environment import Environment, ReplayBuffer
-from agent.sac_agent import SACAgent
+from agent import SACAgent
 
 
 
