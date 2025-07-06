@@ -129,3 +129,13 @@ class Actor(nn.Module):
         else:
             actions = self.tanh(self.fc(s))
             return actions
+
+if __name__ == "__main__":
+    # Test the Actor and Critic models
+    state_dim = 24
+    action_dim = 4
+
+    actor = Actor(state_dim, action_dim, stochastic=True)
+    critic = Critic(state_dim, action_dim)
+
+    print(actor)
