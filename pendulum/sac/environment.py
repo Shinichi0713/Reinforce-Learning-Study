@@ -29,7 +29,7 @@ class Environment:
         return reward + 4
 
     def give_dimensions(self):
-        return self.env.observation_space.shape[0], self.env.action_space.shape[0]
+        return self.env.observation_space.shape[0], self.env.action_space.shape[0], float(self.env.observation_space.high[0])
 
 if __name__ == "__main__":
     env = Environment()

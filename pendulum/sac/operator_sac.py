@@ -1,6 +1,4 @@
-import gymnasium as gym
-import torch.nn as nn
-import torch.optim as optim
+# 訓練、実演のコード
 import numpy as np
 import random, os
 from agent import SACAgent, ReplayBuffer
@@ -21,8 +19,7 @@ ALPHA = 0.2  # エントロピー正則化係数
 # --- メインループ ---
 def train():
     env = Environment(is_train=True)
-    state_dim , action_dim = env.give_dimensions()
-    max_action = float(env.action_space.high[0])
+    state_dim , action_dim, max_action = env.give_dimensions()
     agent = SACAgent(state_dim, action_dim, max_action)
     replay_buffer = ReplayBuffer(MEMORY_SIZE)
 
@@ -73,8 +70,7 @@ def write_log(file_path, data):
 
 def eval():
     env = Environment(is_train=False)
-    state_dim , action_dim = env.give_dimensions()
-    max_action = float(env.action_space.high[0])
+    state_dim , action_dim, max_action = env.give_dimensions()
     agent = SACAgent(state_dim, action_dim, max_action)
 
     state, _ = env.reset()
