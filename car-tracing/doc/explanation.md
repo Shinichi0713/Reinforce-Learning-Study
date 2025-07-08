@@ -81,3 +81,85 @@ class Agent():
                 self.optimizer.step()
 ```
 
+## 環境
+
+https://gymnasium.farama.org/environments/box2d/car_racing/
+
+
+Action Space
+If continuous there are 3 actions :
+
+0: steering, -1 is full left, +1 is full right
+
+1: gas
+
+2: braking
+
+If discrete there are 5 actions:
+
+0: do nothing
+
+1: steer right
+
+2: steer left
+
+3: gas
+
+4: brake
+
+Observation Space
+A top-down 96x96 RGB image of the car and race track.
+
+Rewards
+The reward is -0.1 every frame and +1000/N for every track tile visited, where N is the total number of tiles visited in the track. For example, if you have finished in 732 frames, your reward is 1000 - 0.1*732 = 926.8 points.
+
+Starting State
+The car starts at rest in the center of the road.
+
+やっぱり入力は画像の96×96の情報。
+多分以下がうまくいくのでは。
+
+Actor: ViTの構成
+Critivc: Transformer (ViT)
+
+
+---
+教えてLang
+
+はい、OpenAI Gymの「CarRacing-v0」環境を**Actor-Critic法**（例えばA2CやA3C、DDPG、SACなど）で解くことは**可能です**。
+
+---
+
+## 解説
+
+### 1. **CarRacing-v0の特徴**
+- 状態空間：RGB画像（通常は96x96x3）
+- 行動空間：連続値（ステアリング[-1,1]、アクセル[0,1]、ブレーキ[0,1]）
+- 難易度：画像処理＋連続制御のため、難易度は高め
+
+### 2. **Actor-Critic法の適用**
+- **Actor**：現在の状態から最適なアクション（連続値）を出力するネットワーク
+- **Critic**：状態価値や状態-行動価値を推定するネットワーク
+- **連続行動空間**なので、DDPGやSAC、TD3などの**連続制御向けActor-Criticアルゴリズム**がよく使われます。
+
+### 3. **実装例・参考リソース**
+- **Stable Baselines3**や**rl-baselines3-zoo**などのライブラリを使うと、SACやDDPGでCarRacingを解くサンプルが多数あります。
+- 例えば、Stable Baselines3のSACでのCarRacing学習例:  
+  https://github.com/DLR-RM/rl-baselines3-zoo
+
+### 4. **注意点**
+- 画像入力のためCNNを使う必要があります。
+- 学習には強いGPUと長時間が必要です。
+- 学習が安定しない場合は報酬設計やネットワーク設計の工夫が必要です。
+
+---
+
+## まとめ
+
+- **CarRacing-v0はActor-Critic法で解けます**（特に連続制御向けのアルゴリズムが有効）。
+- ただし、画像処理・連続制御のため難易度は高く、十分な計算リソースと工夫が必要です。
+- 既存の実装やライブラリを活用するのがおすすめです。
+
+
+
+
