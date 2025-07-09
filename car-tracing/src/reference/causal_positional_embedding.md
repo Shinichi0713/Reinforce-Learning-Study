@@ -42,5 +42,7 @@ self.position_embeddings = nn.Parameter(torch.randn(1, num_patches + 1, config.h
 
 ---
 
-ご参考になれば幸いです。  
-さらに詳しい数式や論文の該当箇所もご案内できますので、必要があればご質問ください。
+## 所管
+- Positional Embeddingは学習可能なパラメータ
+- 理由は画像の空間情報を柔軟に表現することが出来る
+- データセットに最適な位置表現を自動で獲得できる(学習可能なパラメータなので)
