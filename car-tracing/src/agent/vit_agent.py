@@ -607,12 +607,8 @@ class Actor(nn.Module):
         super().__init__()
         self.vit = ViTModel()
         vit_out_dim = self.vit.config.hidden_size
-        self.fc = nn.Sequential(
-            nn.Linear(vit_out_dim, 128),
-            nn.GELU(),
-            nn.Linear(128, action_dim),  # CarRacingは連続行動: 3次元
-            nn.Tanh()  # 出力を[-1,1]に制限
-        )
+        self.fc_mean = nn.Linear(vit_out_dim, action_dim)
+        self.fc_logstd = nn.Linear(vit_out_dim, action_dim)
         self.path_nn = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             "actor_model.pth"
@@ -626,8 +622,11 @@ class Actor(nn.Module):
         # x: (B, 3, 96, 96)
         outputs = self.vit(pixel_values=x)
         features = outputs.last_hidden_state[:, 0]
-        action = self.fc(features)
-        return action
+        mean = self.fc_mean(features)
+        log_std = self.fc_logstd(features)
+        log_std = torch.clamp(log_std, -20, 2)  # log_stdの範囲を制限
+        std = log_std.exp()
+        return mean, std
     
     def save(self):
         """
@@ -644,12 +643,12 @@ class Actor(nn.Module):
                 print(f"モデルの重みのロードに失敗しました: {e}")
 
 class Critic(nn.Module):
-    def __init__(self):
+    def __init__(self, action_dim):
         super().__init__()
         self.vit = ViTModel()
         vit_out_dim = self.vit.config.hidden_size
         self.fc = nn.Sequential(
-            nn.Linear(vit_out_dim, 128),
+            nn.Linear(vit_out_dim + action_dim, 128),
             nn.GELU(),
             nn.Linear(128, 1)  # 状態価値を出力
         )
@@ -662,12 +661,14 @@ class Critic(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
-    def forward(self, x):
+    def forward(self, x, action):
         x = x.to(self.device)  # 入力をデバイスに転送
+        action = action.to(self.device)
         # x: (B, 3, 96, 96)
         outputs = self.vit(pixel_values=x)
         features = outputs.last_hidden_state[:, 0]
-        value = self.fc(features)
+        concat = torch.cat([features, action], dim=-1)
+        value = self.fc(concat)
         return value
 
     def __load_state_dict(self):
