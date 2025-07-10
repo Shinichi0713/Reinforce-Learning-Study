@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 from transformers import ViTConfig, PreTrainedModel
 import collections.abc
 from transformers.modeling_outputs import BaseModelOutputWithPooling
+import os
 
 
 def torch_int(x):
@@ -612,17 +613,80 @@ class Actor(nn.Module):
             nn.Linear(128, action_dim),  # CarRacingは連続行動: 3次元
             nn.Tanh()  # 出力を[-1,1]に制限
         )
+        self.path_nn = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "actor_model.pth"
+        )
+        self.__load_state_dict()  # モデルの重みをロード
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
 
     def forward(self, x):
+        x = x.to(self.device)  # 入力をデバイスに転送
         # x: (B, 3, 96, 96)
         outputs = self.vit(pixel_values=x)
         features = outputs.last_hidden_state[:, 0]
         action = self.fc(features)
         return action
+    
+    def save(self):
+        """
+        モデルの重みを保存するメソッド
+        """
+        torch.save(self.state_dict(), self.path_nn)
+    
+    def __load_state_dict(self):
+        if os.path.exists(self.path_nn):
+            try:
+                self.load_state_dict(torch.load(self.path_nn))
+                print(f"モデルの重みをロードしました: {self.path_nn}")
+            except RuntimeError as e:
+                print(f"モデルの重みのロードに失敗しました: {e}")
 
+class Critic(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.vit = ViTModel()
+        vit_out_dim = self.vit.config.hidden_size
+        self.fc = nn.Sequential(
+            nn.Linear(vit_out_dim, 128),
+            nn.GELU(),
+            nn.Linear(128, 1)  # 状態価値を出力
+        )
 
+        self.path_nn = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "critic_model.pth"
+        )
+        self.__load_state_dict()  # モデルの重みをロード
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+
+    def forward(self, x):
+        x = x.to(self.device)  # 入力をデバイスに転送
+        # x: (B, 3, 96, 96)
+        outputs = self.vit(pixel_values=x)
+        features = outputs.last_hidden_state[:, 0]
+        value = self.fc(features)
+        return value
+
+    def __load_state_dict(self):
+        if os.path.exists(self.path_nn):
+            try:
+                self.load_state_dict(torch.load(self.path_nn))
+                print(f"モデルの重みをロードしました: {self.path_nn}")
+            except RuntimeError as e:
+                print(f"モデルの重みのロードに失敗しました: {e}")
+    
+    def save(self):
+        """
+        モデルの重みを保存するメソッド
+        """
+        torch.save(self.state_dict(), self.path_nn)
 
 if __name__ == "__main__":
     actor = Actor(action_dim=3)
-
-    
+    critic = Critic()
+    vit_input = torch.randn(1, 3, 96, 96).to(actor.device)  # バッチサイズ1の入力
+    action = actor(vit_input)
+    value = critic(vit_input)
