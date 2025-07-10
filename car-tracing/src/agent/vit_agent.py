@@ -524,7 +524,7 @@ class ViTEncoder(nn.Module):
         )
 
 class ViTModel(ViTPreTrainedModel):
-    def __init__(self):
+    def __init__(self, add_pooling_layer: bool = False):
         self.config = ViTConfig(
             image_size=96,
             num_channels=3,
@@ -546,7 +546,7 @@ class ViTModel(ViTPreTrainedModel):
 
         # レイヤーノルム
         self.layernorm = nn.LayerNorm(self.config.hidden_size, eps=self.config.layer_norm_eps)
-        self.pooler = ViTPooler(self.config)
+        self.pooler = ViTPooler(self.config) if add_pooling_layer else None
 
     def get_input_embeddings(self):
         return self.embeddings.patch_embeddings
@@ -589,7 +589,7 @@ class ViTModel(ViTPreTrainedModel):
         )
         sequence_output = encoder_outputs[0]
         sequence_output = self.layernorm(sequence_output)
-        pooled_output = self.pooler(sequence_output)
+        pooled_output = self.pooler(sequence_output) if self.pooler is not None else None
 
         if not return_dict:
             return (sequence_output, pooled_output) if output_hidden_states else sequence_output
@@ -601,28 +601,28 @@ class ViTModel(ViTPreTrainedModel):
             attentions=encoder_outputs.attentions,
         )
 
+class Actor(nn.Module):
+    def __init__(self, action_dim):
+        super().__init__()
+        self.vit = ViTModel()
+        vit_out_dim = self.vit.config.hidden_size
+        self.fc = nn.Sequential(
+            nn.Linear(vit_out_dim, 128),
+            nn.GELU(),
+            nn.Linear(128, action_dim),  # CarRacingは連続行動: 3次元
+            nn.Tanh()  # 出力を[-1,1]に制限
+        )
+
+    def forward(self, x):
+        # x: (B, 3, 96, 96)
+        outputs = self.vit(pixel_values=x)
+        features = outputs.last_hidden_state[:, 0]
+        action = self.fc(features)
+        return action
 
 
 
 if __name__ == "__main__":
-    # ViTの設定
-    vit_config = ViTConfig(
-        image_size=96,
-        num_channels=3,
-        patch_size=16,
-        num_hidden_layers=4,
-        hidden_size=256,
-        num_attention_heads=4,
-        intermediate_size=512,
-        qkv_bias=True,
-        hidden_dropout_prob=0.1,
-        attention_probs_dropout_prob=0.1,
-    )
+    actor = Actor(action_dim=3)
+
     
-    # モデルの初期化
-    model = ViTModel()
-    print(model)  # モデルの構造を確認
-    # ダミー入力
-    dummy_input = torch.randn(1, 3, 96, 96)  # バッチサイズ1、チャンネル3、画像サイズ96x96
-    output = model(dummy_input)
-    print(output)  # 出力の形状を確認
