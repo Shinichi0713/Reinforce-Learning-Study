@@ -723,10 +723,57 @@ class SacAgent(object):
             with torch.no_grad():
                 mean, std = self.actor(state)
                 action = torch.tanh(mean)
+                action = action.detach().cpu().numpy()[0]
         else:
             action, _ = self.actor.sample(state)
             action = action.detach().cpu().numpy()[0]
         return action
+
+    def update(self, replay_buffer, batch_size):
+        # バッチサンプリング
+        state, action, reward, next_state, done = replay_buffer.sample(batch_size)
+        state = torch.FloatTensor(state).to(self.device)
+        action = torch.FloatTensor(action).to(self.device)
+        reward = torch.FloatTensor(reward).unsqueeze(1).to(self.device)
+        state_next = torch.FloatTensor(next_state).to(self.device)
+        done = torch.FloatTensor(done).unsqueeze(1).to(self.device)
+
+        # 1. Criticの更新
+        with torch.no_grad():
+            next_action, next_log_prob = self.actor.sample(state_next)
+            target_q1 = self.target_critic1(state_next, next_action)
+            target_q2 = self.target_critic2(state_next, next_action)
+            target_q = torch.min(target_q1, target_q2) - self.alpha * next_log_prob
+            target_value = reward + (1 - done) * self.gamma * target_q
+        current_q1 = self.critic1(state, action)
+        current_q2 = self.critic2(state, action)
+        critic1_loss = nn.MSELoss()(current_q1, target_value)
+        critic2_loss = nn.MSELoss()(current_q2, target_value)
+        self.critic1.zero_grad()
+        self.critic2.zero_grad()
+        critic1_loss.backward()
+        critic2_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic1.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(self.critic2.parameters(), 0.5)
+        self.critic1.step()
+        self.critic2.step()
+        
+        # 2. Actorの更新
+        action_next, log_prob = self.actor.sample(state)
+        q1 = self.critic1(state, action_next)
+        q2 = self.critic2(state, action_next)
+        q_value = torch.min(q1, q2)
+        actor_loss = (self.alpha * log_prob - q_value).mean()
+        self.actor.zero_grad()
+        actor_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 0.5)
+        self.actor.step()
+
+        # 3. Target Criticの更新
+        for target_param, param in zip(self.target_critic1.parameters(), self.critic1.parameters()):
+            target_param.data.copy_(target_param.data * (1.0 - self.tau) + param.data * self.tau)
+        
+        return critic1_loss.item(), critic2_loss.item(), actor_loss.item()
 
     def save_models(self):
         self.actor.cpu()
