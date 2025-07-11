@@ -628,6 +628,19 @@ class Actor(nn.Module):
         std = log_std.exp()
         return mean, std
     
+    def sample(self, x):
+        """
+        入力xに対してアクションをサンプリングするメソッド
+        """
+        mean, std = self.forward(x)
+        dist = torch.distributions.Normal(mean, std)
+        x_t = dist.rsample()
+        action = torch.tanh(x_t)
+        # アクションの範囲を制限
+        log_prob = dist.log_prob(x_t) - torch.log(1 - action.pow(2) + 1e-6)
+        log_prob = log_prob.sum(dim=-1, keepdim=True)  # 各
+        return action, log_prob
+
     def save(self):
         """
         モデルの重みを保存するメソッド
@@ -685,9 +698,49 @@ class Critic(nn.Module):
         """
         torch.save(self.state_dict(), self.path_nn)
 
+
+class SacAgent(object):
+    def __init__(self, action_dim):
+        self.actor = Actor(action_dim)
+        self.critic1 = Critic(action_dim)
+        self.critic2 = Critic(action_dim)
+        self.target_critic1 = Critic(action_dim)
+        self.target_critic2 = Critic(action_dim)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.actor.to(self.device)
+        self.critic1.to(self.device)
+        self.critic2.to(self.device)
+        self.target_critic1.to(self.device)
+        self.target_critic2.to(self.device)
+
+        self.alpha = 0.2
+        self.gamma = 0.98
+        self.tau = 0.01
+
+    def select_action(self, state, evaluate=False):
+        state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+        if evaluate:
+            with torch.no_grad():
+                mean, std = self.actor(state)
+                action = torch.tanh(mean)
+        else:
+            action, _ = self.actor.sample(state)
+            action = action.detach().cpu().numpy()[0]
+        return action
+
+    def save_models(self):
+        self.actor.cpu()
+        self.critic1.cpu()
+        self.critic2.cpu()
+        self.actor.save()
+        self.critic1.save()
+        self.critic2.save()
+        self.actor.to(self.device)
+        self.critic1.to(self.device)
+        self.critic2.to(self.device)
+
 if __name__ == "__main__":
-    actor = Actor(action_dim=3)
-    critic = Critic()
-    vit_input = torch.randn(1, 3, 96, 96).to(actor.device)  # バッチサイズ1の入力
-    action = actor(vit_input)
-    value = critic(vit_input)
+    sac_agent = SacAgent(action_dim=3)
+    vit_input = torch.randn(1, 3, 96, 96).to(sac_agent.device)  # バッチサイズ1の入力
+    action = sac_agent.actor(vit_input)
+    value = sac_agent.critic(vit_input)
