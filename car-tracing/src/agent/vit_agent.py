@@ -656,7 +656,7 @@ class Actor(nn.Module):
                 print(f"モデルの重みのロードに失敗しました: {e}")
 
 class Critic(nn.Module):
-    def __init__(self, action_dim):
+    def __init__(self, action_dim, name_appendix=""):
         super().__init__()
         self.vit = ViTModel()
         vit_out_dim = self.vit.config.hidden_size
@@ -668,7 +668,7 @@ class Critic(nn.Module):
 
         self.path_nn = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            "critic_model.pth"
+            f"critic_model_{self.name_appendix}.pth"
         )
         self.__load_state_dict()  # モデルの重みをロード
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -775,6 +775,7 @@ class SacAgent(object):
         
         return critic1_loss.item(), critic2_loss.item(), actor_loss.item()
 
+    # AIモデルの保存
     def save_models(self):
         self.actor.cpu()
         self.critic1.cpu()
