@@ -41,7 +41,7 @@ def train_sac_agent(
     # 環境とラッパー
     env = Environment(is_train=True)
     # 例: 履歴ラッパーを使いたい場合
-    env = BoxToHistoryBox(env, h=4)
+    # env = BoxToHistoryBox(env.env, h=4)
     obs_dim = env.reset().shape[0]
     action_dim = env.env.action_space.shape[0]
 
