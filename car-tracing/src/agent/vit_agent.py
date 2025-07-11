@@ -579,7 +579,7 @@ class ViTModel(ViTPreTrainedModel):
         expected_dtype = self.embeddings.patch_embeddings.projection.weight.dtype
         if pixel_values.dtype != expected_dtype:
             pixel_values = pixel_values.to(expected_dtype)
-        
+        pixel_values = pixel_values.permute(0, 3, 1, 2)
         embedding_output = self.embeddings(pixel_values, bool_masked_pos, interpolate_pos_encoding)
         encoder_outputs = self.encoder(
             embedding_output,
@@ -668,7 +668,7 @@ class Critic(nn.Module):
 
         self.path_nn = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            f"critic_model_{self.name_appendix}.pth"
+            f"critic_model_{name_appendix}.pth"
         )
         self.__load_state_dict()  # モデルの重みをロード
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -702,16 +702,20 @@ class Critic(nn.Module):
 class SacAgent(object):
     def __init__(self, action_dim):
         self.actor = Actor(action_dim)
-        self.critic1 = Critic(action_dim)
-        self.critic2 = Critic(action_dim)
-        self.target_critic1 = Critic(action_dim)
-        self.target_critic2 = Critic(action_dim)
+        self.critic1 = Critic(action_dim, "critic_1")
+        self.critic2 = Critic(action_dim, "critic_2")
+        self.target_critic1 = Critic(action_dim, "target_critic_1")
+        self.target_critic2 = Critic(action_dim, "target_critic_2")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor.to(self.device)
         self.critic1.to(self.device)
         self.critic2.to(self.device)
         self.target_critic1.to(self.device)
         self.target_critic2.to(self.device)
+
+        self.optimizer_actor = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
+        self.optimizer_critic1 = torch.optim.Adam(self.critic1.parameters(), lr=3e-4)
+        self.optimizer_critic2 = torch.optim.Adam(self.critic2.parameters(), lr=3e-4)
 
         self.alpha = 0.2
         self.gamma = 0.98
@@ -749,14 +753,14 @@ class SacAgent(object):
         current_q2 = self.critic2(state, action)
         critic1_loss = nn.MSELoss()(current_q1, target_value)
         critic2_loss = nn.MSELoss()(current_q2, target_value)
-        self.critic1.zero_grad()
-        self.critic2.zero_grad()
+        self.optimizer_critic1.zero_grad()
+        self.optimizer_critic2.zero_grad()
         critic1_loss.backward()
         critic2_loss.backward()
         torch.nn.utils.clip_grad_norm_(self.critic1.parameters(), 0.5)
         torch.nn.utils.clip_grad_norm_(self.critic2.parameters(), 0.5)
-        self.critic1.step()
-        self.critic2.step()
+        self.optimizer_critic1.step()
+        self.optimizer_critic2.step()
         
         # 2. Actorの更新
         action_next, log_prob = self.actor.sample(state)
@@ -764,10 +768,10 @@ class SacAgent(object):
         q2 = self.critic2(state, action_next)
         q_value = torch.min(q1, q2)
         actor_loss = (self.alpha * log_prob - q_value).mean()
-        self.actor.zero_grad()
+        self.optimizer_actor.zero_grad()
         actor_loss.backward()
         torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 0.5)
-        self.actor.step()
+        self.optimizer_actor.step()
 
         # 3. Target Criticの更新
         for target_param, param in zip(self.target_critic1.parameters(), self.critic1.parameters()):
