@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from collections import deque
-import random
+import random, os
 
 # --- リプレイバッファ ---
 class ReplayBuffer:
@@ -167,6 +167,10 @@ def train_sac_car_racing(
     buffer = ReplayBuffer()
     total_steps = 0
 
+    # 保存先ディレクトリ
+    save_dir = "sac_params"
+    os.makedirs(save_dir, exist_ok=True)
+
     for episode in range(num_episodes):
         obs, info = env.reset()
         episode_return = 0
@@ -188,7 +192,14 @@ def train_sac_car_racing(
                 break
         print(f"Episode {episode+1}: Return={episode_return:.1f}")
 
+        # --- ここでパラメータを保存 ---
+        torch.save(agent.actor.state_dict(), os.path.join(save_dir, f"actor_ep{episode+1}.pth"))
+        torch.save(agent.critic1.state_dict(), os.path.join(save_dir, f"critic1_ep{episode+1}.pth"))
+        torch.save(agent.critic2.state_dict(), os.path.join(save_dir, f"critic2_ep{episode+1}.pth"))
+        torch.save(agent.target_critic1.state_dict(), os.path.join(save_dir, f"target_critic1_ep{episode+1}.pth"))
+        torch.save(agent.target_critic2.state_dict(), os.path.join(save_dir, f"target_critic2_ep{episode+1}.pth"))
+
     env.close()
 
 if __name__ == "__main__":
-    train_sac_car_racing(num_episodes=5)
+    train_sac_car_racing(num_episodes=1000)
