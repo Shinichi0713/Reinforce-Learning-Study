@@ -79,7 +79,9 @@ def train_sac_agent(
 
         returns.append(episode_return)
         print(f"Episode {episode+1} Return: {episode_return}")
-
+        if (episode + 1) % 10 == 0:
+            print(f"Episode {episode+1} Average Return: {np.mean(returns[-10:])}")
+            agent.save_models()
     env.close()
     return returns
 

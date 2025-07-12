@@ -717,6 +717,10 @@ class SacAgent(object):
         self.optimizer_critic1 = torch.optim.Adam(self.critic1.parameters(), lr=3e-4)
         self.optimizer_critic2 = torch.optim.Adam(self.critic2.parameters(), lr=3e-4)
 
+        # ターゲットネットワークの重みを初期化
+        self.target_critic1.load_state_dict(self.critic1.state_dict())
+        self.target_critic2.load_state_dict(self.critic2.state_dict())
+
         self.alpha = 0.2
         self.gamma = 0.98
         self.tau = 0.01
