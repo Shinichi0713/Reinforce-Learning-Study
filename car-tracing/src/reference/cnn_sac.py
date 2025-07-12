@@ -201,5 +201,36 @@ def train_sac_car_racing(
 
     env.close()
 
+# 評価コード
+def evaluate_sac_car_racing(num_episodes=10):
+    env = gym.make("CarRacing-v3", continuous=True, render_mode="human")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    action_dim = env.action_space.shape[0]
+    agent = SACAgent(action_dim, device)
+    
+    # パラメータの読み込み
+    save_dir = "sac_params"
+    agent.actor.load_state_dict(torch.load(os.path.join(save_dir, "actor_ep1000.pth")))
+    agent.critic1.load_state_dict(torch.load(os.path.join(save_dir, "critic1_ep1000.pth")))
+    agent.critic2.load_state_dict(torch.load(os.path.join(save_dir, "critic2_ep1000.pth")))
+    agent.target_critic1.load_state_dict(torch.load(os.path.join(save_dir, "target_critic1_ep1000.pth")))
+    agent.target_critic2.load_state_dict(torch.load(os.path.join(save_dir, "target_critic2_ep1000.pth")))
+
+    for episode in range(num_episodes):
+        obs, info = env.reset()
+        episode_return = 0
+        while True:
+            action = agent.select_action(obs, eval=True)
+            next_obs, reward, terminated, truncated, info = env.step(action)
+            obs = next_obs
+            episode_return += reward
+            if terminated or truncated:
+                break
+        print(f"Episode {episode+1}: Return={episode_return:.1f}")
+
+    env.close()
+
+
 if __name__ == "__main__":
-    train_sac_car_racing(num_episodes=1000)
+    # train_sac_car_racing(num_episodes=1000)
+    evaluate_sac_car_racing(num_episodes=10)
