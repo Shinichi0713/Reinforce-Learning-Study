@@ -85,6 +85,34 @@ def train_sac_agent(
     env.close()
     return returns
 
+## 評価用コード
+def evaluate_sac_agent(num_episodes=10):
+    env = Environment(is_train=False)
+    obs_dim = env.reset().shape[0]
+    action_dim = env.env.action_space.shape[0]
+
+    agent = SacAgent(action_dim)
+    agent.load_models()  # 学習済みモデルをロード
+
+    returns = []
+    for episode in range(num_episodes):
+        state = env.reset()
+        episode_return = 0
+        done = False
+        while not done:
+            action = agent.select_action(state, deterministic=True)
+            next_state, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
+            episode_return += reward
+            state = next_state
+        returns.append(episode_return)
+        print(f"Episode {episode+1} Return: {episode_return}")
+
+    print(f"Average Return over {num_episodes} episodes: {np.mean(returns)}")
+    env.close()
+
+
 # --- 実行 ---
 if __name__ == "__main__":
     train_sac_agent(num_episodes=100)
+    evaluate_sac_agent(num_episodes=10)
