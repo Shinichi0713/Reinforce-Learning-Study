@@ -114,5 +114,5 @@ def evaluate_sac_agent(num_episodes=10):
 
 # --- 実行 ---
 if __name__ == "__main__":
-    train_sac_agent(num_episodes=100)
+    train_sac_agent(num_episodes=1000)
     evaluate_sac_agent(num_episodes=10)
