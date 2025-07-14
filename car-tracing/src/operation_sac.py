@@ -92,7 +92,7 @@ def evaluate_sac_agent(num_episodes=10):
     action_dim = env.env.action_space.shape[0]
 
     agent = SacAgent(action_dim)
-    agent.load_models()  # 学習済みモデルをロード
+    # agent.load_models()  # 学習済みモデルをロード
 
     returns = []
     for episode in range(num_episodes):
@@ -100,11 +100,13 @@ def evaluate_sac_agent(num_episodes=10):
         episode_return = 0
         done = False
         while not done:
-            action = agent.select_action(state, deterministic=True)
-            next_state, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
-            episode_return += reward
-            state = next_state
+            with torch.no_grad():
+                # 評価モードで行動選択
+                action = agent.select_action(state, evaluate=True)
+                next_state, reward, terminated, truncated, info = env.step(action)
+                done = terminated or truncated
+                episode_return += reward
+                state = next_state
         returns.append(episode_return)
         print(f"Episode {episode+1} Return: {episode_return}")
 
@@ -114,5 +116,5 @@ def evaluate_sac_agent(num_episodes=10):
 
 # --- 実行 ---
 if __name__ == "__main__":
-    train_sac_agent(num_episodes=1000)
+    # train_sac_agent(num_episodes=1000)
     evaluate_sac_agent(num_episodes=10)
