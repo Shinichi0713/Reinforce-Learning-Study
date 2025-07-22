@@ -1,9 +1,12 @@
 import os
-import re
-import shutil
-
-import numpy as np
 import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+import numpy as np
+import os
+import shutil
+import re
+
 
 
 class PolicyGraph():
@@ -89,171 +92,83 @@ class PolicyGraph():
 
 
 class PPO():
-    """
-        Proximal policy gradient model class
-    """
-
     def __init__(self, input_shape, num_actions, action_min, action_max,
                  epsilon=0.2, value_scale=0.5, entropy_scale=0.01,
                  model_checkpoint=None, model_name="ppo"):
-        """
-            input_shape [3]:
-                Shape of input images as a tuple (width, height, depth)
-            num_actions (int):
-                Number of continuous actions to output
-            action_min [num_actions]:
-                Minimum possible value for the respective action
-            action_max [num_actions]:
-                Maximum possible value for the respective action
-            epsilon (float):
-                PPO clipping parameter
-            value_scale (float):
-                Value loss scale factor
-            entropy_scale (float):
-                Entropy loss scale factor
-            model_checkpoint (string):
-                Path of model checkpoint file to load from
-            model_name (string):
-                Name of the model
-        """
-
-        tf.reset_default_graph()
-
-        self.input_states = tf.placeholder(
-            shape=(None, *input_shape), dtype=tf.float32,
-            name="input_state_placeholder")
-        self.taken_actions = tf.placeholder(
-            shape=(None, num_actions), dtype=tf.float32,
-            name="taken_action_placeholder")
-        self.input_states = tf.check_numerics(
-            self.input_states, "Invalid value for self.input_states")
-        self.taken_actions = tf.check_numerics(
-            self.taken_actions, "Invalid value for self.taken_actions")
-        self.policy = PolicyGraph(
-            self.input_states, self.taken_actions, num_actions, action_min,
-            action_max, "policy")
-        self.policy_old = PolicyGraph(
-            self.input_states, self.taken_actions, num_actions, action_min,
-            action_max, "policy_old")
-
-        # Create policy gradient train function
-        self.returns = tf.placeholder(
-            shape=(None,), dtype=tf.float32, name="returns_placeholder")
-        self.advantage = tf.placeholder(
-            shape=(None,), dtype=tf.float32, name="advantage_placeholder")
-
-        # Calculate ratio:
-        # r_t(θ) = exp( log   π(a_t | s_t; θ) - log π(a_t | s_t; θ_old)   )
-        # r_t(θ) = exp( log ( π(a_t | s_t; θ) /     π(a_t | s_t; θ_old) ) )
-        # r_t(θ) = π(a_t | s_t; θ) / π(a_t | s_t; θ_old)
-        self.prob_ratio = tf.exp(
-            self.policy.action_log_prob - self.policy_old.action_log_prob)
-
-        # Validate values
-        self.returns = tf.check_numerics(
-            self.returns, "Invalid value for self.returns")
-        self.advantage = tf.check_numerics(
-            self.advantage, "Invalid value for self.advantage")
-        self.prob_ratio = tf.check_numerics(
-            self.prob_ratio, "Invalid value for self.prob_ratio")
-
-        # Policy loss
-        adv = tf.expand_dims(self.advantage, axis=-1)
-        self.policy_loss = tf.reduce_mean(tf.minimum(
-            self.prob_ratio * adv,
-            tf.clip_by_value(self.prob_ratio,
-                             1.0 - epsilon,
-                             1.0 + epsilon) * adv))
-
-        # Value loss = mse(V(s_t) - R_t)
-        self.value_loss = tf.reduce_mean(tf.squared_difference(
-            tf.squeeze(self.policy.value), self.returns)) * value_scale
-
-        # Entropy loss
-        self.entropy_loss = tf.reduce_mean(tf.reduce_sum(
-            self.policy.action_normal.entropy(), axis=-1)) * entropy_scale
-
-        # Total loss
-        self.loss = -self.policy_loss + self.value_loss - self.entropy_loss
-
-        # Policy parameters
-        policy_params = tf.get_collection(
-            tf.GraphKeys.TRAINABLE_VARIABLES, scope="policy/")
-        policy_old_params = tf.get_collection(
-            tf.GraphKeys.TRAINABLE_VARIABLES, scope="policy_old/")
-        assert(len(policy_params) == len(policy_old_params))
-        for src, dst in zip(policy_params, policy_old_params):
-            assert(src.shape == dst.shape)
-
-        # Minimize loss
-        self.learning_rate = tf.placeholder(
-            shape=(), dtype=tf.float32, name="lr_placeholder")
-        self.optimizer = tf.train.AdamOptimizer(
-            learning_rate=self.learning_rate)
-        self.train_step = self.optimizer.minimize(
-            self.loss, var_list=policy_params)
-
-        # Update network parameters
-        self.update_op = tf.group(
-            [dst.assign(src) for src, dst in zip(policy_params, policy_old_params)])
-
-        # Create session
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        self.sess = tf.Session(config=config)
-
-        # Run the initializer
-        self.sess.run(tf.global_variables_initializer())
-
-        # Summaries
-        tf.summary.scalar("loss_policy", self.policy_loss)
-        tf.summary.scalar("loss_value", self.value_loss)
-        tf.summary.scalar("loss_entropy", self.entropy_loss)
-        tf.summary.scalar("loss", self.loss)
-        for i in range(num_actions):
-            tf.summary.scalar("taken_actions_{}".format(
-                i), tf.reduce_mean(self.taken_actions[:, i]))
-            tf.summary.scalar("policy.action_mean_{}".format(
-                i), tf.reduce_mean(self.policy.action_mean[:, i]))
-            tf.summary.scalar("policy.action_std_{}".format(
-                i), tf.reduce_mean(tf.exp(self.policy.action_logstd[i])))
-        tf.summary.scalar("prob_ratio", tf.reduce_mean(self.prob_ratio))
-        tf.summary.scalar("returns", tf.reduce_mean(self.returns))
-        tf.summary.scalar("advantage", tf.reduce_mean(self.advantage))
-        tf.summary.scalar("learning_rate", tf.reduce_mean(self.learning_rate))
-        self.summary_merged = tf.summary.merge_all()
-
-        # Load model checkpoint
+        self.input_shape = input_shape
+        self.num_actions = num_actions
+        self.action_min = np.array(action_min)
+        self.action_max = np.array(action_max)
+        self.epsilon = epsilon
+        self.value_scale = value_scale
+        self.entropy_scale = entropy_scale
         self.model_name = model_name
-        self.saver = tf.train.Saver()
 
-        self.model_dir = "./models/{}".format(self.model_name)
-        self.log_dir = "./logs/{}".format(self.model_name)
-        self.video_dir = "./videos/{}".format(self.model_name)
-        if model_checkpoint is None and os.path.isdir(self.model_dir):
-            answer = input(
-                "{} exists. Do you wish to continue (C) or restart training (R)?".format(self.model_dir))
-            if answer.upper() == "C":
-                model_checkpoint = tf.train.latest_checkpoint(self.model_dir)
-            elif answer.upper() != "R":
-                raise Exception(
-                    "There is already a model directory {}. Please delete it or change model_name and try again".format(self.model_dir))
+        # Policy network
+        self.policy_model = self.build_policy_model()
+        # Old policy network
+        self.policy_old_model = self.build_policy_model()
+        # Value network
+        self.value_model = self.build_value_model()
+
+        self.optimizer = tf.keras.optimizers.Adam()
+
+        # Checkpoint管理
+        self.model_dir = f"./models/{self.model_name}"
+        self.log_dir = f"./logs/{self.model_name}"
+        self.video_dir = f"./videos/{self.model_name}"
+        for d in [self.model_dir, self.log_dir, self.video_dir]:
+            if not os.path.isdir(d):
+                os.makedirs(d)
+        self.ckpt = tf.train.Checkpoint(policy=self.policy_model, value=self.value_model, optimizer=self.optimizer)
+        self.ckpt_manager = tf.train.CheckpointManager(self.ckpt, self.model_dir, max_to_keep=3)
 
         if model_checkpoint:
-            self.step_idx = int(re.findall(
-                r"[/\\]step\d+", model_checkpoint)[0][len("/step"):])
-            self.saver.restore(self.sess, model_checkpoint)
-            print("[INFO] Model checkpoint restored from {}".format(
-                model_checkpoint))
-        else:
-            self.step_idx = 0
-            for d in [self.model_dir, self.log_dir, self.video_dir]:
-                if os.path.isdir(d):
-                    shutil.rmtree(d)
-                os.makedirs(d)
+            self.ckpt.restore(model_checkpoint)
+            print(f"[INFO] Model checkpoint restored from {model_checkpoint}")
 
-        self.train_writer = tf.summary.FileWriter(
-            self.log_dir, self.sess.graph)
+    def build_policy_model(self):
+        inputs = keras.Input(shape=self.input_shape)
+        x = layers.Conv2D(32, 3, activation='relu')(inputs)
+        x = layers.Flatten()(x)
+        x = layers.Dense(64, activation='relu')(x)
+        action_mean = layers.Dense(self.num_actions, activation='tanh')(x)
+        action_mean = layers.Lambda(lambda x: x * (self.action_max - self.action_min) / 2 + (self.action_max + self.action_min) / 2)(action_mean)
+        return keras.Model(inputs=inputs, outputs=action_mean)
+
+    def build_value_model(self):
+        inputs = keras.Input(shape=self.input_shape)
+        x = layers.Conv2D(32, 3, activation='relu')(inputs)
+        x = layers.Flatten()(x)
+        x = layers.Dense(64, activation='relu')(x)
+        value = layers.Dense(1)(x)
+        return keras.Model(inputs=inputs, outputs=value)
+
+    @tf.function
+    def train_step(self, states, actions, returns, advantages, old_log_probs, learning_rate):
+        with tf.GradientTape() as tape:
+            # Forward pass
+            action_means = self.policy_model(states, training=True)
+            values = tf.squeeze(self.value_model(states, training=True), axis=1)
+            # Assume Gaussian policy for continuous control
+            std = 1.0  # You may want to learn this as a parameter
+            dist = tfp.distributions.Normal(action_means, std)
+            log_probs = dist.log_prob(actions)
+            entropy = dist.entropy()
+            # Ratio for PPO
+            ratios = tf.exp(log_probs - old_log_probs)
+            # PPO policy loss
+            policy_loss = -tf.reduce_mean(tf.minimum(
+                ratios * advantages,
+                tf.clip_by_value(ratios, 1.0 - self.epsilon, 1.0 + self.epsilon) * advantages
+            ))
+            value_loss = tf.reduce_mean(tf.square(values - returns)) * self.value_scale
+            entropy_loss = -tf.reduce_mean(entropy) * self.entropy_scale
+            total_loss = policy_loss + value_loss + entropy_loss
+        grads = tape.gradient(total_loss, self.policy_model.trainable_variables + self.value_model.trainable_variables)
+        self.optimizer.learning_rate.assign(learning_rate)
+        self.optimizer.apply_gradients(zip(grads, self.policy_model.trainable_variables + self.value_model.trainable_variables))
+        return total_loss
 
     def save(self):
         model_checkpoint = os.path.join(
