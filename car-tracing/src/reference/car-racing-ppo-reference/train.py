@@ -29,7 +29,7 @@ def parse_arg():
     parser.add_argument("--num_envs", type=int, default=16)
 
     # Training vars
-    parser.add_argument("--model_name", type=str, default='CarRacing-v0')
+    parser.add_argument("--model_name", type=str, default='CarRacing-v3')
     parser.add_argument("--save_interval", type=int, default=1000)
     parser.add_argument("--eval_interval", type=int, default=200)
     parser.add_argument("--record_episodes", type=bool, default=True)
@@ -108,7 +108,7 @@ def train(params, model_name, save_interval=1000, eval_interval=200,
     try:
         # Create test env
         print("[INFO] Creating test environment")
-        test_env = gym.make(env_name)
+        test_env = gym.make("CarRacing-v2")
 
         # Traning parameters
         initial_lr = params["initial_lr"]
