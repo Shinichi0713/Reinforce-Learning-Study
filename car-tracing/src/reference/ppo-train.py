@@ -19,14 +19,14 @@ class PolicyNet(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
-        self.fc = nn.Linear(64 * 20 * 20, 128)
+        self.fc = nn.Linear(64 * 10 * 10, 128)
         self.mean_head = nn.Linear(128, num_actions)
         self.log_std = nn.Parameter(torch.zeros(num_actions))
 
     def forward(self, x):
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
-        x = x.view(x.size(0), -1)
+        x = x.reshape(x.size(0), -1)
         x = torch.relu(self.fc(x))
         mean = torch.tanh(self.mean_head(x))
         std = torch.exp(self.log_std)
@@ -38,7 +38,7 @@ class ValueNet(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 32, 8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, 4, stride=2)
-        self.fc = nn.Linear(64 * 20 * 20, 128)
+        self.fc = nn.Linear(64 * 10 * 10, 128)
         self.value_head = nn.Linear(128, 1)
 
     def forward(self, x):
@@ -82,7 +82,7 @@ for episode in range(1000):
     while not done:
         value = value_net(torch.tensor(obs, dtype=torch.float32, device=device).unsqueeze(0).permute(0,3,1,2)).item()
         action, log_prob = select_action(obs)
-        next_obs, reward, terminated, truncated, _ = env.step(action)
+        next_obs, reward, terminated, truncated, _ = env.step(action.astype(np.float64))
         next_obs = preprocess(next_obs)
         done = terminated or truncated
 
