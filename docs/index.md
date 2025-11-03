@@ -136,5 +136,5 @@ Useful websites that supported learning and experimentation:
 
   [https://yagami12.hatenablog.com/entry/2019/02/22/210608](https://yagami12.hatenablog.com/entry/2019/02/22/210608)
 * 2025年のトレンド
-
-    https://shinichi0713.github.io/Reinforce-Learning-Study/trend_2025
+  
+  [強化学習のトレンド(2025年) | Reinforce-Learning-Study](https://shinichi0713.github.io/Reinforce-Learning-Study/trend_2025)
