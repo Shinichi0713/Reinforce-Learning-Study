@@ -123,7 +123,7 @@ It teaches RL step-by-step with Python code and real working examples.
 
   [https://github.com/google-deepmind/deepmind-research](https://github.com/google-deepmind/deepmind-research)
 
----
+-
 
 ## 🔗 References
 
@@ -135,21 +135,6 @@ Useful websites that supported learning and experimentation:
 * 星の本棚 — Reinforcement learning tips
 
   [https://yagami12.hatenablog.com/entry/2019/02/22/210608](https://yagami12.hatenablog.com/entry/2019/02/22/210608)
+* 2025年のトレンド
 
----
-
-## ✅ Keywords for SEO (Hidden Recommendation)
-
-> reinforcement learning, deep reinforcement learning, RL research, DQN, SAC, PPO, A3C, transformer RL, imitation learning, GAIL, behavior cloning, Gym, robotics, control systems, autonomous agents, python RL, machine learning experiments
-
----
-
-If you want, I can also provide:
-
-* ✅ SEO meta-tags for GitHub Pages
-* ✅ README badges & modern layout
-* ✅ Social preview image
-* ✅ Japanese version
-* ✅ Version optimized for Hugging Face profile
-
-Would you like any of those?
+    https://shinichi0713.github.io/Reinforce-Learning-Study/trend_2025
