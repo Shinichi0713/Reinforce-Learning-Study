@@ -16,6 +16,14 @@ Using Environment
 
 ## problems
 
+### Gird World with Dyna-Q
+
+with using Dyna-Q, train agent to update the model.
+
+below shows trainstion of reward vs episode.
+
+![1762658300029](image/README/1762658300029.png)
+
 ### ball cather
 
 this is the behavior of q-learning agent.
@@ -118,7 +126,6 @@ when using ddqn, ai agent can arrange boxes toward restricted space.
 
 ![alt text](image/arranging-boxes.png)
 
-
 # my work
 
 I am writing a book on reinforcement learning.
@@ -128,7 +135,6 @@ The book is designed for beginners to learn reinforcement learning step by step,
 It is published on Amazon Kindle, so please feel free to check it out if you are interested.
 
 [Amazon.co.jp: 実践!強化学習入門: Pythonで動かしながら理解する AI学習書 (AI関係書籍) eBook : 3 Sons Lover: Kindleストア](https://www.amazon.co.jp/%E5%AE%9F%E8%B7%B5-%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%E5%85%A5%E9%96%80-Python%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%97%E3%81%AA%E3%81%8C%E3%82%89%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B-AI%E5%AD%A6%E7%BF%92%E6%9B%B8-AI%E9%96%A2%E4%BF%82%E6%9B%B8%E7%B1%8D-ebook/dp/B0FH4VKHLJ)
-
 
 # cite
 
