@@ -77,7 +77,7 @@ for ep in range(episodes):
 
         # Q-learning update (real experience)
         Q[state][action] += alpha * (reward + gamma * np.max(Q[next_state]) - Q[state][action])
-      
+  
         # Save model
         model[(state, action)] = (next_state, reward)
 
@@ -119,15 +119,20 @@ for s, q in Q.items():
 
 この例ではランダム Planning を行っていますが、優先度付き sweeping など発展も可能です。
 
+# 💡 実装のポイント解説
+
+| 要素                      | 説明                                                            |
+| ------------------------- | --------------------------------------------------------------- |
+| **Qテーブル更新**   | 通常のQ学習（実際の環境で得た経験）を利用                       |
+| **モデル更新**      | `(state, action)`に対して `(next_state, reward)`を記録      |
+| **計画 (Planning)** | モデルから過去の経験を再利用してQ値を追加で更新（学習を高速化） |
+| **planning_steps**  | モデルを使った「仮想体験」の回数（多いほど高速だが計算負荷↑）  |
+
 ---
 
-## 📌 次のステップ
+# 🔍 結果の見方
 
-必要なら以下も提供します：
+実行後、グラフが表示されます：
 
-* 🎮 Gymnasium/MountainCar バージョン
-* 📊 学習曲線の可視化コード
-* 🧠 Dyna-Q+（探索ボーナス）実装
-* 🚀 Atari / Deep Dyna-Q（DNN 使用）
-
-どれに進みたいですか？
+* 初期：報酬（青線）は低い（ゴールまでたどり着けない）
+* 学習後：報酬が安定して上昇（効率よくゴールへ）
