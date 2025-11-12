@@ -8,15 +8,19 @@ Our goal is to build and apply RL techniques to intelligent self-control and sel
 
 We explore a wide range of RL algorithms, environments, and control tasks — from Q-Learning to advanced transformer-based agents.
 
-
-## My works
+## My Codes
 
 The repository of my scratch code is stored in next URL:
 
 [Shinichi0713/Reinforce-Learning-Study: this is the codes which is in accordance with reinforcement-learning](https://github.com/Shinichi0713/Reinforce-Learning-Study)
 
-Please look.
 
+On the other hand, I have LLM repository also.
+
+[Shinichi0713/LLM-fundamental-study: this site is the fundamental page of LLM-mechanism](https://github.com/Shinichi0713/LLM-fundamental-study)
+
+
+Please look.
 
 ## 📚 Contents
 
