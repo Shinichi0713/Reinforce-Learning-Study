@@ -14,6 +14,33 @@ Using Environment
 - Open Gym
 - Or Gym
 
+
+
+# my work
+
+I am writing a book on reinforcement learning.
+
+The book is designed for beginners to learn reinforcement learning step by step, covering everything from the basics to practical applications.
+
+It is published on Amazon Kindle, so please feel free to check it out if you are interested.
+
+[Amazon.co.jp: 実践!強化学習入門: Pythonで動かしながら理解する AI学習書 (AI関係書籍) eBook : 3 Sons Lover: Kindleストア](https://www.amazon.co.jp/%E5%AE%9F%E8%B7%B5-%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%E5%85%A5%E9%96%80-Python%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%97%E3%81%AA%E3%81%8C%E3%82%89%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B-AI%E5%AD%A6%E7%BF%92%E6%9B%B8-AI%E9%96%A2%E4%BF%82%E6%9B%B8%E7%B1%8D-ebook/dp/B0FH4VKHLJ)
+
+<img src="image/README/1763209669056.png" alt="q-learn" width="300px" height="auto">
+
+
+## My Codes
+
+The repository of my scratch code is stored in next URL:
+
+[Shinichi0713/Reinforce-Learning-Study: this is the codes which is in accordance with reinforcement-learning](https://github.com/Shinichi0713/Reinforce-Learning-Study)
+
+On the other hand, I have LLM repository also.
+
+[Shinichi0713/LLM-fundamental-study: this site is the fundamental page of LLM-mechanism](https://github.com/Shinichi0713/LLM-fundamental-study)
+
+Please look.
+
 ## problems
 
 ### Gird World with Dyna-Q
@@ -126,15 +153,15 @@ when using ddqn, ai agent can arrange boxes toward restricted space.
 
 ![alt text](image/arranging-boxes.png)
 
-# my work
+### Multi-Agent example
 
-I am writing a book on reinforcement learning.
+We implemented DQN training using two Rock-Paper-Scissors agents as a multi-agent example problem. We visualized two aspects:
 
-The book is designed for beginners to learn reinforcement learning step by step, covering everything from the basics to practical applications.
+The trend of Agent 1's average reward (Learning stability).
 
-It is published on Amazon Kindle, so please feel free to check it out if you are interested.
+The trend of Agent 1's final Q-values (Learned action strategy).
 
-[Amazon.co.jp: 実践!強化学習入門: Pythonで動かしながら理解する AI学習書 (AI関係書籍) eBook : 3 Sons Lover: Kindleストア](https://www.amazon.co.jp/%E5%AE%9F%E8%B7%B5-%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%E5%85%A5%E9%96%80-Python%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%97%E3%81%AA%E3%81%8C%E3%82%89%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B-AI%E5%AD%A6%E7%BF%92%E6%9B%B8-AI%E9%96%A2%E4%BF%82%E6%9B%B8%E7%B1%8D-ebook/dp/B0FH4VKHLJ)
+<img src="image/README/1763209192634.png" alt="jssp-3" width="500px" height="auto">
 
 # cite
 

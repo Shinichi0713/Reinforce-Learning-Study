@@ -3,8 +3,8 @@
    <url>
       <loc>https://shinichi0713.github.io/Reinforce-Learning-Study/</loc>
       <lastmod>2025-11-15</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
+      <changefreq>weekly</changefreq>
+      <priority>0.95</priority>
    </url>
    <url>
       <loc>https://shinichi0713.github.io/Reinforce-Learning-Study/roadmap</loc>
@@ -17,5 +17,11 @@
       <lastmod>2025-11-01</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.6</priority>
+   </url>
+   <url>
+      <loc>https://github.com/Shinichi0713/Reinforce-Learning-Study</loc>
+      <lastmod>2025-11-15</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1.0</priority>
    </url>
 </urlset>
