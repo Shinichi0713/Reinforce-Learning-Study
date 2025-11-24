@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5354;&#x8abf;&#x5b66;&#x7fd2;&#x306e;&#x4f8b;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="協調学習の例題">協調学習の例題</h1>
+<p>強調学習の練習を行うために以下のような問題を考えてみました。</p>
+<h2 id="協調的な例題フォークリフトによる倉庫管理-multi-robot-warehouse">協調的な例題：フォークリフトによる倉庫管理 (Multi-Robot Warehouse)</h2>
+<p>この例題は、複数のエージェントが<strong>共通の資源</strong>を管理し、<strong>衝突を避けながら</strong>タスクを効率的に処理する、協調的なMARLの基本を学ぶのに非常に適しています。</p>
+<h3 id="設定">設定</h3>
+<ul>
+<li><strong>環境:</strong> 倉庫のグリッドマップ。商品が置かれた複数の<strong>ピックアップ地点</strong>と、配達を行う<strong>ドロップオフ地点</strong>があります。</li>
+<li><strong>タスク:</strong> 複数のフォークリフトロボット（エージェント）が、割り当てられた商品をピックアップ地点から運び、ドロップオフ地点に配達します。</li>
+</ul>
+<h3 id="エージェントと目標">エージェントと目標</h3>
+<table>
+<thead>
+<tr>
+<th><strong>項目</strong></th>
+<th><strong>詳細</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>エージェント</strong></td>
+<td>2台以上のフォークリフトロボット。</td>
+</tr>
+<tr>
+<td><strong>行動（アクション）</strong></td>
+<td>上、下、左、右への移動、待機、ピックアップ、ドロップオフ。</td>
+</tr>
+<tr>
+<td><strong>目標</strong></td>
+<td><strong>割り当てられたすべての注文を最短時間で完了する</strong> （総合報酬の最大化）。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="相互作用と学習のポイント">相互作用と学習のポイント</h3>
+<p>この例題でMARLを学ぶ上で重要なポイントは以下の2点です。</p>
+<h4 id="1-経路の競合と衝突回避-collision-avoidance">1. 経路の競合と衝突回避 (Collision Avoidance)</h4>
+<ul>
+<li>ロボットは同じ通路や交差点を使用するため、<strong>衝突</strong>が発生する可能性があります。</li>
+<li>学習目標は、単に最短経路を選ぶだけでなく、<strong>他のロボットの動きを予測</strong>し、衝突を避けるために一時的に待機したり、迂回したりする協調的な行動を学習することです。</li>
+</ul>
+<h4 id="2-タスクの割り当てと負荷分散-task-allocation">2. タスクの割り当てと負荷分散 (Task Allocation)</h4>
+<ul>
+<li>複数の注文が発生した場合、どのロボットがどの注文をピックアップするのが最も効率的か（ <strong>誰がどこへ行くか</strong> ）を決定する必要があります。</li>
+<li>単一エージェントではこの決定は不要ですが、MARLでは、<strong>他のエージェントの現在の位置やタスク状況</strong>を考慮して、最適な割り当て戦略を学習することが、全体効率（総合報酬）を最大化する鍵となります。</li>
+</ul>
+<h2 id="環境コード">環境コード</h2>
+<p>強化学習のコードはまず環境コードをつくることから始まります。</p>
+<p>特別なライブラリを使わないということを念頭にリンク先に作ってみました。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main">Shinichi0713/Reinforce-Learning-Study: this is the codes which is in accordance with reinforcement-learning</a></p>
+<p>動作させるとこんな感じになります。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\docs\blog\images\10\marl_agent_motion.gif" alt="jssp-3" width="500px" height="auto">
+<hr>
+<p>著者は暇があればgithubいじってます。 強化学習関係でしたら以下が作品です。 宜しければご覧ください。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study">https://github.com/Shinichi0713/Reinforce-Learning-Study</a></p>
+
+            
+            
+        </body>
+        </html>
