@@ -3,6 +3,8 @@
 this repogitory is run to study reinforcement learning.
 thus, we apply the tech to control Self-discipline system.
 
+![1762658300029](image/README/main_title.png)
+
 # contents
 
 1. basic: that is the code to check fundamental reinforcement theology.
@@ -162,6 +164,14 @@ The trend of Agent 1's average reward (Learning stability).
 The trend of Agent 1's final Q-values (Learned action strategy).
 
 <img src="image/README/1763209192634.png" alt="jssp-3" width="500px" height="auto">
+
+#### MARL
+
+new theme is considering.
+the environment is displayed as next.
+
+<img src="image/README/marl_agent_motion.gif" alt="jssp-3" width="500px" height="auto">
+
 
 # cite
 
