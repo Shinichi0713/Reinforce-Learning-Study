@@ -165,13 +165,17 @@ The trend of Agent 1's final Q-values (Learned action strategy).
 
 <img src="image/README/1763209192634.png" alt="jssp-3" width="500px" height="auto">
 
-#### MARL
+#### MARL warehouse
 
 new theme is considering.
 the environment is displayed as next.
 
 <img src="image/README/marl_agent_motion.gif" alt="jssp-3" width="500px" height="auto">
 
+#### MARL adventure
+
+
+<img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
 
 # cite
 
