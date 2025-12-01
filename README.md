@@ -1,4 +1,4 @@
-# Purpose
+# [Purpose](https://github.com/Shinichi0713/Reinforce-Learning-Study)
 
 this repogitory is run to study reinforcement learning.
 thus, we apply the tech to control Self-discipline system.
@@ -15,6 +15,7 @@ Using Environment
 
 - Open Gym
 - Or Gym
+- Muti Agent
 
 
 
@@ -174,6 +175,29 @@ the environment is displayed as next.
 
 #### MARL adventure
 
+This is a cooperative Multi-Agent Reinforcement Learning (MARL) example focusing on **information sharing** and **continuous coordination**. The core challenge is to efficiently cover an unknown area by pooling decentralized knowledge.
+
+__Environment and Setup__
+
+| Item | Details |
+| :--- | :--- |
+| **Environment** | An **unknown grid map** representing a disaster site where critical targets are hidden. |
+| **Observation** | Each drone has a **very narrow sensor range** (e.g., only adjacent cells), leading to significant local **partial observability**. |
+| **Agents** | Multiple search drones (or mobile sensor robots). |
+| **Actions** | Movement (Up, Down, Left, Right, Stay). |
+| **Goal** | **Maximize map coverage efficiency** by minimizing the time required to fully explore the entire map (minimizing unexplored area). |
+
+__Learning Objectives and Cooperation Points__
+
+1. Information Sharing and Distributed Knowledge
+
+* **Necessity for Coordination:** Without sharing information about previously explored areas, agents will inefficiently perform **redundant searches**.
+* **Learning Goal:** Agents must learn to integrate their local observations into a **common global knowledge map (shared memory)** and use this map to choose a strategy that prioritizes moving toward **unexplored locations**.
+
+2. Optimal Coverage and Spatial Load Balancing
+
+* **Nature of Coordination:** This task emphasizes **positive cooperation** ("dividing up the unexplored area") rather than negative cooperation ("avoiding collisions").
+* **Learning Goal:** The drone swarm must learn a **spatial load-balancing strategy**: maintaining an **appropriate distance** from each other to avoid overcrowding while cooperatively segmenting the search area to maximize the overall coverage rate.
 
 <img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
 

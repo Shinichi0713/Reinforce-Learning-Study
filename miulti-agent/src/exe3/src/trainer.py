@@ -7,6 +7,7 @@ import random
 from collections import deque
 import matplotlib.pyplot as plt
 
+from env import MultiSensorSearchEnv
 # 前回の環境コードが必要ですので、MultiSensorSearchEnvクラスが定義されている前提で進めます
 # (もし未定義の場合は、前の回答の環境コードを先に実行してください)
 
@@ -162,13 +163,19 @@ class SharedAgent:
 
 
 # --- メイン学習ループ ---
-
-def train_multi_agent_search():
+def train_multi_agent_search(save_path: str = "trained_search_agent.pth"):
     # 環境の生成 (前の回答のコードが必要です)
-    env = MultiSensorSearchEnv(size=10, num_agents=3) 
+    # env = MultiSensorSearchEnv(size=10, num_agents=3) # size=10, num_agents=3 は環境定義から取得
     
+    # 環境の定義がないため、仮の値を設定
+    try:
+        env = MultiSensorSearchEnv(size=10, num_agents=3)
+    except NameError:
+        print("警告: MultiSensorSearchEnvクラスが定義されていません。環境の初期化をスキップします。")
+        return None, None, None
+
     # 共有エージェント脳の生成
-    agent_brain = SharedAgent(grid_size=10, action_space=5)
+    agent_brain = SharedAgent(grid_size=env.size, action_space=env.action_space)
     
     num_episodes = 500
     rewards_history = []
@@ -197,16 +204,17 @@ def train_multi_agent_search():
             
             # 3. 経験の保存と状態更新
             for i in range(env.num_agents):
+                # rewards[i] や done は前の回答のコードでは dict の値なので、ここではその dict の値を適切に取得しているものとします。
                 reward_tensor = torch.tensor([rewards[i]], device=device)
                 next_state_tensor = agent_brain.preprocess_state(next_obs, i)
                 done_tensor = torch.tensor([float(done)], device=device)
                 
                 # メモリに追加
                 agent_brain.memory.push(state[i], 
-                                      torch.tensor([[actions[i]]], device=device), 
-                                      next_state_tensor, 
-                                      reward_tensor,
-                                      done_tensor)
+                                       torch.tensor([[actions[i]]], device=device, dtype=torch.long), # action tensorの型を修正
+                                       next_state_tensor, 
+                                       reward_tensor,
+                                       done_tensor)
                 
                 # 状態更新
                 state[i] = next_state_tensor
@@ -225,10 +233,31 @@ def train_multi_agent_search():
         rewards_history.append(total_reward)
         coverage_history.append(info['coverage'])
         
+        # ログ出力
         if (i_episode + 1) % 10 == 0:
-            print(f"Episode {i_episode+1}/{num_episodes} | Total Reward: {total_reward:.2f} | Coverage: {info['coverage']*100:.1f}% | Epsilon: {EPS_END + (EPS_START - EPS_END) * np.exp(-1. * agent_brain.steps_done / EPS_DECAY):.2f}")
+            epsilon_val = EPS_END + (EPS_START - EPS_END) * np.exp(-1. * agent_brain.steps_done / EPS_DECAY)
+            print(f"Episode {i_episode+1}/{num_episodes} | Total Reward: {total_reward:.2f} | Coverage: {info['coverage']*100:.1f}% | Epsilon: {epsilon_val:.2f}")
 
-    print("学習完了！")
+
+    # --- モデルの保存処理 ---
+    
+    # 保存するデータは、モデルの重み（state_dict）と学習履歴を推奨
+    save_data = {
+        'episode': num_episodes,
+        'model_state_dict': agent_brain.policy_net.state_dict(),
+        'optimizer_state_dict': agent_brain.optimizer.state_dict(),
+        'rewards_history': rewards_history,
+        'coverage_history': coverage_history,
+        'hyperparameters': { # 必要に応じてハイパーパラメータも保存
+            'GRID_SIZE': env.size,
+            'NUM_AGENTS': env.num_agents,
+            # ... 他のハイパーパラメータもここに追加
+        }
+    }
+    
+    torch.save(save_data, save_path)
+    print(f"\n✅ 学習済みモデルと履歴を {save_path} に保存しました。")
+
     return agent_brain, rewards_history, coverage_history
 
 # --- 実行と検証 ---

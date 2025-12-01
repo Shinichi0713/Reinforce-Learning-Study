@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x4eca;&#x56de;&#x30a2;&#x30eb;&#x30b4;&#x30ea;&#x30ba;&#x30e0;&#x306e;&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>昨日作成したコード&quot;情報共有と継続的な協調に焦点を当てた、別の代表的な協調型MARLの例題として、「複数のセンサーによる災害現場の探索（Multi-Sensor Search &amp; Coverage）」&quot;を解くアルゴリズムを使って問題を解こうとしています。</p>
+<p>尚、解説ではエージェントである動作物をドローン（エージェント）と仮定しまう。
+今回作成したアルゴリズムは、各ドローンが<strong>同じニューラルネットワーク</strong>を使って意思決定を行う、協調型MARL（Multi-Agent Reinforcement Learning）の代表的な手法です。</p>
+<h2 id="今回アルゴリズムの概要">今回アルゴリズムの概要</h2>
+<p>今回採用してている主なアルゴリズムは、以下の要素で構成されています。</p>
+<h3 id="1-深層強化学習-dqn">1. <strong>深層強化学習 (DQN)</strong></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">説明</th>
+<th style="text-align:left">目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>DQN</strong></td>
+<td style="text-align:left">Q学習にディープニューラルネットワーク（NN）を組み込んだ手法。NNが各状態での最適な行動の<strong>Q値</strong>（将来得られる報酬の期待値）を近似します。</td>
+<td style="text-align:left">複雑な環境状態（マップ全体）を直接入力として受け取り、最適な行動を予測する。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>ターゲットネットワーク</strong></td>
+<td style="text-align:left">予測のターゲット値（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>a</mi><mi>r</mi><mi>g</mi><mi>e</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{target}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>）の計算に使用する、重みが固定されたネットワーク。</td>
+<td style="text-align:left">学習を安定させる。（DQNの最も重要な安定化技術）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>経験再生バッファ</strong></td>
+<td style="text-align:left">過去のエージェントの経験 (状態、行動、報酬、次の状態) を保存するメモリ。</td>
+<td style="text-align:left">経験をランダムにサンプリングして学習に使うことで、データの相関を減らし、学習を安定させる。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-構造的特徴-dueling-dqn-と-cnn">2. <strong>構造的特徴 (Dueling DQN と CNN)</strong></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">説明</th>
+<th style="text-align:left">目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>CNN</strong></td>
+<td style="text-align:left"><strong>畳み込みニューラルネットワーク</strong>をQネットワークに使用。</td>
+<td style="text-align:left">マップ情報（探索済み/未探索エリア）という<strong>空間的なデータ</strong>から、未探索エリアの場所や、移動しやすい経路といった<strong>特徴量</strong>を効率的に抽出する。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>観測 (State)</strong></td>
+<td style="text-align:left">入力は 2 チャンネルの画像形式です。<strong>Ch0: 共有探索マップ</strong>、<strong>Ch1: 自分の位置（ワンホットエンコーディング）</strong>。</td>
+<td style="text-align:left">NNに「今、どこにいるか」と「チーム全体でどこまで探索したか」を同時に伝える。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-マルチエージェントの協調-共有エージェント脳">3. <strong>マルチエージェントの協調 (共有エージェント脳)</strong></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">説明</th>
+<th style="text-align:left">協調学習のポイント</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>共有エージェント (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>SharedAgent</mtext></mrow><annotation encoding="application/x-tex">\text{SharedAgent}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">SharedAgent</span></span></span></span></span>)</strong></td>
+<td style="text-align:left">すべてのドローンが、単一の<strong>同じニューラルネットワーク</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>policy_net</mtext></mrow><annotation encoding="application/x-tex">\text{policy\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">policy_net</span></span></span></span></span>）の重みを共有して意思決定を行う。</td>
+<td style="text-align:left"><strong>完全に協調的なタスク</strong>（探索率の最大化）において、学習された知識（例: 「未探索エリアには優先して向かう」）をチーム全体で瞬時に共有できる。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>報酬</strong></td>
+<td style="text-align:left">チーム全体で新しく発見したマスの数に基づいて<strong>チーム全員に同じ報酬</strong>を与える。</td>
+<td style="text-align:left">ドローンが個々の利己的な行動ではなく、「チーム全体の目標達成」に貢献する行動（分散して探索する）を学習するように誘導する。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="-学習プロセス-学習ループ-の流れ">🏃 学習プロセス (学習ループ) の流れ</h2>
+<ol>
+<li><strong>初期化</strong>: 環境と共有ネットワーク（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>policy_net</mtext></mrow><annotation encoding="application/x-tex">\text{policy\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">policy_net</span></span></span></span></span>と<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>target_net</mtext></mrow><annotation encoding="application/x-tex">\text{target\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9251em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">target_net</span></span></span></span></span>）を初期化し、すべてのドローンをマップ上にランダムに配置します。</li>
+<li><strong>行動決定 (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy)</strong>:
+<ul>
+<li>一定確率 (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>) でランダムな行動を取り（<strong>探索</strong>）、それ以外では <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>policy_net</mtext></mrow><annotation encoding="application/x-tex">\text{policy\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">policy_net</span></span></span></span></span> の出力するQ値が最大の行動を選択します（<strong>活用</strong>）。</li>
+</ul>
+</li>
+<li><strong>環境実行と経験保存</strong>:
+<ul>
+<li>すべてのドローンが同時に行動を実行し、環境が次の状態へ遷移します。</li>
+<li>各ドローンは、その経験 (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>state</mtext></mrow><annotation encoding="application/x-tex">\text{state}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord text"><span class="mord">state</span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>action</mtext></mrow><annotation encoding="application/x-tex">\text{action}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6679em;"></span><span class="mord text"><span class="mord">action</span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>next_state</mtext></mrow><annotation encoding="application/x-tex">\text{next\_state}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9251em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">next_state</span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>reward</mtext></mrow><annotation encoding="application/x-tex">\text{reward}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">reward</span></span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>done</mtext></mrow><annotation encoding="application/x-tex">\text{done}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">done</span></span></span></span></span>) を<strong>共通の</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>ReplayMemory</mtext></mrow><annotation encoding="application/x-tex">\text{ReplayMemory}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">ReplayMemory</span></span></span></span></span> に保存します。</li>
+</ul>
+</li>
+<li><strong>モデルの最適化</strong>:
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>ReplayMemory</mtext></mrow><annotation encoding="application/x-tex">\text{ReplayMemory}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">ReplayMemory</span></span></span></span></span> から経験をランダムにサンプリングし、DQNの損失関数（予測Q値とターゲットQ値の差）を計算します。</li>
+<li><strong>共有ネットワーク</strong>の重みを更新し、全てのドローンがその学習結果を即座に利用できるようにします。</li>
+</ul>
+</li>
+<li><strong>ターゲットネットワークの更新</strong>:
+<ul>
+<li>一定のエピソードごと（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>TARGET_UPDATE</mtext></mrow><annotation encoding="application/x-tex">\text{TARGET\_UPDATE}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9933em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">TARGET_UPDATE</span></span></span></span></span>）に、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>policy_net</mtext></mrow><annotation encoding="application/x-tex">\text{policy\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">policy_net</span></span></span></span></span> の重みを <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>target_net</mtext></mrow><annotation encoding="application/x-tex">\text{target\_net}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9251em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">target_net</span></span></span></span></span> にコピーし、ターゲット値を安定させます。</li>
+</ul>
+</li>
+</ol>
+<p>このプロセスにより、ドローンたちは重複を避け、<strong>効率的にマップを分割して探索</strong>する最適な協調戦略を、ネットワークの重みとして学習します。</p>
+<h2 id="現状の動作">現状の動作</h2>
+<p>現状動作は以下のようになっています。
+上がもともとのランダム状態、下が今回アルゴリズムにより学習した状態です。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
