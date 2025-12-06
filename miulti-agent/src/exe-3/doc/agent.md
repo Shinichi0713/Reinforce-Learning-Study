@@ -49,19 +49,19 @@ class DuelingDQN(nn.Module):
     def __init__(self, h, w, outputs):
         super(DuelingDQN, self).__init__()
         # 入力: 2チャンネル (マップ + 自分の位置), 高さh, 幅w
-      
+    
         # 畳み込み層: 空間的な特徴（未探索エリアの塊など）を抽出
         self.conv1 = nn.Conv2d(2, 16, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
-      
+    
         # 畳み込み後のサイズ計算
         def conv2d_size_out(size, kernel_size=3, stride=1, padding=1):
             return (size + 2 * padding - (kernel_size - 1) - 1) // stride + 1
-          
+        
         convw = conv2d_size_out(conv2d_size_out(w))
         convh = conv2d_size_out(conv2d_size_out(h))
         linear_input_size = convw * convh * 32
-      
+    
         # 全結合層
         self.fc1 = nn.Linear(linear_input_size, 128)
         self.head = nn.Linear(128, outputs)
@@ -94,13 +94,13 @@ class SharedAgent:
     def __init__(self, grid_size, action_space):
         self.grid_size = grid_size
         self.action_space = action_space
-      
+    
         # ネットワークの構築
         self.policy_net = DuelingDQN(grid_size, grid_size, action_space).to(device)
         self.target_net = DuelingDQN(grid_size, grid_size, action_space).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
-      
+    
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
         self.memory = ReplayMemory(MEMORY_SIZE)
         self.steps_done = 0
@@ -113,17 +113,17 @@ class SharedAgent:
         """
         # マップ情報の取得
         explored_map = obs[agent_id]["map"] # shape (H, W)
-      
+    
         # エージェント位置情報の作成
         agent_pos = obs[agent_id]["position"] # (x, y)
         pos_map = np.zeros((self.grid_size, self.grid_size), dtype=np.float32)
-      
+    
         # numpyは(row, col) = (y, x) なので注意
         # 範囲外チェックは環境側で行われている前提だが念のため
         px, py = agent_pos
         if 0 <= py < self.grid_size and 0 <= px < self.grid_size:
             pos_map[py, px] = 1.0
-      
+    
         # チャンネル結合 (2, H, W)
         state = np.stack([explored_map, pos_map], axis=0)
         return torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # バッチ次元追加 (1, 2, H, W)
@@ -133,7 +133,7 @@ class SharedAgent:
         eps_threshold = EPS_END + (EPS_START - EPS_END) * \
             np.exp(-1. * self.steps_done / EPS_DECAY)
         self.steps_done += 1
-      
+    
         if sample > eps_threshold:
             with torch.no_grad():
                 # 最大のQ値を持つ行動を選択
@@ -145,11 +145,11 @@ class SharedAgent:
     def optimize_model(self):
         if len(self.memory) < BATCH_SIZE:
             return
-      
+    
         transitions = self.memory.sample(BATCH_SIZE)
         # バッチデータの整理
         batch_state, batch_action, batch_next_state, batch_reward, batch_done = zip(*transitions)
-      
+    
         state_batch = torch.cat(batch_state)
         action_batch = torch.cat(batch_action)
         reward_batch = torch.cat(batch_reward)
@@ -171,11 +171,11 @@ class SharedAgent:
         # 最適化
         self.optimizer.zero_grad()
         loss.backward()
-      
+    
         # 勾配クリッピング (安定化のため)
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
-          
+        
         self.optimizer.step()
 
     def update_target_network(self):
@@ -199,53 +199,53 @@ def train_multi_agent_search():
 
     for i_episode in range(num_episodes):
         obs = env.reset()
-      
+    
         # エージェントごとの初期状態Tensorを作成
         state = {i: agent_brain.preprocess_state(obs, i) for i in range(env.num_agents)}
-      
+    
         total_reward = 0
-      
+    
         for t in range(100): # Max steps
             actions = {}
-          
+        
             # 1. 全エージェントの行動決定
             for i in range(env.num_agents):
                 action = agent_brain.select_action(state[i])
                 actions[i] = action.item()
-          
+        
             # 2. 環境実行
             next_obs, rewards, done, info = env.step(actions)
-          
+        
             # 3. 経験の保存と状態更新
             for i in range(env.num_agents):
                 reward_tensor = torch.tensor([rewards[i]], device=device)
                 next_state_tensor = agent_brain.preprocess_state(next_obs, i)
                 done_tensor = torch.tensor([float(done)], device=device)
-              
+            
                 # メモリに追加
                 agent_brain.memory.push(state[i], 
                                       torch.tensor([[actions[i]]], device=device), 
                                       next_state_tensor, 
                                       reward_tensor,
                                       done_tensor)
-              
+            
                 # 状態更新
                 state[i] = next_state_tensor
                 total_reward += rewards[i]
-          
+        
             # 4. モデルの最適化 (1ステップごとに学習)
             agent_brain.optimize_model()
-          
+        
             if done:
                 break
-      
+    
         # ターゲットネットワークの定期更新
         if i_episode % TARGET_UPDATE == 0:
             agent_brain.update_target_network()
-          
+        
         rewards_history.append(total_reward)
         coverage_history.append(info['coverage'])
-      
+    
         if (i_episode + 1) % 10 == 0:
             print(f"Episode {i_episode+1}/{num_episodes} | Total Reward: {total_reward:.2f} | Coverage: {info['coverage']*100:.1f}% | Epsilon: {EPS_END + (EPS_START - EPS_END) * np.exp(-1. * agent_brain.steps_done / EPS_DECAY):.2f}")
 
@@ -288,19 +288,19 @@ if __name__ == "__main__":
                 # ε-greedyを使わず、最大のQ値を持つ行動を選択
                 action = trained_brain.policy_net(state[i]).max(1)[1].item()
             actions[i] = action
-          
+        
         next_obs, rewards, done, info = env.step(actions)
-      
+    
         # 可視化
         env.render(sleep_time=0.2)
-      
+    
         state = {i: trained_brain.preprocess_state(next_obs, i) for i in range(env.num_agents)}
-      
+    
         if done:
             print(f"テスト完了！ 最終カバレッジ: {info['coverage']*100:.1f}%")
             plt.pause(2.0)
             break
-          
+        
     plt.ioff()
     plt.show()
 ```
@@ -324,3 +324,42 @@ if __name__ == "__main__":
 * **協調の仕組み** : 報酬は「チーム全体で新しく発見したマスの数」に基づいているため、エージェントは「他の仲間と離れて、まだ誰も行っていない場所に行く」行動を取ると高いQ値が得られるよう学習します。
 
 このコードを実行すると、最初はランダムに動き回っていたドローンたちが、徐々に「お互いに離れて散らばる」「未探索エリアに向かって一直線に進む」といった賢い探索行動を学習していく様子が観察できます。
+
+
+
+## 学習内容
+
+**複数のセンサー（エージェント）による災害現場の探索**という協調的な課題を解決するための、**共有脳型ディープQネットワーク (Shared Brain DQN)** の実装です。
+
+このコードが行っている学習内容は、**効率的な探索と協調**を実現するための強化学習プロセスの確立に集約されます。
+
+
+### 学習内容のまとめ
+
+このコードでエージェントが学習し、最適化している主な内容は以下の3点です。
+
+__1. 共有知識に基づく意思決定__
+
+* **学習目標** : エージェントは、**他のエージェントが既に探索したエリアの知識**を考慮に入れ、「次にどこへ行くべきか」を決定する戦略を学習します。
+* **実現方法** :
+* **状態入力** : エージェントへの入力 (`preprocess_state`) に、**共有探索マップ (Ch0)** とエージェント自身の位置 (Ch1) の両方を含めます。これにより、ネットワークは局所的な情報だけでなく、**グローバルな探索進捗**に基づいて行動を選べます。
+* **SharedAgent** : 全てのエージェントが**単一のポリシーネットワーク** (**$\text{policy\_net}$**) の重みを共有します。これにより、一人のエージェントの学習結果が瞬時にチーム全体に反映され、知識の共有が**暗黙的**に行われます。
+
+__2. 空間的な負荷分散 (分散探索)__
+
+* **学習目標** : エージェントは、**互いに密集しすぎず、未探索の新しいエリアを分担してカバー**するように動く、空間的な協調戦略を学習します。
+* **実現方法** :
+* **報酬設計** : 報酬は、チーム全体が**新しく探索したエリア**の面積に基づいて与えられます（`env.step`内の設計がその前提）。これにより、重複した探索は評価されず、**分散的な行動**がより高い報酬を得るように誘導されます。
+* **CNNの活用** : **$\text{DuelingDQN}$** は **$\text{CNN}$** を使用しており、入力されたマップ画像から「未探索の大きな固まり」や「エージェントの集積地」といった**空間パターン**を認識し、未探索の方向へ動くQ値を高く見積もるように学習します。
+
+__3. DQNによる安定した学習__
+
+* **学習目標** : 複雑な探索タスクにおいて、Q値の推定を安定させ、効率的に収束させる。
+* **実現方法** :
+* **経験再生 (**$\text{ReplayMemory}$**)** : 過去の経験をランダムにサンプリングし、データの相関を断ち切ることで、学習の安定性を高めています。
+* **ターゲットネットワーク** (**$\text{target\_net}$**): Q値のターゲット計算に古いネットワークの重みを使用することで、学習時の**自己参照による発散**を防ぎます。
+* **$\epsilon$-greedy法** : 学習の初期段階ではランダム行動（探索）を多く、進むにつれて学習済み知識の活用（最適行動）を優先するバランスを取っています。
+
+### まとめ
+
+このコードは、**「共有された観測結果と位置情報」** を入力とし、**「協調的な行動が評価される報酬」** の下で、**「単一のDQNネットワーク」** の重みを最適化することで、複数のドローンが**効率的かつ冗長性なく**災害現場の探索を完了する戦略を学習しています。
