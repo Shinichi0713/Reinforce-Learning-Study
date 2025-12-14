@@ -167,7 +167,6 @@ MARL implementation is descripted as below URL:
 
 [Reinforce-Learning-Study/miulti-agent/readme.md at main · Shinichi0713/Reinforce-Learning-Study](https://github.com/Shinichi0713/Reinforce-Learning-Study/blob/main/miulti-agent/readme.md)
 
-
 #### MARL warehouse
 
 new theme is considering.
