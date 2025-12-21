@@ -34,16 +34,21 @@ OBS_SHAPE = 2 + 1 + NUM_AGENTS # 位置(2) + 荷物(1) + Agent ID(2) = 5
 STATE_SHAPE = (2 + 1) * NUM_AGENTS + NUM_ORDERS # 位置(2) + 荷物(1)) * 2 + 注文(3) = 9
 
 # --- 必須なクラス定義 (以前の回答から流用) ---
-
-# class WarehouseEnv: ... (以前の環境定義をここに配置)
 class WarehouseEnv:
     def __init__(self, size: int = GRID_SIZE, num_agents: int = NUM_AGENTS):
         self.size = size
         self.num_agents = num_agents
-        self.action_space = ACTION_SPACE
+        self.action_space = 5  # 0:待機, 1:上, 2:下, 3:左, 4:右
+
+        # Matplotlib用の図の保持
+        self.fig = None
+        self.ax = None
+
+        # 状態の初期化
         self.reset()
 
     def reset(self) -> Dict[int, Tuple]:
+        """環境を初期化し、初期状態を返します。"""
         self.agent_positions: Dict[int, Tuple[int, int]] = {
             i: (random.randint(0, self.size - 1), random.randint(0, self.size - 1))
             for i in range(self.num_agents)
@@ -55,20 +60,222 @@ class WarehouseEnv:
     def _get_obs(self) -> Dict[int, Tuple]:
         obs = {}
         for i in range(self.num_agents):
+            # obs[i] = (
+            #     self.agent_positions[i],
+            #     self.agent_holding[i],
+            #     tuple(self.remaining_orders)
+            # )
+            other_agent_idx = 1 - i # 2エージェントの場合
             obs[i] = (
-                self.agent_positions[i],
-                self.agent_holding[i],
-                tuple(self.remaining_orders)
+                self.agent_positions[i],      # 自分の位置
+                self.agent_holding[i],        # 自分の状態
+                self.agent_positions[other_agent_idx], # 相方の位置（重要！）
+                tuple(self.remaining_orders)  # 残りの注文
             )
         return obs
-
     def step(self, actions: Dict[int, int]) -> Tuple[Dict, Dict, Dict, Dict]:
-        # このメソッドの実装は以前の回答と同様に衝突処理、報酬計算などを含む必要があります。
-        # 簡略化のため、ここではダミーの結果を返しますが、実際には以前のロジックを配置してください。
-        next_obs = self._get_obs()
-        rewards = {i: -0.1 for i in range(self.num_agents)}
-        done = {i: len(self.remaining_orders) == 0 for i in range(self.num_agents)}
-        return next_obs, rewards, done, {}
+            next_positions: Dict[int, Tuple[int, int]] = {}
+            # 1. 報酬とフラグの初期化
+            rewards: Dict[int, float] = {i: 0.0 for i in range(self.num_agents)}
+            picked_up_this_step = {i: False for i in range(self.num_agents)}
+            delivered_this_step = {i: False for i in range(self.num_agents)}
+
+            # 2. 位置の更新 (仮移動先の決定)
+            for i, action in actions.items():
+                current_x, current_y = self.agent_positions[i]
+                next_x, next_y = current_x, current_y
+
+                if action == 1: next_y += 1    # 上
+                elif action == 2: next_y -= 1  # 下
+                elif action == 3: next_x -= 1  # 左
+                elif action == 4: next_x += 1  # 右
+
+                next_x = np.clip(next_x, 0, self.size - 1)
+                next_y = np.clip(next_y, 0, self.size - 1)
+                next_positions[i] = (next_x, next_y)
+
+            # 3. 衝突判定と移動の確定
+            final_positions = self.agent_positions.copy()
+            is_collision = False
+
+            for i in range(self.num_agents):
+                pos = next_positions[i]
+                is_colliding = False
+                for j in range(self.num_agents):
+                    if i != j and pos == next_positions[j]:
+                        is_colliding = True
+                        break
+                
+                if is_colliding:
+                    rewards[i] -= 5.0  # 衝突ペナルティ
+                    is_collision = True
+                    # 衝突した場合は元の位置から動かない(final_positionsを更新しない)
+                else:
+                    final_positions[i] = pos
+
+            self.agent_positions = final_positions
+
+            # 4. ピックアップ・ドロップオフ判定
+            for i in range(self.num_agents):
+                current_pos = self.agent_positions[i]
+                
+                # 荷物を持っていない場合：ピックアップ判定
+                if not self.agent_holding[i]:
+                    # 削除を安全に行うためリストのコピーで回す
+                    for order_idx in list(self.remaining_orders):
+                        if current_pos == PICKUP_LOCATIONS[order_idx]:
+                            self.agent_holding[i] = True
+                            self.remaining_orders.remove(order_idx)
+                            picked_up_this_step[i] = True # フラグを立てる
+                            break
+                
+                # 荷物を持っている場合：ドロップオフ判定
+                elif self.agent_holding[i]:
+                    if current_pos == DROPOFF_LOCATION:
+                        self.agent_holding[i] = False
+                        delivered_this_step[i] = True # フラグを立てる
+
+            # 5. 報酬の最終集計（協調と積極性の強化）
+            for i in range(self.num_agents):
+                # (A) 時間経過による基本ペナルティ (「止まっていると損」と思わせる)
+                rewards[i] -= 0.1 
+                
+                # (B) 成果報酬：ピックアップ
+                if picked_up_this_step[i]:
+                    rewards[i] += 10.0  # チーム共通の成果
+                    rewards[i] += 0.5   # 個別ボーナス（拾った本人へのインセンティブ）
+                
+                # (C) 成果報酬：ドロップオフ
+                if delivered_this_step[i]:
+                    rewards[i] += 50.0  # チーム共通の成果
+                    rewards[i] += 2.0   # 個別ボーナス（届けた本人へのインセンティブ）
+
+            # 全ての注文が完了したかチェック
+            # 荷物を持っているエージェントがいないことも条件に加えるとより正確です
+            is_all_delivered = len(self.remaining_orders) == 0 and not any(self.agent_holding.values())
+            done = {i: is_all_delivered for i in range(self.num_agents)}
+
+            return self._get_obs(), rewards, done, {"collision": is_collision}
+
+    # --- 追加された可視化メソッド ---
+    def render(self, mode='text', sleep_time=0.5):
+        """
+        環境を可視化します。
+        mode='text': コンソールに文字で表示
+        mode='graphic': Matplotlibで図として表示
+        """
+        if mode == 'text':
+            self._render_text()
+        elif mode == 'graphic':
+            self._render_graphic(sleep_time)
+
+    def _render_text(self):
+        grid = [['.' for _ in range(self.size)] for _ in range(self.size)]
+
+        # 場所のマーク (y座標は下から上へ増えるため、表示時は反転させるか注意が必要)
+        # ここでは (0,0) を左下として扱います
+        x, y = DROPOFF_LOCATION
+        grid[self.size - 1 - y][x] = 'D'  # Dropoff
+
+        for idx in self.remaining_orders:
+            x, y = PICKUP_LOCATIONS[idx]
+            grid[self.size - 1 - y][x] = 'P'  # Pickup
+
+        for i, pos in self.agent_positions.items():
+            x, y = pos
+            char = f'A{i}'
+            if self.agent_holding[i]:
+                char = f'H{i}' # Holding
+
+            # 同じ場所に重なった場合の表示処理（簡易）
+            if grid[self.size - 1 - y][x] not in ['.', 'P', 'D']:
+                grid[self.size - 1 - y][x] += char
+            else:
+                grid[self.size - 1 - y][x] = char
+
+        print("-" * (self.size * 3))
+        for row in grid:
+            print(" ".join([f"{c:>2}" for c in row]))
+        print("-" * (self.size * 3))
+
+    # --- WarehouseEnv クラス内の _render_graphic メソッドの修正 ---
+    # ⚠️ 注意: これは WarehouseEnv クラスの内部にあると仮定
+    def _render_graphic(self, sleep_time):
+        # sleep_time はここでは完全に無視される（run_learned_agent側で処理）
+
+        if self.fig is None:
+            plt.ioff() # インタラクティブモードをオフにする（描画更新はdisplayに任せる）
+            self.fig, self.ax = plt.subplots(figsize=(6, 6))
+
+        self.ax.clear()
+        self.ax.set_xlim(-0.5, self.size - 0.5)
+        self.ax.set_ylim(-0.5, self.size - 0.5)
+        self.ax.set_xticks(range(self.size))
+        self.ax.set_yticks(range(self.size))
+        self.ax.grid(True)
+        self.ax.set_title(f"Orders Remaining: {len(self.remaining_orders)}")
+
+        # ドロップオフ地点 (赤色)
+        dx, dy = DROPOFF_LOCATION
+        self.ax.add_patch(patches.Rectangle((dx-0.5, dy-0.5), 1, 1, color='red', alpha=0.3, label='Dropoff'))
+        self.ax.text(dx, dy, 'Drop', ha='center', va='center', fontsize=8, color='darkred')
+
+        # ピックアップ地点 (青色)
+        for idx in self.remaining_orders:
+            px, py = PICKUP_LOCATIONS[idx]
+            self.ax.add_patch(patches.Rectangle((px-0.5, py-0.5), 1, 1, color='blue', alpha=0.3, label='Pickup'))
+            self.ax.text(px, py, 'Pick', ha='center', va='center', fontsize=8, color='darkblue')
+
+        # エージェント (円)
+        colors = ['green', 'orange', 'purple', 'cyan']
+        for i, pos in self.agent_positions.items():
+            ax, ay = pos
+            color = colors[i % len(colors)]
+            edgecolor = 'black'
+            linewidth = 1
+            if self.agent_holding[i]:
+                linewidth = 3
+                edgecolor = 'red' # 荷物持ち強調
+
+            circle = patches.Circle((ax, ay), 0.3, facecolor=color, edgecolor=edgecolor, linewidth=linewidth, label=f'Agent {i}')
+            self.ax.add_patch(circle)
+            self.ax.text(ax, ay, f'A{i}', ha='center', va='center', color='white', fontweight='bold')
+
+        # 🚨 描画更新と待機を削除！ (run_learned_agent側で処理する)
+        # plt.draw()
+        # if sleep_time > 0.0:
+        #   plt.pause(sleep_time)
+
+    def render_frame(self):
+        fig, ax = plt.subplots(figsize=(6, 6))
+
+        ax.set_xlim(-0.5, self.size - 0.5)
+        ax.set_ylim(-0.5, self.size - 0.5)
+        ax.set_xticks(range(self.size))
+        ax.set_yticks(range(self.size))
+        ax.grid(True)
+
+        # Dropoff
+        dx, dy = DROPOFF_LOCATION
+        ax.add_patch(patches.Rectangle((dx-0.5, dy-0.5), 1, 1, color='red', alpha=0.3))
+
+        # Pickup
+        for idx in self.remaining_orders:
+            px, py = PICKUP_LOCATIONS[idx]
+            ax.add_patch(patches.Rectangle((px-0.5, py-0.5), 1, 1, color='blue', alpha=0.3))
+
+        # Agents
+        colors = ['green', 'orange', 'purple', 'cyan']
+        for i, (x, y) in self.agent_positions.items():
+            circle = patches.Circle((x, y), 0.3, color=colors[i % len(colors)])
+            ax.add_patch(circle)
+            ax.text(x, y, f'A{i}', ha='center', va='center', color='white')
+
+        fig.canvas.draw()
+        image = np.asarray(fig.canvas.buffer_rgba())[..., :3]
+
+        plt.close(fig)
+        return image
 
 # class QMixReplayMemory: ... (以前のリプレイメモリ定義をここに配置)
 class QMixReplayMemory:
@@ -150,7 +357,6 @@ class QMixer(torch.nn.Module):
         return q_tot.squeeze(-1)
 
 # class IntegratedQMixAgent: ... (前回の修正版クラス定義をここに配置)
-# (簡略化のため、init_hiddenなどのRNN関連メソッドは削除)
 class IntegratedQMixAgent:
     def __init__(self, env, obs_shape, state_shape, n_actions, lr=5e-4, gamma=0.99, mixing_embed_dim=32, hidden_dim=64, memory_capacity=50000):
         self.env = env
@@ -178,20 +384,20 @@ class IntegratedQMixAgent:
                 pos_tuple = obs[i][0]
                 state_vec.extend([pos_tuple[0] / (GRID_SIZE - 1), pos_tuple[1] / (GRID_SIZE - 1)])
                 state_vec.append(1.0 if obs[i][1] else 0.0)
-            
+
             # 残り注文の処理
             remaining_orders_set = set(obs[0][2])
             for order_idx in range(NUM_ORDERS):
                 state_vec.append(1.0 if order_idx in remaining_orders_set else 0.0)
             return torch.FloatTensor(state_vec).to(self.device).unsqueeze(0)
-        
+
         else:
             tensors = {}
             for i in range(self.n_agents):
                 # --- ここも修正：リスト内包表記ではなく明示的なインデックス指定に ---
                 pos_tuple = obs[i][0]
                 obs_i = [pos_tuple[0] / (GRID_SIZE - 1), pos_tuple[1] / (GRID_SIZE - 1)]
-                
+
                 obs_i.append(1.0 if obs[i][1] else 0.0)
                 agent_id_vec = [0.0] * self.n_agents
                 agent_id_vec[i] = 1.0
@@ -268,6 +474,25 @@ class IntegratedQMixAgent:
         self.target_agent_net.load_state_dict(self.agent_net.state_dict())
         self.target_mixer_net.load_state_dict(self.mixer_net.state_dict())
 
+    def save_model(self, path="qmix_model.pth"):
+        """モデルの重みとオプティマイザの状態を保存"""
+        torch.save({
+            'agent_net_state_dict': self.agent_net.state_dict(),
+            'mixer_net_state_dict': self.mixer_net.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+        }, path)
+        print(f"✅ Model saved to {path}")
+
+    def load_model(self, path="qmix_model.pth"):
+        """保存された状態を読み込み"""
+        checkpoint = torch.load(path, map_location=self.device)
+        self.agent_net.load_state_dict(checkpoint['agent_net_state_dict'])
+        self.mixer_net.load_state_dict(checkpoint['mixer_net_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        # ターゲットネットワークも同期させる
+        self.update_target_networks()
+        print(f"✅ Model loaded from {path}")
 # ----------------------------------------------------
 # 3. 学習ループ
 # ----------------------------------------------------
@@ -278,7 +503,7 @@ def run_qmix_training():
     # リプレイメモリはここで定義されている
     replay_buffer = QMixReplayMemory(MEMORY_SIZE)
 
-    agent = IntegratedQMixAgent(env, OBS_SHAPE, STATE_SHAPE, ACTION_SPACE, gamma=GAMMA)
+    agent = IntegratedQMixAgent(env, OBS_SHAPE, STATE_SHAPE, ACTION_SPACE, gamma=GAMMA, mixing_embed_dim=64, hidden_dim=128)
 
     total_steps = 0
     rewards_history = []
@@ -344,9 +569,11 @@ def run_qmix_training():
     plt.grid(True)
     plt.show()
 
+    return agent
+
 # ----------------------------------------------------
 # 実行
 # ----------------------------------------------------
 
 if __name__ == '__main__':
-    run_qmix_training()
+    agent = run_qmix_training()
