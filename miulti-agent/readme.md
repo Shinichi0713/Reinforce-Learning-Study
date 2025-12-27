@@ -4,7 +4,7 @@ This site is summary of Multi-Agent RL, shows the results of MARL trials.
 
 
 
-## *Shared Brain Deep Q-Network (Shared Brain DQN)
+## Coorporative Search
 
 This is an implementation of a **Shared Brain Deep Q-Network (Shared Brain DQN)** aimed at solving the cooperative challenge of **multi-sensor (agent) search and exploration in a disaster area**.
 
@@ -45,3 +45,53 @@ This code learns a strategy where multiple drones complete the disaster site exp
 <img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
 
 <img src="image/README/marl_adventure.gif" alt="jssp-3" width="500px" height="auto">
+
+
+## Two-Agent Switch Task
+
+The collaborative task we are solving is known as the **"Two-Agent Switch Task"**. Here is a concise summary in English:
+
+### **The Problem: Switch Task**
+
+**1. Scenario**
+
+* **Environment:** A narrow  grid corridor.
+* **Agents:** Two agents (Red and Blue) start at opposite ends.
+* **Objective:** There is one package in the center of the corridor. One agent must pick it up and deliver it to the end-zone behind the other agent.
+
+**2. The Challenge**
+
+* **Bottleneck:** The corridor is too narrow for agents to pass each other. If they both rush to the center, they will collide.
+* **Coordination:** Agents must learn a "yield and pass" strategy. One agent needs to wait or move back while the other agent picks up and delivers the package to maximize the **Global Reward**.
+
+
+### **The Solution: QMIX (MARL)**
+
+**1. Decentralized Execution**
+
+* Each agent chooses actions based solely on its own local observations (its position and status).
+
+**2. Centralized Training**
+
+* **Agent Networks:** Individual "brains" that estimate the local value () of actions.
+* **Mixing Network:** A central "manager" that combines all  values into a single team value () using the global state of the environment.
+
+**3. Monotonicity Constraint**
+
+* QMIX ensures that as an individual agent's performance improves, the team’s total value also increases. This aligns individual interests with the team's goal, solving the **Credit Assignment** problem (knowing who contributed what to the success).
+
+
+### **Key Performance Metrics**
+
+* **Positive Reward:** Granted for picking up () and delivering () the package.
+* **Negative Penalty:** Applied for collisions () and every time step taken ().
+* **Goal:** Reach the destination in the fewest steps possible without colliding.
+
+Would you like me to translate specific technical terms or explain the **Hypernetwork** part of the algorithm in English as well?
+
+## Conclusion
+
+I tested the agents trained with the method mentioned above in the current environment. I observed that one agent successfully stopped before a collision occurred, appropriately yielding the way to the other agent.
+
+<img src="src/exe-6/doc/switch_task_success.gif" alt="jssp-3" width="500px" height="auto">
+

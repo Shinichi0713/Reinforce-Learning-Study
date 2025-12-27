@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>1&period; &#x4f8b;&#x984c;&#xff1a;&#x3075;&#x305f;&#x308a;&#x3067;&#x30b9;&#x30a4;&#x30c3;&#x30c1;&#xff08;Switch Task&#xff09;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>マルチエージェント強化学習（MARL）を理解するための、最もシンプルかつ有名な例題として <strong>「協調型・薄氷渡り（Cooperative Grid World）」</strong> に取り組みました。</p>
+<p>この例題は、今の倉庫問題から複雑な要素（在庫管理など）を削ぎ落とした、協調の本質を学ぶための問題です。</p>
+<h2 id="1-例題ふたりでスイッチswitch-task">1. 例題：ふたりでスイッチ（Switch Task）</h2>
+<p><strong>【設定】</strong></p>
+<ul>
+<li><strong>環境:</strong>  の細長い通路の両端にエージェントがいます。</li>
+<li><strong>ゴール:</strong> 通路の真ん中に1つだけ「荷物」があり、それをどちらかが拾って、自分のスタート地点とは0「反対側」に届けなければなりません。</li>
+<li><strong>制約:</strong> 通路は狭く、エージェント同士は<strong>すれ違うことができません</strong>。(片方が停止しているときは通行が可能)</li>
+</ul>
+<p><strong>【報酬】</strong></p>
+<h3 id="報酬プラスがつ点">報酬（プラスがつ点）</h3>
+<p>エージェントが目的を達成したときに大きく与えられます。</p>
+<ul>
+<li><strong>荷物を拾った時（Pickup）: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>5.0</mn></mrow><annotation encoding="application/x-tex">+5.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">5.0</span></span></span></span></strong></strong>
+<ul>
+<li>通路の真ん中（座標2）にある荷物を、まだ誰も持っていない状態で確保した瞬間に与えられます。</li>
+<li>これにより「まずは真ん中へ行く」という初期目標を学習します。</li>
+</ul>
+</li>
+<li><strong>目的地に届けた時（Delivery）: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>20.0</mn></mrow><annotation encoding="application/x-tex">+20.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">20.0</span></span></span></span></strong></strong>
+<ul>
+<li>荷物を持った状態で、自分のターゲット地点（端）に到達した瞬間に与えられます。</li>
+<li>これがこの環境で最大の報酬であり、エージェントが最終的に目指すべきゴールです。</li>
+</ul>
+</li>
+</ul>
+<h3 id="ペナルティマイナスがつく点">ペナルティ（マイナスがつく点）</h3>
+<p>無駄な動きや、協調を乱す動きを抑制するために与えられます。</p>
+<ul>
+<li><strong>衝突した時（Collision）: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">-1.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1.0</span></span></span></span></strong></strong>
+<ul>
+<li>2つのエージェントが同じマスに入ろうとした、あるいは重なった瞬間に発生します。</li>
+<li>このペナルティがあることで、「相手が来るなら自分は止まる、あるいは避ける」という<strong>協調行動</strong>の必要性を学びます。</li>
+</ul>
+</li>
+<li><strong>時間経過（Time Step Penalty）: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">-0.1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.1</span></span></span></span></strong>（毎ステップ）</strong>
+<ul>
+<li>何もしていなくても、1ステップ経過するごとに少しずつ引かれます。</li>
+<li>これにより「ダラダラせず、できるだけ最短手数でタスクを終わらせる」という<strong>効率性</strong>を学習します。</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-なぜこれがマルチエージェントの練習になるのか">2. なぜこれが「マルチエージェント」の練習になるのか？</h2>
+<p>このシンプルな設定には、MARLの重要な課題がすべて詰まっています。</p>
+<ol>
+<li><strong>衝突回避（Collision Avoidance）:</strong>
+両方が同時に真ん中へ突っ込むと、衝突して動けなくなります。</li>
+<li><strong>役割分担（Role Assignment）:</strong>
+「どちらが荷物を拾い、どちらが道を譲るか」を暗黙のうちに合意する必要があります。</li>
+<li><strong>非定常性（Non-stationarity）:</strong>
+エージェントAから見ると、環境（エージェントB）も同時に学習して動きを変えるため、正解のパターンが常に変化し続けます。</li>
+</ol>
+<h2 id="3-実装のステップ">3. 実装のステップ</h2>
+<p>QMIXなどのアルゴリズムを適用する場合、以下のような設計にします。</p>
+<h3 id="-観測-observation">① 観測 (Observation)</h3>
+<p>各エージェントは以下の情報を得ます。</p>
+<ul>
+<li>自分の位置</li>
+<li>相方の位置</li>
+<li>荷物がどこにあるか、誰が持っているか</li>
+</ul>
+<h3 id="-報酬-reward">② 報酬 (Reward)</h3>
+<ul>
+<li><strong>共通報酬:</strong> 荷物がゴールに届けられたら</li>
+<li><strong>個別ペナルティ:</strong> 衝突したら 、時間経過ごとに</li>
+</ul>
+<h3 id="-協調のメカニズム">③ 協調のメカニズム</h3>
+<p>QMIXを使うと、以下のような「価値の統合」が行われます。</p>
+<ul>
+<li>Agent 1: 「俺が道を譲る（Q値が高い）」</li>
+<li>Agent 2: 「俺が荷物を運ぶ（Q値が高い）」</li>
+<li><strong>Mixer:</strong> 「この組み合わせなら、チーム全体の  が最大になる！」</li>
+</ul>
+<h2 id="4-学習の進み方">4. 学習の進み方</h2>
+<ol>
+<li><strong>初期段階:</strong> 両方がランダムに動き、衝突を繰り返します（報酬はマイナス）。</li>
+<li><strong>中期段階:</strong> 片方が「動かないほうがマシだ（ペナルティが少ない）」と学習し、片方だけが動くようになります（現在のあなたの状況に近い状態です）。</li>
+<li><strong>完成段階:</strong> 「片方が荷物を拾いに行く間、もう片方は邪魔にならない場所で待機する」という効率的な協調行動が生まれます。</li>
+</ol>
+<h2 id="学習のさせ方">学習のさせ方</h2>
+<p>QMIXを用いた協調学習の実装は、大きく分けて <strong>「エージェント・ネットワーク」「ミキサー・ネットワーク」「学習ロジック」</strong> の3つのパーツで構成されます。</p>
+<p>学習時の構成要素の役割を説明します。</p>
+<h3 id="1-個別エージェントネットワーク-drqnmlp-agent">1. 個別エージェント・ネットワーク (DRQN/MLP Agent)</h3>
+<p>各エージェントは自分専用の「脳」を持ちますが、QMIXでは <strong>全ての全エージェントで同じ重みを共有（Parameter Sharing）</strong> するのが一般的です。</p>
+<ul>
+<li><strong>役割</strong>: 自分の観測（ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">o_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ）から、各行動の価値（ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">q_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ）を出力します。</li>
+<li><strong>ポイント</strong>: エージェントは「相方が何を考えているか」の全データは見ず、自分の視界だけで判断します。しかし、自分のID（Agent 0か1か）を入力に含めることで、個別の役割を演じ分けられるようにします。</li>
+</ul>
+<h3 id="2-ミキサーネットワーク-qmixer">2. ミキサー・ネットワーク (QMixer)</h3>
+<p>ここがQMIXの核心部です。各エージェントが出力した個別の <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span></span> 値を、一つの「チーム全体の価値（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{tot}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）」に統合します。</p>
+<ul>
+<li><strong>状態（State）の活用</strong>: 統合する際、環境全体の「真の状態（エージェント全員の位置や荷物の状況など）」を入力として受け取ります。これにより、状況に応じて「今はAgent 0の行動が重要だ」といった重み付けを動的に変えられます。</li>
+<li><strong>単調性の制約 (Monotonicity Constraint)</strong>:
+チーム全体の <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Q_{tot}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を計算する際、各エージェントの <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span></span></span></span> 値に対する重みを必ず <strong>正（プラス）</strong> にします。</li>
+<li><strong>なぜ？</strong>: 「個人の価値が上がれば、チームの価値も必ず上がる（または変わらない）」という制約を設けることで、各エージェントが「自分の  を最大化すること」が「チームの勝利」に直結することを保証するためです。</li>
+</ul>
+<h3 id="3-学習アルゴリズムのフロー">3. 学習アルゴリズムのフロー</h3>
+<p>実装における一連の流れは以下の通りです。</p>
+<ol>
+<li><strong>分散実行（Decentralized Execution）</strong>:
+各エージェントは自分のネットワークだけを使って行動を選びます。</li>
+<li><strong>集中学習（Centralized Training）</strong>:
+リプレイメモリからバッチを取り出し、以下の計算を行います。</li>
+</ol>
+<ul>
+<li>各エージェントの  値を計算。</li>
+<li>ミキサーで  を計算。</li>
+<li>次の状態での最大ターゲット  を計算。</li>
+</ul>
+<ol start="3">
+<li><strong>ロス計算</strong>:
+チーム全体のTD誤差（ とターゲットの差）を計算し、<strong>エージェントとミキサーの両方のパラメータを同時に更新</strong>します。</li>
+</ol>
+<h3 id="4-なぜこれで協調が生まれるのか">4. なぜこれで「協調」が生まれるのか？</h3>
+<p>QMIXは、個々のエージェントに「自分のスコア」を教えるのではなく、 <strong>「チーム全体のスコアを上げるために、お前はどう貢献したか」</strong> を逆伝播（Backpropagation）を通じて伝えます。</p>
+<ul>
+<li><strong>クレジット割り当て（Credit Assignment）</strong>:
+例えば、Agent 0が道を譲ったことでAgent 1がゴールしたとき、チーム報酬が発生します。ミキサーは「この時、Agent 0が待機したことが  の上昇に寄与した」と判断し、Agent 0の「待機」という行動の価値を引き上げます。</li>
+</ul>
+<h3 id="5-実装時の注意点tips">5. 実装時の注意点（Tips）</h3>
+<ul>
+<li><strong>ハイパーネットワーク</strong>:
+ミキサーの重み（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>）を直接学習するのではなく、「状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> を入力して重み <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span> を出力する別のネットワーク（ハイパーネットワーク）」を使います。これが、状況に応じた柔軟な協調を生む鍵です。</li>
+<li><strong>非線形性</strong>:
+ミキサー内部に <code>ELU</code> や <code>ReLU</code> などの活性化関数を入れることで、単純な合計（VDN）よりも複雑な「AがここならBはあそこ」という非線形な協調を表現できるようになります。</li>
+</ul>
+<h2 id="学習の結果">学習の結果</h2>
+<p>上記の学習法で学習させたエージェントを使って今回の環境で動作させてみました。
+片方のエージェントが衝突前に停止して、もう片方のエージェントに適切に道を譲っていることが確認されました。</p>
+<p>今回程度の問題であればQMIXが有効に機能することが確認されました。</p>
+<p>倉庫問題はなかなか解決できないのですが。。。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-6\doc\switch_task_success.gif" alt="jssp-3" width="500px" height="auto">
+
+<script>
+const toc = document.getElementById('toc');
+const headings = document.querySelectorAll('h2');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    const li = document.createElement('li');
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+</script>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
