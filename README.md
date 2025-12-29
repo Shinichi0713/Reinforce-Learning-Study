@@ -10,6 +10,7 @@ thus, we apply the tech to control Self-discipline system.
 1. basic: that is the code to check fundamental reinforcement theology.
 2. documents: that is the note of reinforcement-learning.
 3. pole-problem: that is the code to try the feinforcement learning.
+4. multi-agentict environment.
 
 Using Environment
 
@@ -172,7 +173,19 @@ MARL implementation is descripted as below URL:
 new theme is considering.
 the environment is displayed as next.
 
+I have been working on the Warehouse Problem, where the task is to have two agents deliver items to designated locations within a warehouse.
+
+Initially, I approached this using QMIX, but I encountered a situation where either both agents would fail to move, or only one of them would operate. I concluded that a lack of exploration was the primary cause.
+
+After switching to HSAC (Heterogeneous Soft Actor-Critic), the agents began to cooperate and function properly. This experience has truly highlighted the critical importance of exploration in reinforcement learning.
+
+with using QMIX, the agents doesn't work.
+
 <img src="image/README/marl_agent_motion.gif" alt="jssp-3" width="500px" height="auto">
+
+with using HASAC, lulti-agent systems have started to operate in coordination with each other.
+
+<img src="miulti-agent/src/exe-2/doc/trained_agents.gif" alt="jssp-3" width="500px" height="auto">
 
 #### MARL adventure
 
@@ -200,7 +213,11 @@ __Learning Objectives and Cooperation Points__
 * **Nature of Coordination:** This task emphasizes **positive cooperation** ("dividing up the unexplored area") rather than negative cooperation ("avoiding collisions").
 * **Learning Goal:** The drone swarm must learn a **spatial load-balancing strategy**: maintaining an **appropriate distance** from each other to avoid overcrowding while cooperatively segmenting the search area to maximize the overall coverage rate.
 
+
+
 <img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
+
+
 
 # cite
 
