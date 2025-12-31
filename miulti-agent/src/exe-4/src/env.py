@@ -116,6 +116,18 @@ class DroneDeliveryEnv:
             carry = self.agent_has[i]
             action = actions[i]
 
+            if carry == -1:
+                # 荷物を持っていない時：最も近い「未回収」の荷物への距離を報酬にする
+                undelivered_pkgs = [p for p in self.packages if not p[2]]
+                if undelivered_pkgs:
+                    dists = [np.abs(pos[0]-p[0][0]) + np.abs(pos[1]-p[0][1]) for p in undelivered_pkgs]
+                    # 距離が近いほど報酬（最大0.1程度になるよう調整）
+                    rewards[i] += 0.01 * (10 - min(dists)) 
+            else:
+                # 荷物を持っている時：その荷物の目的地への距離を報酬にする
+                drop_pos = self.packages[carry][1]
+                dist_to_drop = np.abs(pos[0]-drop_pos[0]) + np.abs(pos[1]-drop_pos[1])
+                rewards[i] += 0.01 * (10 - dist_to_drop)
             # pick
             if action == 5 and carry == -1:
                 for pid, pack in enumerate(self.packages):
@@ -194,19 +206,3 @@ class DroneDeliveryEnv:
         self.ax.set_aspect("equal")
         plt.pause(0.01)
 
-# ==============================
-# Example execution
-# ==============================
-if __name__ == "__main__":
-    env = DroneDeliveryEnv()
-    obs = env.reset()
-
-    for t in range(50):
-        # random actions
-        actions = [np.random.randint(0, 7) for _ in range(2)]
-        obs, rew, done, info = env.step(actions)
-        env.render()
-        if done:
-            break
-
-    plt.show()
