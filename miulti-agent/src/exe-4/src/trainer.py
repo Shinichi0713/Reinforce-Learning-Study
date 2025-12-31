@@ -68,26 +68,28 @@ env = DroneDeliveryEnv()
 # obs_dim = 2(pos) + 1(carry) + 2(other) + 3pkgs * 6 = 23
 # state_dim = obs_dim * num_agents (簡易集中Critic用)
 trainer = MAPPOTrainer(obs_dim=23, state_dim=46, action_dim=7)
-
-for episode in range(1000):
+for episode in range(1001):
     obs_list = env.reset()
     memory = Memory()
     ep_reward = 0
     
     for t in range(env.max_steps):
-        obs_t = trainer._obs_to_tensor(obs_list)
-        state_t = obs_t.view(-1) # 全エージェントの観測を結合してStateとする
-        
-        actions, log_probs = [], []
-        for i in range(2):
-            dist = trainer.actors[i](obs_t[i])
-            a = dist.sample()
-            actions.append(a.item())
-            log_probs.append(dist.log_prob(a))
+        # 推論時は勾配計算を無効化してメモリを節約
+        with torch.no_grad():
+            obs_t = trainer._obs_to_tensor(obs_list)
+            state_t = obs_t.view(-1)
+            
+            actions, log_probs = [], []
+            for i in range(2):
+                dist = trainer.actors[i](obs_t[i])
+                a = dist.sample()
+                actions.append(a.item())
+                # ここで計算グラフから切り離す(detach)
+                log_probs.append(dist.log_prob(a).detach())
             
         next_obs_list, rewards, done, _ = env.step(actions)
         
-        # メモリに保存 (訓練用に簡略化)
+        # メモリに保存（全てdetachしたもの、または新規テンソルにする）
         memory.obs.append(obs_t)
         memory.states.append(state_t)
         memory.actions.append(torch.tensor(actions))
@@ -99,7 +101,3 @@ for episode in range(1000):
         if done: break
     
     trainer.train(memory)
-    
-    if episode % 100 == 0:
-        print(f"Episode {episode}, Reward: {ep_reward}")
-        env.save_gif(agent_model=trainer, filename=f"mappo_ep{episode}.gif")
