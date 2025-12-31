@@ -1,103 +1,72 @@
-import torch.optim as optim
+class Memory:
+    def __init__(self):
+        # 変数名を returns に統一します
+        self.obs, self.states, self.actions, self.log_probs = [], [], [], []
+        self.returns, self.dones, self.h_actors, self.h_critics = [], [], [], []
+
+    def clear(self):
+        self.__init__()
 
 class MAPPOTrainer:
-    def __init__(self, obs_dim, state_dim, action_dim, lr=3e-4, gamma=0.99, clip_eps=0.2):
-        self.gamma = gamma
-        self.clip_eps = clip_eps
+    def __init__(self, obs_dim, state_dim, action_dim):
+        self.gamma = 0.99
+        self.clip_eps = 0.2
         self.num_agents = 2
+        self.hidden_act = 128
+        self.hidden_crit = 256
         
-        # エージェントごとにActor、共通のCritic
-        self.actors = [MAPPO_Actor(obs_dim, action_dim) for _ in range(self.num_agents)]
-        self.critic = MAPPO_Critic(state_dim)
+        self.actors = [GRU_Actor(obs_dim, action_dim, self.hidden_act) for _ in range(self.num_agents)]
+        self.critic = GRU_Critic(state_dim, self.hidden_crit)
         
-        self.actor_opts = [optim.Adam(a.parameters(), lr=lr) for a in self.actors]
-        self.critic_opt = optim.Adam(self.critic.parameters(), lr=lr)
+        self.actor_opts = [torch.optim.Adam(a.parameters(), lr=3e-4) for a in self.actors]
+        self.critic_opt = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
 
-    def _obs_to_tensor(self, obs_list):
-        """dict型の観測をテンソルに変換"""
+    def normalize_obs(self, obs_list, grid_size=10):
         tensors = []
         for o in obs_list:
-            # 位置(2), 所持(1), 他者位置(2), 荷物(3x4=12) をフラットに
-            vec = [o["agent_pos"][0], o["agent_pos"][1], o["carrying"]]
-            vec += [o["other_agent"][0], o["other_agent"][1]]
+            # 座標を0-1に正規化
+            vec = [o["agent_pos"][0]/grid_size, o["agent_pos"][1]/grid_size, (o["carrying"]+1)/5.0]
+            vec += [o["other_agent"][0]/grid_size, o["other_agent"][1]/grid_size]
             for p in o["packages"]:
-                vec += [p[0][0], p[0][1], p[1][0], p[1][1], 1 if p[2] else 0, 1 if p[3] else 0]
+                vec += [p[0][0]/grid_size, p[0][1]/grid_size, p[1][0]/grid_size, p[1][1]/grid_size, float(p[2]), float(p[3])]
             tensors.append(torch.FloatTensor(vec))
-        return torch.stack(tensors)
+        return torch.stack(tensors) # (Agents, Obs_Dim)
 
     def train(self, memory):
-        # memoryからデータを展開 (Batch処理)
-        states = torch.stack(memory.states)  # (T, State_Dim)
-        obs = torch.stack(memory.obs)        # (T, Agents, Obs_Dim)
-        actions = torch.stack(memory.actions) # (T, Agents)
-        old_log_probs = torch.stack(memory.log_probs) # (T, Agents)
-        returns = torch.stack(memory.returns) # (T, Agents)
+        # データをテンソル化 (T, Agents, Dim)
+        obs = torch.stack(memory.obs).unsqueeze(0) # (1, T, Agents, Dim)
+        states = torch.stack(memory.states).unsqueeze(0) # (1, T, State_Dim)
+        actions = torch.stack(memory.actions)
+        old_log_probs = torch.stack(memory.log_probs)
         
-        # Criticの更新
-        values = self.critic(states).squeeze()
-        critic_loss = F.mse_loss(values, returns.mean(dim=1)) # 全員の平均報酬をターゲットに
+        # 報酬の累積計算 (Returns)
+        rewards = torch.stack(memory.returns)
+        returns = torch.zeros_like(rewards)
+        running_return = torch.zeros(self.num_agents)
+        for t in reversed(range(len(rewards))):
+            running_return = rewards[t] + self.gamma * running_return
+            returns[t] = running_return
+
+        # Critic更新 (GRUの初期Hiddenは保存時の最初のものを使用)
+        val, _ = self.critic(states, memory.h_critics[0])
+        critic_loss = F.mse_loss(val.squeeze(), returns.mean(dim=-1))
         self.critic_opt.zero_grad()
         critic_loss.backward()
         self.critic_opt.step()
 
-        # Actorの更新 (各エージェント独立)
-        advantages = (returns.mean(dim=1) - values.detach())
-        
+        # Actor更新
+        adv = (returns.mean(dim=-1) - val.squeeze().detach())
         for i in range(self.num_agents):
-            dist = self.actors[i](obs[:, i])
+            dist, _ = self.actors[i](obs[:, :, i], memory.h_actors[0][i])
             new_log_probs = dist.log_prob(actions[:, i])
-            
             ratio = torch.exp(new_log_probs - old_log_probs[:, i])
-            surr1 = ratio * advantages
-            surr2 = torch.clamp(ratio, 1 - self.clip_eps, 1 + self.clip_eps) * advantages
             
+            surr1 = ratio * adv
+            surr2 = torch.clamp(ratio, 1-self.clip_eps, 1+self.clip_eps) * adv
             actor_loss = -torch.min(surr1, surr2).mean() - 0.01 * dist.entropy().mean()
             
             self.actor_opts[i].zero_grad()
             actor_loss.backward()
             self.actor_opts[i].step()
-
-# データ保存用クラス
-class Memory:
-    def __init__(self):
-        self.states, self.obs, self.actions, self.log_probs, self.returns = [], [], [], [], []
-    def clear(self):
-        self.__init__()
-
-env = DroneDeliveryEnv()
-# obs_dim = 2(pos) + 1(carry) + 2(other) + 3pkgs * 6 = 23
-# state_dim = obs_dim * num_agents (簡易集中Critic用)
-trainer = MAPPOTrainer(obs_dim=23, state_dim=46, action_dim=7)
-for episode in range(1001):
-    obs_list = env.reset()
-    memory = Memory()
-    ep_reward = 0
-    
-    for t in range(env.max_steps):
-        # 推論時は勾配計算を無効化してメモリを節約
-        with torch.no_grad():
-            obs_t = trainer._obs_to_tensor(obs_list)
-            state_t = obs_t.view(-1)
-            
-            actions, log_probs = [], []
-            for i in range(2):
-                dist = trainer.actors[i](obs_t[i])
-                a = dist.sample()
-                actions.append(a.item())
-                # ここで計算グラフから切り離す(detach)
-                log_probs.append(dist.log_prob(a).detach())
-            
-        next_obs_list, rewards, done, _ = env.step(actions)
         
-        # メモリに保存（全てdetachしたもの、または新規テンソルにする）
-        memory.obs.append(obs_t)
-        memory.states.append(state_t)
-        memory.actions.append(torch.tensor(actions))
-        memory.log_probs.append(torch.stack(log_probs))
-        memory.returns.append(torch.FloatTensor(rewards))
-        
-        obs_list = next_obs_list
-        ep_reward += sum(rewards)
-        if done: break
-    
-    trainer.train(memory)
+        memory.clear()
