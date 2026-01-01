@@ -4,16 +4,16 @@ import torch
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-def save_hasac_gif(env, trainer, filename="hasac_result.gif", max_steps=200):
+def save_mappo_gif(env, trainer, filename="mappo_result.gif", max_steps=200):
     frames = []
     obs_list = env.reset()
     
     # --- GRUの初期隠れ状態をリセット ---
-    # HASACTrainerのActorヘッドに合わせて隠れ次元(128)を設定
-    h_actors = [torch.zeros(1, 1, 128) for _ in range(trainer.num_agents)]
+    # shape: (num_layers, batch=1, hidden_dim)
+    h_actors = [torch.zeros(1, 1, trainer.hidden_act) for _ in range(trainer.num_agents)]
     
     fig, ax = plt.subplots(figsize=(5, 5))
-    print(f"🎬 エージェントの動作を録画中 (HASAC対応版): {filename}")
+    print(f"🎬 エージェントの動作を録画中 (GRU対応版): {filename}")
     
     for t in range(max_steps):
         # --- 描画ロジック ---
@@ -41,28 +41,30 @@ def save_hasac_gif(env, trainer, filename="hasac_result.gif", max_steps=200):
         ax.set_aspect("equal")
         ax.set_title(f"Step: {t}")
 
-        # 画像としてバッファに保存
+        # 画像保存
         buf = io.BytesIO()
         fig.savefig(buf, format='png', bbox_inches='tight')
         buf.seek(0)
         frames.append(Image.open(buf))
 
-        # --- エージェントの行動選択 (HASACのActor構造に合わせる) ---
+        # --- エージェントの行動選択 (最新の正規化とGRUに対応) ---
         with torch.no_grad():
+            # メソッド名を修正: _obs_to_tensor -> normalize_obs
             obs_tensor = trainer.normalize_obs(obs_list) 
             
             actions = []
             new_h_actors = []
             for i in range(env.num_agents):
-                # 現在のActorは (probs, h_next) を返す
-                probs, h_a = trainer.actors[i](obs_tensor[i].view(1, 1, -1), h_actors[i])
+                # 入力を (batch=1, seq=1, dim) に整形してGRUに渡す
+                dist, h_a = trainer.actors[i](obs_tensor[i].view(1, 1, -1), h_actors[i])
                 
-                # 評価時は最も確率が高い行動を選択
-                a = torch.argmax(probs, dim=-1)
+                # 評価(GIF)時は、ランダムなsampleではなく、最も確率の高い行動(argmax)を選択
+                a = torch.argmax(dist.probs)
                 
                 actions.append(a.item())
                 new_h_actors.append(h_a)
             
+            # 隠れ状態を更新
             h_actors = new_h_actors
         
         # 環境の更新
@@ -76,5 +78,5 @@ def save_hasac_gif(env, trainer, filename="hasac_result.gif", max_steps=200):
     
     plt.close(fig)
 
-# 実行
-save_hasac_gif(env, trainer)
+
+save_mappo_gif(env, trainer)
