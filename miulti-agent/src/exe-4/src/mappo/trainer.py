@@ -1,35 +1,36 @@
-class HASACTrainer:
-    def __init__(self, obs_dim, state_dim, action_dim, num_agents=2):
-        self.num_agents = num_agents
-        self.action_dim = action_dim
+class Memory:
+    def __init__(self):
+        # 変数名を returns に統一します
+        self.obs, self.states, self.actions, self.log_probs = [], [], [], []
+        self.returns, self.dones, self.h_actors, self.h_critics = [], [], [], []
+
+    def clear(self):
+        self.__init__()
+
+class MAPPOTrainer:
+    def __init__(self, obs_dim, state_dim, action_dim):
         self.gamma = 0.99
-        self.tau = 0.005 # ターゲットネットワークのソフト更新用
+        self.clip_eps = 0.2
+        self.num_agents = 2
+        self.hidden_act = 128
+        self.hidden_crit = 256
         
-        # Actor/Critic/Target Critic
-        self.actors = [HASAC_Actor(obs_dim, action_dim) for _ in range(num_agents)]
-        self.critics = [HASAC_Critic(state_dim, action_dim * num_agents) for _ in range(2)]
-        self.target_critics = [HASAC_Critic(state_dim, action_dim * num_agents) for _ in range(2)]
+        self.actors = [GRU_Actor(obs_dim, action_dim, self.hidden_act) for _ in range(self.num_agents)]
+        self.critic = GRU_Critic(state_dim, self.hidden_crit)
         
-        for t, c in zip(self.target_critics, self.critics):
-            t.load_state_dict(c.state_dict())
-
-        self.actor_opts = [optim.Adam(a.parameters(), lr=3e-4) for a in self.actors]
-        self.critic_opts = [optim.Adam(c.parameters(), lr=3e-4) for c in self.critics]
-
-        # 温度パラメータ alpha の自動調整
-        self.target_entropy = -0.6 * np.log(action_dim)
-        self.log_alphas = [torch.zeros(1, requires_grad=True) for _ in range(num_agents)]
-        self.alpha_opts = [optim.Adam([la], lr=3e-4) for la in self.log_alphas]
+        self.actor_opts = [torch.optim.Adam(a.parameters(), lr=3e-4) for a in self.actors]
+        self.critic_opt = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
 
     def normalize_obs(self, obs_list, grid_size=10):
         tensors = []
         for o in obs_list:
+            # 座標を0-1に正規化
             vec = [o["agent_pos"][0]/grid_size, o["agent_pos"][1]/grid_size, (o["carrying"]+1)/5.0]
             vec += [o["other_agent"][0]/grid_size, o["other_agent"][1]/grid_size]
             for p in o["packages"]:
                 vec += [p[0][0]/grid_size, p[0][1]/grid_size, p[1][0]/grid_size, p[1][1]/grid_size, float(p[2]), float(p[3])]
             tensors.append(torch.FloatTensor(vec))
-        return torch.stack(tensors)
+        return torch.stack(tensors) # (Agents, Obs_Dim)
 
     def train(self, memory):
         if len(memory.obs) < 2: return
