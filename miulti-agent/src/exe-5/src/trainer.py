@@ -1,120 +1,89 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from PIL import Image
-import io
+class MAPPOTrainer:
+    def __init__(self, obs_dim, state_dim, action_dim):
+        self.actor = Actor(obs_dim, action_dim)
+        self.critic = Critic(state_dim)
+        self.actor_opt = torch.optim.Adam(self.actor.parameters(), lr=5e-4)
+        self.critic_opt = torch.optim.Adam(self.critic.parameters(), lr=1e-3)
+        self.clip_eps = 0.2
+        self.gamma = 0.98
 
-class SimpleReachEnv:
-    def __init__(self, size=5):
-        self.size = size
-        self.num_agents = 2
-        self.max_steps = 20
-        # ターゲット位置
-        self.targets = np.array([[size-1, size-1], [0, 0]]) 
-        self.reset()
+    def train(self, memory):
+        # テンソル化 (簡易版のためバッチサイズ1、全シーケンスで学習)
+        obs = torch.stack(memory.obs).unsqueeze(0)        # (1, T, NumAgents, ObsDim)
+        states = torch.stack(memory.states).unsqueeze(0)  # (1, T, StateDim)
+        actions = torch.stack(memory.actions).unsqueeze(0) # (1, T, NumAgents)
+        old_log_probs = torch.stack(memory.log_probs).unsqueeze(0)
+        rewards = torch.stack(memory.rewards)             # (T, NumAgents)
 
-    def reset(self):
-        # エージェントの初期位置
-        self.agent_pos = np.array([[0, 0], [self.size-1, self.size-1]])
-        self.steps = 0
-        return self._get_obs()
+        # 累積報酬 (Returns) の計算
+        T = rewards.size(0)
+        returns = torch.zeros_like(rewards)
+        running_return = torch.zeros(2)
+        for t in reversed(range(T)):
+            running_return = rewards[t] + self.gamma * running_return
+            returns[t] = running_return
+        
+        target_returns = returns.mean(dim=-1).unsqueeze(0).unsqueeze(-1) # (1, T, 1)
 
-    def _get_obs(self):
-        obs = []
-        for i in range(self.num_agents):
-            # 自分の座標 + ターゲットへの相対距離
-            rel_dist = self.targets[i] - self.agent_pos[i]
-            obs.append(np.concatenate([self.agent_pos[i]/self.size, rel_dist/self.size]))
-        return obs
+        # Critic 更新
+        values, _ = self.critic(states, memory.h_critics[0])
+        critic_loss = F.mse_loss(values, target_returns)
+        self.critic_opt.zero_grad()
+        critic_loss.backward()
+        self.critic_opt.step()
 
-    def step(self, actions):
-        rewards = []
-        for i, a in enumerate(actions):
-            # 0:待機, 1:上, 2:下, 3:左, 4:右
-            if a == 1: self.agent_pos[i][0] = max(0, self.agent_pos[i][0]-1)
-            elif a == 2: self.agent_pos[i][0] = min(self.size-1, self.agent_pos[i][0]+1)
-            elif a == 3: self.agent_pos[i][1] = max(0, self.agent_pos[i][1]-1)
-            elif a == 4: self.agent_pos[i][1] = min(self.size-1, self.agent_pos[i][1]+1)
+        # Actor 更新
+        advantages = (target_returns - values.detach())
+        actor_loss = 0
+        for i in range(2):
+            agent_id = torch.zeros(1, T, 2); agent_id[:, :, i] = 1.0
+            actor_input = torch.cat([obs[:, :, i], agent_id], dim=-1)
+            dist, _ = self.actor(actor_input, memory.h_actors[0][i])
+            new_log_probs = dist.log_prob(actions[:, :, i])
             
-            # 報酬：ターゲットに近づいたらプラス、離れたらマイナス
-            dist = np.linalg.norm(self.agent_pos[i] - self.targets[i])
-            rewards.append(-dist * 0.1) 
-            if dist == 0: rewards[-1] += 1.0 
+            ratio = torch.exp(new_log_probs - old_log_probs[:, :, i])
+            surr1 = ratio * advantages.squeeze(-1)
+            surr2 = torch.clamp(ratio, 1-self.clip_eps, 1+self.clip_eps) * advantages.squeeze(-1)
+            actor_loss += -torch.min(surr1, surr2).mean() - 0.01 * dist.entropy().mean()
 
-        self.steps += 1
-        done = (self.steps >= self.max_steps) or all([np.array_equal(p, t) for p, t in zip(self.agent_pos, self.targets)])
-        return self._get_obs(), rewards, done, {}
+        self.actor_opt.zero_grad()
+        actor_loss.backward()
+        self.actor_opt.step()
 
-    # --- 追加: 可視化メソッド ---
-    def render(self, ax):
-        """現在の状態をmatplotlibのaxに描画する"""
-        ax.clear()
-        ax.set_xlim(0, self.size)
-        ax.set_ylim(0, self.size)
-        ax.set_xticks(range(self.size + 1))
-        ax.set_yticks(range(self.size + 1))
-        ax.grid(True, linestyle=':', alpha=0.6)
-        ax.set_aspect('equal')
+# --- 実行セクション ---
+env = CollaborativeDroneEnv(size=7)
+trainer = MAPPOTrainer(obs_dim=7, state_dim=14, action_dim=5)
+memory = MAPPOMemory()
 
-        colors = ['red', 'green']
-        # ターゲットの描画
-        for i, (tx, ty) in enumerate(self.targets):
-            circle = patches.Circle((ty + 0.5, self.size - 1 - tx + 0.5), 0.3, 
-                                    color=colors[i], alpha=0.2)
-            ax.add_patch(circle)
-            ax.text(ty + 0.3, self.size - 1 - tx + 0.3, f"T{i}", color=colors[i], fontsize=10)
-
-        # エージェントの描画
-        for i, (ax_p, ay_p) in enumerate(self.agent_pos):
-            rect = patches.Rectangle((ay_p + 0.1, self.size - 1 - ax_p + 0.1), 0.8, 0.8, 
-                                     color=colors[i], alpha=0.8)
-            ax.add_patch(rect)
-            ax.text(ay_p + 0.3, self.size - 1 - ax_p + 0.3, f"A{i}", color='white', weight='bold')
-
-        ax.set_title(f"Step: {self.steps}")
-
-    def save_gif(self, trainer=None, filename="simple_reach.gif"):
-        """エピソードを実行してGIFを保存する (trainerがNoneならランダム)"""
-        frames = []
-        obs_list = self.reset()
-        done = False
+for epi in range(1001):
+    obs_list = env.reset()
+    h_actors = [torch.zeros(1, 1, 128) for _ in range(2)]
+    h_critic = torch.zeros(1, 1, 256)
+    memory.h_actors.append([h.clone() for h in h_actors]); memory.h_critics.append(h_critic.clone())
+    
+    total_r = 0
+    for t in range(env.max_steps):
+        obs_tensor = torch.FloatTensor(np.array(obs_list))
+        global_state = obs_tensor.view(-1)
         
-        fig, ax = plt.subplots(figsize=(5, 5))
+        actions, log_probs, next_h_actors = [], [], []
+        for i in range(2):
+            agent_id = torch.zeros(2); agent_id[i] = 1.0
+            a_input = torch.cat([obs_tensor[i], agent_id]).view(1, 1, -1)
+            with torch.no_grad():
+                dist, h_a = trainer.actor(a_input, h_actors[i])
+                a = dist.sample()
+                actions.append(a.item()); log_probs.append(dist.log_prob(a)); next_h_actors.append(h_a)
         
-        # 初期状態の隠れ状態 (MAPPO/GRU用)
-        h_actors = [np.zeros((1, 1, 128)) for _ in range(self.num_agents)]
+        next_obs, rewards, done, _ = env.step(actions)
+        memory.store(obs_tensor, global_state, torch.tensor(actions), torch.tensor(log_probs), torch.FloatTensor(rewards), done)
+        
+        obs_list, h_actors, total_r = next_obs, next_h_actors, total_r + sum(rewards)
+        if done: break
+        
+    trainer.train(memory)
+    memory.clear()
 
-        while not done:
-            # フレームを描画
-            self.render(ax)
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png', bbox_inches='tight')
-            buf.seek(0)
-            frames.append(Image.open(buf))
-
-            # 行動選択
-            if trainer is None:
-                # ランダム行動
-                actions = [np.random.randint(0, 5) for _ in range(self.num_agents)]
-            else:
-                # 学習済みエージェントの行動 (以前作成したtrainerのロジックを使用)
-                import torch
-                obs_tensor = trainer.normalize_obs(obs_list)
-                actions = []
-                for i in range(self.num_agents):
-                    agent_id = torch.zeros(self.num_agents); agent_id[i] = 1.0
-                    inp = torch.cat([obs_tensor[i], agent_id], dim=-1).view(1, 1, -1)
-                    with torch.no_grad():
-                        # ここでは決定論的な行動 (argmax) を選択
-                        # probs, _ = trainer.actor(inp, torch.FloatTensor(h_actors[i]))
-                        # actions.append(torch.argmax(probs).item())
-                        dist, _ = trainer.actor(inp, torch.FloatTensor(h_actors[i]))
-                        # Categoricalオブジェクト(dist)から、実際の確率(probs)を取り出してargmaxをとる
-                        actions.append(torch.argmax(dist.probs).item())
-                
-            obs_list, _, done, _ = self.step(actions)
-
-        # GIFの生成
-        frames[0].save(filename, save_all=True, append_images=frames[1:], duration=300, loop=0)
-        plt.close(fig)
-        print(f"✅ GIF saved as {filename}")
+    if epi % 100 == 0:
+        print(f"Episode {epi}, Reward: {total_r:.2f}")
+        # env.save_gif(filename=f"mappo_coop_ep{epi}.gif")
