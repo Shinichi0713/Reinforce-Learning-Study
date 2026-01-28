@@ -5,6 +5,6 @@ sceneTreePerspectives: 000000ff00000001000000030000001e000000c0000000fa010000000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 1 "C:/Users/yoshinaga/Documents/Python Scripts/hard-related/hard-ware/robotics/servo/projects/2-tutorial/controllers/robot_cont1/robot_cont1.py" "controllers/my_controller/my_controller.py"
+textFiles: 1 "../../../../Users/yoshinaga/Documents/Python Scripts/hard-related/hard-ware/robotics/servo/projects/2-tutorial/controllers/robot_cont1/robot_cont1.py" "D:/PycharmProjects/Reinforce-Learning-Study/physical_engine/child_world/controllers/my_controller/my_controller.py"
 consoles: Console:All:All
 renderingDevicePerspectives: ERS-7:PRM:/r1/c1/c2/c3/i1-FbkImageSensor:F1;1;1;0;0

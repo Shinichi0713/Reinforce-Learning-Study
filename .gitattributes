@@ -1,7 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 # Pythonファイルを除外
-*.py linguist-vendored
+# *.py linguist-vendored
 
 # Jupyter Notebookを除外
 *.ipynb linguist-vendored
