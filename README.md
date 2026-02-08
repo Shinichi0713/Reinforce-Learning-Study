@@ -213,8 +213,6 @@ __Learning Objectives and Cooperation Points__
 * **Nature of Coordination:** This task emphasizes **positive cooperation** ("dividing up the unexplored area") rather than negative cooperation ("avoiding collisions").
 * **Learning Goal:** The drone swarm must learn a **spatial load-balancing strategy**: maintaining an **appropriate distance** from each other to avoid overcrowding while cooperatively segmenting the search area to maximize the overall coverage rate.
 
-
-
 <img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
 
 ## Fundamental Knowledge
@@ -243,8 +241,6 @@ Algorithms like DQN (Deep Q-Network) utilize **Off-policy learning**, which allo
 
 * **The Role of Memory:** By looking back at historical records ("I acted this way before and failed"), the agent can evaluate and refine its current decision-making strategy.
 
-
-
 # cite
 
 in this repogitory, oss 'pygame-learning-environment' is used.
@@ -271,5 +267,4 @@ this site shows nice tips about reinforcement learning.
 
 I publish technical articles focused on Reinforcement Learning related technics on my blog. Feel free to visit and have a read.
 
-https://yoshishinnze.hatenablog.com/
-
+[writer&#39;s blog](https://yoshishinnze.hatenablog.com/)

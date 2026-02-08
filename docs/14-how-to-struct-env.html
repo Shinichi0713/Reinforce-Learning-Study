@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5354;&#x8abf;&#x5b66;&#x7fd2;&#x306e;&#x4f8b;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>今日は先日扱った協調学習について、問題の定義、環境コードを実装してみました。</p>
+<h2 id="協調学習の例題">協調学習の例題</h2>
+<p>強調学習の練習を行うために以下のような問題を考えてみました。</p>
+<p>協調的な例題：フォークリフトによる倉庫管理 (Multi-Robot Warehouse)</p>
+<p>この例題は、複数のエージェントが共通の資源を管理し、衝突を避けながらタスクを効率的に処理する、協調的なMARLの基本を学ぶのに非常に適しています。</p>
+<h3 id="倉庫配送タスクの設定概要">倉庫配送タスクの設定概要</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳細内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>環境</strong></td>
+<td>倉庫のグリッドマップ（ピックアップ地点 ＆ ドロップオフ地点）</td>
+</tr>
+<tr>
+<td><strong>エージェント</strong></td>
+<td>2台以上のフォークリフトロボット</td>
+</tr>
+<tr>
+<td><strong>行動（アクション）</strong></td>
+<td>上・下・左・右への移動、待機、ピックアップ、ドロップオフ</td>
+</tr>
+<tr>
+<td><strong>目標</strong></td>
+<td>全注文の最短時間完了（総合報酬の最大化）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="実装するコツ">実装するコツ</h3>
+<p>この例題でMARLを学ぶ上で重要なポイントは以下の2点です。</p>
+<p><strong>1. 経路の競合と衝突回避 (Collision Avoidance)</strong></p>
+<p>ロボットは同じ通路や交差点を使用するため、衝突が発生する可能性があります。
+学習目標は、単に最短経路を選ぶだけでなく、他のロボットの動きを予測し、衝突を避けるために一時的に待機したり、迂回したりする協調的な行動を学習することです。</p>
+<p><strong>2. タスクの割り当てと負荷分散 (Task Allocation)</strong></p>
+<p>複数の注文が発生した場合、どのロボットがどの注文をピックアップするのが最も効率的か（ 誰がどこへ行くか ）を決定する必要があります。
+単一エージェントではこの決定は不要ですが、MARLでは、他のエージェントの現在の位置やタスク状況を考慮して、最適な割り当て戦略を学習することが、全体効率（総合報酬）を最大化する鍵となります。
+環境コード</p>
+<h2 id="環境の実装">環境の実装</h2>
+<p>強化学習のコードはまず環境コードをつくることから始まります。</p>
+<h3 id="環境つくるコツ">環境つくるコツ</h3>
+<p>コツはやはりあります。
+著者が考える重要なコツをまとめます。</p>
+<h4 id="1-観測空間observationの情報の絞り込み">1. 観測空間（Observation）の「情報の絞り込み」</h4>
+<p>AIに何を見せるか（State）は、多すぎても少なすぎてもいけません。</p>
+<ul>
+<li><strong>完全な情報の罠:</strong> 全ての座標や速度をそのまま渡すと、AIは情報の海で溺れます。「自分とターゲットの相対距離」や「壁までの距離」など、<strong>行動の判断に直結する特徴量</strong>に加工して渡す（特徴量エンジニアリング）のがコツです。</li>
+<li><strong>部分観測性（POMDP）の考慮:</strong> 自分の背後が見えない設定なら、過去数ステップの情報をスタックして渡すことで、AIに「記憶」を持たせることができます。</li>
+</ul>
+<h4 id="2-報酬関数rewardの段階的設計">2. 報酬関数（Reward）の「段階的設計」</h4>
+<p>AIは「ズル（報酬ハッキング）」の天才です。</p>
+<ul>
+<li><strong>疎な報酬の回避:</strong> 「ゴールしたら+1」だけでは、偶然辿り着くまで何も学びません。ゴールに近づくごとに微小な報酬（シェイピング報酬）を与えます。</li>
+<li><strong>生存ペナルティ:</strong> 1ステップごとに <code>-0.01</code> などの微小なマイナスを与えると、「最短ルートでクリアしよう」という動機付けになります。</li>
+<li><strong>正規化:</strong> 報酬の合計値が極端に大きく（例：100万）なったり小さくなったりしないよう、概ね <code>-1.0 〜 1.0</code> の範囲に収まるようスケーリングするのが安定の秘訣です。</li>
+</ul>
+<h4 id="3-エピソードの強制終了とリセット">3. エピソードの「強制終了」と「リセット」</h4>
+<ul>
+<li><strong>タイムリミット:</strong> AIが無限に迷走しないよう、一定ステップ数（例：500歩）でエピソードを強制終了させます。</li>
+<li><strong>Doneフラグの扱い:</strong> 「壁に激突して終了」と「時間切れで終了」を区別してAIに伝える（TimeLimit.truncated）ことで、AIが「時間が来たら死ぬ」という誤解をするのを防げます。</li>
+</ul>
+<h4 id="4-シミュレーションの軽量化と並列化">4. シミュレーションの「軽量化」と「並列化」</h4>
+<p>強化学習は数百万回の試行が必要です。</p>
+<ul>
+<li><strong>描画（Rendering）のオフ:</strong> 学習中はGUIを表示せず、計算のみを行う「Headlessモード」で回します。</li>
+<li><strong>Vectorized Environment:</strong> 1つではなく、同時に16個、32個の環境を並列で動かすことで、学習時間を劇的に短縮できます（Gymnasiumの <code>SyncVectorEnv</code> など）。</li>
+</ul>
+<h4 id="5-難易度のスケーリングカリキュラム学習">5. 難易度の「スケーリング（カリキュラム学習）」</h4>
+<p>いきなりフルセットの環境で学習させないのがコツです。</p>
+<ul>
+<li>最初はターゲットを目の前に置き、成功したら少しずつ遠ざける。</li>
+<li>最初は敵を動かさず、慣れてきたら動かし始める。
+この「徐々に難しくする」仕組みをコードに組み込んでおくと、学習が停滞しにくくなります。</li>
+</ul>
+<h3 id="実装コード">実装コード</h3>
+<p>特別なライブラリを使わないということを念頭にリンク先に作ってみました。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main">Shinichi0713/Reinforce-Learning-Study: this is the codes which is in accordance with reinforcement-learning</a></p>
+<p>動作させるとこんな感じになります。
+エージェントはランダムな動作なので、意思を持った動作は未だできていません。
+今後、強化学習のモデル構築、学習を進めていきます。</p>
+
+<div class="separator" style="clear: both;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg4H904hy8dhV9Hk1Z5jeNXlwysjdj8cxUCRvStu8Fv-3pIVCRLy1IgW6aVarViDNDZQ23Tt3Tfm7zwZ-5ZT6gpKyOTdkBeFuyvPF6adZk59GcDa2OWYr0UlBY4_52G4qVyxAVqk6FYzHiytecB-tql6uU9UG6BG6j53uagwpGO2_ti8lMZcWDzi4i4bhZO/s664/marl_agent_motion.gif" style="display: block; padding: 1em 0; text-align: center;"><img alt="" border="0" height="400" data-original-height="664" data-original-width="616" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg4H904hy8dhV9Hk1Z5jeNXlwysjdj8cxUCRvStu8Fv-3pIVCRLy1IgW6aVarViDNDZQ23Tt3Tfm7zwZ-5ZT6gpKyOTdkBeFuyvPF6adZk59GcDa2OWYr0UlBY4_52G4qVyxAVqk6FYzHiytecB-tql6uU9UG6BG6j53uagwpGO2_ti8lMZcWDzi4i4bhZO/s400/marl_agent_motion.gif" /></a></div>
+
+<h2 id="結論">結論</h2>
+<p>今回は環境コードの作成、環境実装のコツを説明しました。
+学習は自動ですが、エージェントが経験学習する環境はノウハウそのものです。
+今回の記事、是非ご参考下さい。</p>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+ 
+            
+        </body>
+        </html>
