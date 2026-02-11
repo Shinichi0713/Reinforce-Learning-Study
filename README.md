@@ -241,6 +241,114 @@ Algorithms like DQN (Deep Q-Network) utilize **Off-policy learning**, which allo
 
 * **The Role of Memory:** By looking back at historical records ("I acted this way before and failed"), the agent can evaluate and refine its current decision-making strategy.
 
+## MARL
+
+## Centralized vs. Decentralized Learning
+
+In Reinforcement Learning, "Centralized Learning" and "Decentralized Learning" refer to structural differences in **"who processes the information and where the command center for learning is located."**
+
+The following outlines their characteristics within the context of Multi-Agent Reinforcement Learning (MARL).
+
+### 1. Centralized Training
+
+This style involves **collecting data (observations, actions, rewards) from all agents into a single location to train a single, massive intelligence.**
+
+* **Mechanism:** Learning is based on a "Global State" that integrates information from all agents. To use a football (soccer) analogy, it is like a manager overseeing the entire pitch and giving synchronized instructions to all players.
+* **Pros:** * Directly learns complex interactions between agents (e.g., "Since Agent A moved right, I will move left").
+* Theoretically, it is the most likely to reach an optimal global solution.
+
+
+* **Cons:** * **Curse of Dimensionality:** As the number of agents increases, the combinations of information grow exponentially, making computation unfeasible.
+* **Execution Constraints:** Since it assumes access to everyone’s information during training, it often requires constant communication between all agents during execution.
+
+
+
+### 2. Decentralized Training
+
+This is a style where **each agent learns independently based solely on its own experience.**
+
+* **Mechanism:** Other agents are treated as "part of the environment" (like moving obstacles), and each agent updates its network individually.
+* **Pros:** * High scalability because the computational load is distributed per agent.
+* Resilient to privacy concerns and communication limits since interaction with others is not required for training.
+
+
+* **Cons:** * **Non-stationarity Problem:** Because others change their behavior while an agent is learning, the "rules of the world" appear to change arbitrarily from the AI's perspective, making learning highly unstable.
+* Cooperative behavior relies on chance, making high-level coordination difficult to achieve.
+
+
+
+### 3. Hybrid: Centralized Training, Decentralized Execution (CTDE)
+
+Currently the most popular approach for tasks like cooperative drone control, **CTDE** combines the best of both worlds.
+
+* **Concept:** **"Practice (Training) involves everyone reviewing game tapes together to reflect, but the Match (Execution) is handled by each individual's judgment."**
+* **Features:** * **Training:** Centralized training is performed, refining the "Critic" by considering the actions of others.
+* **Execution:** Decentralized execution is performed, where the "Actor" acts quickly based only on its own local sensor data.
+
+
+* **Representative Examples:** QMIX, MADDPG.
+
+### Summary Comparison
+
+| Feature | Centralized | Decentralized | CTDE (Hybrid) |
+| --- | --- | --- | --- |
+| **Data Aggregation** | Always centralized | Distributed per agent | Centralized only during training |
+| **Learning Stability** | High (Global view) | Low (Others are moving) | Medium to High (Balanced) |
+| **Execution Autonomy** | Low (Requires comms) | High (Operates alone) | High (Operates alone) |
+| **Primary Use Cases** | Small-scale precision control | Large-scale independent envs | **Multi-drone coordination** |
+
+**Conclusion:** Regarding the choice between centralized or decentralized, the modern MARL consensus is that **CTDE (Centralized Training, Decentralized Execution)** is the most efficient and practical solution.
+
+
+## MARL Learning Methodologies
+
+The major frameworks for cooperative learning in MARL are categorized into three types based on how they handle information and the learning process. While **CTDE** is the current standard, here are the characteristics of each:
+
+### 1. Decentralized Training, Decentralized Execution (DTDE)
+
+The simplest form where each agent treats others as "part of the environment" (like moving walls) and learns/executes independently.
+
+* **Mechanism:** Each agent runs a single-agent algorithm (e.g., DQN, PPO) independently (Independent RL).
+* **Pros:** Simple algorithm; the structure remains the same regardless of the number of agents.
+* **Challenges:** Environment instability (non-stationarity) makes convergence difficult.
+
+### 2. Centralized Training, Centralized Execution (CTCE)
+
+Treats all agents as one "giant AI," processing all observations and actions collectively.
+
+* **Mechanism:** All observations are merged into one input vector, and all actions are defined in one giant joint action space.
+* **Pros:** Theoretically can learn the most optimal cooperative combinations.
+* **Challenges:** Curse of dimensionality makes computation impossible as agents increase; requires constant communication during execution.
+
+### 3. Centralized Training, Decentralized Execution (CTDE)
+
+**The current de facto standard.** It shares information only during training and maintains independence during execution.
+
+* **Mechanism:** * **Training (Centralized):** A Critic or Mixing Network "cheats" by looking at the states and actions of all agents to accurately evaluate each action.
+* **Execution (Decentralized):** Each agent uses only its own network (Actor) to decide actions based on local info.
+
+
+* **Representative Methods:** **MADDPG** (Individual critics see others' actions), **QMIX/VDN** (Individual values integrated into a team value).
+* **Pros:** Stable learning; works in environments with weak communication infrastructure (e.g., field-deployed drones).
+
+### 4. Communication-based Learning
+
+A framework where agents encourage cooperation by sending "messages" to one another.
+
+* **Mechanism:** Includes a network layer to exchange vectorized information (communication protocols) before selecting an action.
+* **Pros:** Allows agents to know the status of teammates outside their field of view, enabling high-level coordination.
+* **Representative Methods:** **CommNet**, **DIAL**.
+
+### 5. Hierarchical / Role-based Learning
+
+Dividing agents into a "Manager" (commander) and "Workers" (executors), or assigning specific "Roles."
+
+* **Mechanism:** Separates the AI that sets long-term goals from the AI that performs specific operations (e.g., drone movement).
+* **Pros:** Efficiently learns complex, long-term tasks.
+* **Representative Methods:** **ROMA** (Dynamic role learning).
+
+For more detail, please come in [here](https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent).
+
 # cite
 
 in this repogitory, oss 'pygame-learning-environment' is used.
