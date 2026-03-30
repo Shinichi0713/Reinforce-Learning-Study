@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x554f;&#x984c;&#x8a2d;&#x5b9a;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>大分経過してしまいましたが、マルチエージェント強化学習(MARL)で前回から更新が止まっていた問題解決までトライアルです。
+今回の問題設定について説明していきます。</p>
+<h2 id="問題設定">問題設定</h2>
+<h3 id="1-問題の目的">1. 問題の目的</h3>
+<p>本タスクは、<strong>2体のエージェントが共有ターゲット地点に協調して到達する</strong>ことを目的とするマルチエージェント強化学習（MARL）問題です。<br>
+単に「各自が最短経路で動く」だけでは効率が悪く、<strong>ボトルネック（狭い通路）や衝突回避を考慮した協調行動</strong>が求められます。</p>
+<p><strong>主目的</strong></p>
+<ul>
+<li>両エージェントができるだけ早く、かつ<strong>同時に</strong>共有ターゲットに到達すること</li>
+<li>その過程で、<strong>衝突や混雑を避けつつ、全体の移動効率を最大化</strong>すること</li>
+</ul>
+<h3 id="2-環境設定">2. 環境設定</h3>
+<p><strong>2.1 グリッドワールド</strong></p>
+<ul>
+<li>サイズ：<code>size × size</code> の2次元グリッド（例：5×5）</li>
+<li>各セルはエージェントの位置を表し、上下左右に移動可能。</li>
+</ul>
+<p><strong>2.2 エージェント</strong></p>
+<ul>
+<li>数：2体（Agent 0, Agent 1）</li>
+<li>初期位置：
+<ul>
+<li>Agent 0: <code>(0, 0)</code>（左上）</li>
+<li>Agent 1: <code>(size-1, size-1)</code>（右下）</li>
+</ul>
+</li>
+<li>行動：
+<ul>
+<li>0: 待機</li>
+<li>1: 上</li>
+<li>2: 下</li>
+<li>3: 左</li>
+<li>4: 右</li>
+</ul>
+</li>
+</ul>
+<p><strong>2.3 ターゲット</strong></p>
+<ul>
+<li>共有ターゲット：<code>(size-1, size-1)</code>（右下）</li>
+<li>両エージェントがこのセルに同時に到達することがゴール。</li>
+</ul>
+<p><strong>2.4 ボトルネック（狭い通路）</strong></p>
+<ul>
+<li>中央行（<code>size // 2</code>）に<strong>1マス幅の通路</strong>のみが存在し、それ以外のセルは通行不可。</li>
+<li>例：5×5グリッドの場合、中央行の中央列（<code>(2,2)</code>）のみ通行可能。</li>
+<li>これにより、エージェントは<strong>順番に通過する必要</strong>があり、独立最適行動では渋滞が発生します。</li>
+</ul>
+<p><strong>2.5 終了条件</strong></p>
+<ul>
+<li>最大ステップ数に達する（例：30ステップ）</li>
+<li>または、両エージェントが同時にターゲットセルに到達する</li>
+</ul>
+<h3 id="3-観測observation">3. 観測（Observation）</h3>
+<p>各エージェントは以下の情報を観測します（正規化済み）：</p>
+<ul>
+<li>自分の位置 <code>(x, y)</code></li>
+<li>ターゲットへの相対距離 <code>(Δx, Δy)</code></li>
+<li>他エージェントとの相対位置 <code>(Δx_other, Δy_other)</code></li>
+<li>ボトルネック位置への相対距離 <code>(Δx_bn, Δy_bn)</code></li>
+</ul>
+<p>これにより、エージェントは「自分とターゲットの関係」「他エージェントとの位置関係」「ボトルネックの位置」を認識できます。</p>
+<h3 id="4-報酬設計協調を促す要件">4. 報酬設計（協調を促す要件）</h3>
+<p><strong>4.1 グローバル距離報酬</strong></p>
+<ul>
+<li>両エージェントのターゲットまでの距離の合計に比例したマイナス報酬</li>
+<li>式：<code>-0.1 * (dist0 + dist1)</code></li>
+<li>目的：<strong>全体としてターゲットに近づく</strong>ことを促す。</li>
+</ul>
+<p><strong>4.2 同時到達ボーナス</strong></p>
+<ul>
+<li>両エージェントが同時にターゲットに到達した場合、<strong>大きな正の報酬（+5.0）</strong></li>
+<li>目的：<strong>協調的なゴール達成</strong>を強く評価する。</li>
+</ul>
+<p><strong>4.3 衝突ペナルティ</strong></p>
+<ul>
+<li>両エージェントが同じセルに同時に入ろうとした場合、<strong>マイナス報酬（-1.0）</strong></li>
+<li>目的：<strong>衝突回避</strong>と「順番待ち」の学習を促す。</li>
+</ul>
+<p><strong>4.4 混雑ペナルティ</strong></p>
+<ul>
+<li>ボトルネック付近で両エージェントが近づきすぎた場合、<strong>マイナス報酬（-0.5）</strong></li>
+<li>目的：<strong>間隔調整</strong>（一方が待機し、他方が先に通過するなど）を促す。</li>
+</ul>
+<h3 id="5-マルチエージェントに求められる要件">5. マルチエージェントに求められる要件</h3>
+<p><strong>5.1 協調ナビゲーション能力</strong></p>
+<ul>
+<li><strong>経路の調整</strong>：ボトルネックを通過する際、どちらが先に通るかを暗黙に決定する。</li>
+<li><strong>タイミングの調整</strong>：一方が待機し、他方が先に通過するなど、<strong>時間的な協調</strong>が求められる。</li>
+</ul>
+<p><strong>5.2 衝突回避と混雑管理</strong></p>
+<ul>
+<li>同じセルへの同時進入を避ける。</li>
+<li>ボトルネック付近で過度に接近しないように間隔を保つ。</li>
+</ul>
+<p><strong>5.3 部分観測下での意思決定</strong></p>
+<ul>
+<li>各エージェントは「自分の位置・ターゲット・他エージェント・ボトルネック」の相対情報しか持たない。</li>
+<li>これらを統合し、<strong>他エージェントの意図を推測しながら行動</strong>する必要がある。</li>
+</ul>
+<p><strong>5.4 グローバル報酬の理解</strong></p>
+<ul>
+<li>各エージェントは「自分の行動がチーム全体の報酬にどう影響するか」を学習する必要がある。</li>
+<li>これはMAPPOやQMIXなどの<strong>集中学習・分散実行（CTDE）</strong> アルゴリズムが得意とする部分です。</li>
+</ul>
+<h3 id="6-まとめ">6. まとめ</h3>
+<p>この問題設定は、<strong>単純なナビゲーションタスクに「ボトルネック」「衝突」「同時到達ボーナス」を加えることで、協調行動を強く要求するMARLベンチマーク</strong>として設計されています。<br>
+エージェントは、単に最短経路を選ぶだけでなく、</p>
+<ul>
+<li>どちらが先にボトルネックを通るか</li>
+<li>どのタイミングで待機・前進するか</li>
+<li>どのように衝突を避けるか</li>
+</ul>
+<p>を<strong>分散的に学習</strong>する必要があります。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-5\doc\coop_nav.gif" alt="jssp-3" width="600px" height="auto">
+<h2 id="解法">解法</h2>
+<p>上記の協調ナビゲーション環境を解くためのマルチエージェント構成を、アルゴリズムの観点から整理します。</p>
+<h3 id="1-環境の特徴アルゴリズム選択の前提">1. 環境の特徴（アルゴリズム選択の前提）</h3>
+<p>環境の主な特徴は以下です。</p>
+<ul>
+<li><strong>グローバル報酬</strong>：距離の合計・同時到達ボーナス・衝突ペナルティなど、<strong>チーム全体の報酬</strong>が中心。</li>
+<li><strong>部分観測</strong>：各エージェントは自分の位置・ターゲット・他エージェント・ボトルネックの相対情報のみを持つ。</li>
+<li><strong>協調が必要</strong>：ボトルネックや衝突回避のため、「順番待ち」「間隔調整」などの<strong>協調行動</strong>が不可欠。</li>
+<li><strong>エージェント数が少ない</strong>：2エージェントなので、大規模分散型よりも<strong>集中型・通信型</strong>の手法が適しやすい。</li>
+</ul>
+<p>この環境は「<strong>協調ナビゲーション＋グローバル報酬＋部分観測</strong>」という、典型的なCTDE（Centralized Training, Decentralized Execution）向きのタスクです。</p>
+<h3 id="2-解決に選定したアルゴリズム">2. 解決に選定したアルゴリズム</h3>
+<p>例のごとくQMIX系（Value Decomposition）による解法を検討します。</p>
+<p><strong>概要</strong></p>
+<ul>
+<li>グローバルQ値を「各エージェントのQ値の混合」として表現し、<strong>集中学習・分散実行</strong>を行う。</li>
+<li>代表例：QMIX, VDN, QPLEX など。</li>
+</ul>
+<p><strong>この環境への適合性</strong></p>
+<ul>
+<li>グローバル報酬（距離の合計・同時到達ボーナス）を<strong>価値分解</strong>で扱える。</li>
+<li>部分観測から各エージェントがローカルQ値を学習し、Mixing Networkが協調構造を学習する。</li>
+<li>2エージェントなので、Mixing Networkもシンプルで済む。</li>
+</ul>
+<p><strong>構成案</strong></p>
+<ul>
+<li>各エージェント：DQN（またはRNN-DQN）でローカルQ値を学習。</li>
+<li>Mixing Network：グローバルQ値を出力し、<strong>単調性制約</strong>（QMIX）で分解を保証。</li>
+<li>入力：各エージェントの観測（位置・ターゲット・他エージェント・ボトルネック）＋必要に応じて状態情報。</li>
+</ul>
+<p><strong>メリット</strong></p>
+<ul>
+<li>グローバル報酬を自然に扱える。</li>
+<li>分散実行が可能（学習時だけ集中情報を使う）。</li>
+<li>協調構造（順番待ち・間隔調整）をMixing Networkが暗黙に学習。</li>
+</ul>
+<p><strong>デメリット</strong></p>
+<ul>
+<li>価値ベースなので、連続行動や確率的方策には不向き（この環境は離散行動なので問題なし）。</li>
+<li>通信プロトコルを明示的に学習しない（暗黙の協調に依存）。</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>以下のレポジトリにコードを保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-5/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-5/src</a></p>
+<p><strong>工夫点</strong></p>
+<ol>
+<li>ほっとくとエージェントが停止するため、環境の報酬設計に停滞防止の報酬設計を行う</li>
+<li>QMIXのTrainerに温度パラメータを設定し、初期の行動は探索を優先するように設定する</li>
+<li>Actorモデルは確率行動分布に従って行動する(決定論的エージェントではない)</li>
+</ol>
+<p>としました。</p>
+<p>学習の推移は以下のようになっています。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-5\image\README\1774861662928.png" alt="1774861662928"></p>
+<p>そして、学習後のエージェントの行動は以下です。
+強調していないか・・・。
+というより、片方のエージェントが全く機能していないようにも見えます。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-5\doc\coop_nav_qmix.gif" alt="jssp-3" width="600px" height="auto">
+<h2 id="考察">考察</h2>
+<p>今回は個人エージェントの独立した行動と、評価はチーム単位ということでQMIXを用いました。
+毎回のことですが、エージェントの片方がうまく動作しないような状態となっています。
+もう少し、検討が必要ということと認識しました。</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+            
+        </body>
+        </html>
