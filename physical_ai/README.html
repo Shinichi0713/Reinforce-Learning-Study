@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>What Is Physical AI&quest;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <ul id="toc">Table of Contents</ul> 
+</nav>
+            <h1 id="what-is-physical-ai">What Is Physical AI?</h1>
+<p>Over the past two years, the concept of <strong>Physical AI</strong> has rapidly gained attention.
+Although the term can be somewhat vague, this article summarizes what is currently understood about it.</p>
+<hr>
+<h2 id="overview">Overview</h2>
+<p><strong>Physical AI</strong> refers to technologies in which <strong>artificial intelligence possesses a physical body</strong>—such as robots, drones, autonomous vehicles, or smart appliances—and operates autonomously in the real world.</p>
+<p>Traditional AI (digital AI) primarily performs <strong>information processing or content generation within digital environments</strong>, such as text or image generation on screens.</p>
+<p>In contrast, Physical AI performs a <strong>continuous real-time cycle</strong>:</p>
+<ol>
+<li>Perceive the real-world environment</li>
+<li>Make decisions</li>
+<li>Physically act upon the environment</li>
+</ol>
+<hr>
+<h2 id="key-differences-from-traditional-ai">Key Differences from Traditional AI</h2>
+<h3 id="operational-environment">Operational Environment</h3>
+<p>Traditional generative AI systems (such as ChatGPT) operate entirely within <strong>digital space</strong>.
+Physical AI, on the other hand, operates within the <strong>physical world</strong>.</p>
+<hr>
+<h3 id="type-of-data-processed">Type of Data Processed</h3>
+<p>Traditional AI primarily handles <strong>text and images</strong>.</p>
+<p>Physical AI processes <strong>complex physical data obtained through sensors</strong>, including:</p>
+<ul>
+<li>gravity</li>
+<li>friction</li>
+<li>distance</li>
+<li>obstacles</li>
+<li>temporal dynamics (time-series data)</li>
+</ul>
+<hr>
+<h3 id="autonomy-of-behavior">Autonomy of Behavior</h3>
+<p>Conventional robots typically perform <strong>repetitive pre-programmed tasks</strong>.</p>
+<p>Physical AI systems instead <strong>adapt their behavior to surrounding conditions</strong>, autonomously determining optimal actions.</p>
+<hr>
+<h2 id="application-areas-and-examples-of-physical-ai">Application Areas and Examples of Physical AI</h2>
+<h3 id="manufacturing-and-logistics">Manufacturing and Logistics</h3>
+<ul>
+<li>General-purpose robots capable of grasping and transporting diverse products</li>
+<li>Automated transport systems inside factories (AGV / AMR)</li>
+</ul>
+<hr>
+<h3 id="hazardous-environments">Hazardous Environments</h3>
+<p>Physical AI can operate in environments that are dangerous for humans:</p>
+<ul>
+<li>high-altitude operations</li>
+<li>fire sites</li>
+<li>hazardous material zones</li>
+</ul>
+<hr>
+<h3 id="humanoid-robots">Humanoid Robots</h3>
+<p>Humanoid robots capable of natural conversation while performing household or light industrial tasks are under development by companies such as:</p>
+<ul>
+<li>Figure AI</li>
+<li>Tesla</li>
+</ul>
+<hr>
+<h2 id="why-physical-ai-is-attracting-attention">Why Physical AI Is Attracting Attention</h2>
+<p>The rapid growth of Physical AI is driven by several global trends:</p>
+<ul>
+<li>severe labor shortages</li>
+<li>continued digital transformation (DX)</li>
+</ul>
+<p>Major technology companies such as:</p>
+<ul>
+<li>NVIDIA</li>
+<li>SoftBank Group</li>
+</ul>
+<p>are investing massive amounts of capital.</p>
+<p>Because of this rapid acceleration, <strong>2026 is sometimes referred to as the “first year of Physical AI.”</strong></p>
+<hr>
+<h1 id="changes-in-learning-paradigms">Changes in Learning Paradigms</h1>
+<p>The learning targets of Physical AI differ dramatically from those of traditional digital AI.</p>
+<p>Instead of learning from <strong>screen-based information</strong>, Physical AI learns from <strong>physical interactions in the real world</strong>.</p>
+<hr>
+<h2 id="1-from-digital-data-to-multimodal-physical-data">1. From Digital Data to Multimodal Physical Data</h2>
+<p>Traditional AI models such as ChatGPT were trained primarily on <strong>large amounts of internet text and images</strong>.</p>
+<p>Physical AI integrates multiple sources of sensory information obtained through a physical body.</p>
+<p>Examples include:</p>
+<h3 id="vision-and-spatial-perception">Vision and Spatial Perception</h3>
+<ul>
+<li>cameras</li>
+<li>LiDAR</li>
+</ul>
+<p>These provide <strong>3D spatial understanding</strong>, including distances and object placement.</p>
+<hr>
+<h3 id="force-and-tactile-feedback">Force and Tactile Feedback</h3>
+<ul>
+<li>pressure when grasping objects</li>
+<li>friction</li>
+<li>object weight</li>
+</ul>
+<hr>
+<h3 id="time-series-motion-data">Time-Series Motion Data</h3>
+<p>Physical actions involve time-dependent changes such as:</p>
+<ul>
+<li>motion timing</li>
+<li>acceleration</li>
+<li>velocity</li>
+</ul>
+<hr>
+<h2 id="2-from-static-knowledge-to-dynamic-trial-and-error">2. From Static Knowledge to Dynamic Trial-and-Error</h2>
+<p>Traditional AI primarily performs <strong>pattern inference from existing datasets</strong>.</p>
+<p>Physical AI instead emphasizes <strong>reinforcement learning</strong>, where the system repeatedly acts in the real world (or high-fidelity simulation environments) and learns through trial and error.</p>
+<p>Example:</p>
+<p>Learning how to <strong>lift a cup without breaking it</strong> requires discovering the appropriate amount of force through experience.</p>
+<hr>
+<h2 id="why-reinforcement-learning-is-necessary">Why Reinforcement Learning Is Necessary</h2>
+<p>Physical AI relies heavily on <strong>reinforcement learning rather than supervised learning</strong> because the real world rarely has a single correct labeled answer.</p>
+<p>Physical interactions must be <strong>experienced</strong>.</p>
+<hr>
+<h3 id="1-motion-cannot-be-fully-described-with-labels">1. Motion Cannot Be Fully Described with Labels</h3>
+<p>Traditional AI can learn from labeled images such as:</p>
+<blockquote>
+<p>&quot;This is a cat.&quot;</p>
+</blockquote>
+<p>However, if a robot must <strong>pick up an egg without breaking it</strong>, it is impossible to provide precise labeled data for:</p>
+<ul>
+<li>finger angles at millimeter precision</li>
+<li>exact gripping force</li>
+<li>slip conditions</li>
+</ul>
+<p>Reinforcement learning instead provides a simple objective:</p>
+<ul>
+<li>reward if the egg is lifted without breaking</li>
+</ul>
+<p>The AI then discovers the optimal behavior.</p>
+<hr>
+<h3 id="2-adaptation-to-unknown-environments">2. Adaptation to Unknown Environments</h3>
+<p>Real-world environments constantly change:</p>
+<ul>
+<li>floor friction</li>
+<li>wind strength</li>
+<li>object weight</li>
+</ul>
+<p>If a robot only imitates pre-programmed movements, it fails when conditions change.</p>
+<p>By learning <strong>strategies</strong> through reinforcement learning, the system can adapt to new environments and unexpected obstacles.</p>
+<hr>
+<h3 id="3-continuous-decision-making">3. Continuous Decision-Making</h3>
+<p>Physical motion is a <strong>continuous process</strong>, where each decision affects the next state.</p>
+<p>Example: Human walking.</p>
+<p>After stepping forward with the right foot, the center of gravity shifts.</p>
+<p>The next step depends on that shift.</p>
+<p>Therefore, rather than evaluating each frame independently, reinforcement learning optimizes <strong>the cumulative reward over an entire sequence of actions</strong>.</p>
+<hr>
+<h2 id="3-from-language-rules-to-understanding-physical-laws">3. From Language Rules to Understanding Physical Laws</h2>
+<p>Traditional digital AI learns:</p>
+<ul>
+<li>grammar</li>
+<li>logic</li>
+</ul>
+<p>Physical AI must instead learn:</p>
+<ul>
+<li>gravity</li>
+<li>inertia</li>
+<li>material stiffness</li>
+</ul>
+<p>This allows it to respond flexibly in unexpected situations such as:</p>
+<ul>
+<li>slippery floors</li>
+<li>sudden obstacles</li>
+</ul>
+<hr>
+<h2 id="how-physical-ai-learns-physical-laws">How Physical AI Learns Physical Laws</h2>
+<p>Two main approaches are currently used.</p>
+<hr>
+<h3 id="1-training-in-physics-simulators">1. Training in Physics Simulators</h3>
+<p>Real-world trial-and-error can be dangerous and inefficient.</p>
+<p>Instead, training occurs in simulated environments such as:</p>
+<ul>
+<li>NVIDIA Isaac</li>
+<li>digital twin systems</li>
+</ul>
+<p>These environments simulate:</p>
+<ul>
+<li>gravity</li>
+<li>friction</li>
+<li>air resistance</li>
+<li>material hardness</li>
+</ul>
+<p>AI systems can perform <strong>millions of training iterations</strong>, learning causal relationships such as:</p>
+<ul>
+<li>how objects bounce</li>
+<li>how gripping angles affect slipping</li>
+</ul>
+<hr>
+<h3 id="2-world-models">2. World Models</h3>
+<p>A major recent advancement is the development of <strong>internal world models</strong>.</p>
+<p>A world model acts as an <strong>internal simulator of reality</strong>.</p>
+<p>Example:</p>
+<p>By observing large amounts of video where a ball follows a parabolic trajectory, the AI learns <strong>physical intuition</strong> without explicitly learning equations.</p>
+<p>Before acting, the AI mentally simulates possible outcomes and selects the safest and most efficient action.</p>
+<hr>
+<h3 id="3-integration-with-large-language-models-llms">3. Integration with Large Language Models (LLMs)</h3>
+<p>Modern Physical AI systems integrate <strong>large language models</strong>.</p>
+<p>Example instruction:</p>
+<blockquote>
+<p>&quot;The sponge is soft, so hold it gently.&quot;</p>
+</blockquote>
+<p>The AI interprets this conceptually:</p>
+<ul>
+<li>soft → easily deformed → reduce applied force</li>
+</ul>
+<p>The system converts <strong>linguistic knowledge into physical action</strong>.</p>
+<hr>
+<h1 id="core-architecture-of-physical-ai">Core Architecture of Physical AI</h1>
+<p>The architecture of Physical AI resembles a <strong>multi-layer nervous system</strong>.</p>
+<p>LLMs function as part of the <strong>brain</strong>, but additional components act like:</p>
+<ul>
+<li>cerebellum</li>
+<li>spinal cord</li>
+</ul>
+<p>The architecture typically contains three layers.</p>
+<hr>
+<h2 id="1-vision-language-models-vlm--the-cerebrum">1. Vision-Language Models (VLM) — The “Cerebrum”</h2>
+<p>A <strong>VLM</strong> combines a large language model with visual perception.</p>
+<p>Example base models:</p>
+<ul>
+<li>GPT-style LLMs with image input capability.</li>
+</ul>
+<p>Role:</p>
+<p>Understanding abstract instructions.</p>
+<p>Example instruction:</p>
+<blockquote>
+<p>&quot;Clean the messy room.&quot;</p>
+</blockquote>
+<p>The system interprets camera input and produces a plan:</p>
+<ul>
+<li>trash → trash bin</li>
+<li>cup → table</li>
+</ul>
+<hr>
+<h2 id="2-world-models--physical-intuition">2. World Models — Physical Intuition</h2>
+<p>LLMs alone cannot simulate physics.</p>
+<p>A <strong>world model</strong> predicts physical consequences.</p>
+<p>Example:</p>
+<blockquote>
+<p>&quot;If I drop this cup, it will fall and break.&quot;</p>
+</blockquote>
+<p>Technically, these models often adapt techniques from <strong>video generation AI</strong>, predicting future states of the environment.</p>
+<hr>
+<h2 id="3-policy-networks--motor-control">3. Policy Networks — Motor Control</h2>
+<p>This is the lowest-level control layer responsible for moving motors.</p>
+<p>Role:</p>
+<p>Convert high-level instructions like</p>
+<blockquote>
+<p>&quot;Pick up the cup&quot;</p>
+</blockquote>
+<p>into precise motor commands.</p>
+<p>These commands control:</p>
+<ul>
+<li>force</li>
+<li>speed</li>
+<li>position</li>
+</ul>
+<p>Reinforcement learning is heavily used in this layer.</p>
+<hr>
+<h1 id="major-players-in-physical-ai">Major Players in Physical AI</h1>
+<h2 id="1-platform-and-infrastructure-companies">1. Platform and Infrastructure Companies</h2>
+<p>These companies provide the <strong>training environments and core AI models</strong>.</p>
+<h3 id="nvidia">NVIDIA</h3>
+<p>Provides:</p>
+<ul>
+<li>Omniverse physics simulation platform</li>
+<li>humanoid robot foundation model <strong>Project GR00T</strong></li>
+</ul>
+<p>NVIDIA is currently the <strong>central hub of the Physical AI ecosystem</strong>.</p>
+<hr>
+<h3 id="amazon-aws">Amazon (AWS)</h3>
+<p>Provides cloud infrastructure for robotics development.</p>
+<p>AWS also collaborates with NVIDIA to support Physical AI startups.</p>
+<hr>
+<h3 id="softbank-group">SoftBank Group</h3>
+<p>SoftBank has invested heavily in <strong>Skild AI</strong>, which is developing a universal robot control AI called <strong>Skild Brain</strong>.</p>
+<p>Their strategy is to integrate Physical AI with global communication networks.</p>
+<hr>
+<h2 id="2-humanoid-and-general-purpose-robot-developers">2. Humanoid and General-Purpose Robot Developers</h2>
+<p>These companies develop both the <strong>physical robot body</strong> and the controlling AI.</p>
+<h3 id="tesla">Tesla</h3>
+<p>Developing the humanoid robot <strong>Optimus</strong>.</p>
+<p>Tesla uses driving data from millions of vehicles for AI training.</p>
+<hr>
+<h3 id="figure-ai">Figure AI</h3>
+<p>Partnered with OpenAI.</p>
+<p>Developing humanoid robots such as <strong>Figure 03</strong>, capable of conversation and physical tasks.</p>
+<hr>
+<h3 id="boston-dynamics">Boston Dynamics</h3>
+<p>Now owned by Hyundai.</p>
+<p>Their new electric <strong>Atlas</strong> robot is being introduced into industrial environments.</p>
+<hr>
+<h3 id="1x-technologies">1X Technologies</h3>
+<p>A Norwegian robotics company backed by OpenAI.</p>
+<p>Developing the home robot <strong>NEO</strong>.</p>
+<hr>
+<h2 id="3-key-japanese-companies">3. Key Japanese Companies</h2>
+<p>Japan remains strong in <strong>robot hardware and industrial robotics</strong>.</p>
+<p>Examples include:</p>
+<ul>
+<li>Telexistence</li>
+<li>FANUC</li>
+<li>Yaskawa Electric</li>
+<li>NEC</li>
+<li>Toyota</li>
+</ul>
+<p>Toyota collaborates closely with NVIDIA on digital twin technology and autonomous driving.</p>
+<hr>
+<h2 id="4-major-chinese-players">4. Major Chinese Players</h2>
+<p>China may become one of the most significant sources of innovation.</p>
+<p>Chinese companies include:</p>
+<h3 id="unitree-robotics">Unitree Robotics</h3>
+<p>Produces affordable, high-performance humanoid and quadruped robots.</p>
+<hr>
+<h3 id="xiaomi">Xiaomi</h3>
+<p>Developing humanoid robots such as <strong>CyberOne</strong>.</p>
+<hr>
+<h1 id="conclusion">Conclusion</h1>
+<p>This article summarized the current state of Physical AI.</p>
+<hr>
+<h2 id="architecture">Architecture</h2>
+<p>Physical AI systems typically combine multiple AI architectures:</p>
+<ul>
+<li>VLM for perception and reasoning</li>
+<li>world models for physical prediction</li>
+<li>policy networks for motor control</li>
+</ul>
+<hr>
+<h2 id="learning-methods">Learning Methods</h2>
+<p>Physical AI learns through:</p>
+<ul>
+<li>multimodal sensor data</li>
+<li>trial-and-error interaction with the environment</li>
+</ul>
+<p>Unlike traditional AI, simply feeding information is not sufficient when interacting with the physical world.</p>
+<hr>
+<h2 id="industry-players">Industry Players</h2>
+<p>Major companies include:</p>
+<ul>
+<li>Amazon</li>
+<li>NVIDIA</li>
+<li>Tesla</li>
+</ul>
+<p>Japan has companies such as:</p>
+<ul>
+<li>FANUC</li>
+<li>Yaskawa</li>
+<li>SoftBank</li>
+</ul>
+<p>China also has strong players such as:</p>
+<ul>
+<li>Xiaomi</li>
+<li>Unitree Robotics</li>
+</ul>
+<hr>
+<p>If Physical AI becomes fully realized, robots similar to <strong>Doraemon</strong> may one day move freely in the real world.</p>
+<p>However, Japan may lag behind in innovation and adoption, despite being a country that urgently needs such technology due to its rapidly aging population.</p>
+<p>This article aimed to organize and clarify the current state of Physical AI.</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+            
+        </body>
+        </html>
