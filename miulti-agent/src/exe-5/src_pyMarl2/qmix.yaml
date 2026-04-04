@@ -1,0 +1,24 @@
+# --- 共通部分はそのまま ---
+name: "qmix"
+use_cuda: True
+
+# --- 環境に合わせて調整する部分 ---
+batch_size_run: 1
+batch_size: 32
+buffer_size: 5000
+
+# ネットワーク構造（obs_size に合わせて調整）
+agent:
+  hidden_dim: 64
+  rnn_hidden_dim: 64
+
+mixer:
+  hypernet_embed: 64
+
+runner: "episode"
+t_max: 500000        # 総ステップ数（適宜調整）
+test_nepisode: 32
+test_interval: 2000
+log_interval: 2000
+runner_log_interval: 2000
+learner_log_interval: 1000
