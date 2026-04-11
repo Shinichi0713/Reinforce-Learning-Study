@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
 import io
+import torch
 
 class CooperativeNavigationEnv:
     def __init__(self, size=5):
@@ -20,8 +21,27 @@ class CooperativeNavigationEnv:
         self.reset()
 
     def reset(self):
-        # エージェントの初期位置（対角からスタート）
-        self.agent_pos = np.array([[0, 0], [self.size-1, self.size-1]])
+        # ランダムな初期位置を生成（衝突せず、ボトルネックにも乗らない）
+        while True:
+            pos0 = np.random.randint(0, self.size, size=2)
+            pos1 = np.random.randint(0, self.size, size=2)
+            
+            # 条件チェック
+            # 1. 両エージェントが同じセルでない
+            if np.array_equal(pos0, pos1):
+                continue
+            # 2. どちらもボトルネックセルでない（中央行の中央列）
+            if (pos0[0] == self.bottleneck_row and pos0[1] == self.bottleneck_cols[0]) or \
+              (pos1[0] == self.bottleneck_row and pos1[1] == self.bottleneck_cols[0]):
+                continue
+            # 3. どちらもターゲット位置（右下）でない（到達済み状態を避ける）
+            if np.array_equal(pos0, self.targets[0]) or np.array_equal(pos1, self.targets[0]):
+                continue
+            
+            # 条件を満たしたら採用
+            self.agent_pos = np.array([pos0, pos1])
+            break
+
         self.steps = 0
         return self._get_obs()
 
@@ -46,10 +66,10 @@ class CooperativeNavigationEnv:
         # 1. 行動を適用（ただし衝突やボトルネック制約を考慮）
         new_pos = self.agent_pos.copy()
         for i, a in enumerate(actions):
-            if a == 1: new_pos[i][0] = max(0, new_pos[i][0]-1)
-            elif a == 2: new_pos[i][0] = min(self.size-1, new_pos[i][0]+1)
-            elif a == 3: new_pos[i][1] = max(0, new_pos[i][1]-1)
-            elif a == 4: new_pos[i][1] = min(self.size-1, new_pos[i][1]+1)
+            if a == 0: new_pos[i][0] = max(0, new_pos[i][0]-1)      # 上
+            elif a == 1: new_pos[i][0] = min(self.size-1, new_pos[i][0]+1)  # 下
+            elif a == 2: new_pos[i][1] = max(0, new_pos[i][1]-1)      # 左
+            elif a == 3: new_pos[i][1] = min(self.size-1, new_pos[i][1]+1)  # 右
 
         # 2. ボトルネック制約：中央行の特定列以外は通れない
         for i in range(self.num_agents):
@@ -70,50 +90,45 @@ class CooperativeNavigationEnv:
         # 5. 報酬計算（協調ナビゲーション用）
         rewards = np.zeros(self.num_agents, dtype=float)
 
-        # 5-1. ターゲットまでの距離に基づく報酬（グローバル）
+        # 1. 距離報酬を強化（グローバル）
         dist0 = np.linalg.norm(self.agent_pos[0] - self.targets[0])
         dist1 = np.linalg.norm(self.agent_pos[1] - self.targets[1])
-        global_dist_reward = -0.1 * (dist0 + dist1)
+        global_dist_reward = -0.2 * (dist0 + dist1)  # 係数を少し大きく
         rewards += global_dist_reward
 
-        # 5-2. 個別進捗報酬（停滞を防ぐ）
+        # 2. 個別進捗報酬を強化
         prev_dist0 = np.linalg.norm(prev_pos[0] - self.targets[0])
         prev_dist1 = np.linalg.norm(prev_pos[1] - self.targets[1])
         if dist0 < prev_dist0:
-            rewards[0] += 0.05  # エージェント0がターゲットに近づいた
+            rewards[0] += 0.2  # 大きくする
         if dist1 < prev_dist1:
-            rewards[1] += 0.05  # エージェント1がターゲットに近づいた
+            rewards[1] += 0.2
 
-        # 5-3. 停滞ペナルティ（同じ位置に留まり続けるとマイナス）
+        # 3. 停滞ペナルティは維持
         if np.array_equal(self.agent_pos[0], prev_pos[0]):
             rewards[0] -= 0.1
         if np.array_equal(self.agent_pos[1], prev_pos[1]):
             rewards[1] -= 0.1
 
-        # 5-4. 同時到達ボーナス（協調報酬）を強化
+        # 4. ゴール報酬を下げる（成功の定義は維持）
         if dist0 == 0 and dist1 == 0:
-            rewards += 10.0  # 両方同時に到達したら大報酬（強化）
+            rewards += 3.0  # 10.0 → 3.0 に下げる
 
-        # 5-5. 衝突ペナルティ
+        # 5. 衝突ペナルティは維持
         if np.array_equal(self.agent_pos[0], self.agent_pos[1]):
             rewards -= 1.0
 
-        # 5-6. ボトルネック付近での混雑ペナルティ（協調を促す）
+        # 6. ボトルネック混雑ペナルティは維持
         bottleneck_dist0 = np.linalg.norm(self.agent_pos[0] - np.array([self.bottleneck_row, self.bottleneck_cols[0]]))
         bottleneck_dist1 = np.linalg.norm(self.agent_pos[1] - np.array([self.bottleneck_row, self.bottleneck_cols[0]]))
         if bottleneck_dist0 < 2 and bottleneck_dist1 < 2:
-            # 両方がボトルネック付近に接近しすぎているとペナルティ
             rewards -= 0.5
 
-        # 5-7. 他エージェントを考慮した協調報酬（相手がボトルネックに近いときに自分が待機／迂回するとボーナス）
-        # エージェント0の視点
+        # 7. 協調報酬（待機／迂回）を強化
         if bottleneck_dist1 < 1.5 and dist0 > 1.0:
-            # エージェント1がボトルネックに近く、自分はまだ遠い → 待機／迂回を推奨
-            rewards[0] += 0.1
-        # エージェント1の視点
+            rewards[0] += 0.3  # 大きくする
         if bottleneck_dist0 < 1.5 and dist1 > 1.0:
-            # エージェント0がボトルネックに近く、自分はまだ遠い → 待機／迂回を推奨
-            rewards[1] += 0.1
+            rewards[1] += 0.3
 
         self.steps += 1
         done = (self.steps >= self.max_steps) or (dist0 == 0 and dist1 == 0)
@@ -187,6 +202,3 @@ class CooperativeNavigationEnv:
       plt.close(fig)
       print(f"✅ GIF saved as {filename}")
 
-env = CooperativeNavigationEnv()
-env.reset()
-env.save_gif()
