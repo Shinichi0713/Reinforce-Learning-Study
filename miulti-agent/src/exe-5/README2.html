@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x554f;&#x984c;&#x8a2d;&#x5b9a;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>先日の協調学習をMAVENで行う問題ですが、解決しました。
+経過と結果について説明します。</p>
+<p>本ブログは以下のブログの続きです。</p>
+<h2 id="問題設定">問題設定</h2>
+<p>詳細は以下のブログで説明しています。</p>
+<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/04/04/135026">https://yoshishinnze.hatenablog.com/entry/2026/04/04/135026</a></p>
+<p>問題の成功条件や学習のゴールは以下の通りです。</p>
+<ul>
+<li><strong>成功</strong>: 両エージェントが、衝突や混雑を避けつつ、共有ターゲットに<strong>同時に</strong>到達すること。</li>
+<li><strong>協調のポイント</strong>: 狭い通路（ボトルネック）を<strong>順番に</strong>通過する必要があり、<strong>他エージェントの行動を推測しながら協調する</strong>ことが求められる。</li>
+<li><strong>学習のゴール</strong>: 「自分だけ早く行く」のではなく、「<strong>相手とタイミングを合わせて、全体として効率よくゴールする</strong>」戦略を身につけること。</li>
+</ul>
+<p>この問題は、<strong>MAVEN や QMIX などのマルチエージェント強化学習アルゴリズムが得意とする「協調ナビゲーション」の典型的な例</strong>になっています。</p>
+<h3 id="何をしたら成功か">何をしたら「成功」か</h3>
+<p><strong>成功の定義は、次の条件を満たすことです。</strong></p>
+<ol>
+<li>
+<p><strong>両エージェントが同じターゲットセルに同時に到達する</strong></p>
+<ul>
+<li>ターゲットは <code>(size-1, size-1)</code>（右下）で共有。</li>
+<li>片方だけが早く着いても、もう片方が遅れていれば「完全な成功」とは見なされません。</li>
+</ul>
+</li>
+<li>
+<p><strong>できるだけ少ないステップ数で到達する</strong></p>
+<ul>
+<li>最大ステップ数（例：30）以内に到達する必要があります。</li>
+<li>早く到達するほど、全体の報酬が高くなります。</li>
+</ul>
+</li>
+<li>
+<p><strong>衝突や混雑を避けながら、効率的にボトルネックを通過する</strong></p>
+<ul>
+<li>中央の狭い通路（ボトルネック）を、<strong>順番に</strong>通過する。</li>
+<li>同じセルに同時に入らない（衝突回避）。</li>
+<li>ボトルネック付近で過度に接近しない（混雑回避）。</li>
+</ul>
+</li>
+</ol>
+<h3 id="協調の本質何が難しいか">協調の本質（何が難しいか）</h3>
+<ol>
+<li>
+<p><strong>「自分だけ早く行く」ではうまくいかない</strong></p>
+<ul>
+<li>ボトルネックは1マス幅しかないため、<strong>同時に通れない</strong>。</li>
+<li>どちらかが先に通る必要があり、もう一方は<strong>待機・迂回</strong>する必要があります。</li>
+</ul>
+</li>
+<li>
+<p><strong>他エージェントの意図を推測しながら行動する必要がある</strong></p>
+<ul>
+<li>各エージェントは「自分の位置」「ターゲット」「相手の位置」「ボトルネックの位置」しか見えません。</li>
+<li>それをもとに、「相手は今、ボトルネックを通ろうとしているのか」「自分は待つべきか、先に行くべきか」を判断する必要があります。</li>
+</ul>
+</li>
+<li>
+<p><strong>グローバルな報酬を理解する必要がある</strong></p>
+<ul>
+<li>報酬は「全体の距離の合計」「同時到達ボーナス」「衝突ペナルティ」「混雑ペナルティ」など、<strong>チーム全体の結果</strong>に基づいて与えられます。</li>
+<li>各エージェントは、「自分の行動がチーム全体の報酬にどう影響するか」を学習しなければなりません。</li>
+</ul>
+</li>
+</ol>
+<h2 id="mavenによる協調学習">MAVENによる協調学習</h2>
+<p>ここまでの実装を踏まえて、<strong>MAVEN（Multi-Agent Variational Exploration）の実装ポイント</strong>を整理します。</p>
+<h3 id="1-maven-の目的何を解決したいか">1. MAVEN の目的（何を解決したいか）</h3>
+<p><strong>問題</strong>:<br>
+マルチエージェント強化学習では、<strong>探索が偏りやすい</strong>（全員が同じ戦略を試してしまう）ため、<strong>多様な協調戦略</strong>をうまく見つけられないことがあります。</p>
+<p><strong>MAVEN の狙い</strong>:</p>
+<ul>
+<li><strong>潜在変数 z</strong> を導入し、<strong>探索の「モード」を変える</strong>ことで、
+<ul>
+<li>「全員が突進するモード」</li>
+<li>「一人が待機するモード」</li>
+<li>「迂回するモード」<br>
+など、<strong>多様な協調戦略を試す</strong>こと。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-ctdecentralized-training-decentralized-execution">2. CTDE（Centralized Training, Decentralized Execution）</h3>
+<p>MAVEN は <strong>CTDE 型</strong> のアルゴリズムです。</p>
+<ul>
+<li><strong>学習時（Centralized Training）</strong>:
+<ul>
+<li>各エージェントの Q ネットワークと、<strong>Mixing Network</strong> を同時に学習。</li>
+<li>潜在変数 z も学習に組み込む。</li>
+</ul>
+</li>
+<li><strong>実行時（Decentralized Execution）</strong>:
+<ul>
+<li>各エージェントは <strong>自分の観測だけ</strong> から行動を選択。</li>
+<li>z は学習時に多様な探索を促すための「裏方」であり、実行時には使わない（使う実装もあるが、ここでは簡略化）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-実装のポイント">3. 実装のポイント</h3>
+<p><strong>(1) 潜在変数 z の導入</strong></p>
+<p><strong>目的</strong>:</p>
+<ul>
+<li>探索の「モード」を変えるための低次元ベクトル。</li>
+</ul>
+<p><strong>実装例</strong>:</p>
+<pre><code class="language-python">z_dim = <span class="hljs-number">4</span>  <span class="hljs-comment"># 例: 4次元の潜在空間</span>
+z = torch.rand(batch_size, z_dim) * <span class="hljs-number">2</span> - <span class="hljs-number">1</span>  <span class="hljs-comment"># [-1, 1] の一様分布</span>
+</code></pre>
+<p><strong>ポイント</strong>:</p>
+<ul>
+<li>z は <strong>バッチごとにサンプリング</strong> する。</li>
+<li>同じ z を「現在のQ」と「ターゲットQ」の両方に使うことで、<strong>一貫したモードで学習</strong>する。</li>
+</ul>
+<p><strong>(2) Mixing Network（混合ネットワーク）</strong></p>
+<p><strong>目的</strong>:</p>
+<ul>
+<li>各エージェントの Q 値を <strong>z と一緒に</strong> 混ぜて、<strong>共同Q値 Q_tot</strong> を計算する。</li>
+</ul>
+<p><strong>実装例</strong>:</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MixingNetwork</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, n_agents, hidden_dim=<span class="hljs-number">64</span>, z_dim=<span class="hljs-number">4</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_agents + z_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, <span class="hljs-number">1</span>)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, agent_qs, z</span>):
+        x = torch.cat([agent_qs, z], dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> self.net(x)  <span class="hljs-comment"># (batch, 1)</span>
+</code></pre>
+<p><strong>ポイント</strong>:</p>
+<ul>
+<li>入力: <code>agent_qs</code>（各エージェントのQ値） + <code>z</code>（潜在変数）</li>
+<li>出力: <code>Q_tot</code>（チーム全体のQ値）</li>
+<li>z が変わると、<strong>同じ状態でも Q_tot の評価が変わる</strong> → 探索モードが変わる。</li>
+</ul>
+<p><strong>(3) TD誤差の計算（z を共有）</strong></p>
+<p><strong>目的</strong>:</p>
+<ul>
+<li>現在の Q_tot とターゲット Q_tot を、<strong>同じ z のもとで</strong> 比較する。</li>
+</ul>
+<p><strong>実装例</strong>:</p>
+<pre><code class="language-python"><span class="hljs-comment"># 1. 現在のQ_tot（zを使って計算）</span>
+current_q_tot = self.compute_q_tot(obs_batch, action_batch, z, self.q_nets, self.mixing_net)
+
+<span class="hljs-comment"># 2. ターゲットQ_tot（同じzを使って計算）</span>
+<span class="hljs-keyword">with</span> torch.no_grad():
+    next_agent_qs = ...  <span class="hljs-comment"># 各エージェントのmax Q</span>
+    next_q_tot = self.target_mixing_net(next_agent_qs, z)
+    target_q_tot = rewards + (<span class="hljs-number">1</span> - dones) * self.gamma * next_q_tot.squeeze(<span class="hljs-number">1</span>)
+
+<span class="hljs-comment"># 3. 損失計算</span>
+loss = nn.SmoothL1Loss()(current_q_tot, target_q_tot)
+</code></pre>
+<p><strong>ポイント</strong>:</p>
+<ul>
+<li><strong>同じ z</strong> を使うことで、「ある探索モードでのQ値」を一貫して学習。</li>
+<li>z を変えるたびに、<strong>別の探索モードでのQ値</strong>を学習できる。</li>
+</ul>
+<h3 id="4-探索の多様化maven-の本質">4. 探索の多様化（MAVEN の本質）</h3>
+<p><strong>通常の QMIX との違い</strong>:</p>
+<ul>
+<li><strong>QMIX</strong>:
+<ul>
+<li>各エージェントは ε-greedy などでランダムに行動するが、<strong>探索の「方向性」は同じ</strong>。</li>
+</ul>
+</li>
+<li><strong>MAVEN</strong>:
+<ul>
+<li>z によって、<strong>探索の「モード」そのものを変える</strong>。</li>
+<li>例:
+<ul>
+<li><code>z ≈ [1, 0, 0, 0]</code> → 「全員が突進するモード」</li>
+<li><code>z ≈ [0, 1, 0, 0]</code> → 「一人が待機するモード」</li>
+<li><code>z ≈ [0, 0, 1, 0]</code> → 「迂回するモード」</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>実装上のポイント</strong>:</p>
+<ul>
+<li>z は <strong>学習時にのみ</strong> サンプリングし、<strong>実行時には固定</strong>（または使わない）。</li>
+<li>これにより、学習中に <strong>多様な協調戦略を試し、その中から良いものを選ぶ</strong> ことができます。</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>実装は以下レポジトリのenv.pyとmodel_maven.pyをご参考下さい。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-5/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-5/src</a></p>
+<p><strong>分かった点</strong></p>
+<ol>
+<li>学習がなかなか進まない状況</li>
+</ol>
+<p>先述のzの実装を誤って行動の度にzを変えてしまってました。</p>
+<p>正しくはエピソードごとに同じ z を「現在のQ」と「ターゲットQ」の両方に使うことで、<strong>一貫したモードで学習</strong>する必要があります。</p>
+<p><strong>なぜ「同じ z」が必要なのか</strong></p>
+<p><strong>(1) 探索モードの一貫性を保つため</strong></p>
+<p>MAVEN では、<strong>潜在変数 z が「探索のモード」を決める</strong>役割を持ちます。</p>
+<ul>
+<li>例：
+<ul>
+<li><code>z ≈ [1, 0, 0, 0]</code> → 「全員が突進するモード」</li>
+<li><code>z ≈ [0, 1, 0, 0]</code> → 「一人が待機するモード」</li>
+</ul>
+</li>
+</ul>
+<p><strong>学習の流れ</strong>（TD誤差の計算）:</p>
+<ol>
+<li><strong>現在のQ_tot</strong>: ある状態・行動に対して、「このモード（z）での価値」を評価。</li>
+<li><strong>ターゲットQ_tot</strong>: 次の状態から得られる「同じモード（z）での価値」を予測。</li>
+</ol>
+<p>もし <strong>現在のQとターゲットQで z が異なる</strong>と、どうなるでしょうか？</p>
+<ul>
+<li>例：
+<ul>
+<li>現在のQ: 「突進モード（z1）」での価値を評価。</li>
+<li>ターゲットQ: 「待機モード（z2）」での価値を予測。</li>
+</ul>
+</li>
+</ul>
+<p>→ <strong>モードが食い違っているため、学習がブレる</strong>（どのモードでの価値を学んでいるのか分からなくなる）。</p>
+<p><strong>結論</strong>:<br>
+<strong>同じモード（同じ z）で一貫して価値を評価・予測する</strong>ことで、<br>
+「このモードでの良い行動は何か？」を正しく学習できます。</p>
+<p><strong>(2) 学習の安定性を保つため</strong></p>
+<p>TD誤差の式は：</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>loss</mtext><mo>=</mo><msup><mrow><mo fence="true">(</mo><msub><mi>Q</mi><mtext>tot</mtext></msub><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo separator="true">;</mo><mi>z</mi><mo stretchy="false">)</mo><mo>−</mo><mrow><mo fence="true">(</mo><mi>r</mi><mo>+</mo><mi>γ</mi><mo>⋅</mo><msub><mi>Q</mi><mtext>tot</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">;</mo><mi>z</mi><mo stretchy="false">)</mo><mo fence="true">)</mo></mrow><mo fence="true">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\text{loss} = \left( Q_{\text{tot}}(s, a; z) - \left( r + \gamma \cdot Q_{\text{tot}}(s&#x27;, a&#x27;; z) \right) \right)^2
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">loss</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2559em;vertical-align:-0.25em;"></span><span class="minner"><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">tot</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">tot</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.0059em;"><span style="top:-3.2548em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>ここで、<strong>z が同じ</strong>であることが重要です。</p>
+<ul>
+<li><strong>z が同じ</strong> → 同じモードでの価値比較 → 学習が安定。</li>
+<li><strong>z が異なる</strong> → 異なるモードでの価値比較 → 学習が不安定（ノイズが増える）。</li>
+</ul>
+<p>特に、**ターゲットネットワーク（target network）**を使う場合、</p>
+<ul>
+<li>現在のネットワークとターゲットネットワークの <strong>両方に同じ z を渡す</strong>ことで、<br>
+**「同じモードでの価値の時間差分」**を正しく計算できます。</li>
+</ul>
+<ol start="2">
+<li>報酬設計</li>
+</ol>
+<p>報酬をゴール条件だけに設定していると全然学習が進みませんでした。
+そのため、ゴールに近づくことで小さな報酬を出す、停滞するとペナルティを与えるというようにしました。</p>
+<p>今回の学習のポイントは、**「ゴール報酬だけに頼らず、途中の行動にも報酬を細かく与える」**ことです。</p>
+<p><strong>1. なぜゴール報酬だけではダメか</strong></p>
+<ul>
+<li>ゴール報酬（例：<code>+10.0</code>）は<strong>非常に大きい</strong>が、<strong>偶然ゴールするまで報酬が得られない</strong>。</li>
+<li>エージェントは「何が良かったのか」を学ぶ前に、<strong>試行錯誤の時間が長すぎる</strong>。</li>
+<li>特にマルチエージェントでは、<strong>両方が同時にゴールする確率が低い</strong>ため、学習が進まない。</li>
+</ul>
+<p><strong>2. 今回の報酬設計のポイント</strong></p>
+<p><strong>(1) 距離報酬（グローバル）</strong></p>
+<ul>
+<li>両エージェントのターゲットまでの距離の合計に比例したマイナス報酬。</li>
+<li>例：<code>-0.1 * (dist0 + dist1)</code></li>
+<li><strong>ゴールに近づくだけで報酬が得られる</strong> → 段階的な学習が進む。</li>
+</ul>
+<p><strong>(2) 個別進捗報酬</strong></p>
+<ul>
+<li>ターゲットに近づいたら <code>+0.2</code> など。</li>
+<li><strong>「少しでも良くなった」という信号</strong>を明確に与える。</li>
+</ul>
+<p><strong>(3) 停滞ペナルティ</strong></p>
+<ul>
+<li>同じ位置に留まると <code>-0.1</code>。</li>
+<li><strong>動かないよりは動いた方がマシ</strong>ということを教える。</li>
+</ul>
+<p><strong>(4) ゴール報酬の調整</strong></p>
+<ul>
+<li>ゴール報酬を <code>+10.0 → +3.0</code> などに下げる。</li>
+<li><strong>途中の報酬とのバランスを取る</strong>ことで、ゴールだけに偏らない。</li>
+</ul>
+<h2 id="実験結果">実験結果</h2>
+<p>学習ごとに報酬の推移は以下のようになりました。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-5\image\README2\1775879397726.png" alt="1775879397726"></p>
+<p>学習後のエージェントの行動は以下のようになります。
+環境の設定上、同じセルにいると衝突の条件を入れてしまってたので、ゴール付近で押し出すような挙動になりましたが。。。</p>
+<h2 id="総括">総括</h2>
+<p>QMIXだと、学習の安定感がなかったのですが、MAVENで学習の安定と、行動が一貫してゴールに向かうことが確認できるようになりました。
+やはり強化学習、協調学習では探索をいかに行うかが重要だと考えています。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+        </body>
+        </html>
