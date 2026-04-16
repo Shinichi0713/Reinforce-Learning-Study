@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8fd1;&#x5e74;&#x306e;MARL&#x624b;&#x6cd5;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+
+            <p>先日のMAVENのトライアルで、環境の報酬が結構難儀しました。
+学習自体は成功したものの、手法としてよりポテンシャル高いものがないかは気になっています。
+ということで、次のMARLのテーマに向けて近年のMARL用手法について調査しました。</p>
+<h2 id="近年のmarl手法">近年のMARL手法</h2>
+<p>以下では、<strong>MAVENやQMIX以外</strong>のMARL手法に絞って、MAPPOとの関係も含めて整理します。</p>
+<h3 id="1-masacmulti-agent-soft-actor-critic">1. MASAC（Multi-Agent Soft Actor-Critic）</h3>
+<ul>
+<li>
+<p><strong>概要</strong><br>
+SAC（Soft Actor-Critic）をマルチエージェントに拡張した、<strong>オフポリシー＋エントロピー正則化</strong>の枠組みです。<a href="https://www.emergentmind.com/topics/multi-agent-soft-actor-critic-algorithm">Emergent Mind</a></p>
+</li>
+<li>
+<p><strong>特徴</strong></p>
+<ul>
+<li>各エージェントは分散実行（decentralized execution）で方策を学習</li>
+<li>学習時には集中型批評家（centralized critic）を用いる CTDE パラダイム</li>
+<li>SAC の利点（探索性の高さ、連続行動空間への適応）をマルチエージェントに持ち込める</li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPOとの関係</strong></p>
+<ul>
+<li>MAPPO は 2021 年、MASAC は 2020 年前後の論文が代表的で、<strong>MAPPO の方が新しい</strong>。<a href="https://openreview.net/forum?id=YVXaxB6L2Pl">OpenReview</a></li>
+<li>SMAC などのベンチマークでは、MAPPO が「標準ベースライン」として広く使われており、<strong>引用数も MAPPO の方が圧倒的に多い</strong>（約2,000件以上 vs MASAC 数十件レベル）。<a href="https://www.semanticscholar.org/paper/The-Surprising-Effectiveness-of-PPO-in-Cooperative-Yu-Velu/3a315c81a98851f0614c09fef6a14c30d6a1e63c">Semantic Scholar</a><a href="https://www.researchgate.net/publication/381392364_Multiagent_Soft_Actor-Critic_Aided_Active_Disturbance_Rejection_Control_of_DC_Solid-State_Transformer">ResearchGate</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="2-maa2cmulti-agent-actor-attention-critic">2. MAA2C（Multi-Agent Actor Attention Critic）</h3>
+<ul>
+<li>
+<p><strong>概要</strong><br>
+A2C（Advantage Actor-Critic）をマルチエージェントに拡張し、<strong>Attention 機構</strong>を組み込んだ手法です。<a href="https://www.techscience.com/iasc/v39n2/56498/html">TechScience</a></p>
+</li>
+<li>
+<p><strong>特徴</strong></p>
+<ul>
+<li>各エージェントの批評家が、他エージェントの情報を Attention で重み付けして利用</li>
+<li>集中型批評家＋分散実行（CTDE）の枠組み</li>
+<li>SMAC などのベンチマークで、MAPPO と比較されることが多い</li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPOとの比較</strong></p>
+<ul>
+<li>SMAC の一部シナリオでは、<strong>MAA2C が MAPPO より高い性能を示した</strong>と報告されています。<a href="https://www.techscience.com/iasc/v39n2/56498/html">TechScience</a></li>
+<li>特に、<strong>局所観測＋強い協調が必要なタスク</strong>で、Attention による協調モデリングが有利になるケースがあります。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-mazeromulti-agent-muzero">3. MAZero（Multi-Agent MuZero）</h3>
+<ul>
+<li>
+<p><strong>概要</strong><br>
+MuZero をマルチエージェントに拡張した<strong>モデルベースMARL</strong>手法です。<a href="https://openreview.net/forum?id=CpnKq3UJwp">OpenReview</a></p>
+</li>
+<li>
+<p><strong>特徴</strong></p>
+<ul>
+<li>環境の遷移モデルを学習し、**プランニング（探索木）**を用いて方策を改善</li>
+<li>モデルフリー手法（MAPPO など）に比べて<strong>サンプル効率が高い</strong>ことが報告されている</li>
+<li>SMAC ベンチマークで、MAPPO より<strong>同等以上の性能を、より少ないサンプルで達成</strong>したとされています。<a href="https://openreview.net/forum?id=CpnKq3UJwp">OpenReview</a></li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPOとの比較</strong></p>
+<ul>
+<li>計算コストは高くなるが、<strong>サンプル効率と最終性能の両面で MAPPO を上回るケース</strong>が報告されています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-happo--fp3oppo系の改良">4. HAPPO / FP3O（PPO系の改良）</h3>
+<ul>
+<li>
+<p><strong>HAPPO（Heterogeneous-Agent PPO）</strong></p>
+<ul>
+<li>異種エージェント（heterogeneous agents）が混在する環境向けに、PPO を拡張した手法です。<a href="https://openreview.net/forum?id=cALu06i7JJH">OpenReview</a></li>
+<li>MAPPO より<strong>理論的保証が強く、大規模チームでの安定性が高い</strong>とされています。</li>
+</ul>
+</li>
+<li>
+<p><strong>FP3O（Full-Pipeline PPO）</strong></p>
+<ul>
+<li>「Full-Pipeline PPO」として提案された、PPO 系マルチエージェント手法の改良版です。<a href="https://openreview.net/forum?id=cALu06i7JJH">OpenReview</a></li>
+<li>政策勾配の推定をより安定化し、<strong>MAPPO より高い性能・安定性</strong>を示すことが報告されています。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPOとの関係</strong></p>
+<ul>
+<li>MAPPO は「PPO をそのままマルチエージェントに持ち込んだ」初期の代表例ですが、<br>
+HAPPO / FP3O は<strong>PPO 系のマルチエージェント版をさらに改良した手法</strong>として、MAPPO を上回る性能が期待されています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-通信注意機構を組み込んだ手法">5. 通信・注意機構を組み込んだ手法</h3>
+<ul>
+<li>
+<p><strong>通信効率を高めたMARL</strong></p>
+<ul>
+<li>SMACv2 や MOSMAC などの新しいベンチマークでは、
+<ul>
+<li>通信量を制限しつつ協調を実現する手法</li>
+<li>Attention や Graph Neural Network（GNN）を組み込んだ手法<br>
+が MAPPO を上回るケースが報告されています。<a href="https://neurips.cc/virtual/2023/poster/73695">NeurIPS</a><a href="https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=11978&amp;context=sis_research">SMU</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>例</strong></p>
+<ul>
+<li><strong>MARC（Multi-Agent Relational Actor-Critic）</strong>：関係推論（relational reasoning）を組み込んだ手法</li>
+<li><strong>MAHGAC（Multi-Agent Hierarchical Graph Attention Actor-Critic）</strong>：階層的グラフ注意を用いた手法</li>
+<li>これらは、<strong>エージェント間の依存関係をより柔軟にモデリング</strong>できるため、MAPPO より高い性能を示すことがあります。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総合評価">総合評価</h2>
+<p>以下では、<strong>MAPPO / MASAC / MAA2C / MAZero / HAPPO・FP3O / 通信・注意機構付き手法</strong>について、<br>
+4つの観点（探索力・協調調整・安定性・精度）で<strong>A（良い）〜C（悪い）の3段階評価</strong>を整理します。</p>
+<h3 id="評価基準簡易">評価基準（簡易）</h3>
+<ul>
+<li><strong>A（良い）</strong>：その観点で特に優れている／最先端クラス</li>
+<li><strong>B（普通）</strong>：標準的・平均的</li>
+<li><strong>C（悪い）</strong>：弱い・課題がある</li>
+</ul>
+<h3 id="各手法のac評価">各手法のA〜C評価</h3>
+<p><strong>1. MAPPO（Multi-Agent PPO）</strong></p>
+<ul>
+<li><strong>探索力</strong>: B（普通）
+<ul>
+<li>PPOベースで探索は標準的。SACほど強いエントロピー正則化はない。</li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: B（普通）
+<ul>
+<li>集中型批評家で協調を学習するが、値分解系ほど明示的ではない。</li>
+</ul>
+</li>
+<li><strong>安定性</strong>: A（良い）
+<ul>
+<li>PPOのクリッピングにより学習が安定。SMACなどで「強力なベースライン」として広く使われている。<a href="https://openreview.net/forum?id=YVXaxB6L2Pl">OpenReview</a></li>
+</ul>
+</li>
+<li><strong>精度</strong>: B（普通）
+<ul>
+<li>多くのタスクで十分な性能だが、QMIXやMAZeroなどに負けるケースもある。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. MASAC（Multi-Agent Soft Actor-Critic）</strong></p>
+<ul>
+<li><strong>探索力</strong>: A（良い）
+<ul>
+<li>SACの最大エントロピー方策最適化をマルチエージェントに拡張しており、<strong>探索性が高い</strong>。<a href="https://www.emergentmind.com/topics/multi-agent-soft-actor-critic-algorithm">Emergent Mind</a></li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: B（普通）
+<ul>
+<li>CTDEで集中型批評家を用いるが、値分解や明示的な通信構造は持たない。</li>
+</ul>
+</li>
+<li><strong>安定性</strong>: C（悪い）
+<ul>
+<li>オフポリシーだが、マルチエージェントでは非定常性の影響を受けやすく、MAPPOより不安定になりがち。</li>
+</ul>
+</li>
+<li><strong>精度</strong>: B（普通）
+<ul>
+<li>連続行動空間や探索が重要なタスクでは有利だが、SMACなどではMAPPOや値分解系に劣るケースも多い。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. MAA2C（Multi-Agent Actor Attention Critic）</strong></p>
+<ul>
+<li><strong>探索力</strong>: B（普通）
+<ul>
+<li>A2Cベースで探索は標準的。</li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: A（良い）
+<ul>
+<li>Attention機構により、<strong>どのエージェントの情報に注目すべきか</strong>を学習し、協調を柔軟にモデリングできる。<a href="https://www.techscience.com/iasc/v39n2/56498/html">TechScience</a></li>
+</ul>
+</li>
+<li><strong>安定性</strong>: B（普通）
+<ul>
+<li>オンポリシーでやや不安定になりうるが、Attentionによる協調モデリングで性能は安定しやすい。</li>
+</ul>
+</li>
+<li><strong>精度</strong>: A（良い／タスク依存）
+<ul>
+<li>SMACの一部シナリオでMAPPOを上回る報告があり、<strong>協調が重要なタスクでは高精度</strong>。<a href="https://www.techscience.com/iasc/v39n2/56498/html">TechScience</a></li>
+</ul>
+</li>
+</ul>
+<p><strong>4. MAZero（Multi-Agent MuZero）</strong></p>
+<ul>
+<li><strong>探索力</strong>: A（良い）
+<ul>
+<li>モデルベース＋プランニングにより、<strong>探索木ベースの強力な探索</strong>が可能。<a href="https://openreview.net/forum?id=CpnKq3UJwp">OpenReview</a></li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: B（普通）
+<ul>
+<li>協調は主に価値関数・方策を通じて学習されるが、明示的な値分解や通信構造は持たない。</li>
+</ul>
+</li>
+<li><strong>安定性</strong>: C（悪い）
+<ul>
+<li>モデル学習の不安定さや計算コストの高さが課題。収束すれば強いが、学習が難しい。</li>
+</ul>
+</li>
+<li><strong>精度</strong>: A（良い）
+<ul>
+<li>SMACでMAPPOより<strong>サンプル効率と最終性能の両面で優れる</strong>と報告されている。<a href="https://openreview.net/forum?id=CpnKq3UJwp">OpenReview</a></li>
+</ul>
+</li>
+</ul>
+<p><strong>5. HAPPO / FP3O（PPO系の改良）</strong></p>
+<ul>
+<li><strong>探索力</strong>: B（普通）
+<ul>
+<li>PPOベースで探索は標準的。</li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: A（良い）
+<ul>
+<li>異種エージェントや大規模チーム向けに設計されており、<strong>クレジット割当や協調の理論的保証が強化</strong>されている。<a href="https://openreview.net/forum?id=cALu06i7JJH">OpenReview</a></li>
+</ul>
+</li>
+<li><strong>安定性</strong>: A（良い）
+<ul>
+<li>MAPPOより<strong>理論的保証が強く、大規模チームでの安定性が高い</strong>とされている。<a href="https://openreview.net/forum?id=cALu06i7JJH">OpenReview</a></li>
+</ul>
+</li>
+<li><strong>精度</strong>: A（良い）
+<ul>
+<li>MAPPOを上回る性能・安定性が報告されており、<strong>PPO系の現状の最先端</strong>に近い。</li>
+</ul>
+</li>
+</ul>
+<p><strong>6. 通信・注意機構を組み込んだ手法（MARC, MAHGAC など）</strong></p>
+<ul>
+<li><strong>探索力</strong>: B（普通）
+<ul>
+<li>探索機構そのものは標準的だが、関係推論やグラフ構造により<strong>探索の質が向上</strong>するケースがある。</li>
+</ul>
+</li>
+<li><strong>協調調整</strong>: A（良い）
+<ul>
+<li>AttentionやGNNにより、<strong>エージェント間の依存関係を明示的にモデリング</strong>できるため、協調調整が非常に強い。<a href="https://neurips.cc/virtual/2023/poster/73695">NeurIPS</a><a href="https://ink.library.smu.edu.sg/cgi/viewcontent.cgi?article=11978&amp;context=sis_research">SMU</a></li>
+</ul>
+</li>
+<li><strong>安定性</strong>: C（悪い）
+<ul>
+<li>ネットワーク構造が複雑になるため、学習がやや不安定になりうる。</li>
+</ul>
+</li>
+<li><strong>精度</strong>: A（良い／タスク依存）
+<ul>
+<li>構造的依存が強いタスク（SMACv2, MOSMACなど）では、MAPPOを上回る性能が報告されている。</li>
+</ul>
+</li>
+</ul>
+<h3 id="まとめac評価の比較表">まとめ（A〜C評価の比較表）</h3>
+<table>
+<thead>
+<tr>
+<th>手法</th>
+<th>探索力</th>
+<th>協調調整</th>
+<th>安定性</th>
+<th>精度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAPPO</td>
+<td>B</td>
+<td>B</td>
+<td>A</td>
+<td>B</td>
+</tr>
+<tr>
+<td>MASAC</td>
+<td>A</td>
+<td>B</td>
+<td>C</td>
+<td>B</td>
+</tr>
+<tr>
+<td>MAA2C</td>
+<td>B</td>
+<td>A</td>
+<td>B</td>
+<td>A（タスク依存）</td>
+</tr>
+<tr>
+<td>MAZero</td>
+<td>A</td>
+<td>B</td>
+<td>C</td>
+<td>A</td>
+</tr>
+<tr>
+<td>HAPPO/FP3O</td>
+<td>B</td>
+<td>A</td>
+<td>A</td>
+<td>A</td>
+</tr>
+<tr>
+<td>通信・注意機構付き</td>
+<td>B</td>
+<td>A</td>
+<td>C</td>
+<td>A（タスク依存）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="総括">総括</h2>
+<p>手法としての安定性ということではHAPPO/FPOがよさげです。
+どうも行動の探索力と安定性がトレードオフの関係にある可能性があります。
+ですので、協調学習で&quot;なかなか行動が良くならない、一定の報酬ラインで停滞する&quot;となると、ガチャになりますがMAZeroの手法に切り替えることも重要と考えました。
+強化学習自体、かなりランダム性や不安定性が強いので、なんとかならないかなーという次第です。</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+            
+        </body>
+        </html>
