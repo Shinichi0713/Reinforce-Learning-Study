@@ -210,7 +210,7 @@ class DroneDeliveryEnv:
     # -----------------------------
     # 動画保存メソッド
     # -----------------------------
-    def save_render_gif(self, agent_actions_list, filename="delivery_video.gif", fps=5):
+    def save_render_video(self, agent_actions_list, filename="delivery_video.mp4", fps=5):
         import matplotlib.animation as animation
 
         # 動画作成用に再リセット
@@ -223,9 +223,12 @@ class DroneDeliveryEnv:
 
         print("Recording frames...")
         
+        # ヘルパー関数: 現在の画面を画像配列として取得
         def get_frame():
             self.fig.canvas.draw()
+            # tostring_rgb() の代わりとなる最新の書き方
             rgba_buffer = self.fig.canvas.buffer_rgba()
+            # numpy配列に変換し、RGBAからRGBにスライス
             image = np.array(rgba_buffer)[:, :, :3]
             return image
 
@@ -239,8 +242,8 @@ class DroneDeliveryEnv:
             self.render()
             frames.append(get_frame())
 
-        # アニメーションの作成と保存（GIF）
-        print(f"Saving GIF to {filename}...")
+        # アニメーションの作成と保存
+        print(f"Saving video to {filename}...")
         video_fig, video_ax = plt.subplots()
         video_ax.axis('off')
         
@@ -253,27 +256,13 @@ class DroneDeliveryEnv:
         ani = animation.FuncAnimation(video_fig, update, frames=frames, blit=True)
         
         try:
-            # writer='pillow' で GIF 保存
-            ani.save(filename, writer='pillow', fps=fps)
+            # プログレスバーの代わりに出力
+            ani.save(filename, writer='ffmpeg', fps=fps)
             print(f"Successfully saved: {filename}")
         except Exception as e:
             print(f"Error: {e}")
-            print("Hint: Make sure 'pillow' is installed: pip install pillow")
+            print("Hint: Check if 'ffmpeg' is installed on your system.")
         
         plt.close(video_fig)
-        plt.close(self.fig)
-        self.fig = None
-
-if __name__ == "__main__":
-    env = DroneDeliveryEnv()
-    env.reset()
-
-    # 例：100ステップ分のランダムアクションを生成
-    action_history = []
-    for _ in range(100):
-        # 2台分のアクション (0~6のランダム)
-        actions = [random.randint(0, 6) for _ in range(2)]
-        action_history.append(actions)
-
-    # 動画として保存
-    env.save_render_video(action_history, filename="drone_test.mp4", fps=5)
+        plt.close(self.fig) # リソース解放
+        self.fig = None # 次回呼び出しのためにリセット
