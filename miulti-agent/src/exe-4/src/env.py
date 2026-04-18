@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.animation as animation
 import random
 
 # ==============================
@@ -206,3 +207,76 @@ class DroneDeliveryEnv:
         self.ax.set_aspect("equal")
         plt.pause(0.01)
 
+    # -----------------------------
+    # 動画保存メソッド
+    # -----------------------------
+    def save_render_video(self, agent_actions_list, filename="delivery_video.mp4", fps=5):
+        import matplotlib.animation as animation
+
+        # 動画作成用に再リセット
+        self.reset()
+        frames = []
+
+        # 描画用のフィギュアを初期化
+        if self.fig is None:
+            self.fig, self.ax = plt.subplots(figsize=(5, 5))
+
+        print("Recording frames...")
+        
+        # ヘルパー関数: 現在の画面を画像配列として取得
+        def get_frame():
+            self.fig.canvas.draw()
+            # tostring_rgb() の代わりとなる最新の書き方
+            rgba_buffer = self.fig.canvas.buffer_rgba()
+            # numpy配列に変換し、RGBAからRGBにスライス
+            image = np.array(rgba_buffer)[:, :, :3]
+            return image
+
+        # 初期状態のキャプチャ
+        self.render()
+        frames.append(get_frame())
+
+        # アクションリストに従ってステップ実行
+        for actions in agent_actions_list:
+            self.step(actions)
+            self.render()
+            frames.append(get_frame())
+
+        # アニメーションの作成と保存
+        print(f"Saving video to {filename}...")
+        video_fig, video_ax = plt.subplots()
+        video_ax.axis('off')
+        
+        im = video_ax.imshow(frames[0])
+
+        def update(f):
+            im.set_data(f)
+            return [im]
+
+        ani = animation.FuncAnimation(video_fig, update, frames=frames, blit=True)
+        
+        try:
+            # プログレスバーの代わりに出力
+            ani.save(filename, writer='ffmpeg', fps=fps)
+            print(f"Successfully saved: {filename}")
+        except Exception as e:
+            print(f"Error: {e}")
+            print("Hint: Check if 'ffmpeg' is installed on your system.")
+        
+        plt.close(video_fig)
+        plt.close(self.fig) # リソース解放
+        self.fig = None # 次回呼び出しのためにリセット
+
+if __name__ == "__main__":
+    env = DroneDeliveryEnv()
+    env.reset()
+
+    # 例：100ステップ分のランダムアクションを生成
+    action_history = []
+    for _ in range(100):
+        # 2台分のアクション (0~6のランダム)
+        actions = [random.randint(0, 6) for _ in range(2)]
+        action_history.append(actions)
+
+    # 動画として保存
+    env.save_render_video(action_history, filename="drone_test.mp4", fps=5)
