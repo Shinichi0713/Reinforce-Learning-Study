@@ -5,33 +5,11 @@ class MAZeroAgent:
         self.optimizer = optimizer
         self.device = device
 
-    def select_action(self, state, temperature=1.0):
-        """
-        MCTS の行動確率に基づいて行動をサンプリング
-        
-        Parameters
-        ----------
-        state : torch.Tensor
-            現在の状態
-        temperature : float
-            温度パラメータ（1.0 でそのまま、0に近いと greedy に近づく）
-        """
-        action_probs = self.mcts.run(state)  # shape: (2, action_dim)
-
-        actions = []
-        for i in range(2):
-            probs = action_probs[i]
-            # 温度でスケーリング
-            if temperature != 1.0:
-                probs = np.power(probs, 1.0 / temperature)
-                probs /= probs.sum()
-            # サンプリング
-            action = np.random.choice(self.mcts.action_dim, p=probs)
-            actions.append(action)
-
+    def select_action(self, state):
+        action_probs = self.mcts.run(state)
+        actions = [np.argmax(ap) for ap in action_probs]
         return actions
 
-    # update メソッドはそのまま
     def update(self, states, target_values, target_rewards, target_policies):
         self.model.train()
         self.optimizer.zero_grad()
@@ -60,8 +38,7 @@ def train_mazero(num_episodes=1000, num_simulations=50):
     state_dim = env_wrapper.state_dim
     action_dim = env_wrapper.action_space.n
 
-    # ここで device を渡す
-    model = MAZeroNet(state_dim, action_dim, hidden_dim=128, device=device)
+    model = MAZeroNet(state_dim, action_dim, hidden_dim=128)
     mcts = MAZeroMCTS(model, env_wrapper, num_simulations=num_simulations)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     agent = MAZeroAgent(model, mcts, optimizer, device=device)
@@ -72,33 +49,29 @@ def train_mazero(num_episodes=1000, num_simulations=50):
         state = env_wrapper.reset()
         episode_states = []
         episode_rewards = []
-        episode_mcts_probs = []  # MCTS の行動確率を記録
+        episode_actions = []
 
         done = False
         while not done:
-            # MCTS の行動確率を取得（サンプリングは別途）
-            mcts_probs = mcts.run(state)
-            actions = agent.select_action(state, temperature=1.0)  # サンプリング
-
+            actions = agent.select_action(state)
             next_state, rewards, done, _ = env_wrapper.step(actions)
 
             episode_states.append(state)
             episode_rewards.append(rewards)
-            episode_mcts_probs.append(mcts_probs)  # ターゲット方策として使用
+            episode_actions.append(actions)
 
             state = next_state
 
-        # n-step bootstrapping による価値ターゲット（簡易版）
-        returns = np.zeros((len(episode_rewards), 2))
-        R = np.zeros(2)
-        for t in reversed(range(len(episode_rewards))):
-            R = episode_rewards[t] + mcts.discount * R
-            returns[t] = R
+        # 報酬の累積和（簡易版の価値ターゲット）
+        returns = np.cumsum(list(reversed(episode_rewards))[::-1], axis=0)
 
         for t in range(len(episode_states)):
             target_value = returns[t]  # shape: (2,)
             target_reward = episode_rewards[t]  # shape: (2,)
-            target_policy = episode_mcts_probs[t]  # shape: (2, action_dim)
+            # ターゲット方策（実際に選んだ行動に1、他は0）
+            target_policy = np.zeros((2, action_dim))
+            for i, a in enumerate(episode_actions[t]):
+                target_policy[i, a] = 1.0
 
             replay_buffer.append((
                 episode_states[t],
@@ -116,3 +89,5 @@ def train_mazero(num_episodes=1000, num_simulations=50):
                 print(f"Episode {episode}, Loss: {loss:.4f}")
 
     return agent
+
+    
