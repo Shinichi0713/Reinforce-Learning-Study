@@ -21,28 +21,67 @@ class MAZeroNet(nn.Module):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.hidden_dim = hidden_dim
-        self.device = device  # ここで device 属性を追加
+        self.device = device
 
+        # エンコーダ（状態 → 隠れ状態）
         self.encoder = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
         )
+
+        # 価値ヘッド（隠れ状態 → 価値）
         self.value_head = nn.Linear(hidden_dim, 2)
+
+        # 報酬ヘッド（隠れ状態 → 報酬）
         self.reward_head = nn.Linear(hidden_dim, 2)
+
+        # 方策ヘッド（隠れ状態 → 行動確率）
         self.policy_head = nn.Linear(hidden_dim, 2 * action_dim)
 
-    def forward(self, state):
+        # 遷移ヘッド（隠れ状態 + 行動 → 次の隠れ状態）
+        # 行動は one-hot に変換して入力（簡易版）
+        self.transition_head = nn.Sequential(
+            nn.Linear(hidden_dim + 2 * action_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+        )
+
+    def encode(self, state):
         # state: (batch, state_dim)
-        h = self.encoder(state)
-        value = self.value_head(h)
-        reward = self.reward_head(h)
-        logits = self.policy_head(h)
-        logits = logits.view(-1, 2, self.action_dim)
-        policy = F.softmax(logits, dim=-1)
+        return self.encoder(state)
+
+    def predict_value_reward_policy(self, hidden_state):
+        # hidden_state: (batch, hidden_dim)
+        value = self.value_head(hidden_state)          # (batch, 2)
+        reward = self.reward_head(hidden_state)        # (batch, 2)
+        logits = self.policy_head(hidden_state)         # (batch, 2*action_dim)
+        logits = logits.view(-1, 2, self.action_dim)   # (batch, 2, action_dim)
+        policy = F.softmax(logits, dim=-1)             # (batch, 2, action_dim)
         return value, reward, policy
 
+    def transition(self, hidden_state, actions):
+        # hidden_state: (batch, hidden_dim)
+        # actions: (batch, 2) 各エージェントの行動インデックス
+        batch_size = hidden_state.size(0)
+
+        # 行動を one-hot に変換
+        actions_onehot = torch.zeros(batch_size, 2 * self.action_dim).to(self.device)
+        for i in range(2):
+            actions_onehot.scatter_(1, actions[:, i].unsqueeze(1) + i * self.action_dim, 1.0)
+
+        # 隠れ状態と行動を結合
+        x = torch.cat([hidden_state, actions_onehot], dim=-1)  # (batch, hidden_dim + 2*action_dim)
+        next_hidden = self.transition_head(x)                   # (batch, hidden_dim)
+        return next_hidden
+
+    def forward(self, state):
+        # 互換性のため（既存コード用）
+        h = self.encode(state)
+        value, reward, policy = self.predict_value_reward_policy(h)
+        return value, reward, policy
 
 class Node:
     """MuZero/MAZero 風 MCTS ノード（全エージェント共有）"""
@@ -64,28 +103,20 @@ class Node:
         return self.value_sum / self.visit_count
 
 class MAZeroMCTS:
-    """
-    MuZero/MAZero 風 MCTS 実装
-    - 2エージェントの行動を同時に選択する
-    - ネットワークで価値・報酬・方策を予測
-    - UCT スコアで選択、訪問回数に基づく行動確率を返す
-    """
-    def __init__(self, model, env_wrapper, num_simulations=50, discount=0.99, c1=1.25, c2=19652):
+    def __init__(self, model, env_wrapper, num_simulations=50, discount=0.99, c1=1.25, c2=19652, lambda_val=0.8):
         self.model = model
         self.env_wrapper = env_wrapper
         self.num_simulations = num_simulations
         self.discount = discount
         self.c1 = c1
         self.c2 = c2
+        self.lambda_val = lambda_val  # λ-return 用
         self.action_dim = env_wrapper.action_space.n
 
     def run(self, state):
-        """
-        state: テンソル (state_dim,)
-        戻り値: 各エージェントの行動確率 (2, action_dim)
-        """
         root = Node(prior=1.0)
         root.state = state
+        root.hidden_state = self.model.encode(state.unsqueeze(0)).squeeze(0)  # 隠れ状態を保存
 
         for _ in range(self.num_simulations):
             node = root
@@ -100,7 +131,7 @@ class MAZeroMCTS:
 
             # Expansion & Evaluation: 葉ノードを展開し、ネットワークで評価
             parent = search_path[-2] if len(search_path) >= 2 else root
-            value = self._expand_and_evaluate(node, parent.state, actions_history)
+            value = self._expand_and_evaluate(node, parent.hidden_state, actions_history)
             self._backpropagate(search_path, value, self.discount)
 
         # 訪問回数に基づく行動確率を計算
@@ -108,9 +139,6 @@ class MAZeroMCTS:
         return action_probs
 
     def _select_child(self, node):
-        """
-        UCT スコアに基づいて子ノードを選択
-        """
         best_score = -float("inf")
         best_action = None
         best_child = None
@@ -118,11 +146,6 @@ class MAZeroMCTS:
         total_visits = sum(child.visit_count for child in node.children.values())
 
         for action, child in node.children.items():
-            # child.state が None にならないようにする
-            if child.state is None:
-                # 必要に応じて parent.state からコピーするなど
-                child.state = node.state.clone() if hasattr(node.state, 'clone') else node.state
-            # PUCT スコア（MuZero/AlphaZero 風）
             uct_score = self._compute_uct_score(child, node.prior, total_visits)
             if uct_score > best_score:
                 best_score = uct_score
@@ -132,72 +155,62 @@ class MAZeroMCTS:
         return best_action, best_child
 
     def _compute_uct_score(self, child, parent_prior, total_visits):
-        """
-        PUCT スコアの計算
-        """
         pb_c = np.log((total_visits + self.c2 + 1) / self.c2) + self.c1
         pb_c *= np.sqrt(total_visits) / (child.visit_count + 1)
-
         prior_score = pb_c * child.prior
         value_score = child.value()
         return value_score + prior_score
 
-    def _expand_and_evaluate(self, node, parent_state, actions_history):
-        # parent_state が None でないことを確認
-        if parent_state is None:
-            # デフォルトの state を使う（root.state など）
-            parent_state = self.root.state
+    def _expand_and_evaluate(self, node, parent_hidden_state, actions_history):
+        # parent_hidden_state: (hidden_dim,)
         # 1. ネットワークで価値・報酬・方策を予測
         with torch.no_grad():
-            state_tensor = parent_state.unsqueeze(0).to(self.model.device)
-            value, reward, policy = self.model(state_tensor)
+            hidden_state = parent_hidden_state.unsqueeze(0)  # (1, hidden_dim)
+            value, reward, policy = self.model.predict_value_reward_policy(hidden_state)
 
         value = value.squeeze(0).cpu().numpy()        # (2,)
         reward = reward.squeeze(0).cpu().numpy()     # (2,)
         policy = policy.squeeze(0).cpu().numpy()     # (2, action_dim)
 
-        # 2. すべての行動組み合わせに対して子ノードを作成
+        # 2. すべての行動組み合わせに対して子ノードを作成（簡易版：サンプリング推奨）
         for a1 in range(self.action_dim):
             for a2 in range(self.action_dim):
-                # 行動 (a1, a2) に対する事前確率（ネットワーク出力）
-                prior_prob = policy[0, a1] * policy[1, a2]  # 簡易的な結合
+                # 行動 (a1, a2) に対する事前確率
+                prior_prob = policy[0, a1] * policy[1, a2]
                 child = Node(prior=prior_prob)
-                child.reward = reward.mean()  # 簡易的に平均報酬を使用
-                child.value_sum = value.mean()  # 簡易的に平均価値を使用
+                child.reward = reward.mean()  # 簡易的に平均報酬
+                child.value_sum = value.mean()
+
+                # 遷移モデルで次の隠れ状態を予測
+                actions_tensor = torch.LongTensor([[a1, a2]]).to(self.model.device)
+                next_hidden = self.model.transition(hidden_state, actions_tensor).squeeze(0)
+                child.hidden_state = next_hidden
+
                 node.children[(a1, a2)] = child
 
-        # 3. 評価値として平均価値を返す
         return value.mean()
 
     def _backpropagate(self, search_path, value, discount):
-        """
-        シミュレーション結果をルートまで伝播
-        """
+        # λ-return 風の価値伝播（簡易版）
+        # 実際には n-step return を計算するのが望ましい
         for node in reversed(search_path):
             node.value_sum += value
             node.visit_count += 1
-            value = node.reward + discount * value  # 割引累積報酬で更新
+            value = node.reward + discount * value
 
     def _get_action_probs(self, root):
-        """
-        訪問回数に基づく行動確率を計算
-        """
         action_probs = np.zeros((2, self.action_dim))
-
-        # 各エージェントごとに訪問回数を集計
         for (a1, a2), child in root.children.items():
             action_probs[0, a1] += child.visit_count
             action_probs[1, a2] += child.visit_count
-
-        # 正規化
         for i in range(2):
             total = action_probs[i].sum()
             if total > 0:
                 action_probs[i] /= total
             else:
                 action_probs[i] = np.ones(self.action_dim) / self.action_dim
-
         return action_probs
+
 
 class EnvWrapper:
     def __init__(self, grid_size=10, num_agents=2, num_packages=3):
