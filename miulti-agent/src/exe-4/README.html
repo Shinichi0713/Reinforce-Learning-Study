@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x554f;&#x984c;&#x8a2d;&#x5b9a;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>MARLの問題で先日のMAZeroの威力を把握してみたいと思いました。
+問題設定の上でMAZeroの威力を把握する実験を行いました。</p>
+<h2 id="問題設定">問題設定</h2>
+<p>MARLの問題を以下のように定義しました。</p>
+<h3 id="1-環境の報酬設計">1. 環境の報酬設計</h3>
+<ul>
+<li>
+<p><strong>移動報酬（距離ベース）</strong></p>
+<ul>
+<li>荷物を持っていないとき：最も近い「未回収」荷物のピックアップ位置までのマンハッタン距離に基づき、近いほど少し報酬が増える（<code>0.01 * (10 - min(dists))</code>）。</li>
+<li>荷物を持っているとき：
+その荷物の配送先までのマンハッタン距離に基づき、近いほど少し報酬が増える（<code>0.01 * (10 - dist_to_drop)</code>）。</li>
+</ul>
+</li>
+<li>
+<p><strong>ピックアップ報酬</strong></p>
+<ul>
+<li>エージェントがピックアップ位置にいて「pick（5）」を実行し、まだ回収されていない荷物を拾うと、<code>+1</code> の報酬。</li>
+</ul>
+</li>
+<li>
+<p><strong>配送報酬</strong></p>
+<ul>
+<li>荷物を持った状態で配送先にいて「deliver（6）」を実行し、まだ配達されていない荷物を届けると、<code>+10</code> の報酬。</li>
+</ul>
+</li>
+<li>
+<p><strong>衝突ペナルティ</strong></p>
+<ul>
+<li>2体のエージェントが同じマスにいると、両方に <code>-5</code> の報酬。</li>
+</ul>
+</li>
+<li>
+<p><strong>エピソード終了時の報酬</strong></p>
+<ul>
+<li>すべての荷物が配達完了すると、各エージェントに <code>+5</code> の追加報酬。</li>
+<li>最大ステップ数（<code>max_steps</code>）に達すると、成功・失敗にかかわらずエピソード終了。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-環境が表す問題">2. 環境が表す問題</h3>
+<ul>
+<li>
+<p><strong>問題の種類</strong></p>
+<ul>
+<li>2体のエージェントがグリッド上で協調しながら複数の荷物をピックアップし、それぞれの配送先に届ける「<strong>マルチエージェント配送問題</strong>」。</li>
+</ul>
+</li>
+<li>
+<p><strong>環境の構造</strong></p>
+<ul>
+<li><code>grid_size × grid_size</code> のグリッド空間。</li>
+<li>各荷物は「ピックアップ位置」と「配送位置」を持ち、状態として「未回収」「回収済み」「配達済み」を持つ。</li>
+<li>エージェントは「荷物を持っているかどうか」を状態として持つ。</li>
+</ul>
+</li>
+<li>
+<p><strong>行動空間</strong></p>
+<ul>
+<li>各エージェントは <code>{0:stay, 1:up, 2:down, 3:left, 4:right, 5:pick, 6:deliver}</code> の7種類の行動を選択可能。</li>
+</ul>
+</li>
+</ul>
+<p>一旦エージェントを操作させるとこんな動作となります。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-4\doc\drone_test.gif" alt="drone-3" width="500px" height="auto">
+<h3 id="3-環境で学習を行う目的">3. 環境で学習を行う目的</h3>
+<ul>
+<li>
+<p><strong>主目的</strong></p>
+<ul>
+<li>2体のエージェントが協調して、<strong>できるだけ少ないステップ数で、すべての荷物をピックアップし、配送先に届ける</strong>こと。</li>
+<li>その過程で、衝突を避けつつ、ピックアップ・配送の順序や分担を効率よく決める方策を学習すること。</li>
+</ul>
+</li>
+<li>
+<p><strong>副次的な目的</strong></p>
+<ul>
+<li>エージェント間の<strong>タスク分担</strong>（どのエージェントがどの荷物を運ぶか）を自然に学習すること。</li>
+<li>互いに邪魔にならない<strong>経路計画</strong>（衝突回避）を学習すること。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-問題を解くための必要条件">4. 問題を解くための必要条件</h3>
+<ul>
+<li>
+<p><strong>個々のエージェントが満たすべき条件</strong></p>
+<ul>
+<li>グリッド上の移動・ピックアップ・配送のルールを正しく理解していること。</li>
+<li>自分が荷物を持っているかどうかに応じて、適切な行動（移動・pick・deliver）を選択できること。</li>
+</ul>
+</li>
+<li>
+<p><strong>マルチエージェントとしての必要条件</strong></p>
+<ul>
+<li><strong>協調性</strong>：同じ荷物を奪い合わない、あるいは同じ配送先に集中しすぎない。</li>
+<li><strong>衝突回避</strong>：同じマスに同時に存在しないように、経路やタイミングを調整する。</li>
+<li><strong>タスク分配</strong>：どちらがどの荷物を担当するか、あるいは途中で荷物を渡すような協調も含め、全体として効率の良い分担を実現すること。</li>
+</ul>
+</li>
+<li>
+<p><strong>学習上の必要条件</strong></p>
+<ul>
+<li>各エージェントが、自身の観測（位置・荷物状態・他エージェント位置）から、<strong>協調的かつ効率的な方策</strong>を学習できること。</li>
+<li>報酬設計（距離報酬・ピックアップ報酬・配送報酬・衝突ペナルティ）をうまく利用して、<strong>「速く」「衝突せず」「すべて配達する」</strong> という目的に整合した行動を獲得すること。</li>
+</ul>
+</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>前回のMAZeroの説明を踏まえた「MAZero によるマルチエージェント配送環境の学習」の実装手順を整理します。</p>
+<h3 id="1-全体の流れ">1. 全体の流れ</h3>
+<ol>
+<li><strong>環境の準備</strong>：<code>DroneDeliveryEnv</code> を理解し、必要に応じて修正（報酬スケール、終了条件など）。</li>
+<li><strong>環境ラッパーの実装</strong>：<code>EnvWrapper</code> で状態・行動を PyTorch に適した形式に変換。</li>
+<li><strong>ネットワークの実装</strong>：<code>MAZeroNet</code>（価値・報酬・方策の予測）。</li>
+<li><strong>MCTS の実装</strong>：<code>MAZeroMCTS</code>（MuZero/MAZero 風の探索）。</li>
+<li><strong>エージェントの実装</strong>：<code>MAZeroAgent</code>（行動選択・学習更新）。</li>
+<li><strong>学習ループの実装</strong>：<code>train_mazero</code>（データ収集・MCTS 実行・ネットワーク更新）。</li>
+<li><strong>学習済みエージェントの保存・復元</strong>：チェックポイントの保存・読み込み。</li>
+<li><strong>評価・可視化</strong>：<code>evaluate_agent</code>、<code>record_agent_video</code>、<code>save_render_video</code> など。</li>
+</ol>
+<h3 id="2-各ステップの詳細">2. 各ステップの詳細</h3>
+<p><strong>ステップ 1: 環境の準備（<code>DroneDeliveryEnv</code>）</strong></p>
+<ul>
+<li>既存の <code>DroneDeliveryEnv</code> を確認・修正します。</li>
+<li>特に以下の点を確認：
+<ul>
+<li>報酬スケール（距離報酬が小さすぎないか）</li>
+<li><code>max_steps</code>（終了条件）</li>
+<li><code>save_render_video</code> メソッド（動画保存用）</li>
+</ul>
+</li>
+</ul>
+<p>必要に応じて、報酬スケールを調整したり、<code>max_steps</code> を短くして学習を安定させます。</p>
+<p><strong>ステップ 2: 環境ラッパーの実装（<code>EnvWrapper</code>）</strong></p>
+<p><code>DroneDeliveryEnv</code> を PyTorch で扱いやすい形式にラップします。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">EnvWrapper</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, grid_size=<span class="hljs-number">10</span>, num_agents=<span class="hljs-number">2</span>, num_packages=<span class="hljs-number">3</span></span>):
+        self.env = DroneDeliveryEnv(grid_size, num_agents, num_packages)
+        self.action_space = gym.spaces.Discrete(<span class="hljs-number">7</span>)  <span class="hljs-comment"># 0-6</span>
+        self.state_dim = ...  <span class="hljs-comment"># 状態ベクトルの次元を計算</span>
+        self.num_agents = num_agents
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+        obs = self.env.reset()
+        <span class="hljs-keyword">return</span> self._obs_to_tensor(obs)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, actions</span>):
+        obs, rewards, done, info = self.env.step(actions)
+        <span class="hljs-keyword">return</span> self._obs_to_tensor(obs), rewards, done, info
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_obs_to_tensor</span>(<span class="hljs-params">self, obs</span>):
+        <span class="hljs-comment"># 各エージェントの観測を連結して 1 つの状態ベクトルにする</span>
+        <span class="hljs-comment"># 例：エージェント位置、荷物状態などをフラット化</span>
+        state_vec = ...
+        <span class="hljs-keyword">return</span> torch.FloatTensor(state_vec)
+</code></pre>
+<ul>
+<li><code>state_dim</code> は、状態ベクトルの次元（例：<code>(2*2 + 3*4)</code> など）を計算して設定します。</li>
+<li><code>_obs_to_tensor</code> で、観測を PyTorch のテンソルに変換します。</li>
+</ul>
+<p><strong>ステップ 3: ネットワークの実装（<code>MAZeroNet</code>）</strong></p>
+<p>価値・報酬・方策を予測するニューラルネットワークを実装します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MAZeroNet</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, state_dim, action_dim, hidden_dim=<span class="hljs-number">128</span>, device=<span class="hljs-string">&quot;cpu&quot;</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.device = device
+        self.encoder = nn.Sequential(
+            nn.Linear(state_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+        )
+        self.value_head = nn.Linear(hidden_dim, <span class="hljs-number">2</span>)          <span class="hljs-comment"># 各エージェントの価値</span>
+        self.reward_head = nn.Linear(hidden_dim, <span class="hljs-number">2</span>)        <span class="hljs-comment"># 各エージェントの報酬</span>
+        self.policy_head = nn.Linear(hidden_dim, <span class="hljs-number">2</span> * action_dim)  <span class="hljs-comment"># 2エージェント分の方策</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = x.to(self.device)
+        h = self.encoder(x)
+        value = self.value_head(h)
+        reward = self.reward_head(h)
+        policy_logits = self.policy_head(h)
+        policy = F.softmax(policy_logits.view(-<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, self.policy_head.out_features // <span class="hljs-number">2</span>), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> value, reward, policy
+</code></pre>
+<ul>
+<li><code>device</code> 属性を持たせ、<code>forward</code> で明示的にデバイスに送ります。</li>
+<li>出力は <code>(value, reward, policy)</code> の3つで、<code>policy</code> は <code>(batch, 2, action_dim)</code> の形状にします。</li>
+</ul>
+<p><strong>ステップ 4: MCTS の実装（<code>MAZeroMCTS</code>）</strong></p>
+<p>MuZero/MAZero 風の MCTS を実装します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, state, prior, parent=<span class="hljs-literal">None</span></span>):
+        self.state = state
+        self.parent = parent
+        self.children = {}
+        self.visit_count = <span class="hljs-number">0</span>
+        self.value_sum = <span class="hljs-number">0.0</span>
+        self.prior = prior
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAZeroMCTS</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, model, env_wrapper, num_simulations=<span class="hljs-number">50</span>, discount=<span class="hljs-number">0.99</span></span>):
+        self.model = model
+        self.env_wrapper = env_wrapper
+        self.num_simulations = num_simulations
+        self.discount = discount
+        self.action_dim = env_wrapper.action_space.n
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">self, state</span>):
+        root = Node(state, prior=<span class="hljs-literal">None</span>)
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.num_simulations):
+            self._simulate(root)
+        <span class="hljs-keyword">return</span> self._action_probs(root)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_simulate</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-comment"># 1. 選択（UCT スコアで子ノードを選択）</span>
+        <span class="hljs-comment"># 2. 展開（未訪問の行動を展開し、ネットワークで評価）</span>
+        <span class="hljs-comment"># 3. バックアップ（価値を親ノードに伝播）</span>
+        <span class="hljs-keyword">pass</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_action_probs</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-comment"># 訪問回数に基づく行動確率を返す</span>
+        <span class="hljs-keyword">pass</span>
+</code></pre>
+<ul>
+<li><code>Node</code> クラスで探索木のノードを管理。</li>
+<li><code>_simulate</code> で「選択・展開・評価・バックアップ」のサイクルを実装。</li>
+<li><code>_action_probs</code> で MCTS の結果を行動確率として返す。</li>
+</ul>
+<p><strong>ステップ 5: エージェントの実装（<code>MAZeroAgent</code>）</strong></p>
+<p>MCTS の結果に基づいて行動を選択し、ネットワークを更新します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MAZeroAgent</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, model, mcts, optimizer, device=<span class="hljs-string">&quot;cpu&quot;</span></span>):
+        self.model = model.to(device)
+        self.mcts = mcts
+        self.optimizer = optimizer
+        self.device = device
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">select_action</span>(<span class="hljs-params">self, state, temperature=<span class="hljs-number">1.0</span></span>):
+        action_probs = self.mcts.run(state)  <span class="hljs-comment"># (2, action_dim)</span>
+        actions = []
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">2</span>):
+            probs = action_probs[i]
+            <span class="hljs-keyword">if</span> temperature != <span class="hljs-number">1.0</span>:
+                probs = np.power(probs, <span class="hljs-number">1.0</span> / temperature)
+                probs /= probs.<span class="hljs-built_in">sum</span>()
+            action = np.random.choice(self.mcts.action_dim, p=probs)
+            actions.append(action)
+        <span class="hljs-keyword">return</span> actions
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, states, target_values, target_rewards, target_policies</span>):
+        <span class="hljs-comment"># バッチ学習の実装</span>
+        <span class="hljs-keyword">pass</span>
+</code></pre>
+<ul>
+<li><code>select_action</code> で MCTS の確率に基づき行動をサンプリング。</li>
+<li><code>update</code> でネットワークを更新（価値・報酬・方策の損失を計算）。</li>
+</ul>
+<p><strong>ステップ 6: 学習ループの実装（<code>train_mazero</code>）</strong></p>
+<p>エピソードを回し、MCTS で行動確率を計算し、ネットワークを更新します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">train_mazero</span>(<span class="hljs-params">num_episodes=<span class="hljs-number">1000</span>, num_simulations=<span class="hljs-number">50</span></span>):
+    device = <span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>
+    env_wrapper = EnvWrapper(grid_size=<span class="hljs-number">10</span>, num_agents=<span class="hljs-number">2</span>, num_packages=<span class="hljs-number">3</span>)
+    state_dim = env_wrapper.state_dim
+    action_dim = env_wrapper.action_space.n
+
+    model = MAZeroNet(state_dim, action_dim, hidden_dim=<span class="hljs-number">128</span>, device=device)
+    mcts = MAZeroMCTS(model, env_wrapper, num_simulations=num_simulations)
+    optimizer = optim.Adam(model.parameters(), lr=<span class="hljs-number">1e-3</span>)
+    agent = MAZeroAgent(model, mcts, optimizer, device=device)
+
+    replay_buffer = deque(maxlen=<span class="hljs-number">10000</span>)
+
+    <span class="hljs-keyword">for</span> episode <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_episodes):
+        state = env_wrapper.reset()
+        episode_states = []
+        episode_rewards = []
+        episode_mcts_probs = []
+
+        done = <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+            mcts_probs = mcts.run(state)
+            actions = agent.select_action(state, temperature=<span class="hljs-number">1.0</span>)
+            next_state, rewards, done, _ = env_wrapper.step(actions)
+
+            episode_states.append(state)
+            episode_rewards.append(rewards)
+            episode_mcts_probs.append(mcts_probs)
+            state = next_state
+
+        <span class="hljs-comment"># n-step bootstrapping でターゲットを計算</span>
+        returns = np.zeros((<span class="hljs-built_in">len</span>(episode_rewards), <span class="hljs-number">2</span>))
+        R = np.zeros(<span class="hljs-number">2</span>)
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(episode_rewards))):
+            R = episode_rewards[t] + mcts.discount * R
+            returns[t] = R
+
+        <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(episode_states)):
+            target_value = returns[t]
+            target_reward = episode_rewards[t]
+            target_policy = episode_mcts_probs[t]
+            replay_buffer.append((episode_states[t], target_value, target_reward, target_policy))
+
+        <span class="hljs-comment"># バッチ学習</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(replay_buffer) &gt;= <span class="hljs-number">32</span>:
+            batch = random.sample(replay_buffer, <span class="hljs-number">32</span>)
+            states, t_values, t_rewards, t_policies = <span class="hljs-built_in">zip</span>(*batch)
+            loss = agent.update(states, t_values, t_rewards, t_policies)
+            <span class="hljs-keyword">if</span> episode % <span class="hljs-number">100</span> == <span class="hljs-number">0</span>:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Episode <span class="hljs-subst">{episode}</span>, Loss: <span class="hljs-subst">{loss:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+    <span class="hljs-keyword">return</span> agent
+</code></pre>
+<ul>
+<li>MCTS の結果を「ターゲット方策」として使用。</li>
+<li>n-step bootstrapping で「ターゲット価値」を計算。</li>
+<li>報酬はそのまま「ターゲット報酬」として使用。</li>
+</ul>
+<p><strong>ステップ 7: 学習済みエージェントの保存・復元</strong></p>
+<p>学習完了後にチェックポイントを保存し、必要に応じて復元します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">save_agent</span>(<span class="hljs-params">agent, save_path</span>):
+    checkpoint = {
+        <span class="hljs-string">&quot;model_state_dict&quot;</span>: agent.model.state_dict(),
+        <span class="hljs-string">&quot;optimizer_state_dict&quot;</span>: agent.optimizer.state_dict(),
+        <span class="hljs-string">&quot;state_dim&quot;</span>: ...,
+        <span class="hljs-string">&quot;action_dim&quot;</span>: ...,
+        <span class="hljs-string">&quot;device&quot;</span>: agent.device,
+    }
+    torch.save(checkpoint, save_path)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">load_agent</span>(<span class="hljs-params">checkpoint_path, env_wrapper, device=<span class="hljs-string">&quot;cpu&quot;</span></span>):
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    state_dim = checkpoint[<span class="hljs-string">&quot;state_dim&quot;</span>]
+    action_dim = checkpoint[<span class="hljs-string">&quot;action_dim&quot;</span>]
+    model = MAZeroNet(state_dim, action_dim, hidden_dim=<span class="hljs-number">128</span>, device=device)
+    model.load_state_dict(checkpoint[<span class="hljs-string">&quot;model_state_dict&quot;</span>])
+    optimizer = optim.Adam(model.parameters(), lr=<span class="hljs-number">1e-3</span>)
+    optimizer.load_state_dict(checkpoint[<span class="hljs-string">&quot;optimizer_state_dict&quot;</span>])
+    mcts = MAZeroMCTS(model, env_wrapper, num_simulations=<span class="hljs-number">50</span>)
+    agent = MAZeroAgent(model, mcts, optimizer, device=device)
+    <span class="hljs-keyword">return</span> agent
+</code></pre>
+<ul>
+<li><code>train_mazero</code> の最後で <code>save_agent</code> を呼び出す。</li>
+<li>評価時は <code>load_agent</code> で復元して使用。</li>
+</ul>
+<p><strong>ステップ 8: 評価・可視化</strong></p>
+<p>学習済みエージェントの性能を確認します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">evaluate_agent</span>(<span class="hljs-params">agent, env_wrapper, num_episodes=<span class="hljs-number">5</span>, render=<span class="hljs-literal">False</span></span>):
+    total_rewards = []
+    <span class="hljs-keyword">for</span> ep <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_episodes):
+        state = env_wrapper.reset()
+        done = <span class="hljs-literal">False</span>
+        episode_reward = [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>]
+        <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+            actions = agent.select_action(state, temperature=<span class="hljs-number">0.0</span>)  <span class="hljs-comment"># greedy</span>
+            state, rewards, done, _ = env_wrapper.step(actions)
+            episode_reward[<span class="hljs-number">0</span>] += rewards[<span class="hljs-number">0</span>]
+            episode_reward[<span class="hljs-number">1</span>] += rewards[<span class="hljs-number">1</span>]
+            <span class="hljs-keyword">if</span> render:
+                env_wrapper.env.render()
+        total_rewards.append(episode_reward)
+    <span class="hljs-keyword">return</span> total_rewards
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">record_agent_video</span>(<span class="hljs-params">agent, env_wrapper, filename=<span class="hljs-string">&quot;agent_video.mp4&quot;</span></span>):
+    state = env_wrapper.reset()
+    done = <span class="hljs-literal">False</span>
+    agent_actions_list = []
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+        actions = agent.select_action(state, temperature=<span class="hljs-number">0.0</span>)
+        agent_actions_list.append(actions)
+        state, _, done, _ = env_wrapper.step(actions)
+    env_wrapper.env.save_render_video(agent_actions_list, filename=filename, fps=<span class="hljs-number">5</span>)
+</code></pre>
+<ul>
+<li><code>evaluate_agent</code> で平均報酬を計測。</li>
+<li><code>record_agent_video</code> で動画を保存。</li>
+</ul>
+<h3 id="3-実装の順序">3. 実装の順序</h3>
+<p>ここまでの流れをまとめました。</p>
+<ol>
+<li><code>DroneDeliveryEnv</code> の確認・修正（報酬スケール・終了条件）。</li>
+<li><code>EnvWrapper</code> の実装（状態ベクトルの設計が重要）。</li>
+<li><code>MAZeroNet</code> の実装（出力形状を確認）。</li>
+<li><code>MAZeroAgent</code> の <code>update</code> メソッドの実装（損失計算を確認）。</li>
+<li><code>MAZeroMCTS</code> の実装（MuZero/MAZero 風の探索）。</li>
+<li><code>train_mazero</code> の実装（データ収集・学習ループ）。</li>
+<li>保存・復元コードの追加。</li>
+<li>評価・可視化コードの追加。</li>
+</ol>
+<p>この順序で進めると、各ステップで動作確認をしながら実装を進められます。</p>
+<h3 id="4-現状">4. 現状</h3>
+<p>学習は走るようになりましたが、1エピソード回すのに5分かかっています。
+この状態だと、エージェントがそれらしい動作を始める可能性がある1000エピソードまで5000分→3.5日くらいかかりそうです。
+学習できるサーバーが欲しいと思う今日この頃です。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-4\image\README\1776574362099.png" alt="1776574362099"></p>
+<h2 id="総括">総括</h2>
+<p>実験したかったのですが、探索木生成がかなり時間がかかります。
+いつものようにGoogle Colabで学習しようとすると時間切れとなりました。。。</p>
+<p>前回説明のMAZeroをなんとか実験して、結果を確認する方法を考えます。</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+            
+        </body>
+        </html>
