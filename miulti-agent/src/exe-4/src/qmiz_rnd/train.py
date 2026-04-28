@@ -1,4 +1,48 @@
+
+from env import DroneDeliveryEnv
+from model import QMIXRNDAgent
+import torch
+
+
 env = DroneDeliveryEnv(grid_size=10, num_agents=2, num_packages=3, max_steps=200)
+
+def save_agent_checkpoint(agent, path):
+    """
+    エージェントのネットワークパラメータと学習状態を保存する単体関数
+    """
+    checkpoint = {
+        "episode": agent.episode,
+        "eps": agent.eps,
+        "q_net_state_dict": agent.q_net.state_dict(),
+        "q_target_state_dict": agent.q_target.state_dict(),
+        "mixer_state_dict": agent.mixer.state_dict(),
+        "mixer_target_state_dict": agent.mixer_target.state_dict(),
+        "rnd_predictor_state_dict": agent.rnd_predictor.state_dict(),
+        "rnd_target_state_dict": agent.rnd_target.state_dict(),
+        "optimizer_q_state_dict": agent.optimizer_q.state_dict(),
+        "optimizer_rnd_state_dict": agent.optimizer_rnd.state_dict(),
+        "device": str(agent.device),
+    }
+    torch.save(checkpoint, path)
+    print(f"Checkpoint saved to {path}")
+
+
+def load_agent_checkpoint(agent, path, map_location="cpu"):
+    """
+    エージェントのネットワークパラメータと学習状態を読み込む単体関数
+    """
+    checkpoint = torch.load(path, map_location=map_location)
+    agent.episode = checkpoint["episode"]
+    agent.eps = checkpoint["eps"]
+    agent.q_net.load_state_dict(checkpoint["q_net_state_dict"])
+    agent.q_target.load_state_dict(checkpoint["q_target_state_dict"])
+    agent.mixer.load_state_dict(checkpoint["mixer_state_dict"])
+    agent.mixer_target.load_state_dict(checkpoint["mixer_target_state_dict"])
+    agent.rnd_predictor.load_state_dict(checkpoint["rnd_predictor_state_dict"])
+    agent.rnd_target.load_state_dict(checkpoint["rnd_target_state_dict"])
+    agent.optimizer_q.load_state_dict(checkpoint["optimizer_q_state_dict"])
+    agent.optimizer_rnd.load_state_dict(checkpoint["optimizer_rnd_state_dict"])
+    print(f"Checkpoint loaded from {path} (episode={agent.episode}, eps={agent.eps:.3f})")
 
 # 状態次元の計算
 state_dim_per_agent = (

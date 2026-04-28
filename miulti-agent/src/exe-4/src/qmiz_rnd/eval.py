@@ -1,32 +1,41 @@
-def run_multiple_episodes_and_save_best(agent, env, num_episodes=10, filename="best_episode.mp4", fps=5):
-    best_reward = -float("inf")
-    best_actions_list = None
+from moviepy.editor import VideoFileClip
 
-    for ep in range(num_episodes):
-        obs = env.reset()
-        done = False
-        step_count = 0
-        total_reward = 0
-        actions_list = []
+def mp4_to_gif(input_path, output_path, fps=10, resize=None):
+    """
+    MP4ファイルをGIFに変換する
 
-        while not done and step_count < env.max_steps:
-            actions = agent.act(obs, explore=False)
-            actions_list.append(actions)
-            next_obs, rewards, done, _ = env.step(actions)
-            total_reward += sum(rewards)
-            obs = next_obs
-            step_count += 1
+    Parameters
+    ----------
+    input_path : str
+        入力MP4ファイルのパス
+    output_path : str
+        出力GIFファイルのパス
+    fps : int, optional
+        出力GIFのフレームレート（デフォルト 10）
+    resize : float or tuple, optional
+        リサイズ比率 (例: 0.5) または (width, height)
+    """
+    # 動画読み込み
+    clip = VideoFileClip(input_path)
 
-        print(f"Episode {ep}: total_reward = {total_reward:.2f}")
+    # 必要に応じてリサイズ
+    if resize is not None:
+        if isinstance(resize, (int, float)):
+            clip = clip.resize(resize)
+        elif isinstance(resize, tuple) and len(resize) == 2:
+            clip = clip.resize(resize)
 
-        if total_reward > best_reward:
-            best_reward = total_reward
-            best_actions_list = actions_list
+    # GIFとして書き出し
+    clip.write_gif(output_path, fps=fps)
 
-    # 最良エピソードを動画に保存
-    env.reset()
-    env.save_render_video(best_actions_list, filename=filename, fps=fps)
-    print(f"Best episode (reward={best_reward:.2f}) saved to {filename}")
+    # リソース解放
+    clip.close()
 
 # 使用例
-run_multiple_episodes_and_save_best(agent, env, num_episodes=10, filename="best_qmix_rnd.mp4")
+if __name__ == "__main__":
+    mp4_to_gif(
+        input_path="best_qmix_rnd.mp4",
+        output_path="drone_test.gif",
+        fps=10,
+        resize=0.5  # サイズを半分に縮小
+    )
