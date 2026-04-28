@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x9078;&#x5b9a;&#x3057;&#x305f;&#x624b;&#x6cd5;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>MAZeroの手法は非常に有効そうですが、モデルベースの探索MCTSを生成するため、非常に大きな学習コストがかかっていました。
+そこで計算コストを抑えて、探索力にも優れる手法を考えることとしました。</p>
+<h2 id="選定した手法">選定した手法</h2>
+<p>QMIXに探索力を付加できるRNDを組み合わせることで活路を見出そうと思います。</p>
+<h3 id="qmixの課題">QMIXの課題</h3>
+<p>QMIX はマルチエージェント強化学習（MARL）において<strong>非常に有効な手法</strong>ですが、その設計上の特徴から「<strong>探索力が不足しやすい</strong>」という課題が生じます。<br>
+以下では、「QMIX がなぜ有効なのか」と「なぜ探索力が不足しがちなのか」を対比して説明します。</p>
+<p><strong>1. QMIX が有効な理由（強み）</strong></p>
+<p>QMIX の有効性は、主に次の 2 点にあります。</p>
+<p><strong>(1) 価値分解（Value Decomposition）</strong></p>
+<ul>
+<li>QMIX は、<strong>グローバルな Q 値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>total</mtext></msub></mrow><annotation encoding="application/x-tex">Q_{\text{total}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">total</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> を、<strong>各エージェントの Q 値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">Q_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> の単調関数</strong>として表現します。</li>
+<li>つまり、<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>Q</mi><mtext>total</mtext></msub><mo stretchy="false">(</mo><mi mathvariant="bold">s</mi><mo separator="true">,</mo><mi mathvariant="bold">a</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>f</mi><mtext>mixer</mtext></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><msub><mi>Q</mi><mn>1</mn></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>Q</mi><mi>n</mi></msub><mo stretchy="false">(</mo><msub><mi>s</mi><mi>n</mi></msub><mo separator="true">,</mo><msub><mi>a</mi><mi>n</mi></msub><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">Q_{\text{total}}(\mathbf{s}, \mathbf{a}) = f_{\text{mixer}}\big(Q_1(s_1, a_1), \dots, Q_n(s_n, a_n)\big)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">total</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathbf">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">a</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3175em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">mixer</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mord"><span class="delimsizing size1">)</span></span></span></span></span></span></p>
+という形で、<strong>グローバル報酬を個々のエージェントに分解</strong>します。</li>
+<li>これにより、
+<ul>
+<li><strong>学習時</strong>：グローバル報酬に基づいて集中学習できる</li>
+<li><strong>実行時</strong>：各エージェントは自分の観測と Q 値だけで行動できる（分散実行）
+という利点があります。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) 単調性制約による安定性</strong></p>
+<ul>
+<li>QMIX は「単調性（monotonicity）」を課すことで、<strong>グローバル Q と各 Q の整合性を保ちつつ学習</strong>します。</li>
+<li>これにより、
+<ul>
+<li>学習が安定しやすい</li>
+<li>協調的な行動が自然に学習されやすい<br>
+という性質があります。</li>
+</ul>
+</li>
+</ul>
+<p>このように、QMIX は<strong>協調的な価値分解と安定した学習</strong>によって、多くのマルチエージェント環境で高い性能を示す「有効な手法」です。</p>
+<p><strong>2. QMIX の探索力不足が生じる理由（課題）</strong></p>
+<p>一方で、QMIX の設計は「探索」という観点では以下のような制約を持ちます。</p>
+<p><strong>(1) 探索は基本的に「局所的」で「独立」</strong></p>
+<ul>
+<li>QMIX の各エージェントは、<strong>自分の Q ネットワークに基づいて行動</strong>します。</li>
+<li>探索は、主に
+<ul>
+<li>ε-greedy</li>
+<li>Boltzmann 探索</li>
+<li>NoisyNet などのノイズ付加<br>
+といった「<strong>局所的かつ独立な探索</strong>」に依存します。</li>
+</ul>
+</li>
+<li>つまり、
+<ul>
+<li>各エージェントは「自分の Q が高い行動」や「ランダムに選んだ行動」を試すだけで、</li>
+<li><strong>エージェント間で協調的に未知の領域を探索する仕組み</strong>は基本的にありません。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) 価値分解が「既知の良い行動」を強化しがち</strong></p>
+<ul>
+<li>QMIX はグローバル報酬に基づいて学習するため、<strong>一度見つかった良い協調行動</strong>は強く強化されます。</li>
+<li>一方で、
+<ul>
+<li>報酬が得られない未知の状態・行動ペア</li>
+<li>複雑な協調が必要ながら、短期的には報酬が低い行動<br>
+には、なかなか価値が割り当てられません。</li>
+</ul>
+</li>
+<li>その結果、<strong>エージェントたちは「既知の良い戦略」に留まりやすく、新しい戦略を試そうとする動機（探索）が弱くなりがち</strong>です。</li>
+</ul>
+<p><strong>(3) モデルベース探索や長期的計画がない</strong></p>
+<ul>
+<li>MAZero のような手法は、<strong>環境モデルを学習し、MCTS で長期的な計画を行う</strong>ことで、未知の状態空間を積極的に探索します。</li>
+<li>一方 QMIX は、
+<ul>
+<li>環境モデルを持たない（モデルフリー）</li>
+<li>将来の状態を明示的にシミュレーションしない<br>
+ため、<strong>長期的な探索や計画が苦手</strong>です。</li>
+</ul>
+</li>
+<li>つまり、「今から数ステップ先にどんな面白い協調が生まれるか」を積極的に試す仕組みが乏しいのです。</li>
+</ul>
+<p><strong>3. 探索力不足が顕著になる状況</strong></p>
+<p>QMIX の探索力不足は、特に以下のような環境で問題になります。</p>
+<ul>
+<li>
+<p><strong>報酬が疎な環境</strong></p>
+<ul>
+<li>なかなか報酬が得られない場合、エージェントたちは「何も起こらない行動」を繰り返しがちです。</li>
+<li>新しい協調行動を見つけるために、広い探索が必要ですが、QMIX 単体ではそれが難しい。</li>
+</ul>
+</li>
+<li>
+<p><strong>複雑な協調が必要な環境</strong></p>
+<ul>
+<li>特定のエージェントの行動だけでは報酬が得られず、複数のエージェントがタイミングを合わせて行動する必要がある場合。</li>
+<li>そのような「協調の組み合わせ」を試すには広い探索が必要ですが、QMIX の局所探索だけでは見つけにくい。</li>
+</ul>
+</li>
+<li>
+<p><strong>長期的な計画が必要な環境</strong></p>
+<ul>
+<li>短期的には報酬が低くても、長期的には大きな報酬が得られるような戦略が必要な場合。</li>
+<li>QMIX は主に短期的な Q 学習に基づくため、長期的な探索・計画が弱い。</li>
+</ul>
+</li>
+</ul>
+<h3 id="qmix--rndについて">QMIX + RNDについて</h3>
+<p>QMIX は協調学習には強いが、探索は各エージェントの局所的な ε-greedy などに依存するため、<strong>未知の状態や新しい協調戦略を試しにくい</strong>という課題があります。</p>
+<p>RND は「状態の新しさ」を予測誤差で測り、それを内部報酬として与える手法です。<br>
+QMIX に RND を組み合わせると、</p>
+<ol>
+<li>
+<p><strong>未知の状態に報酬が付く</strong><br>
+→ QMIX 単体では訪れなかった領域を、エージェントが積極的に探索するようになる。</p>
+</li>
+<li>
+<p><strong>協調的な未知状態も試されやすくなる</strong><br>
+→ 複数のエージェントが同時に新しい行動を取った状態に大きな内部報酬が付き、新しい協調戦略の発見が促される。</p>
+</li>
+<li>
+<p><strong>報酬が疎な環境でも探索が続く</strong><br>
+→ 外部報酬が得られない間も内部報酬で学習が進み、局所解に陥りにくくなる。</p>
+</li>
+</ol>
+<p>このように、RND が QMIX の「探索の動機」を補強することで、<strong>QMIX 単体では不足していた探索力を補える</strong>、というのが仮説の核心です。</p>
+<h2 id="rndについて">RNDについて</h2>
+<p>RND（Random Network Distillation）は、「<strong>状態がどれだけ新しいか</strong>」をニューラルネットの予測誤差で測り、それを探索のボーナス（内部報酬）として使う手法です。</p>
+<h3 id="1-基本アイデア">1. 基本アイデア</h3>
+<ul>
+<li>ランダムに初期化した「ターゲットネットワーク」を固定し、<br>
+もう一方の「予測ネットワーク」にその出力を予測させる。</li>
+<li><strong>よく訪れる状態</strong>は予測がうまくいく（誤差が小さい）。<br>
+<strong>ほとんど見たことのない状態</strong>は予測がうまくいかない（誤差が大きい）。</li>
+<li>この<strong>予測誤差の大きさ</strong>を「状態の新しさ」とみなし、探索ボーナスとして使う。</li>
+</ul>
+<h3 id="2-ネットワーク構成">2. ネットワーク構成</h3>
+<ol>
+<li>
+<p><strong>ターゲットネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span></strong></p>
+<ul>
+<li>ランダムに初期化した後、<strong>一切学習しない</strong>。</li>
+<li>入力状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> を特徴ベクトル <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> に写像する。</li>
+</ul>
+</li>
+<li>
+<p><strong>予測ネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>f</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{f}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1523em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0833em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span></strong></p>
+<ul>
+<li>ターゲットネットワークの出力 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を予測するように学習する。</li>
+<li>つまり、入力 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> から <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を再現する。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-学習の流れ">3. 学習の流れ</h3>
+<ol>
+<li>状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> をターゲットネットワークに入力 → <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を得る。</li>
+<li>同じ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> を予測ネットワークに入力 → <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>f</mi><mo>^</mo></mover><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\hat{f}(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2079em;vertical-align:-0.25em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0833em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を得る。</li>
+<li>予測誤差を計算：<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>e</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="normal">∥</mi><mi>f</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo>−</mo><mover accent="true"><mi>f</mi><mo>^</mo></mover><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">e(s) = \| f(s) - \hat{f}(s) \|^2
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∥</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2079em;vertical-align:-0.25em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9579em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0833em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mord"><span class="mord">∥</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></p>
+</li>
+<li>この誤差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">e(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を「<strong>内部報酬（intrinsic reward）</strong>」として、外部報酬に加算：<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>r</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>r</mi><mtext>ext</mtext></msub><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi><mo>⋅</mo><mi>e</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">r&#x27;(s) = r_{\text{ext}}(s) + \beta \cdot e(s)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0519em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">ext</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></span></p>
+（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span> は探索の強さを決める係数）</li>
+</ol>
+<h3 id="4-なぜ新しさになるのか">4. なぜ「新しさ」になるのか</h3>
+<ul>
+<li>予測ネットワークは、<strong>よく訪れる状態ほど正確に予測できるよう学習</strong>される。</li>
+<li>逆に、<strong>ほとんど見たことのない状態</strong>では予測がうまくいかず、誤差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">e(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> が大きくなる。</li>
+<li>したがって、誤差が大きい状態ほど「新しい状態」と解釈でき、探索ボーナスとして扱える。</li>
+</ul>
+<h3 id="5-まとめ">5. まとめ</h3>
+<ul>
+<li>RND は、<strong>ランダムネットワークの予測誤差</strong>を「状態の新しさ」の指標として使う手法です。</li>
+<li>これにより、報酬が疎な環境でも、エージェントが未知の状態を積極的に訪れるようになり、探索が促進されます。</li>
+</ul>
+<p>今回必要なのはあくまで見たことない探索をしてくれるかです。
+良いとわかっているところを集中的に探索することになるようなMCTSが欲しいというわけではありません。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\src\exe-4\src\qmiz_rnd\doc\image\README\1777178351321.png" alt="1777178351321"></p>
+<h2 id="実装">実装</h2>
+<p>実装コードは以下のレポジトリです。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-4/src/qmiz_rnd">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/src/exe-4/src/qmiz_rnd</a></p>
+<p><strong>実装のコツ</strong></p>
+<p>ここまでの実装と議論から、QMIX + RND をうまく動かすための「コツ」を整理します。</p>
+<p><strong>1. 状態エンコードの設計</strong></p>
+<p>QMIX は「グローバル状態」を使って価値分解を行うので、<strong>状態ベクトルの設計が非常に重要</strong>です。</p>
+<ul>
+<li><strong>エージェントごとの状態</strong>
+<ul>
+<li><code>agent_pos</code>, <code>carrying</code>, <code>other_agent</code>, <code>packages</code> を固定長ベクトルにエンコードする。</li>
+<li>例：<code>state_dim_per_agent = 23</code>（位置2 + 運搬状態1 + 他エージェント位置2 + パッケージ情報18）。</li>
+</ul>
+</li>
+<li><strong>グローバル状態</strong>
+<ul>
+<li>全エージェントの状態を結合し、<code>global_state_dim = num_agents * state_dim_per_agent</code> とする。</li>
+<li>QMIX の MixerNetwork はこの <code>global_state_dim</code> を入力として受け取る。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li>観測の各要素（位置、フラグ、他エージェント情報）を<strong>一貫した順序</strong>で並べる。</li>
+<li><code>_obs_to_tensor</code> と <code>_global_state_to_tensor</code> で同じロジックを使い、次元が一致するようにする。</li>
+</ul>
+<p><strong>2. RND の内部報酬の扱い</strong></p>
+<p>RND は「状態の新しさ」を予測誤差で測り、内部報酬として与えます。</p>
+<ul>
+<li><strong>内部報酬のスケール</strong>
+<ul>
+<li>外部報酬（例：配送成功 +100）と内部報酬（予測誤差）のスケールが大きく異なるので、
+<ul>
+<li>内部報酬を <code>RND_BETA</code>（例：0.1）でスケーリングする。</li>
+<li>あるいは、内部報酬を正規化（移動平均・分散で標準化）する。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>どの状態に適用するか</strong>
+<ul>
+<li>ここでは「各エージェントの個別状態」に RND を適用し、内部報酬をエージェントごとに与えています。</li>
+<li>グローバル状態に RND を適用する案もありますが、実装が複雑になるので、まずは個別状態で十分。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li><code>RND_BETA</code> を小さめ（0.01〜0.1）から始め、学習の様子を見ながら調整する。</li>
+<li>内部報酬が外部報酬を完全に支配しないように注意する。</li>
+</ul>
+<p><strong>3. QMIX の更新タイミングとバッチ構成</strong></p>
+<p>QMIX は「エージェント Q ネットワーク + Mixer ネットワーク」で構成されるため、更新のタイミングとバッチの形が重要です。</p>
+<ul>
+<li><strong>更新頻度</strong>
+<ul>
+<li><code>update_interval = 4</code> など、数ステップごとに更新する。</li>
+<li>頻繁に更新しすぎると不安定になり、逆に遅すぎると学習が進まない。</li>
+</ul>
+</li>
+<li><strong>バッチの形状</strong>
+<ul>
+<li><code>agent_qs: [batch, num_agents]</code></li>
+<li><code>state: [batch, global_state_dim]</code></li>
+<li><code>actions: [batch, num_agents]</code></li>
+<li>これらが <code>torch.bmm</code> や <code>nn.Linear</code> の入力次元と一致するようにする。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li><code>MixerNetwork.forward</code> の <code>bmm</code> 部分で形状をよく確認する（先ほどの <code>batch2 must be a 3D tensor</code> エラーは典型例）。</li>
+<li><code>unsqueeze</code> / <code>squeeze</code> を多用するので、<code>print(shape)</code> でデバッグすると良い。</li>
+</ul>
+<p><strong>4. 探索とターゲット更新のバランス</strong></p>
+<p>QMIX + RND では、<strong>探索（RND）と安定性（ターゲットネットワーク）</strong> のバランスが重要です。</p>
+<ul>
+<li><strong>探索率（ε-greedy）</strong>
+<ul>
+<li>初期 <code>EPS_START = 1.0</code> から <code>EPS_END = 0.05</code> まで指数関数的に減衰させる。</li>
+<li>RND が内部報酬で探索を促進するので、ε は比較的早く下げても良い。</li>
+</ul>
+</li>
+<li><strong>ターゲット更新</strong>
+<ul>
+<li><code>TARGET_UPDATE = 100</code> など、一定エピソードごとにターゲットネットワークを更新する。</li>
+<li>QMIX は価値分解が複雑なので、ターゲット更新を遅めにすると安定しやすい。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li>RND が強く効いている間は ε を下げても探索が維持される。</li>
+<li>ターゲット更新を早くしすぎると QMIX が発散しやすいので、まずは大きめの値から始める。</li>
+</ul>
+<p><strong>5. デバイス管理とチェックポイント</strong></p>
+<p>PyTorch 実装では、<strong>デバイス（CPU/GPU）の扱い</strong>がバグの原因になりがちです。</p>
+<ul>
+<li><strong>CPU-only 環境</strong>
+<ul>
+<li>モデル・チェックポイントはすべて <code>device=&quot;cpu&quot;</code> で扱う。</li>
+<li><code>torch.load(path, map_location=&quot;cpu&quot;)</code> で読み込む。</li>
+</ul>
+</li>
+<li><strong>チェックポイント</strong>
+<ul>
+<li><code>episode</code>, <code>eps</code>, 各ネットワークの <code>state_dict</code>, オプティマイザの <code>state_dict</code> を保存する。</li>
+<li>読み込み時は <code>map_location</code> を明示し、デバイス不一致エラーを避ける。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li>学習時と推論時でデバイスが変わる可能性を考慮し、<code>map_location</code> を柔軟に指定できるようにする。</li>
+<li><code>agent.device</code> を文字列で保存し、読み込み時に必要に応じて上書きする。</li>
+</ul>
+<p><strong>6. 可視化とデバッグ</strong></p>
+<p>QMIX + RND はパラメータが多いため、<strong>可視化とログ</strong>が重要です。</p>
+<ul>
+<li><strong>報酬の推移</strong>
+<ul>
+<li>外部報酬と内部報酬の合計を記録し、学習が進んでいるか確認する。</li>
+</ul>
+</li>
+<li><strong>動画保存</strong>
+<ul>
+<li><code>env.save_render_video</code> で学習済みエージェントの動作を確認し、
+<ul>
+<li>パッケージを効率的に配送できているか</li>
+<li>エージェント同士が衝突していないか<br>
+を目視で確認する。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>RND の予測誤差</strong>
+<ul>
+<li>内部報酬の平均・最大値などをログに出し、探索が適切に働いているか確認する。</li>
+</ul>
+</li>
+</ul>
+<p><strong>コツ</strong>：</p>
+<ul>
+<li>学習初期は探索が強く、報酬が低いことが多いので、短いエピソードで様子を見る。</li>
+<li>動画を見て「明らかに変な行動」をしていないか確認し、バグ（状態エンコードミスなど）を早期に発見する。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>実装してみたものの、まだ学習の推移が思わしくありません。
+以下の動画のような動作となりました。</p>
+<p>この結果の場合MAZeroの方が良い結果となりそうです。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+        </body>
+        </html>

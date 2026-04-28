@@ -4,9 +4,6 @@ import matplotlib.patches as patches
 import matplotlib.animation as animation
 import random
 
-# ==============================
-# Multi-Agent Delivery Environment
-# ==============================
 class DroneDeliveryEnv:
     def __init__(self, grid_size=10, num_agents=2, num_packages=3, max_steps=200):
         self.grid_size = grid_size
@@ -27,9 +24,6 @@ class DroneDeliveryEnv:
         self.fig = None
         self.ax = None
 
-    # -----------------------------
-    # Reset environment
-    # -----------------------------
     def reset(self):
         self.step_count = 0
 
@@ -49,20 +43,13 @@ class DroneDeliveryEnv:
 
         return self._get_obs()
 
-    # -----------------------------
-    # Random empty cell generator
-    # -----------------------------
     def _random_empty_cell(self, occupied):
         while True:
             pos = (np.random.randint(self.grid_size), np.random.randint(self.grid_size))
             if pos not in occupied:
                 return pos
 
-    # -----------------------------
-    # Observation
-    # -----------------------------
     def _get_obs(self):
-        """Returns list[agent] = dict(state)"""
         obs = []
         for i in range(self.num_agents):
             agent_state = {
@@ -74,21 +61,12 @@ class DroneDeliveryEnv:
             obs.append(agent_state)
         return obs
 
-    # -----------------------------
-    # Step function
-    # actions: list of integer actions for each agent
-    # Action mapping:
-    # 0 stay
-    # 1 up
-    # 2 down
-    # 3 left
-    # 4 right
-    # 5 pick
-    # 6 deliver
-    # -----------------------------
     def step(self, actions):
         rewards = [0, 0]
         done = False
+
+        # 各エージェントの「前の位置」を保存（距離変化の計算用）
+        prev_pos = self.agent_pos.copy()
 
         # Move agents
         for i in range(self.num_agents):
@@ -111,24 +89,41 @@ class DroneDeliveryEnv:
             rewards[0] -= 5
             rewards[1] -= 5
 
-        # Pick / Deliver actions
+        # Pick / Deliver actions & distance-based shaping
         for i in range(self.num_agents):
             pos = self.agent_pos[i]
             carry = self.agent_has[i]
             action = actions[i]
 
+            # --- 距離ベースのシェーピング報酬 ---
             if carry == -1:
-                # 荷物を持っていない時：最も近い「未回収」の荷物への距離を報酬にする
+                # 荷物を持っていない → 未ピックアップのパッケージのピックアップポイントに近づくほど報酬
                 undelivered_pkgs = [p for p in self.packages if not p[2]]
                 if undelivered_pkgs:
-                    dists = [np.abs(pos[0]-p[0][0]) + np.abs(pos[1]-p[0][1]) for p in undelivered_pkgs]
-                    # 距離が近いほど報酬（最大0.1程度になるよう調整）
-                    rewards[i] += 0.01 * (10 - min(dists)) 
+                    # 現在の最小距離
+                    dists_now = [np.abs(pos[0]-p[0][0]) + np.abs(pos[1]-p[0][1]) for p in undelivered_pkgs]
+                    min_dist_now = min(dists_now)
+
+                    # 前のステップの最小距離
+                    dists_prev = [np.abs(prev_pos[i][0]-p[0][0]) + np.abs(prev_pos[i][1]-p[0][1]) for p in undelivered_pkgs]
+                    min_dist_prev = min(dists_prev)
+
+                    # 距離が縮まったら報酬、広がったらペナルティ
+                    delta_dist = min_dist_prev - min_dist_now
+                    rewards[i] += delta_dist * 0.5  # 係数は調整可能
+
             else:
-                # 荷物を持っている時：その荷物の目的地への距離を報酬にする
-                drop_pos = self.packages[carry][1]
-                dist_to_drop = np.abs(pos[0]-drop_pos[0]) + np.abs(pos[1]-drop_pos[1])
-                rewards[i] += 0.01 * (10 - dist_to_drop)
+                # 荷物を持っている → そのパッケージの配送先に近づくほど報酬
+                pid = carry
+                drop_pos = self.packages[pid][1]
+
+                dist_now = np.abs(pos[0]-drop_pos[0]) + np.abs(pos[1]-drop_pos[1])
+                dist_prev = np.abs(prev_pos[i][0]-drop_pos[0]) + np.abs(prev_pos[i][1]-drop_pos[1])
+
+                delta_dist = dist_prev - dist_now
+                rewards[i] += delta_dist * 0.5  # 係数は調整可能
+
+            # --- 行動ベースの報酬（pick / deliver） ---
             # pick
             if action == 5 and carry == -1:
                 for pid, pack in enumerate(self.packages):
@@ -136,7 +131,7 @@ class DroneDeliveryEnv:
                     if not picked and pos == pick:
                         self.agent_has[i] = pid
                         pack[2] = True  # mark picked
-                        rewards[i] += 1
+                        rewards[i] += 20
                         break
 
             # deliver
@@ -146,7 +141,7 @@ class DroneDeliveryEnv:
                 if pos == drop and picked and not delivered:
                     self.agent_has[i] = -1
                     self.packages[pid][3] = True
-                    rewards[i] += 10
+                    rewards[i] += 500
 
         # Check if all delivered
         if all(p[3] for p in self.packages):
@@ -159,9 +154,6 @@ class DroneDeliveryEnv:
 
         return self._get_obs(), rewards, done, {}
 
-    # -----------------------------
-    # Rendering
-    # -----------------------------
     def render(self):
         if self.fig is None:
             self.fig, self.ax = plt.subplots(figsize=(5, 5))
@@ -186,7 +178,6 @@ class DroneDeliveryEnv:
             # pickup point
             if not picked:
                 self.ax.add_patch(patches.Circle(px, 0.3, color="red"))
-            # carry state (do nothing)
             # delivery point
             if not delivered:
                 self.ax.add_patch(patches.Circle(dx, 0.3, color="green"))
@@ -207,12 +198,10 @@ class DroneDeliveryEnv:
         self.ax.set_aspect("equal")
         plt.pause(0.01)
 
-    # -----------------------------
-    # 動画保存メソッド
-    # -----------------------------
-    def save_render_gif(self, agent_actions_list, filename="delivery_video.gif", fps=5):
-        import matplotlib.animation as animation
-
+    def save_render_video(self, agent_actions_list, filename="delivery_video.mp4", fps=5):
+        """
+        エージェントの行動リストに基づいて動画を保存する
+        """
         # 動画作成用に再リセット
         self.reset()
         frames = []
@@ -222,7 +211,7 @@ class DroneDeliveryEnv:
             self.fig, self.ax = plt.subplots(figsize=(5, 5))
 
         print("Recording frames...")
-        
+
         def get_frame():
             self.fig.canvas.draw()
             rgba_buffer = self.fig.canvas.buffer_rgba()
@@ -239,11 +228,11 @@ class DroneDeliveryEnv:
             self.render()
             frames.append(get_frame())
 
-        # アニメーションの作成と保存（GIF）
-        print(f"Saving GIF to {filename}...")
+        # アニメーションの作成と保存
+        print(f"Saving video to {filename}...")
         video_fig, video_ax = plt.subplots()
         video_ax.axis('off')
-        
+
         im = video_ax.imshow(frames[0])
 
         def update(f):
@@ -251,18 +240,18 @@ class DroneDeliveryEnv:
             return [im]
 
         ani = animation.FuncAnimation(video_fig, update, frames=frames, blit=True)
-        
+
         try:
-            # writer='pillow' で GIF 保存
-            ani.save(filename, writer='pillow', fps=fps)
+            ani.save(filename, writer='ffmpeg', fps=fps)
             print(f"Successfully saved: {filename}")
         except Exception as e:
             print(f"Error: {e}")
-            print("Hint: Make sure 'pillow' is installed: pip install pillow")
-        
+            print("Hint: Check if 'ffmpeg' is installed on your system.")
+
         plt.close(video_fig)
         plt.close(self.fig)
         self.fig = None
+
 
 if __name__ == "__main__":
     env = DroneDeliveryEnv()
