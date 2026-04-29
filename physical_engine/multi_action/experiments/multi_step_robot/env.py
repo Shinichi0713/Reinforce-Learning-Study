@@ -41,6 +41,10 @@ class RobotCarryEnv(gym.Env):
         self.target_pos = None
         self.grasped = None
 
+        # 前ステップの距離（報酬計算用）
+        self.prev_dist_obj = None      # ロボット〜物体の距離
+        self.prev_dist_target = None   # ロボット〜目的地の距離
+
         # gif保存用
         self.record_frames = []  # フレーム（PIL画像）を保存するリスト
         self.recording = False   # 録画中かどうか
@@ -58,6 +62,10 @@ class RobotCarryEnv(gym.Env):
         self.target_pos = self._random_pos()
         self.grasped = 0.0
 
+        # 距離の初期化
+        self.prev_dist_obj = np.linalg.norm(self.robot_pos - self.object_pos)
+        self.prev_dist_target = np.linalg.norm(self.robot_pos - self.target_pos)
+
         # 録画リセット
         self.record_frames.clear()
         self.recording = False
@@ -74,53 +82,89 @@ class RobotCarryEnv(gym.Env):
         ).astype(np.float32)
 
     def _get_obs(self):
-        return np.concatenate([
-            self.robot_pos,
-            self.robot_vel,
-            self.object_pos,
-            self.target_pos,
-            [self.grasped]
+        # 生の観測
+        raw_obs = np.concatenate([
+            self.robot_pos,      # 0,1
+            self.robot_vel,      # 2,3
+            self.object_pos,     # 4,5
+            self.target_pos,     # 6,7
+            [self.grasped]      # 8
         ]).astype(np.float32)
+
+        # 観測の正規化
+        normalized_obs = np.zeros_like(raw_obs)
+        scale_pos = self.world_size
+        scale_vel = self.max_speed
+
+        # 位置関連: 世界サイズで割る
+        normalized_obs[0:2] = raw_obs[0:2] / scale_pos  # rx, ry
+        normalized_obs[4:6] = raw_obs[4:6] / scale_pos  # ox, oy
+        normalized_obs[6:8] = raw_obs[6:8] / scale_pos  # tx, ty
+
+        # 速度関連: 最大速度で割る
+        normalized_obs[2:4] = raw_obs[2:4] / scale_vel  # vx, vy
+
+        # grasped はそのまま
+        normalized_obs[8] = raw_obs[8]
+
+        return normalized_obs
 
     def step(self, action):
         self.step_count += 1
         action = np.clip(action, self.action_space.low, self.action_space.high)
 
-        # ロボットの速度を更新
-        self.robot_vel += action * self.dt
+        # 1. 速度変化量として扱う（加速度）
+        self.robot_vel += action * self.dt  # 行動は加速度として解釈
+
+        # 速度の大きさを制限
         speed = np.linalg.norm(self.robot_vel)
         if speed > self.max_speed:
             self.robot_vel = self.robot_vel / speed * self.max_speed
 
-        # ロボットの位置を更新
+        # 2. 位置を更新
         self.robot_pos += self.robot_vel * self.dt
 
-        # 物体を掴んでいるかチェック
-        dist_to_obj = np.linalg.norm(self.robot_pos - self.object_pos)
-        if dist_to_obj < self.grasp_dist:
-            self.grasped = 1.0
-            self.object_pos = self.robot_pos.copy()
-        else:
-            self.grasped = 0.0
+        # 世界の境界でクリップ
+        self.robot_pos = np.clip(self.robot_pos, -self.world_size/2, self.world_size/2)
 
-        # 報酬計算
+        # 2. 把持判定の修正（一度掴んだら維持）
+        prev_grasped = self.grasped
+        dist_to_obj = np.linalg.norm(self.robot_pos - self.object_pos)
+
+        if self.grasped < 0.5:
+            if dist_to_obj < self.grasp_dist:
+                self.grasped = 1.0
+
+        # 掴んでいる間は物体をロボットの位置に固定
+        if self.grasped > 0.5:
+            self.object_pos = self.robot_pos.copy()
+
+        # 3. 報酬設計の整理
         reward = 0.0
         done = False
 
-        if self.grasped > 0.5:
+        if self.grasped < 0.5:
+            # 掴む前：物体へ近づくインセンティブ
+            reward -= 0.1 * dist_to_obj
+        else:
+            # 掴んだ後：目的地へ近づくインセンティブ
             dist_to_target = np.linalg.norm(self.object_pos - self.target_pos)
-            if dist_to_target < self.target_dist:
-                reward += 10.0
-                done = True
-            else:
-                reward += 0.01
+            reward -= 0.1 * dist_to_target
 
-        if self.step_count >= self.max_steps:
-            done = True
+            # 目的地に到着
+            if dist_to_target < self.target_dist:
+                reward += 50.0  # ゴール報酬
+                done = True
+
+        # 掴んだ瞬間のボーナス（1回切り）
+        if prev_grasped < 0.5 and self.grasped > 0.5:
+            reward += 5.0
+
+        # タイムアウト
+        truncated = self.step_count >= self.max_steps
 
         obs = self._get_obs()
-        info = {}
-        return obs, reward, done, False, info
+        return obs, reward, done, truncated, {}
 
     def render(self, mode="human"):
         if mode == "human":
@@ -201,24 +245,3 @@ class RobotCarryEnv(gym.Env):
             img = Image.fromarray(rgb_array)
             self.record_frames.append(img)
         return obs, reward, done, truncated, info
-
-
-
-if __name__ == "__main__":
-    env = RobotCarryEnv()
-    obs, _ = env.reset()
-
-    # 録画開始
-    env.start_recording()
-
-    # ランダム行動で数ステップ動かす
-    for _ in range(30):
-        action = env.action_space.sample()
-        obs, reward, done, truncated, info = env.step_with_record(action)
-        env.render(mode="human")
-        if done:
-            break
-
-    # 録画停止＆gif保存
-    env.stop_recording()
-    env.save_gif("episode.gif", duration=200)

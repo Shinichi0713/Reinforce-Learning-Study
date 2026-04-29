@@ -14,9 +14,10 @@ class PolicyNetwork(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.fc_mu = nn.Linear(hidden_dim, act_dim)
         self.fc_log_std = nn.Linear(hidden_dim, act_dim)
+        self.ln1 = nn.LayerNorm(hidden_dim) # これを追加
 
     def forward(self, obs):
-        x = F.relu(self.fc1(obs))
+        x = F.relu(self.ln1(self.fc1(obs)))
         x = F.relu(self.fc2(x))
         mu = torch.tanh(self.fc_mu(x))  # [-1,1] に収める
         log_std = self.fc_log_std(x)
@@ -37,10 +38,11 @@ class QNetwork(nn.Module):
         self.fc1 = nn.Linear(obs_dim + act_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.fc_out = nn.Linear(hidden_dim, 1)
+        self.ln1 = nn.LayerNorm(hidden_dim) # これを追加
 
     def forward(self, obs, act):
         x = torch.cat([obs, act], dim=-1)
-        x = F.relu(self.fc1(x))
+        x = F.relu(self.ln1(self.fc1(x)))
         x = F.relu(self.fc2(x))
         return self.fc_out(x)
 
@@ -58,6 +60,7 @@ class ReplayBuffer:
 
     def __len__(self):
         return len(self.buffer)
+
 
 
 class SACAgent:
@@ -146,6 +149,9 @@ class SACAgent:
         self.q_optimizer1.zero_grad()
         self.q_optimizer2.zero_grad()
         q_loss.backward()
+        # 勾配クリッピングを追加
+        torch.nn.utils.clip_grad_norm_(self.q_net1.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(self.q_net2.parameters(), max_norm=1.0)
         self.q_optimizer1.step()
         self.q_optimizer2.step()
 
@@ -158,6 +164,8 @@ class SACAgent:
 
         self.policy_optimizer.zero_grad()
         policy_loss.backward()
+        # 勾配クリッピングを追加
+        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), max_norm=1.0)
         self.policy_optimizer.step()
 
         # αの自動調整（オプション）
@@ -165,6 +173,8 @@ class SACAgent:
             alpha_loss = -(self.log_alpha * (new_log_prob.detach() + self.target_entropy)).mean()
             self.alpha_optimizer.zero_grad()
             alpha_loss.backward()
+            # αの勾配もクリップ（任意）
+            torch.nn.utils.clip_grad_norm_([self.log_alpha], max_norm=1.0)
             self.alpha_optimizer.step()
             self.alpha = self.log_alpha.exp().item()
 

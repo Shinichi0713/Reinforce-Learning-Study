@@ -1,6 +1,6 @@
 # [Purpose](https://github.com/Shinichi0713/Reinforce-Learning-Study)
 
-this repogitory is run to study reinforcement learning.
+this repository is run to study reinforcement learning.
 thus, we apply the tech to control Self-discipline system.
 
 ![1762658300029](image/README/main_title.png)
@@ -8,9 +8,8 @@ thus, we apply the tech to control Self-discipline system.
 # contents
 
 1. basic: that is the code to check fundamental reinforcement theology.
-2. documents: that is the note of reinforcement-learning.
-3. pole-problem: that is the code to try the feinforcement learning.
-4. multi-agentict environment.
+2. docs: that is the note of reinforcement-learning.
+3. multi-agent: codes and result of experiments regarding MARL.
 
 Using Environment
 
@@ -256,12 +255,8 @@ This style involves **collecting data (observations, actions, rewards) from all 
 * **Mechanism:** Learning is based on a "Global State" that integrates information from all agents. To use a football (soccer) analogy, it is like a manager overseeing the entire pitch and giving synchronized instructions to all players.
 * **Pros:** * Directly learns complex interactions between agents (e.g., "Since Agent A moved right, I will move left").
 * Theoretically, it is the most likely to reach an optimal global solution.
-
-
 * **Cons:** * **Curse of Dimensionality:** As the number of agents increases, the combinations of information grow exponentially, making computation unfeasible.
 * **Execution Constraints:** Since it assumes access to everyone’s information during training, it often requires constant communication between all agents during execution.
-
-
 
 ### 2. Decentralized Training
 
@@ -270,12 +265,8 @@ This is a style where **each agent learns independently based solely on its own 
 * **Mechanism:** Other agents are treated as "part of the environment" (like moving obstacles), and each agent updates its network individually.
 * **Pros:** * High scalability because the computational load is distributed per agent.
 * Resilient to privacy concerns and communication limits since interaction with others is not required for training.
-
-
 * **Cons:** * **Non-stationarity Problem:** Because others change their behavior while an agent is learning, the "rules of the world" appear to change arbitrarily from the AI's perspective, making learning highly unstable.
 * Cooperative behavior relies on chance, making high-level coordination difficult to achieve.
-
-
 
 ### 3. Hybrid: Centralized Training, Decentralized Execution (CTDE)
 
@@ -284,21 +275,18 @@ Currently the most popular approach for tasks like cooperative drone control, **
 * **Concept:** **"Practice (Training) involves everyone reviewing game tapes together to reflect, but the Match (Execution) is handled by each individual's judgment."**
 * **Features:** * **Training:** Centralized training is performed, refining the "Critic" by considering the actions of others.
 * **Execution:** Decentralized execution is performed, where the "Actor" acts quickly based only on its own local sensor data.
-
-
 * **Representative Examples:** QMIX, MADDPG.
 
 ### Summary Comparison
 
-| Feature | Centralized | Decentralized | CTDE (Hybrid) |
-| --- | --- | --- | --- |
-| **Data Aggregation** | Always centralized | Distributed per agent | Centralized only during training |
-| **Learning Stability** | High (Global view) | Low (Others are moving) | Medium to High (Balanced) |
-| **Execution Autonomy** | Low (Requires comms) | High (Operates alone) | High (Operates alone) |
-| **Primary Use Cases** | Small-scale precision control | Large-scale independent envs | **Multi-drone coordination** |
+| Feature                      | Centralized                   | Decentralized                | CTDE (Hybrid)                      |
+| ---------------------------- | ----------------------------- | ---------------------------- | ---------------------------------- |
+| **Data Aggregation**   | Always centralized            | Distributed per agent        | Centralized only during training   |
+| **Learning Stability** | High (Global view)            | Low (Others are moving)      | Medium to High (Balanced)          |
+| **Execution Autonomy** | Low (Requires comms)          | High (Operates alone)        | High (Operates alone)              |
+| **Primary Use Cases**  | Small-scale precision control | Large-scale independent envs | **Multi-drone coordination** |
 
 **Conclusion:** Regarding the choice between centralized or decentralized, the modern MARL consensus is that **CTDE (Centralized Training, Decentralized Execution)** is the most efficient and practical solution.
-
 
 ## MARL Learning Methodologies
 
@@ -326,8 +314,6 @@ Treats all agents as one "giant AI," processing all observations and actions col
 
 * **Mechanism:** * **Training (Centralized):** A Critic or Mixing Network "cheats" by looking at the states and actions of all agents to accurately evaluate each action.
 * **Execution (Decentralized):** Each agent uses only its own network (Actor) to decide actions based on local info.
-
-
 * **Representative Methods:** **MADDPG** (Individual critics see others' actions), **QMIX/VDN** (Individual values integrated into a team value).
 * **Pros:** Stable learning; works in environments with weak communication infrastructure (e.g., field-deployed drones).
 
@@ -351,7 +337,7 @@ For more detail, please come in [here](https://github.com/Shinichi0713/Reinforce
 
 # cite
 
-in this repogitory, oss 'pygame-learning-environment' is used.
+in this repository, oss 'pygame-learning-environment' is used.
 [https://github.com/ntasfi/PyGame-Learning-Environment](https://github.com/ntasfi/PyGame-Learning-Environment)
 
 deep mind archives!
