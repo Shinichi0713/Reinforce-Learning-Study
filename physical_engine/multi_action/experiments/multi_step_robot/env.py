@@ -254,3 +254,40 @@ class RobotCarryEnv(gym.Env):
             img = Image.fromarray(rgb_array)
             self.record_frames.append(img)
         return obs, reward, done, truncated, info
+    
+
+
+if __name__ == "__main__":
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from IPython.display import display, clear_output
+    import time
+
+    # 自作環境をインポート（ファイル名に応じて変更してください）
+    # from robot_carry_env import RobotCarryEnv
+    # または、このノートブック内で既に定義されている場合はそのまま使う
+
+    # 環境の作成
+    env = RobotCarryEnv(max_steps=200, world_size=10.0)
+
+    # 1エピソード分のランダム行動で動作確認
+    obs, info = env.reset()
+    env.start_recording()  # 録画開始
+
+    done = False
+    truncated = False
+    total_reward = 0.0
+
+    while not (done or truncated):
+        # ランダム行動（連続行動空間）
+        action = env.action_space.sample()
+        obs, reward, done, truncated, info = env.step_with_record(action)
+        total_reward += reward
+
+    env.stop_recording()  # 録画停止
+
+    print(f"Episode finished. Total reward: {total_reward:.2f}")
+    print(f"Final step: {env.step_count}, Grasped: {env.grasped}")
+
+    # gif として保存
+    env.save_gif("random_agent_episode.gif", duration=100)
