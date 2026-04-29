@@ -9,7 +9,6 @@ import os
 class RobotCarryEnv(gym.Env):
     """
     ロボットが物体を掴んで目的地まで運ぶ2Dシミュレーション環境
-    行動は「1ステップでの移動量（dx, dy）」として扱い、1ステップで1マス動くように修正
     gif保存機能付き
     """
 
@@ -19,24 +18,25 @@ class RobotCarryEnv(gym.Env):
         self.world_size = world_size
         self.step_count = 0
 
-        # 観測空間: 15次元
+        # 観測空間: [rx, ry, vx, vy, ox, oy, tx, ty, grasped]
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(15,), dtype=np.float32
+            low=-np.inf, high=np.inf, shape=(9,), dtype=np.float32
         )
 
-        # 行動空間: [dx, dy] ロボットの1ステップでの移動量（連続）
+        # 行動空間: [ax, ay] ロボットの速度変化量（連続）
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(2,), dtype=np.float32
         )
 
         # 物理パラメータ
-        self.dt = 1.0  # 1ステップで1マス動くように固定
-        self.max_speed = 1.0  # 1ステップで動ける最大距離（行動空間の上限と同じ）
+        self.dt = 0.1
+        self.max_speed = 2.0
         self.grasp_dist = 0.5
         self.target_dist = 0.5
 
         # 状態変数
         self.robot_pos = None
+        self.robot_vel = None
         self.object_pos = None
         self.target_pos = None
         self.grasped = None
@@ -55,6 +55,7 @@ class RobotCarryEnv(gym.Env):
 
         # ロボット初期位置（中心付近）
         self.robot_pos = np.array([0.0, 0.0], dtype=np.float32)
+        self.robot_vel = np.array([0.0, 0.0], dtype=np.float32)
 
         # 物体と目的地をランダムに配置
         self.object_pos = self._random_pos()
@@ -84,38 +85,27 @@ class RobotCarryEnv(gym.Env):
         # 生の観測
         raw_obs = np.concatenate([
             self.robot_pos,      # 0,1
-            [0.0, 0.0],          # 2,3（速度は使わないが次元を維持）
+            self.robot_vel,      # 2,3
             self.object_pos,     # 4,5
             self.target_pos,     # 6,7
             [self.grasped]      # 8
-        ]).ast(np.float32)
-
-        # 相対位置と距離
-        rel_obj = self.object_pos - self.robot_pos
-        rel_target = self.target_pos - self.robot_pos
-        dist_obj = np.linalg.norm(rel_obj)
-        dist_target = np.linalg.norm(rel_target)
-
-        # 拡張観測
-        extended_obs = np.concatenate([
-            raw_obs,
-            rel_obj,           # 9,10
-            rel_target,        # 11,12
-            [dist_obj],        # 13
-            [dist_target]      # 14
         ]).astype(np.float32)
 
-        # 正規化
+        # 観測の正規化
+        normalized_obs = np.zeros_like(raw_obs)
         scale_pos = self.world_size
-        normalized_obs = extended_obs.copy()
-        normalized_obs[0:2] /= scale_pos    # rx, ry
-        normalized_obs[4:6] /= scale_pos    # ox, oy
-        normalized_obs[6:8] /= scale_pos    # tx, ty
-        normalized_obs[9:11] /= scale_pos   # rel_obj
-        normalized_obs[11:13] /= scale_pos  # rel_target
-        normalized_obs[13] /= scale_pos     # dist_obj
-        normalized_obs[14] /= scale_pos     # dist_target
-        # 速度は使わないので正規化しない（0のまま）
+        scale_vel = self.max_speed
+
+        # 位置関連: 世界サイズで割る
+        normalized_obs[0:2] = raw_obs[0:2] / scale_pos  # rx, ry
+        normalized_obs[4:6] = raw_obs[4:6] / scale_pos  # ox, oy
+        normalized_obs[6:8] = raw_obs[6:8] / scale_pos  # tx, ty
+
+        # 速度関連: 最大速度で割る
+        normalized_obs[2:4] = raw_obs[2:4] / scale_vel  # vx, vy
+
+        # grasped はそのまま
+        normalized_obs[8] = raw_obs[8]
 
         return normalized_obs
 
@@ -123,22 +113,21 @@ class RobotCarryEnv(gym.Env):
         self.step_count += 1
         action = np.clip(action, self.action_space.low, self.action_space.high)
 
-        # 1. 行動を「1ステップでの移動量」として扱う
-        # dt=1.0 なので robot_pos += action * dt = action
-        move = action * self.dt
+        # 1. 速度変化量として扱う（加速度）
+        self.robot_vel += action * self.dt  # 行動は加速度として解釈
 
-        # 移動量の大きさを制限（1ステップで動ける最大距離）
-        move_norm = np.linalg.norm(move)
-        if move_norm > self.max_speed:
-            move = move / move_norm * self.max_speed
+        # 速度の大きさを制限
+        speed = np.linalg.norm(self.robot_vel)
+        if speed > self.max_speed:
+            self.robot_vel = self.robot_vel / speed * self.max_speed
 
         # 2. 位置を更新
-        self.robot_pos += move
+        self.robot_pos += self.robot_vel * self.dt
 
         # 世界の境界でクリップ
         self.robot_pos = np.clip(self.robot_pos, -self.world_size/2, self.world_size/2)
 
-        # 3. 把持判定（一度掴んだら維持）
+        # 2. 把持判定の修正（一度掴んだら維持）
         prev_grasped = self.grasped
         dist_to_obj = np.linalg.norm(self.robot_pos - self.object_pos)
 
@@ -150,21 +139,23 @@ class RobotCarryEnv(gym.Env):
         if self.grasped > 0.5:
             self.object_pos = self.robot_pos.copy()
 
-        # 4. 報酬設計
+        # 3. 報酬設計の整理
         reward = 0.0
         done = False
-        dist_to_target = np.linalg.norm(self.object_pos - self.target_pos)
-        # 距離を正規化
-        norm_dist_obj = dist_to_obj / self.world_size
-        norm_dist_target = dist_to_target / self.world_size
 
         if self.grasped < 0.5:
-            reward -= 0.1 * norm_dist_obj  # 正規化された距離に基づく報酬
+            # 掴む前：物体へ近づくインセンティブ
+            reward -= 0.1 * dist_to_obj
         else:
-            reward -= 0.1 * norm_dist_target
+            # 掴んだ後：目的地へ近づくインセンティブ
+            dist_to_target = np.linalg.norm(self.object_pos - self.target_pos)
+            reward -= 0.1 * dist_to_target
+
+            # 目的地に到着
             if dist_to_target < self.target_dist:
-                reward += 10.0
+                reward += 50.0  # ゴール報酬
                 done = True
+
         # 掴んだ瞬間のボーナス（1回切り）
         if prev_grasped < 0.5 and self.grasped > 0.5:
             reward += 5.0
@@ -179,7 +170,7 @@ class RobotCarryEnv(gym.Env):
         if mode == "human":
             # テキスト表示
             print(f"Step {self.step_count}")
-            print(f"Robot: {self.robot_pos}")
+            print(f"Robot: {self.robot_pos}, Vel: {self.robot_vel}")
             print(f"Object: {self.object_pos}, Grasped: {self.grasped}")
             print(f"Target: {self.target_pos}")
             print("---")

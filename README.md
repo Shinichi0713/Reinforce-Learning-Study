@@ -1,7 +1,6 @@
 # [Purpose](https://github.com/Shinichi0713/Reinforce-Learning-Study)
 
-this repository is run to study reinforcement learning.
-thus, we apply the tech to control Self-discipline system.
+A study repository for Reinforcement Learning (RL) and Multi-Agent Reinforcement Learning (MARL) with Python implementations (DQN, SAC, QMIX, CTDE). Includes theory notes, code examples (OpenAI Gym, PettingZoo), and applications to self-discipline systems.
 
 ![1762658300029](image/README/main_title.png)
 
