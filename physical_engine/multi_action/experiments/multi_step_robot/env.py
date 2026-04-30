@@ -4,12 +4,12 @@ from gymnasium import spaces
 import matplotlib.pyplot as plt
 from PIL import Image
 import os
+import pdb
 
 
 class RobotCarryEnv(gym.Env):
     """
     ロボットが物体を掴んで目的地まで運ぶ2Dシミュレーション環境
-    行動は「1ステップでの移動量（dx, dy）」として扱い、1ステップで1マス動くように修正
     gif保存機能付き
     """
 
@@ -24,19 +24,20 @@ class RobotCarryEnv(gym.Env):
             low=-np.inf, high=np.inf, shape=(15,), dtype=np.float32
         )
 
-        # 行動空間: [dx, dy] ロボットの1ステップでの移動量（連続）
+        # 行動空間: [ax, ay] ロボットの速度変化量（連続）
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(2,), dtype=np.float32
         )
 
         # 物理パラメータ
-        self.dt = 1.0  # 1ステップで1マス動くように固定
-        self.max_speed = 1.0  # 1ステップで動ける最大距離（行動空間の上限と同じ）
+        self.dt = 0.1
+        self.max_speed = 2.0
         self.grasp_dist = 0.5
         self.target_dist = 0.5
 
         # 状態変数
         self.robot_pos = None
+        self.robot_vel = None
         self.object_pos = None
         self.target_pos = None
         self.grasped = None
@@ -55,6 +56,7 @@ class RobotCarryEnv(gym.Env):
 
         # ロボット初期位置（中心付近）
         self.robot_pos = np.array([0.0, 0.0], dtype=np.float32)
+        self.robot_vel = np.array([0.0, 0.0], dtype=np.float32)
 
         # 物体と目的地をランダムに配置
         self.object_pos = self._random_pos()
@@ -84,11 +86,11 @@ class RobotCarryEnv(gym.Env):
         # 生の観測
         raw_obs = np.concatenate([
             self.robot_pos,      # 0,1
-            [0.0, 0.0],          # 2,3（速度は使わないが次元を維持）
+            self.robot_vel,      # 2,3
             self.object_pos,     # 4,5
             self.target_pos,     # 6,7
             [self.grasped]      # 8
-        ]).ast(np.float32)
+        ]).astype(np.float32)
 
         # 相対位置と距離
         rel_obj = self.object_pos - self.robot_pos
@@ -107,6 +109,7 @@ class RobotCarryEnv(gym.Env):
 
         # 正規化
         scale_pos = self.world_size
+        scale_vel = self.max_speed
         normalized_obs = extended_obs.copy()
         normalized_obs[0:2] /= scale_pos    # rx, ry
         normalized_obs[4:6] /= scale_pos    # ox, oy
@@ -115,7 +118,7 @@ class RobotCarryEnv(gym.Env):
         normalized_obs[11:13] /= scale_pos  # rel_target
         normalized_obs[13] /= scale_pos     # dist_obj
         normalized_obs[14] /= scale_pos     # dist_target
-        # 速度は使わないので正規化しない（0のまま）
+        normalized_obs[2:4] /= scale_vel   # vx, vy
 
         return normalized_obs
 
@@ -123,22 +126,21 @@ class RobotCarryEnv(gym.Env):
         self.step_count += 1
         action = np.clip(action, self.action_space.low, self.action_space.high)
 
-        # 1. 行動を「1ステップでの移動量」として扱う
-        # dt=1.0 なので robot_pos += action * dt = action
-        move = action * self.dt
-
-        # 移動量の大きさを制限（1ステップで動ける最大距離）
-        move_norm = np.linalg.norm(move)
-        if move_norm > self.max_speed:
-            move = move / move_norm * self.max_speed
+        # 1. 速度変化量として扱う（加速度）
+        self.robot_vel += action * self.dt  # 行動は加速度として解釈
+        # pdb.set_trace()
+        # 速度の大きさを制限
+        speed = np.linalg.norm(self.robot_vel)
+        if speed > self.max_speed:
+            self.robot_vel = self.robot_vel / speed * self.max_speed
 
         # 2. 位置を更新
-        self.robot_pos += move
+        self.robot_pos += self.robot_vel * self.dt
 
         # 世界の境界でクリップ
         self.robot_pos = np.clip(self.robot_pos, -self.world_size/2, self.world_size/2)
 
-        # 3. 把持判定（一度掴んだら維持）
+        # 2. 把持判定の修正（一度掴んだら維持）
         prev_grasped = self.grasped
         dist_to_obj = np.linalg.norm(self.robot_pos - self.object_pos)
 
@@ -150,7 +152,7 @@ class RobotCarryEnv(gym.Env):
         if self.grasped > 0.5:
             self.object_pos = self.robot_pos.copy()
 
-        # 4. 報酬設計
+        # 3. 報酬設計の整理（方向ベースの報酬を追加）
         reward = 0.0
         done = False
         dist_to_target = np.linalg.norm(self.object_pos - self.target_pos)
@@ -158,13 +160,41 @@ class RobotCarryEnv(gym.Env):
         norm_dist_obj = dist_to_obj / self.world_size
         norm_dist_target = dist_to_target / self.world_size
 
+        # 行動ベクトル（速度変化量）の大きさ
+        action_norm = np.linalg.norm(action)
+        if action_norm < 1e-6:
+            action_norm = 1e-6  # ゼロ除算防止
+
+        # 行動の方向ベクトル（単位ベクトル）
+        action_dir = action / action_norm
+
         if self.grasped < 0.5:
-            reward -= 0.1 * norm_dist_obj  # 正規化された距離に基づく報酬
+            # 物体を持っていないとき：物体方向への移動に報酬
+            obj_dir = self.object_pos - self.robot_pos
+            obj_dir_norm = np.linalg.norm(obj_dir)
+            if obj_dir_norm > 1e-6:
+                obj_dir_unit = obj_dir / obj_dir_norm
+                # 内積が正なら物体方向に進んでいる
+                dot_product = np.dot(action_dir, obj_dir_unit)
+                if dot_product > 0:
+                    reward += 0.5 * dot_product  # 方向が正しいほど大きな報酬
+            # 距離に基づく小さなペナルティは維持
+            reward -= 0.1 * norm_dist_obj
         else:
+            # 物体を持った後：ゴール方向への移動に報酬
+            target_dir = self.target_pos - self.robot_pos
+            target_dir_norm = np.linalg.norm(target_dir)
+            if target_dir_norm > 1e-6:
+                target_dir_unit = target_dir / target_dir_norm
+                dot_product = np.dot(action_dir, target_dir_unit)
+                if dot_product > 0:
+                    reward += 0.5 * dot_product
+            # 距離に基づく小さなペナルティは維持
             reward -= 0.1 * norm_dist_target
             if dist_to_target < self.target_dist:
                 reward += 10.0
                 done = True
+
         # 掴んだ瞬間のボーナス（1回切り）
         if prev_grasped < 0.5 and self.grasped > 0.5:
             reward += 5.0
@@ -179,7 +209,7 @@ class RobotCarryEnv(gym.Env):
         if mode == "human":
             # テキスト表示
             print(f"Step {self.step_count}")
-            print(f"Robot: {self.robot_pos}")
+            print(f"Robot: {self.robot_pos}, Vel: {self.robot_vel}")
             print(f"Object: {self.object_pos}, Grasped: {self.grasped}")
             print(f"Target: {self.target_pos}")
             print("---")
@@ -254,40 +284,3 @@ class RobotCarryEnv(gym.Env):
             img = Image.fromarray(rgb_array)
             self.record_frames.append(img)
         return obs, reward, done, truncated, info
-    
-
-
-if __name__ == "__main__":
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from IPython.display import display, clear_output
-    import time
-
-    # 自作環境をインポート（ファイル名に応じて変更してください）
-    # from robot_carry_env import RobotCarryEnv
-    # または、このノートブック内で既に定義されている場合はそのまま使う
-
-    # 環境の作成
-    env = RobotCarryEnv(max_steps=200, world_size=10.0)
-
-    # 1エピソード分のランダム行動で動作確認
-    obs, info = env.reset()
-    env.start_recording()  # 録画開始
-
-    done = False
-    truncated = False
-    total_reward = 0.0
-
-    while not (done or truncated):
-        # ランダム行動（連続行動空間）
-        action = env.action_space.sample()
-        obs, reward, done, truncated, info = env.step_with_record(action)
-        total_reward += reward
-
-    env.stop_recording()  # 録画停止
-
-    print(f"Episode finished. Total reward: {total_reward:.2f}")
-    print(f"Final step: {env.step_count}, Grasped: {env.grasped}")
-
-    # gif として保存
-    env.save_gif("random_agent_episode.gif", duration=100)
