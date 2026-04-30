@@ -121,6 +121,48 @@ class SACAgent:
 
         return q_loss.item(), policy_loss.item(), self.alpha
 
+    def save_model(self, path):
+        """
+        モデルのネットワークとα（自動調整時）を .pth ファイルに保存
+        path: 保存先パス（例: "sac_model.pth"）
+        """
+        checkpoint = {
+            "policy_net_state_dict": self.policy_net.state_dict(),
+            "q_net1_state_dict": self.q_net1.state_dict(),
+            "q_net2_state_dict": self.q_net2.state_dict(),
+            "target_q_net1_state_dict": self.target_q_net1.state_dict(),
+            "target_q_net2_state_dict": self.target_q_net2.state_dict(),
+            "policy_optimizer_state_dict": self.policy_optimizer.state_dict(),
+            "q_optimizer1_state_dict": self.q_optimizer1.state_dict(),
+            "q_optimizer2_state_dict": self.q_optimizer2.state_dict(),
+            "alpha": self.alpha,
+        }
+        if self.auto_alpha:
+            checkpoint["log_alpha"] = self.log_alpha
+            checkpoint["alpha_optimizer_state_dict"] = self.alpha_optimizer.state_dict()
+        torch.save(checkpoint, path)
+        print(f"Model saved to {path}")
+
+    def load_model(self, path):
+        """
+        .pth ファイルからモデルを読み込み
+        path: 読み込み元パス（例: "sac_model.pth"）
+        """
+        checkpoint = torch.load(path, map_location="cpu")
+        self.policy_net.load_state_dict(checkpoint["policy_net_state_dict"])
+        self.q_net1.load_state_dict(checkpoint["q_net1_state_dict"])
+        self.q_net2.load_state_dict(checkpoint["q_net2_state_dict"])
+        self.target_q_net1.load_state_dict(checkpoint["target_q_net1_state_dict"])
+        self.target_q_net2.load_state_dict(checkpoint["target_q_net2_state_dict"])
+        self.policy_optimizer.load_state_dict(checkpoint["policy_optimizer_state_dict"])
+        self.q_optimizer1.load_state_dict(checkpoint["q_optimizer1_state_dict"])
+        self.q_optimizer2.load_state_dict(checkpoint["q_optimizer2_state_dict"])
+        self.alpha = checkpoint["alpha"]
+        if self.auto_alpha and "log_alpha" in checkpoint:
+            self.log_alpha = checkpoint["log_alpha"]
+            self.alpha_optimizer.load_state_dict(checkpoint["alpha_optimizer_state_dict"])
+        print(f"Model loaded from {path}")
+
 
 # ====================== 経験再生バッファ ======================
 class ReplayBuffer:
