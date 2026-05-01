@@ -152,6 +152,60 @@ when using ddqn, ai agent can arrange boxes toward restricted space.
 
 ![alt text](image/arranging-boxes.png)
 
+### Summary: Reward Design
+
+**Key idea:**  
+In reinforcement learning (RL), tasks where rewards only come after many actions are much harder to learn than tasks where rewards arrive quickly. This is because delayed rewards weaken the learning signal and make it hard to know which actions were actually good.
+
+__1. Intuitive reasons why delayed rewards are hard__
+
+- **Credit assignment problem:**  
+  When a sequence of actions leads to a reward only at the end, it’s unclear which specific actions contributed most to success. The agent struggles to assign “credit” correctly to earlier actions.
+
+- **Exploration becomes inefficient:**  
+  If rewards are rare and delayed, the agent may never stumble upon the right sequence of actions by random exploration. It’s like trying to learn chess when you only find out if you won dozens of moves later.
+
+- **Weak learning signal:**  
+  Temporal difference (TD) errors and policy gradients become small when rewards are sparse and delayed, slowing down learning and making updates less informative.
+
+__2. Mathematical explanation (MDP perspective)__
+
+- In an MDP, the discounted return is  
+  $$
+  G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}.
+  $$
+- If a large reward $R_T$ only appears after many steps $T$, then  
+  $$
+  G_0 \approx \gamma^{T-1} R_T.
+  $$
+- With discount factor $\gamma < 1$, $\gamma^{T-1}$ decays quickly as $T$ grows:
+  - Large $T$ → small $G_0$ → weak value function signal.
+- TD error $\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$ becomes dominated by value differences rather than rewards, reducing the influence of actual reward feedback.
+
+
+__3. Policy gradient perspective__
+
+- Policy gradient updates scale roughly with $G_t$:
+  $$
+  \nabla_\theta J(\theta) \propto \mathbb{E}_\pi[G_t \nabla_\theta \log \pi_\theta(A_t \mid S_t)].
+  $$
+- If $G_t$ is small (due to delayed rewards), gradients are small → slow learning.
+- Variance also increases, making learning unstable.
+
+
+__4. Experimental result__
+
+You compared two reward designs in a robot delivery task:
+
+- **Case 1:** Reward only when grasping an object and when delivering it to the goal.
+- **Case 2:** Additional shaping rewards when the robot adjusts its output toward the object or goal.
+
+Result:  
+Case 2 (with shaping rewards) learned successfully; the robot learned to grasp objects and move them to the goal.  
+Case 1 (only sparse terminal rewards) failed to even learn grasping reliably.
+
+
+
 ### Multi-Agent example
 
 We implemented DQN training using two Rock-Paper-Scissors agents as a multi-agent example problem. We visualized two aspects:
