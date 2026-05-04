@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>最近はMARL関係が多かったのですが、久しぶりに探索系のRLをしたくなりました。
+環境構築が毎回手間だったのですが、そんな中で使えそうなOpen Spielについて調査、お試しを行いました。</p>
+<h2 id="概要">概要</h2>
+<h3 id="開発元">開発元</h3>
+<p>OpenSpielは <strong>Google DeepMind</strong>（現在は Google DeepMind の GitHub 組織として公開）が開発・公開している、ゲームにおける強化学習・探索・プランニングの研究用フレームワークです<a href="https://github.com/google-deepmind/open_spiel">OpenSpiel GitHub</a>。</p>
+<h3 id="サポートされているゲーム環境の種類">サポートされているゲーム環境の種類</h3>
+<p>OpenSpielは、<strong>70種類以上のゲーム環境</strong>をサポートしており、以下のような多様なゲームタイプが含まれています<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a>。</p>
+<p><strong>1. シングルプレイヤー（1人用）ゲーム</strong></p>
+<ul>
+<li><strong>2048</strong>: タイルをスライドさせて同じ数字を合体させ、2048タイルを作るパズル<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a></li>
+<li><strong>Yacht</strong>: サイコロを使った得点ゲーム（1〜10人対応）<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a></li>
+<li>その他、単純なグリッドワールドやベンチマークタスクも含まれます。</li>
+</ul>
+<p><strong>2. 2人・多人数の対戦ゲーム</strong></p>
+<ul>
+<li><strong>m,n,k-game</strong>: m×n の盤面で k 個並べるゲーム（三目並べや五目並べの一般化）<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a></li>
+<li><strong>Backgammon</strong>: サイコロを使ったボードゲーム<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a></li>
+<li><strong>Tic-Tac-Toe（三目並べ）</strong>, <strong>Go（囲碁）</strong>, <strong>Chess（チェス）</strong> など、古典的な完全情報ゲーム</li>
+<li><strong>Kuhn Poker</strong>, <strong>Leduc Poker</strong> などの不完全情報ゲーム（ポーカー系）</li>
+<li>その他、カードゲームやボードゲームの研究用ベンチマークが多数含まれます。</li>
+</ul>
+<p><strong>3. 不完全情報ゲーム（情報が一部しか見えないゲーム）</strong></p>
+<ul>
+<li><strong>Kuhn Poker</strong>: 3枚のカードを使う簡易ポーカー</li>
+<li><strong>Leduc Poker</strong>: もう少し複雑なポーカー</li>
+<li><strong>Goofspiel</strong>（スコアカードを使うカードゲーム）など</li>
+<li>これらはゲーム理論や CFR（反実仮想後悔最小化）のベンチマークとしてよく使われます。</li>
+</ul>
+<p><strong>4. 平均場ゲーム（Mean Field Games）</strong></p>
+<ul>
+<li><strong>Mean Field Game: linear-quadratic</strong>: プレイヤーが一様分布からスタートし、同じ点に集まるように動く問題</li>
+<li><strong>Mean Field Game: routing</strong>: 各ノードで行き先を選ぶルーティング問題</li>
+<li>多数のエージェントが相互作用するようなマクロなモデルを扱うゲームです<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a>。</li>
+</ul>
+<p><strong>5. その他の特徴</strong></p>
+<ul>
+<li><strong>完全情報／不完全情報</strong> の両方に対応</li>
+<li><strong>同時手番（simultaneous-move）</strong> と <strong>交互手番（turn-taking）</strong> の両方に対応</li>
+<li><strong>ゼロサム／非ゼロサム（一般和）／協力ゲーム</strong> など、報酬構造の異なるゲームを幅広くサポート<a href="https://openspiel.readthedocs.io/en/latest/games.html">OpenSpiel Documentation</a>。</li>
+</ul>
+<h3 id="ゲーム一覧の確認方法">ゲーム一覧の確認方法</h3>
+<p>公式ドキュメントの「Available games」ページに、ゲーム名・プレイヤー数・完全情報かどうか・利用可能かどうかなどが一覧で掲載されています<a href="https://openspiel.readthedocs.io/en/latest/games.html">Available games — OpenSpiel documentation</a>。</p>
+<ul>
+<li>ページ内の表で、ゲーム名・プレイヤー数・情報構造（完全情報／不完全情報）・利用可否が確認できます。</li>
+<li>また、GitHubリポジトリの <code>open_spiel/games/</code> ディレクトリに各ゲームの実装が格納されています<a href="https://github.com/google-deepmind/open_spiel">OpenSpiel GitHub</a>。</li>
+</ul>
+<h3 id="特徴">特徴</h3>
+<p>豊富なアルゴリズム実装のようです。
+OpenSpielには、強化学習・探索・ゲーム理論アルゴリズムのリファレンス実装が以下のジャンルに含まれています。</p>
+<ul>
+<li>探索・プランニング系</li>
+</ul>
+<p>MCTS（モンテカルロ木探索）
+Minimax / Alpha-Beta など</p>
+<ul>
+<li>強化学習系</li>
+</ul>
+<p>DQN, A2C などの基本的な深層RL
+マルチエージェントRL（NFSP, ED など）</p>
+<ul>
+<li>ゲーム理論・不完全情報ゲーム</li>
+</ul>
+<p>CFR（反実仮想後悔最小化）
+その派生アルゴリズム
+線形計画法（LP）による均衡計算</p>
+<h2 id="使い方">使い方</h2>
+<h3 id="1-インストール">1. インストール</h3>
+<p><strong>公式ドキュメント</strong></p>
+<ul>
+<li>メインリポジトリ: <a href="https://github.com/google-deepmind/open_spiel">https://github.com/google-deepmind/open_spiel</a></li>
+<li>公式ドキュメント: <a href="https://openspiel.readthedocs.io/">https://openspiel.readthedocs.io/</a></li>
+<li>インストール手順:
+<ul>
+<li>Linux / macOS: <code>docs/install.md</code></li>
+<li>Windows: <code>docs/windows.md</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>おおまかな手順（Linux/macOS 例）</strong></p>
+<ol>
+<li>リポジトリをクローン</li>
+</ol>
+<pre><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/google-deepmind/open_spiel.git
+<span class="hljs-built_in">cd</span> open_spiel
+</code></pre>
+<ol start="2">
+<li>依存パッケージのインストール（例: Ubuntu）</li>
+</ol>
+<pre><code class="language-bash">./open_spiel/scripts/install.sh
+</code></pre>
+<ol start="3">
+<li>OpenSpielのビルド</li>
+</ol>
+<pre><code class="language-bash"><span class="hljs-built_in">mkdir</span> build
+<span class="hljs-built_in">cd</span> build
+CXX=clang++ cmake -DPython3_EXECUTABLE=$(<span class="hljs-built_in">which</span> python3) ../open_spiel
+make -j$(<span class="hljs-built_in">nproc</span>)
+</code></pre>
+<ol start="4">
+<li>Pythonパッケージのインストール</li>
+</ol>
+<pre><code class="language-bash">pip install -e .
+</code></pre>
+<p>※詳細はOSごとに公式ドキュメントを参照してください。</p>
+<h3 id="2-pythonでの基本的な使い方">2. Pythonでの基本的な使い方</h3>
+<p><strong>2.1 環境（ゲーム）の作成</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> pyspiel
+
+<span class="hljs-comment"># ゲームの定義（例: じゃんけん）</span>
+game = pyspiel.load_game(<span class="hljs-string">&quot;matrix_rps&quot;</span>)
+
+<span class="hljs-comment"># 状態の初期化</span>
+state = game.new_initial_state()
+</code></pre>
+<p><code>load_game</code> の引数には、ゲームの名前（<code>kuhn_poker</code>, <code>leduc_poker</code>, <code>tic_tac_toe</code> など）を指定します。</p>
+<p><strong>2.2 状態の情報を確認</strong></p>
+<pre><code class="language-python"><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;ゲーム名:&quot;</span>, game.get_type().short_name)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;プレイヤー数:&quot;</span>, game.num_players())
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;状態の文字列表現:&quot;</span>, state)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;現在のプレイヤー:&quot;</span>, state.current_player())
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;可能な行動数:&quot;</span>, state.legal_actions())
+</code></pre>
+<p><strong>2.3 行動を適用して進める</strong></p>
+<pre><code class="language-python"><span class="hljs-comment"># 可能な行動の一覧</span>
+legal_actions = state.legal_actions()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;可能な行動:&quot;</span>, legal_actions)
+
+<span class="hljs-comment"># 最初の行動を適用</span>
+action = legal_actions[<span class="hljs-number">0</span>]
+state.apply_action(action)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;行動後の状態:&quot;</span>, state)
+</code></pre>
+<p><strong>2.4 終了状態と報酬</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> state.is_terminal():
+    <span class="hljs-comment"># ランダムに行動を選ぶ例</span>
+    action = np.random.choice(state.legal_actions())
+    state.apply_action(action)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;最終状態:&quot;</span>, state)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;報酬:&quot;</span>, state.returns())
+</code></pre>
+<h3 id="3-サンプルコードとチュートリアル">3. サンプルコードとチュートリアル</h3>
+<ul>
+<li><code>open_spiel/python/examples/</code> に多くのサンプルがあります。
+<ul>
+<li><code>example.py</code>: 基本的な使い方</li>
+<li><code>mcts.py</code>: MCTS（モンテカルロ木探索）の例</li>
+<li><code>jpsro.py</code>: ポリシー空間応答オラクル（PSRO）の例 など</li>
+</ul>
+</li>
+<li><code>docs/concepts.md</code>: APIの概要と最初の例</li>
+<li>Google Colab チュートリアル:
+<ul>
+<li><a href="https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/OpenSpielTutorial.ipynb">https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/OpenSpielTutorial.ipynb</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="4-参考情報">4. 参考情報</h3>
+<ul>
+<li>公式GitHub: <a href="https://github.com/google-deepmind/open_spiel">https://github.com/google-deepmind/open_spiel</a></li>
+<li>公式ドキュメント: <a href="https://openspiel.readthedocs.io/">https://openspiel.readthedocs.io/</a></li>
+<li>チュートリアルColab: <a href="https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/OpenSpielTutorial.ipynb">https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/OpenSpielTutorial.ipynb</a></li>
+</ul>
+<h2 id="お試し">お試し</h2>
+<p>五目並べを使って強化学習を実装してみました。</p>
+<p>この手の手の探索はSACを使うのが著者の常習です。
+本当はSACは状態空間が連続の場合に威力を発揮するといわれてますが、離散化も可能です。</p>
+<p>コードは以下レポジトリを参考下さい。
+<a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/physical_engine/open_spiel/src/tic_tac_toe">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/physical_engine/open_spiel/src/tic_tac_toe</a></p>
+<p><strong>結果</strong></p>
+<p>今回はそこまでシビアな環境ではないので、あっさり学習出来ました。
+最後に3回ランダムの打ち手と対戦しました。</p>
+<pre><code>=== Final Results ===
+SAC Agent Wins: 3
+Opponent Wins: 0
+Draws: 0
+Overall Winner: SAC Agent
+</code></pre>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\physical_engine\open_spiel\src\tic_tac_toe\image\README\marl_agent_motion.gif" alt="jssp-3" width="500px" height="auto">
+<h2 id="総括">総括</h2>
+<p>環境が初めからそろっていると強化学習のアルゴリズム実装に集中出来ます。
+今回はそんな中からOpen Spielについて調査、お試しで実装してみました。</p>
+<p>一点注意が可視化用の機能がないので、レンダリングする機能は自分で実装する必要があります。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+        </body>
+        </html>
