@@ -214,7 +214,7 @@ The trend of Agent 1's average reward (Learning stability).
 
 The trend of Agent 1's final Q-values (Learned action strategy).
 
-`<img src="image/README/1763209192634.png" alt="jssp-3" width="500px" height="auto">`
+<img src="image/README/1763209192634.png" alt="jssp-3" width="500px" height="auto">
 
 MARL implementation is descripted as below URL:
 
