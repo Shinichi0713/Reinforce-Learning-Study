@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MARL&#x74b0;&#x5883;&#x8abf;&#x67fb;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>最近MARLのトライアル中に自作環境で困ることが多いと感じました。(この下りは記事下の総括でも触れますが・・・結構手痛い目を見ました)
+そこで、Google Colabで動作する、MARL環境を構築することが出来る、利用者が一定数以上存在するという条件でパッケージの選定を行いました。</p>
+<h2 id="marl環境調査">MARL環境調査</h2>
+<p>Google Colab で動作し、かつ利用者が一定数以上いる MARL 環境パッケージとして、代表的なものを以下に挙げ、それぞれを</p>
+<ul>
+<li><strong>ネット上の情報量（利用者数・認知度）</strong></li>
+<li><strong>パッケージの更新性（メンテナンス状況）</strong></li>
+<li><strong>環境の豊富さ（タスクの多様性）</strong></li>
+</ul>
+<p>の 3 軸で評価します。</p>
+<h3 id="候補パッケージの概要と評価">候補パッケージの概要と評価</h3>
+<p><strong>1. PettingZoo（Farama Foundation）</strong></p>
+<ul>
+<li><strong>概要</strong>: Gymnasium 互換の API を持つマルチエージェント環境標準ライブラリ。Classic、MPE、Atari など多数の環境を提供。</li>
+<li><strong>Colab 対応</strong>: <code>pip install pettingzoo[&quot;mpe&quot;]</code> などでインストール可能。公式ドキュメントやチュートリアルも豊富。</li>
+<li><strong>GitHub スター数</strong>: 10,000 以上と非常に多く、MARL 環境のデファクトスタンダードとして認知されています<a href="https://pettingzoo.farama.org/index.html">PettingZoo Documentation</a>。</li>
+</ul>
+<p><strong>評価</strong></p>
+<ul>
+<li><strong>情報量・利用者数</strong>: ★★★★★<br>
+GitHub スター数が 1 万超えで、論文・ブログ・チュートリアルも非常に多い。MARL 環境の「標準 API」として扱われることが多く、情報量はトップクラス。</li>
+<li><strong>更新性</strong>: ★★★★☆<br>
+Farama Foundation（旧 OpenAI Gym メンツ）がメンテナンスしており、Gymnasium との整合性も高く、定期的にアップデートされている。</li>
+<li><strong>環境の豊富さ</strong>: ★★★★★<br>
+Classic（じゃんけん、囲碁、四目並べ）、MPE（粒子環境）、Atari（Pong, Space Invaders など）、さらに SMAC, SUMO, GRF などのサードパーティ環境も PettingZoo API でラップされている<a href="https://pettingzoo.farama.org/environments/third_party_envs/">PettingZoo Third-Party Environments</a>。<br>
+協力・競争・混合インセンティブなど、タスクの幅が非常に広い。</li>
+</ul>
+<p><strong>2. Melting Pot（DeepMind）</strong></p>
+<ul>
+<li><strong>概要</strong>: 50 以上のマルチエージェント基盤と 256 以上のテストシナリオからなる MARL 評価スイート。社会的相互作用（協力・競争・欺瞞など）の一般化性能を測るベンチマーク<a href="https://github.com/google-deepmind/meltingpot">Melting Pot GitHub</a>。</li>
+<li><strong>Colab 対応</strong>: <code>dm-meltingpot</code> として PyPI に公開され、評価用ノートブックが Colab で開けるようになっている。</li>
+<li><strong>GitHub スター数</strong>: 約 750 前後と、研究用途に特化した中規模プロジェクト<a href="https://medium.com/@gwrx2005/top-10-github-repositories-for-multi-agent-reinforcement-learning-marl-platforms-05cc8d21a6c1">Top 10 MARL Repositories</a>。</li>
+</ul>
+<p><strong>評価</strong></p>
+<ul>
+<li><strong>情報量・利用者数</strong>: ★★★☆☆<br>
+研究コミュニティでは有名だが、一般的な MARL 入門用途での利用は少なめ。GitHub スターも PettingZoo の 1/10 程度。</li>
+<li><strong>更新性</strong>: ★★★☆☆<br>
+DeepMind が開発・公開しているが、PettingZoo ほど頻繁な更新はなく、研究ベンチマークとしての位置づけが強い。</li>
+<li><strong>環境の豊富さ</strong>: ★★★★☆<br>
+社会的ジレンマに特化した多様なシナリオ（協力・競争・欺瞞・信頼など）が揃っているが、タスクの種類は「社会的相互作用」に集中している。</li>
+</ul>
+<p><strong>3. AI Economist / Foundation（Salesforce）</strong></p>
+<ul>
+<li><strong>概要</strong>: 経済シミュレーションのためのマルチエージェント環境。労働者と政府（社会的プランナー）の相互作用を Gym 互換 API でモデル化<a href="https://github.com/salesforce/ai-economist">AI Economist GitHub</a>。</li>
+<li><strong>Colab 対応</strong>: <code>tutorials/</code> に複数の Colab ノートブックがあり、GPU トレーニング（WarpDrive）や RLlib 連携などが紹介されている。</li>
+<li><strong>GitHub スター数</strong>: 数百〜千程度で、経済・政策シミュレーションに特化したニッチな利用。</li>
+</ul>
+<p><strong>評価</strong></p>
+<ul>
+<li><strong>情報量・利用者数</strong>: ★★☆☆☆<br>
+経済政策・エネルギー市場などの応用研究では使われるが、一般的な MARL 入門では利用が限定的。</li>
+<li><strong>更新性</strong>: ★★☆☆☆<br>
+プロジェクトは公開されているが、PettingZoo ほど活発なコミュニティ更新は見られない。アーカイブ的な扱いになりつつある。</li>
+<li><strong>環境の豊富さ</strong>: ★★☆☆☆<br>
+経済シミュレーションに特化しており、タスクの種類は限定的。汎用 MARL 環境としては狭い。</li>
+</ul>
+<p><strong>4. VMAS（Vectorized Multi-Agent Simulator）</strong></p>
+<ul>
+<li><strong>概要</strong>: PyTorch ベースの 2D 物理エンジン兼マルチエージェントシミュレータ。ベクトル化された環境で効率的な MARL ベンチマークを提供<a href="https://github.com/proroklab/vectorizedmultiagentsimulator">VMAS GitHub</a>。</li>
+<li><strong>Colab 対応</strong>: BenchMARL（TorchRL の MARL ライブラリ）と連携した Colab ノートブックが公式に提供されている。</li>
+<li><strong>GitHub スター数</strong>: 数百程度で、研究用途の高性能シミュレータとして認知されている。</li>
+</ul>
+<p><strong>評価</strong></p>
+<ul>
+<li><strong>情報量・利用者数</strong>: ★★☆☆☆<br>
+高性能シミュレータとして論文でよく引用されるが、一般的な MARL 入門での利用は少ない。</li>
+<li><strong>更新性</strong>: ★★★☆☆<br>
+研究プロジェクトとして継続的に開発されているが、PettingZoo ほどの大規模コミュニティではない。</li>
+<li><strong>環境の豊富さ</strong>: ★★★☆☆<br>
+物理ベースのマルチロボットタスク（ナビゲーション、追跡、衝突回避など）に強みがあるが、ゲームや経済など他ドメインはカバーしていない。</li>
+</ul>
+<p><strong>5. Mava（InstaDeep）</strong></p>
+<ul>
+<li><strong>概要</strong>: JAX ベースの分散 MARL フレームワーク。PPO, Q-learning, SAC などのアルゴリズムを単一ファイル実装で提供し、高速な研究プロトタイピングを支援<a href="https://github.com/instadeepai/mava">Mava GitHub</a>。</li>
+<li><strong>Colab 対応</strong>: Quickstart 用の Colab ノートブックが公式に用意されている。</li>
+<li><strong>GitHub スター数</strong>: 数百程度で、JAX ベース MARL の代表的なフレームワーク。</li>
+</ul>
+<p><strong>評価</strong></p>
+<ul>
+<li><strong>情報量・利用者数</strong>: ★★☆☆☆<br>
+JAX コミュニティでは有名だが、一般的な MARL 入門では PettingZoo ほど広くは使われていない。</li>
+<li><strong>更新性</strong>: ★★★☆☆<br>
+InstaDeep がメンテナンスしており、研究用途としては活発。</li>
+<li><strong>環境の豊富さ</strong>: ★★☆☆☆<br>
+主にアルゴリズム実装にフォーカスしており、環境自体は PettingZoo や Melting Pot をラップして使うことが多い。独自環境の数は限定的。</li>
+</ul>
+<h3 id="総合評価と-pettingzoo-の選定理由">総合評価と PettingZoo の選定理由</h3>
+<p>ということでパッケージの評価結果を以下に示します。</p>
+<table>
+<thead>
+<tr>
+<th>パッケージ</th>
+<th>情報量・利用者数</th>
+<th>更新性</th>
+<th>環境の豊富さ</th>
+<th>合計（★15点満点）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PettingZoo</td>
+<td>5</td>
+<td>4</td>
+<td>5</td>
+<td><strong>14</strong></td>
+</tr>
+<tr>
+<td>Melting Pot</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>10</td>
+</tr>
+<tr>
+<td>AI Economist</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>6</td>
+</tr>
+<tr>
+<td>VMAS</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Mava</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p>※あくまで相対的な目安です。</p>
+<h3 id="結論">結論</h3>
+<ul>
+<li><strong>Melting Pot</strong> は社会的ジレンマの評価に強みがあり、<strong>VMAS</strong> は物理ベースの高性能シミュレーションに優れ、<strong>Mava</strong> は JAX ベースの高速アルゴリズム実装に特化しています。</li>
+<li>しかし、<strong>Google Colab で MARL 環境を構築し、利用者が一定数以上いる</strong>という条件を満たし、かつ情報量・更新性・環境の豊富さのバランスが最も良いのは <strong>PettingZoo</strong> です。</li>
+</ul>
+<p>したがって、<strong>「Colab で動かせる MARL 環境パッケージを 1 つ選ぶなら PettingZoo が最適」</strong> と考えました。</p>
+<h2 id="pettingzooとは">PettingZooとは</h2>
+<p>PettingZoo は、<strong>マルチエージェント強化学習（MARL）用の環境を集めた Python パッケージ</strong>です。<br>
+Farama Foundation（OpenAI Gym や Gymnasium を開発している団体）が開発・メンテナンスしています。</p>
+<h3 id="1-pettingzoo-は何をするパッケージか">1. PettingZoo は何をするパッケージか</h3>
+<ul>
+<li><strong>目的</strong>:<br>
+単一エージェント向けの Gym/Gymnasium のように、<strong>マルチエージェント強化学習の環境を標準化し、共通の API で扱えるようにする</strong>ことです。</li>
+<li><strong>提供物</strong>:
+<ul>
+<li>多数のマルチエージェント環境（古典ゲーム、Atari、MPE など）</li>
+<li>それらを扱うための統一的な Python インターフェース</li>
+<li>カスタム環境を作るためのテンプレートやユーティリティ</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-主な特徴">2. 主な特徴</h3>
+<p><strong>(1) Gymnasium 互換の API 設計</strong></p>
+<ul>
+<li><strong>AEC（Agent Environment Cycle）API</strong><br>
+エージェントが順番に行動する「ターン制」のゲーム向けです。
+<ul>
+<li><code>env.reset()</code> → <code>for agent in env.agent_iter():</code> → <code>env.last()</code> → <code>env.step(action)</code> という流れで制御します。</li>
+</ul>
+</li>
+<li><strong>Parallel API</strong><br>
+全エージェントが同時に行動する「同時行動」型のゲーム向けです。
+<ul>
+<li><code>observations = env.reset()</code> → <code>actions = {agent: ...}</code> → <code>observations, rewards, ... = env.step(actions)</code> という形式です。</li>
+</ul>
+</li>
+</ul>
+<p>どちらの API も Gym/Gymnasium の <code>reset</code> / <code>step</code> に似た感覚で使えるため、既存の RL ライブラリとの統合がしやすいです。</p>
+<p><strong>(2) 豊富な環境コレクション</strong></p>
+<p>代表的なカテゴリ：</p>
+<ul>
+<li><strong>Classic（古典ゲーム）</strong><br>
+じゃんけん（<code>rps_v2</code>）、四目並べ（<code>connect_four_v3</code>）、囲碁（<code>go_v5</code>）など。</li>
+<li><strong>MPE（Multi-Agent Particle Environments）</strong><br>
+スピーカー・リスナー、追跡・回避、協力ナビゲーションなど、2D の物理ベース環境。</li>
+<li><strong>Atari（マルチエージェント版）</strong><br>
+Pong、Space Invaders などを複数エージェントでプレイする環境。</li>
+<li><strong>その他</strong><br>
+カードゲーム、ボードゲーム、自作環境なども統合可能。</li>
+</ul>
+<p><strong>(3) マルチエージェントに特化した設計</strong></p>
+<ul>
+<li>各エージェントごとに <code>observation_space</code>、<code>action_space</code>、<code>reward</code> を持てる。</li>
+<li>エージェントの参加・離脱（エピソード中にエージェント数が変わる）も扱える。</li>
+<li>部分観測（Partial Observability）や非対称な役割など、MARL 特有の設定を自然に表現できます。</li>
+</ul>
+<p><strong>(4) 主要 RL ライブラリとの連携</strong></p>
+<p>PettingZoo は「環境だけ」を提供し、学習アルゴリズムは別ライブラリに任せる設計です。<br>
+公式ドキュメントには以下の連携例があります：</p>
+<ul>
+<li>Stable-Baselines3</li>
+<li>Ray RLlib</li>
+<li>Tianshou</li>
+<li>CleanRL</li>
+<li>AgileRL</li>
+</ul>
+<p>これらと組み合わせることで、PettingZoo 環境上で PPO、DQN などのアルゴリズムをすぐに試せます。</p>
+<p><strong>(5) カスタム環境の作成が容易</strong></p>
+<ul>
+<li>Gymnasium と同様に、<code>Env</code> クラスを継承して独自の MARL 環境を実装できます。</li>
+<li>AEC / Parallel のどちらか一方を実装すれば、もう一方は自動変換するユーティリティも用意されています。</li>
+</ul>
+<h2 id="動作させる">動作させる</h2>
+<p>PettingZoo で MARL 環境をランダムに動かす代表的なコードを、AEC 形式と Parallel 形式の両方で示します。</p>
+<p>因みに、動作で困ったら<a href="https://pettingzoo.farama.org/content/environment_creation/">公式リファレンス</a>が一番頼りになります。
+強化学習のパッケージは知らない間に改版され、従来コードが動かないことが多々あり、ネットや生成AIがあんまり役に立たないことがあります。</p>
+<p>今回は、Google Colabはレンダリングをしてくれない、でも、動作確認はしたいと考えました。
+そこで<strong>PettingZoo の Atari 環境（例: <code>pong_v3</code>）を動作して、結果を OpenCV で動画保存する例</strong>を示します。</p>
+<h3 id="opencv-でフレームをキャプチャして動画保存する例">OpenCV でフレームをキャプチャして動画保存する例</h3>
+<p><strong>準備：必要なライブラリのインストール</strong></p>
+<pre><code class="language-python">!pip install pettingzoo[<span class="hljs-string">&quot;atari&quot;</span>] opencv-python
+!AutoROM --accept-license  <span class="hljs-comment"># Atari ROM のインストール</span>
+</code></pre>
+<p><strong>動画保存コード（Pong 環境を例に）</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> cv2
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> pettingzoo.atari <span class="hljs-keyword">import</span> pong_v2
+
+<span class="hljs-comment"># 環境生成（human モードで描画）</span>
+env = pong_v2.env(render_mode=<span class="hljs-string">&quot;rgb_array&quot;</span>)  <span class="hljs-comment"># rgb_array でフレーム取得</span>
+env.reset()
+
+<span class="hljs-comment"># 動画保存用の設定</span>
+fps = <span class="hljs-number">30</span>
+frame_size = (env.unwrapped.screen_width, env.unwrapped.screen_height)
+fourcc = cv2.VideoWriter_fourcc(*<span class="hljs-string">&quot;mp4v&quot;</span>)
+video_writer = cv2.VideoWriter(<span class="hljs-string">&quot;pong_episode.mp4&quot;</span>, fourcc, fps, frame_size)
+
+<span class="hljs-comment"># エピソードを実行し、各ステップの画面を動画に書き込む</span>
+max_steps = <span class="hljs-number">500</span>
+step = <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.agent_iter():
+    <span class="hljs-keyword">if</span> step &gt;= max_steps:
+        <span class="hljs-keyword">break</span>
+
+    obs, reward, termination, truncation, info = env.last()
+
+    <span class="hljs-keyword">if</span> termination <span class="hljs-keyword">or</span> truncation:
+        action = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">else</span>:
+        action = env.action_space(agent).sample()
+
+    env.step(action)
+
+    <span class="hljs-comment"># 現在の画面を RGB 配列として取得</span>
+    frame = env.render()
+    <span class="hljs-comment"># OpenCV は BGR 形式なので変換</span>
+    frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    video_writer.write(frame_bgr)
+
+    step += <span class="hljs-number">1</span>
+
+env.close()
+video_writer.release()
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;動画を保存しました: pong_episode.mp4&quot;</span>)
+</code></pre>
+<p><strong>動画のダウンロード</strong></p>
+<p>Colab 左側のファイルブラウザ（📁）から <code>pong_episode.mp4</code> を右クリック →「ダウンロード」でローカルに保存できます。</p>
+<p>こんな感じの動作が得られました。</p>
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\doc\images\2_intro_petting_zoo\pong_episode.mp4" width="600">
+<h2 id="総括">総括</h2>
+<p>MARLの環境を構築するのがいつも手間だった、そして、うまく解けない場合、自分で作った環境の場合、情報がなかなかないということから、パッケージを使ったMARL環境の構築を行いました。</p>
+<p>出来れば今後は今回導入したMARL環境でトライアルをしていきたいと思います。</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+            
+        </body>
+        </html>
