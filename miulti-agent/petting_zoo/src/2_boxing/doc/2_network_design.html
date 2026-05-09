@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x89e3;&#x6cd5;&#x306e;&#x30b7;&#x30ca;&#x30ea;&#x30aa;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <p>連日Atariのボクシングを強化学習エージェントで勝利するためのアルゴリズム構築を行っています。</p>
+<p><strong>ここまでの関連記事</strong></p>
+<ol>
+<li>
+<p>petting-zooの導入(MARL環境の導入)
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000">https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000</a></p>
+</li>
+<li>
+<p>解くためのアルゴリズム選定</p>
+</li>
+<li>
+<p>データパイプライン構築</p>
+</li>
+</ol>
+<h2 id="解法のシナリオ">解法のシナリオ</h2>
+<p>以下の流れに沿って今回のボクシングゲームの解決を行っていきます。</p>
+<ol>
+<li>データパイプライン構築: ゲームの画像から「集中クリティック用の入力」を作成し、バッファに正しく保存・取り出しができる仕組みを作ります。</li>
+<li>ネットワーク設計: 210x160の画像を処理するための畳み込み層を設計します。</li>
+<li>学習用エージェント設計: 学習を実際に進めるエージェントを構築します。</li>
+<li>強化学習してエージェントにデモプレイします。</li>
+</ol>
+<p>今回は2. ネットワーク設計構築を実施していきます。</p>
+<h2 id="ネットワーク設計">ネットワーク設計</h2>
+<p>データパイプラインが正常に動作していることが確認できたので、次は<strong>強化学習の本体であるモデル（Network）</strong> と<strong>リプレイバッファ（Buffer）</strong> の設計に入ります。
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/01/10/153824">MAPPO</a>をボクシング環境で成功させるために、設計段階で考慮すべきクリティカルなポイントをリストアップしました。</p>
+<h3 id="1-ネットワーク設計model-architecture">1. ネットワーク設計（Model Architecture）</h3>
+<p>分散実行・集中学習（<a href="https://yoshishinnze.hatenablog.com/entry/2025/11/18/053506">CTDE</a>）を支えるための、ActorとCriticの構造上の工夫です。</p>
+<ul>
+<li>
+<p><strong>重み共有（Parameter Sharing）の採用</strong>
+1Pと2Pは、色（白と黒）や立ち位置が違うだけで、ボクシングとしての基本動作（パンチ、移動、回避）のルールは同じです。1Pと2Pで同じActorネットワークを共有することで、学習効率を2倍にし、片方が見つけた「良い動き」を即座にもう片方が模倣できるようにします。</p>
+</li>
+<li>
+<p><strong>入力情報の差異（Actor vs Critic）</strong></p>
+</li>
+<li>
+<p><strong>Actor</strong>: 自分の観測（4ch）のみを入力。自分の動きに集中させます。</p>
+</li>
+<li>
+<p><strong>Critic</strong>: 統合状態（8ch）を入力。相手の動きや、自分と相手の距離感（間合い）を価値判断の基準に含めます。</p>
+</li>
+<li>
+<p><strong>マルチヘッド出力の検討</strong>
+1つのバックボーン（CNN）から、1P用の価値出力（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">V_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）と2P用の価値出力（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">V_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）を別々のブランチで出す設計にします。これにより、「相手にパンチが当たった＝自分にとってプラス、相手にとってマイナス」という対立する評価を一つのモデルで同時に学習できます。</p>
+</li>
+</ul>
+<h3 id="2-リプレイバッファ設計replay-buffer">2. リプレイバッファ設計（Replay Buffer）</h3>
+<p>PPOは「オンポリシー」アルゴリズムであるため、データの保持方法とサンプリング方法に独自の配慮が必要です。</p>
+<ul>
+<li><strong>ペアデータの完全同期</strong>
+1Pの行動、2Pの行動、そしてその時の「統合状態（8ch）」が1つのインデックスで紐付いている必要があります。ここがズレると、集中学習の理論的根拠（CTDE）が崩壊します。</li>
+<li><strong>GAE（一般化アドバンテージ推定）の計算準備</strong>
+バッファ内に「エピソードが途切れたかどうか（Doneフラグ）」と「その時の価値予測値（Value）」を保持し、ミニバッチを作る前に各ステップのアドバンテージを算出する処理を組み込みます。</li>
+<li><strong>シャッフルとミニバッチの整合性</strong>
+更新時にはデータをシャッフルしますが、マルチエージェントの場合、「1Pのデータだけシャッフルして、2Pはそのまま」にすると相関が壊れます。常に<strong>1P・2P・統合状態をセットにしたままシャッフル</strong>する仕組みが必要です。</li>
+</ul>
+<h3 id="3-学習の安定化戦略marl-strategy">3. 学習の安定化・戦略（MARL Strategy）</h3>
+<p>ボクシングという対戦ゲーム特有の性質への対策です。</p>
+<ul>
+<li><strong>報酬の正規化（Reward Normalization）</strong>
+Atariのボクシングは1打ごとに報酬が入りますが、学習初期の不安定な報酬の振れ幅を抑えるため、バッファ内で報酬のスケールを調整する処理を検討します。</li>
+<li><strong>セルフプレイ（Self-Play）の管理</strong>
+「今の自分」とだけ戦い続けると、特定のハメ技に特化してしまい、汎用的な強さが身につきません。バッファにデータを溜める際、対戦相手として「過去のモデル」を一定確率で呼び出すロジックを設計に含めます。</li>
+<li><strong>エントロピー・ボーナスによる探索の促進</strong>
+ボクシングは「待ち」が強い戦略になりがちです。Actorの損失関数にエントロピー項を追加し、積極的に様々なパンチを試す（探索する）ように仕向けます。</li>
+</ul>
+<h2 id="モデルの実装">モデルの実装</h2>
+<p>重み共有（Parameter Sharing）と集中クリティック（Centralized Critic）を統合した、MAPPO向けのネットワーク設計を実装します。</p>
+<p>ボクシング環境の特性に合わせ、「1つのモデルで1P・2Pの両方を制御し、かつ神の視点での評価も同時に行う」効率的なアーキテクチャです。</p>
+<h3 id="mappo-actor-critic-モデルの実装">MAPPO Actor-Critic モデルの実装</h3>
+<p>このモデルは、Actor（行動決定）とCritic（盤面評価）のバックボーンを共通化しつつ、入力チャンネル数と出力ヘッドを切り分ける設計にしています。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPOAgent</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, action_space_n=<span class="hljs-number">18</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        
+        <span class="hljs-comment"># --- 共通のCNNバックボーン (特徴抽出器) ---</span>
+        <span class="hljs-comment"># ActorもCriticも同じ構造のCNNを使用しますが、重みは別々に管理します</span>
+        <span class="hljs-keyword">def</span> <span class="hljs-title function_">make_cnn</span>(<span class="hljs-params">in_channels</span>):
+            <span class="hljs-keyword">return</span> nn.Sequential(
+                nn.Conv2d(in_channels, <span class="hljs-number">32</span>, kernel_size=<span class="hljs-number">8</span>, stride=<span class="hljs-number">4</span>),
+                nn.ReLU(),
+                nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>),
+                nn.ReLU(),
+                nn.Conv2d(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">1</span>),
+                nn.ReLU(),
+                nn.Flatten(),
+                nn.Linear(<span class="hljs-number">64</span> * <span class="hljs-number">7</span> * <span class="hljs-number">7</span>, <span class="hljs-number">512</span>),
+                nn.ReLU()
+            )
+
+        <span class="hljs-comment"># Actor: 自分の4フレーム分を見る (in=4)</span>
+        self.actor_encoder = make_cnn(in_channels=<span class="hljs-number">4</span>)
+        self.action_head = nn.Linear(<span class="hljs-number">512</span>, action_space_n)
+
+        <span class="hljs-comment"># Centralized Critic: 自分と相手の計8フレームを見る (in=8)</span>
+        self.critic_encoder = make_cnn(in_channels=<span class="hljs-number">8</span>)
+        <span class="hljs-comment"># 1P用と2P用の価値をそれぞれ出力するヘッド</span>
+        self.value_head_1p = nn.Linear(<span class="hljs-number">512</span>, <span class="hljs-number">1</span>)
+        self.value_head_2p = nn.Linear(<span class="hljs-number">512</span>, <span class="hljs-number">1</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_action</span>(<span class="hljs-params">self, obs, action=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        Actor: 行動と対数確率、エントロピーを返す
+        obs: (batch, 4, 84, 84)
+        &quot;&quot;&quot;</span>
+        features = self.actor_encoder(obs)
+        logits = self.action_head(features)
+        probs = torch.distributions.Categorical(logits=logits)
+        
+        <span class="hljs-keyword">if</span> action <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            action = probs.sample()
+        
+        <span class="hljs-keyword">return</span> action, probs.log_prob(action), probs.entropy()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_value</span>(<span class="hljs-params">self, joint_obs</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        Centralized Critic: 神の視点での評価値を返す
+        joint_obs: (batch, 8, 84, 84)
+        &quot;&quot;&quot;</span>
+        features = self.critic_encoder(joint_obs)
+        v1 = self.value_head_1p(features)
+        v2 = self.value_head_2p(features)
+        <span class="hljs-keyword">return</span> v1, v2
+
+</code></pre>
+<h3 id="この設計のポイント">この設計のポイント</h3>
+<p><strong>1. パラメータ共有（Actor）</strong></p>
+<p><code>self.actor_encoder</code> は1つだけ定義しています。</p>
+<ul>
+<li>1Pの行動を決めるときは <code>obs_1p</code> を入力。</li>
+<li>2Pの行動を決めるときは <code>obs_2p</code> を入力。
+同じ重みを使うことで、例えば「相手との距離が詰まったらパンチを打つ」という知識を、1Pと2Pで別々に学習する必要がなくなります。</li>
+</ul>
+<p><strong>2. 集中クリティック（Critic）</strong></p>
+<p><code>self.critic_encoder</code> は8チャンネル（1Pの4枚 + 2Pの4枚）を入力として受け取ります。
+これにより、「自分がパンチを打とうとしている瞬間に、相手が避けているか」という相関関係を1つの特徴マップとして抽出できます。</p>
+<p><strong>3. 価値ヘッドの分離</strong></p>
+<p>ボクシングはゼロサムゲームに近い性質を持つため、「1Pにとって良い状況」は「2Pにとって悪い状況」であることが多いです。</p>
+<ul>
+<li><code>value_head_1p</code>: 1Pの報酬に基づいた価値予測。</li>
+<li><code>value_head_2p</code>: 2Pの報酬に基づいた価値予測。
+これらを分けることで、エージェントごとの微妙な利害の差を正確にアドバンテージとして抽出できます。</li>
+</ul>
+<h3 id="前回コードとの結合">前回コードとの結合</h3>
+<p>動作確認してみます。
+ここまで作ったネットワークで行動確率を出力し、可視化してみます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)
+agent = MAPPOAgent().to(device)
+
+<span class="hljs-comment"># 1. データの準備 (前回の preprocess_joint_obs を使用)</span>
+o1, o2, joint_s = preprocess_joint_obs(obs_dict, device)
+
+<span class="hljs-comment"># 2. Actorによる行動決定 (重みを共有して2人分計算)</span>
+a1, log_p1, _ = agent.get_action(o1.unsqueeze(<span class="hljs-number">0</span>))
+a2, log_p2, _ = agent.get_action(o2.unsqueeze(<span class="hljs-number">0</span>))
+
+<span class="hljs-comment"># ボクシングの18アクション（公式ドキュメント準拠）</span>
+ACTION_MEANING = [
+    <span class="hljs-string">&quot;NOOP&quot;</span>, <span class="hljs-string">&quot;FIRE&quot;</span>, <span class="hljs-string">&quot;UP&quot;</span>, <span class="hljs-string">&quot;RIGHT&quot;</span>, <span class="hljs-string">&quot;LEFT&quot;</span>, <span class="hljs-string">&quot;DOWN&quot;</span>, 
+    <span class="hljs-string">&quot;UPRIGHT&quot;</span>, <span class="hljs-string">&quot;UPLEFT&quot;</span>, <span class="hljs-string">&quot;DOWNRIGHT&quot;</span>, <span class="hljs-string">&quot;DOWNLEFT&quot;</span>,
+    <span class="hljs-string">&quot;UPFIRE&quot;</span>, <span class="hljs-string">&quot;RIGHTFIRE&quot;</span>, <span class="hljs-string">&quot;LEFTFIRE&quot;</span>, <span class="hljs-string">&quot;DOWNFIRE&quot;</span>,
+    <span class="hljs-string">&quot;UPRIGHTFIRE&quot;</span>, <span class="hljs-string">&quot;UPLEFTFIRE&quot;</span>, <span class="hljs-string">&quot;DOWNRIGHTFIRE&quot;</span>, <span class="hljs-string">&quot;DOWNLEFTFIRE&quot;</span>
+]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_action_probs</span>(<span class="hljs-params">agent, obs, agent_name=<span class="hljs-string">&quot;1P&quot;</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    特定の観測に対するエージェントの行動確率をグラフ化する
+    &quot;&quot;&quot;</span>
+    agent.<span class="hljs-built_in">eval</span>()
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        <span class="hljs-comment"># Actorネットワークを通してロジットを取得</span>
+        features = agent.actor_encoder(obs.unsqueeze(<span class="hljs-number">0</span>))
+        logits = agent.action_head(features)
+        
+        <span class="hljs-comment"># ソフトマックス関数で確率(0.0~1.0)に変換</span>
+        probs = F.softmax(logits, dim=-<span class="hljs-number">1</span>).cpu().numpy()[<span class="hljs-number">0</span>]
+
+    <span class="hljs-comment"># グラフ描画</span>
+    plt.figure(figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">5</span>))
+    colors = [<span class="hljs-string">&#x27;skyblue&#x27;</span> <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;FIRE&quot;</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> name <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;salmon&#x27;</span> <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> ACTION_MEANING]
+    plt.bar(ACTION_MEANING, probs, color=colors)
+    plt.xticks(rotation=<span class="hljs-number">45</span>, ha=<span class="hljs-string">&#x27;right&#x27;</span>)
+    plt.ylabel(<span class="hljs-string">&quot;Probability&quot;</span>)
+    plt.title(<span class="hljs-string">f&quot;Action Probability Distribution for <span class="hljs-subst">{agent_name}</span>&quot;</span>)
+    plt.ylim(<span class="hljs-number">0</span>, <span class="hljs-number">1.0</span>) <span class="hljs-comment"># 確率なので最大は1.0</span>
+    plt.grid(axis=<span class="hljs-string">&#x27;y&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
+    plt.tight_layout()
+    plt.show()
+
+<span class="hljs-comment"># --- 実行例 ---</span>
+o1, o2, _ = preprocess_joint_obs(obs_dict)
+visualize_action_probs(agent, o1, agent_name=<span class="hljs-string">&quot;1P (White)&quot;</span>)
+</code></pre>
+<p>環境から得られた情報をネットワークより得られた get_action の内部で計算されている「18種類のアクションの確率（Logits）」を可視化しました。
+未だ学習していないので、行動は横一直線っぽいですが。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\2_network_design\1778307579226.png" alt="1778307579226"></p>
+<p>※実際のAI開発でもステップバイステップで上記のように動作チェックしながら進めていきます。</p>
+<h2 id="マルチエージェントリプレイバッファの実装">マルチエージェント・リプレイバッファの実装</h2>
+<p>ボクシング環境でのMAPPO（Multi-Agent PPO）を支える、「マルチエージェント・リプレイバッファ」を実装します。</p>
+<p>このバッファの設計で最も重要なのは、「1Pと2Pのデータ、そして共通の統合状態を、インデックスがズレないように並列で管理すること」です。</p>
+<h3 id="マルチエージェントリプレイバッファの実装-1">マルチエージェント・リプレイバッファの実装</h3>
+<p>学習に必要なすべての情報（観測、行動、報酬、価値、対数確率、終了フラグ）を一括して管理し、PPOの更新に必要なミニバッチを生成します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPORolloutBuffer</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, buffer_size, obs_shape, joint_shape, device=<span class="hljs-string">&quot;cpu&quot;</span></span>):
+        self.device = device
+        self.buffer_size = buffer_size
+
+        <span class="hljs-comment"># 各エージェント(2人分)のデータを保持するテンソル</span>
+        <span class="hljs-comment"># obs: (buffer_size, 2, 4, 84, 84)</span>
+        self.obs = torch.zeros((buffer_size, <span class="hljs-number">2</span>, *obs_shape), device=device)
+        <span class="hljs-comment"># joint_states: (buffer_size, 8, 84, 84) -&gt; 集中クリティック用</span>
+        self.joint_states = torch.zeros((buffer_size, *joint_shape), device=device)
+        
+        self.actions = torch.zeros((buffer_size, <span class="hljs-number">2</span>), device=device)
+        self.log_probs = torch.zeros((buffer_size, <span class="hljs-number">2</span>), device=device)
+        self.rewards = torch.zeros((buffer_size, <span class="hljs-number">2</span>), device=device)
+        self.values = torch.zeros((buffer_size, <span class="hljs-number">2</span>), device=device)
+        self.dones = torch.zeros((buffer_size, <span class="hljs-number">2</span>), device=device)
+        
+        self.ptr = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">insert</span>(<span class="hljs-params">self, obs_1p, obs_2p, joint_state, actions, log_probs, rewards, values, dones</span>):
+        <span class="hljs-string">&quot;&quot;&quot;1ステップ分のデータを格納&quot;&quot;&quot;</span>
+        self.obs[self.ptr, <span class="hljs-number">0</span>] = obs_1p
+        self.obs[self.ptr, <span class="hljs-number">1</span>] = obs_2p
+        self.joint_states[self.ptr] = joint_state
+        
+        <span class="hljs-comment"># actions, log_probs 等は [1Pの値, 2Pの値] のリストや配列を想定</span>
+        self.actions[self.ptr] = torch.tensor(actions, device=self.device)
+        self.log_probs[self.ptr] = torch.tensor(log_probs, device=self.device)
+        self.rewards[self.ptr] = torch.tensor(rewards, device=self.device)
+        self.values[self.ptr] = torch.tensor(values, device=self.device)
+        self.dones[self.ptr] = torch.tensor(dones, device=self.device)
+        
+        self.ptr = (self.ptr + <span class="hljs-number">1</span>) % self.buffer_size
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_batches</span>(<span class="hljs-params">self, batch_size</span>):
+        <span class="hljs-string">&quot;&quot;&quot;学習用にデータをシャッフルしてバッチを生成するイテレータ&quot;&quot;&quot;</span>
+        indices = np.arange(self.buffer_size)
+        np.random.shuffle(indices)
+        
+        <span class="hljs-keyword">for</span> start <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, self.buffer_size, batch_size):
+            end = start + batch_size
+            batch_idx = indices[start:end]
+            
+            <span class="hljs-comment"># 各データのバッチを辞書で返す</span>
+            <span class="hljs-keyword">yield</span> {
+                <span class="hljs-string">&quot;obs&quot;</span>: self.obs[batch_idx],
+                <span class="hljs-string">&quot;joint_states&quot;</span>: self.joint_states[batch_idx],
+                <span class="hljs-string">&quot;actions&quot;</span>: self.actions[batch_idx],
+                <span class="hljs-string">&quot;log_probs&quot;</span>: self.log_probs[batch_idx],
+                <span class="hljs-string">&quot;rewards&quot;</span>: self.rewards[batch_idx],
+                <span class="hljs-string">&quot;values&quot;</span>: self.values[batch_idx],
+                <span class="hljs-string">&quot;dones&quot;</span>: self.dones[batch_idx]
+            }
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;更新後にバッファをリセット&quot;&quot;&quot;</span>
+        self.ptr = <span class="hljs-number">0</span>
+
+</code></pre>
+<h3 id="この実装の工夫点">この実装の工夫点</h3>
+<ul>
+<li><strong>次元の管理</strong>: <code>self.obs</code> の形状を <code>(buffer_size, 2, 4, 84, 84)</code> としています。<code>2</code> という次元があることで、1Pと2Pの視覚情報をひとまとめに扱いつつ、インデックス <code>0</code> と <code>1</code> で明確に分離できます。</li>
+<li><strong>集中学習への対応</strong>: <code>joint_states</code> を独立して保持しています。これにより、Criticの学習時に「あの瞬間、相手はどこにいたか」を8チャンネルの画像として即座に引き出せます。</li>
+<li><strong>シャッフルの整合性</strong>: <code>np.random.shuffle(indices)</code> を使うことで、1Pの行動と2Pの行動、そしてその結果の報酬がバラバラにならないよう、<strong>「時間軸上の1セット」を維持したまま</strong>シャッフルされます。</li>
+</ul>
+<h3 id="実装後のデータ構造イメージ">実装後のデータ構造イメージ</h3>
+<p>バッファ内では、以下のような「1行」が <code>buffer_size</code> 分積み重なっているイメージです。</p>
+<table>
+<thead>
+<tr>
+<th>インデックス</th>
+<th>Obs (2x4ch)</th>
+<th>Joint State (8ch)</th>
+<th>Actions (2)</th>
+<th>Rewards (2)</th>
+<th>Values (2)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>t</code></td>
+<td>[1P画像, 2P画像]</td>
+<td>[1P+2P統合画像]</td>
+<td>[Punch, Move]</td>
+<td>[+1, -1]</td>
+<td>[0.5, -0.4]</td>
+</tr>
+<tr>
+<td><code>t+1</code></td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="総括">総括</h2>
+<p>ボクシングゲーム用MAPPOのネットワーク・バッファ設計の勘所は、<strong>「Actorは自分の視点だけ、Criticは全体を見る」「1P/2Pを同じ重みで動かす」「バッファでは1P・2P・統合状態をセットで管理する」</strong> の3点に集約されます。</p>
+<h3 id="1-ネットワーク設計の勘所">1. ネットワーク設計の勘所</h3>
+<ul>
+<li>
+<p><strong>Actor（行動決定）</strong></p>
+<ul>
+<li>入力：自分の観測のみ（4フレームスタック <code>(4,84,84)</code>）。</li>
+<li>役割：自分の行動（パンチ・移動など）を決める。</li>
+<li>重み共有：1Pと2Pで同じ <code>actor_encoder</code> を使い、ボクシングの基本動作（距離感・パンチタイミング）を共有学習させる。</li>
+</ul>
+</li>
+<li>
+<p><strong>Critic（集中評価）</strong></p>
+<ul>
+<li>入力：1P＋2Pの統合状態（8フレームスタック <code>(8,84,84)</code>）。</li>
+<li>役割：神の視点で「1Pと2Pの位置関係・意図」を同時に評価。</li>
+<li>マルチヘッド出力：1つのCNNバックボーンから、1P用価値 <code>V₁</code> と2P用価値 <code>V₂</code> を別々のヘッドで出す。ゼロサムに近いボクシングの対立評価を正しく扱うため。</li>
+</ul>
+</li>
+<li>
+<p><strong>設計のコア</strong></p>
+<ul>
+<li>Actorは「自分視点」、Criticは「全体視点」というCTDE（分散実行・集中学習）の原則を画像チャンネル数で表現。</li>
+<li>CNNバックボーンは共通構造だが、Actor/Criticで重みは分離し、入力チャンネル（4ch vs 8ch）と出力ヘッド（行動 vs 価値）で役割を切り分ける。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-リプレイバッファ設計の勘所">2. リプレイバッファ設計の勘所</h3>
+<ul>
+<li>
+<p><strong>ペアデータの完全同期</strong></p>
+<ul>
+<li>1Pの観測、2Pの観測、統合状態（joint state）、行動、報酬、価値、終了フラグを「1インデックス＝1ステップ」で紐付ける。</li>
+<li><code>obs</code> を <code>(buffer_size, 2, 4,84,84)</code> とし、<code>0</code> が1P、<code>1</code> が2Pとしてまとめて管理。</li>
+</ul>
+</li>
+<li>
+<p><strong>シャッフル時の整合性</strong></p>
+<ul>
+<li>ミニバッチ生成時はインデックスでシャッフルし、1P・2P・統合状態がバラバラにならないようにする。</li>
+<li>PPOのオンポリシー性を保ちつつ、マルチエージェントの相関（誰が何をした結果どうなったか）を壊さない。</li>
+</ul>
+</li>
+<li>
+<p><strong>Critic学習への対応</strong></p>
+<ul>
+<li><code>joint_states</code> を独立して保持し、Critic更新時に「その瞬間の全体像（8ch）」を即座に引き出せるようにする。</li>
+<li>GAE計算や報酬正規化、セルフプレイ管理など、MARL特有の戦略を後から組み込みやすい構造にしておく。</li>
+</ul>
+</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p> </p>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+<p> </p>
+        </body>
+        </html>
