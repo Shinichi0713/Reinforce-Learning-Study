@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x89e3;&#x6cd5;&#x306e;&#x30b7;&#x30ca;&#x30ea;&#x30aa;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+
+            <p>連日Atariのボクシングを強化学習エージェントで勝利するためのアルゴリズム構築を行っています。</p>
+<p><strong>ここまでの関連記事</strong></p>
+<ol>
+<li>
+<p>petting-zooの導入(MARL環境の導入)
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000">https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000</a></p>
+</li>
+<li>
+<p>解くためのアルゴリズム選定</p>
+</li>
+<li>
+<p>データパイプライン構築</p>
+</li>
+</ol>
+<h2 id="解法のシナリオ">解法のシナリオ</h2>
+<p>以下の流れに沿って今回のボクシングゲームの解決を行っていきます。</p>
+<ol>
+<li>データパイプライン構築: ゲームの画像から「集中クリティック用の入力」を作成し、バッファに正しく保存・取り出しができる仕組みを作ります。</li>
+<li>ネットワーク設計: 210x160の画像を処理するための畳み込み層を設計します。</li>
+<li>学習用エージェント設計: 学習を実際に進めるエージェントを構築します。</li>
+<li>強化学習してエージェントにデモプレイします。</li>
+</ol>
+<p>今回は3. 学習用エージェント設計を実施していきます。</p>
+<h2 id="gae">GAE</h2>
+<p>実装の前に必要な知識となる <strong>GAE（一般化アドバンテージ推定）</strong> について説明します。
+GAEを一言で言うと、「報酬の受け取り方のバランスを調整して、学習を安定させるテクニック」のことです。
+強化学習（特にPPO）では、「この行動はどれくらい良かったのか？」というアドバンテージ（期待以上の良さ）を計算する必要がありますが、その計算には大きなジレンマがあります。</p>
+<h3 id="1-gaeが解決するジレンマ">1. GAEが解決する「ジレンマ」</h3>
+<p>アドバンテージを計算する方法は、大きく分けて2つあります。</p>
+<ul>
+<li>
+<p><strong>方法A：実際の報酬を最後まで足す (Monte Carlo)</strong></p>
+</li>
+<li>
+<p><strong>メリット</strong>: 正確（実際に得られた報酬なので）。</p>
+</li>
+<li>
+<p><strong>デメリット</strong>: <strong>バラツキ（分散）が激しい</strong>。たまたま敵が変な動きをしただけで「この行動は最高だ！」と勘違いしやすい。</p>
+</li>
+<li>
+<p><strong>方法B：1ステップ後の予測値を使う (TD誤差)</strong></p>
+</li>
+<li>
+<p><strong>メリット</strong>: 安定している。</p>
+</li>
+<li>
+<p><strong>デメリット</strong>: <strong>不正確（バイアスがある）</strong>。自分の「予測（Value）」が間違っていると、学習全体が間違った方向に進む。</p>
+</li>
+</ul>
+<p><strong>GAEは、このAとBを「いいとこ取り」して混ぜ合わせる手法です。</strong></p>
+<h3 id="2-直感的なイメージボクシングでの例">2. 直感的なイメージ：ボクシングでの例</h3>
+<p>あなたがパンチを打った瞬間を想像してください。</p>
+<ul>
+<li><strong>1ステップ後</strong>: まだ当たっていませんが、相手との距離が詰まったので「価値（Value）」は上がります。</li>
+<li><strong>10ステップ後</strong>: 実際にパンチが当たり、報酬 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">1</span></span></span></span> を得ました。</li>
+</ul>
+<p>GAEは、<strong>「今すぐの結果（TD誤差）」</strong> だけでなく、<strong>「少し先の未来の結果」</strong> も指数関数的に重み付けして合算します。</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span></span></span></span>（ラムダ）というパラメータを使い、どれくらい未来まで考慮するかを調整します。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\lambda = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> なら、今の予測（方法B）を信じる。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> なら、最後まで全部足す（方法A）。</li>
+<li><strong>通常 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\lambda = 0.95</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.95</span></span></span></span> くらい</strong>に設定し、ほどよく未来を見つつ、今の安定感も保ちます。</li>
+</ul>
+<h3 id="3-gaeの計算式数式">3. GAEの計算式（数式）</h3>
+<p>理論的には、各ステップ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> での「TD誤差（予測のズレ）」を <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\delta_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> とすると、GAE（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>A</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{A}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）は以下のように計算されます。</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>δ</mi><mi>t</mi></msub><mo>=</mo><msub><mi>r</mi><mi>t</mi></msub><mo>+</mo><mi>γ</mi><mi>V</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>−</mo><mi>V</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">γV</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mover accent="true"><mi>A</mi><mo>^</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>δ</mi><mi>t</mi></msub><mo>+</mo><mo stretchy="false">(</mo><mi>γ</mi><mi>λ</mi><mo stretchy="false">)</mo><msub><mi>δ</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>+</mo><mo stretchy="false">(</mo><mi>γ</mi><mi>λ</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup><msub><mi>δ</mi><mrow><mi>t</mi><mo>+</mo><mn>2</mn></mrow></msub><mo>+</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">γλ</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">γλ</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0379em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.123em;"></span><span class="minner">…</span></span></span></span></span></p>
+<blockquote>
+<p>※ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>（ガンマ）は割引率、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span></span></span></span>（ラムダ）がGAEの調整係数です。</p>
+</blockquote>
+<h3 id="4-mappoにおけるgaeの重要性">4. MAPPOにおけるGAEの重要性</h3>
+<p>マルチエージェント（MAPPO）では、自分だけでなく「相手の動き」という不確定要素が加わるため、報酬のバラツキがさらに激しくなります。</p>
+<p>GAEを使うことで：</p>
+<ul>
+<li><strong>ノイズに強くなる</strong>: 相手の突発的な動きによる報酬の変化を、上手くマイルドに処理できます。</li>
+<li><strong>効率的な学習</strong>: 集中クリティックが予測した「神の視点での価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span>」をベースにGAEを計算するため、非常に質の高いアドバンテージが得られます。</li>
+</ul>
+<h3 id="次の実装バッファ内でのgae計算">次の実装：バッファ内でのGAE計算</h3>
+<p>次は、この理屈をコードに落とし込みます。具体的には、<strong>バッファを後ろ（最新のステップ）から順に遡りながら、この <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>A</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{A}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を計算していくロジック</strong>を実装します。
+ロジック自体は前回のリプレーバッファに実装することが自然です。</p>
+<h2 id="学習用エージェント">学習用エージェント</h2>
+<p>ボクシング環境でのMAPPO攻略に向けて、これまでに作成した「環境」「ネットワーク」「バッファ」を統括し、学習を回すためのコアエンジンとなる <code>MAPPOAtariTrainer</code> クラスを実装します。</p>
+<p>このクラスは、データの収集からGAEの計算、そして勾配更新（学習）までを一手に引き受けます。</p>
+<h3 id="mappoataritrainer-クラスの実装">MAPPOAtariTrainer クラスの実装</h3>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.optim <span class="hljs-keyword">as</span> optim
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPOAtariTrainer</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, env, agent, buffer_size=<span class="hljs-number">2048</span>, batch_size=<span class="hljs-number">64</span>, lr=<span class="hljs-number">3e-4</span>, gamma=<span class="hljs-number">0.99</span>, gae_lambda=<span class="hljs-number">0.95</span>, ppo_epochs=<span class="hljs-number">10</span></span>):
+        self.env = env
+        self.agent = agent
+        self.device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)
+        self.agent.to(self.device)
+        
+        <span class="hljs-comment"># ハイパーパラメータ</span>
+        self.gamma = gamma
+        self.gae_lambda = gae_lambda
+        self.ppo_epochs = ppo_epochs
+        self.batch_size = batch_size
+        
+        <span class="hljs-comment"># バッファの初期化</span>
+        <span class="hljs-comment"># obs_shape=(4, 84, 84), joint_shape=(8, 84, 84)</span>
+        self.buffer = MAPPORolloutBuffer(buffer_size, (<span class="hljs-number">4</span>, <span class="hljs-number">84</span>, <span class="hljs-number">84</span>), (<span class="hljs-number">8</span>, <span class="hljs-number">84</span>, <span class="hljs-number">84</span>), self.device)
+        
+        <span class="hljs-comment"># オプティマイザ (ActorとCriticをまとめて更新)</span>
+        self.optimizer = optim.Adam(self.agent.parameters(), lr=lr, eps=<span class="hljs-number">1e-5</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">collect_rollouts</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;環境を動かしてデータを収集する&quot;&quot;&quot;</span>
+        self.buffer.clear()
+        obs_dict, _ = self.env.reset()
+        
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.buffer.buffer_size):
+            <span class="hljs-comment"># 1. 前処理</span>
+            o1, o2, joint_s = preprocess_joint_obs(obs_dict, self.device)
+            
+            <span class="hljs-comment"># 2. 行動決定と価値予測</span>
+            <span class="hljs-keyword">with</span> torch.no_grad():
+                a1, logp1, _ = self.agent.get_action(o1.unsqueeze(<span class="hljs-number">0</span>))
+                a2, logp2, _ = self.agent.get_action(o2.unsqueeze(<span class="hljs-number">0</span>))
+                v1, v2 = self.agent.get_value(joint_s.unsqueeze(<span class="hljs-number">0</span>))
+            
+            <span class="hljs-comment"># 3. 環境の実行</span>
+            actions = {<span class="hljs-string">&#x27;first_0&#x27;</span>: a1.item(), <span class="hljs-string">&#x27;second_0&#x27;</span>: a2.item()}
+            next_obs_dict, rewards, terms, truncs, infos = self.env.step(actions)
+            
+            <span class="hljs-comment"># 4. バッファへ保存</span>
+            dones = [terms[<span class="hljs-string">&#x27;first_0&#x27;</span>] <span class="hljs-keyword">or</span> truncs[<span class="hljs-string">&#x27;first_0&#x27;</span>], terms[<span class="hljs-string">&#x27;second_0&#x27;</span>] <span class="hljs-keyword">or</span> truncs[<span class="hljs-string">&#x27;second_0&#x27;</span>]]
+            self.buffer.insert(
+                o1, o2, joint_s, 
+                [a1.item(), a2.item()], 
+                [logp1.item(), logp2.item()],
+                [rewards[<span class="hljs-string">&#x27;first_0&#x27;</span>], rewards[<span class="hljs-string">&#x27;second_0&#x27;</span>]],
+                [v1.item(), v2.item()],
+                dones
+            )
+            
+            obs_dict = next_obs_dict
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(dones):
+                obs_dict, _ = self.env.reset()
+
+        <span class="hljs-comment"># 5. GAEの計算準備 (最後の状態の価値)</span>
+        _, _, last_joint_s = preprocess_joint_obs(obs_dict, self.device)
+        <span class="hljs-keyword">with</span> torch.no_grad():
+            last_v1, last_v2 = self.agent.get_value(last_joint_s.unsqueeze(<span class="hljs-number">0</span>))
+        
+        self.buffer.compute_returns_and_advantages(
+            torch.tensor([last_v1.item(), last_v2.item()], device=self.device),
+            self.gamma, self.gae_lambda
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">train_step</span>(<span class="hljs-params">self, clip_param=<span class="hljs-number">0.2</span>, ent_coef=<span class="hljs-number">0.01</span>, vf_coef=<span class="hljs-number">0.5</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;バッファのデータを使ってネットワークを更新する&quot;&quot;&quot;</span>
+        total_loss = <span class="hljs-number">0</span>
+        
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.ppo_epochs):
+            <span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> self.buffer.get_batches(self.batch_size):
+                <span class="hljs-comment"># 1Pと2Pのデータをまとめて処理するために変形</span>
+                <span class="hljs-comment"># batch[&#x27;obs&#x27;]: (batch, 2, 4, 84, 84) -&gt; (batch*2, 4, 84, 84)</span>
+                obs = batch[<span class="hljs-string">&#x27;obs&#x27;</span>].view(-<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">84</span>, <span class="hljs-number">84</span>)
+                actions = batch[<span class="hljs-string">&#x27;actions&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                old_log_probs = batch[<span class="hljs-string">&#x27;log_probs&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                advantages = batch[<span class="hljs-string">&#x27;advantages&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                returns = batch[<span class="hljs-string">&#x27;returns&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                
+                <span class="hljs-comment"># 新しいログ確率とエントロピーを取得</span>
+                _, new_log_probs, dist_entropy = self.agent.get_action(obs, actions)
+                
+                <span class="hljs-comment"># --- Actor Loss (PPO Clipping) ---</span>
+                ratio = torch.exp(new_log_probs - old_log_probs)
+                surr1 = ratio * advantages
+                surr2 = torch.clamp(ratio, <span class="hljs-number">1.0</span> - clip_param, <span class="hljs-number">1.0</span> + clip_param) * advantages
+                actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean()
+                
+                <span class="hljs-comment"># --- Critic Loss (Value Function MSE) ---</span>
+                <span class="hljs-comment"># 集中クリティックなので joint_states を使用</span>
+                v1_pred, v2_pred = self.agent.get_value(batch[<span class="hljs-string">&#x27;joint_states&#x27;</span>])
+                <span class="hljs-comment"># v_preds を (batch*2, 1) にまとめてリターンと比較</span>
+                v_preds = torch.cat([v1_pred, v2_pred], dim=<span class="hljs-number">0</span>).squeeze()
+                critic_loss = F.mse_loss(v_preds, returns)
+                
+                <span class="hljs-comment"># --- Total Loss ---</span>
+                loss = actor_loss + vf_coef * critic_loss - ent_coef * dist_entropy.mean()
+                
+                self.optimizer.zero_grad()
+                loss.backward()
+                nn.utils.clip_grad_norm_(self.agent.parameters(), <span class="hljs-number">0.5</span>) <span class="hljs-comment"># 勾配爆発防止</span>
+                self.optimizer.step()
+                
+                total_loss += loss.item()
+        
+        <span class="hljs-keyword">return</span> total_loss
+
+</code></pre>
+<h3 id="クラス設計の要点">クラス設計の要点</h3>
+<p><strong>1. <code>collect_rollouts</code>（経験の収集）</strong></p>
+<ul>
+<li>ここではグラフィックスメモリを節約するため <code>torch.no_grad()</code> を使用しています。</li>
+<li>エピソードが終了（<code>done</code>）した際に自動で <code>reset</code> し、常にデータが途切れないようにしています。</li>
+</ul>
+<p><strong>2. <code>train_step</code>（ポリシーの更新）</strong></p>
+<ul>
+<li><strong>データのフラット化</strong>: バッファ内では <code>(batch, 2, ...)</code> とエージェントごとに分かれていますが、学習時は <code>(batch*2, ...)</code> と一列に並べることで、1Pと2Pの区別なく「ボクシングの動き」として一気に重み共有モデル（Actor）を学習させます。</li>
+<li><strong>PPO損失計算</strong>: 前回設計した Clipping ロジックを組み込み、古いポリシーから離れすぎないように制御しています。</li>
+<li><strong>エントロピー項</strong>: <code>ent_coef</code> を掛けて損失から引くことで、AIが「同じ行動ばかり選ぶ」のを防ぎ、多様な動きを探索させます。</li>
+</ul>
+<h3 id="実行イメージ">実行イメージ</h3>
+<pre><code class="language-python"><span class="hljs-comment"># 全体の統合</span>
+env = get_env()
+agent = MAPPOAgent(action_space_n=<span class="hljs-number">18</span>)
+trainer = MAPPOAtariTrainer(env, agent)
+
+<span class="hljs-comment"># 学習ループ</span>
+<span class="hljs-keyword">for</span> iteration <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1000</span>):
+    trainer.collect_rollouts() <span class="hljs-comment"># 1. データを溜める</span>
+    loss = trainer.train_step() <span class="hljs-comment"># 2. 学習する</span>
+    
+    <span class="hljs-keyword">if</span> iteration % <span class="hljs-number">10</span> == <span class="hljs-number">0</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Iteration <span class="hljs-subst">{iteration}</span>, Loss: <span class="hljs-subst">{loss:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+</code></pre>
+<p>これで、ボクシング攻略のための「頭脳」と「学習システム」がすべて連結されました。</p>
+<h2 id="総括">総括</h2>
+<p>ボクシングゲーム用MAPPOの学習エージェント設計の勘所は、<strong>「GAEでアドバンテージを安定化」「バッファで1P・2P・統合状態を完全同期」「1つのトレーナーで収集・GAE計算・PPO更新を一括管理」</strong> の3点に集約されます。</p>
+<h3 id="1-gae一般化アドバンテージ推定の勘所">1. GAE（一般化アドバンテージ推定）の勘所</h3>
+<ul>
+<li><strong>目的</strong>：<br>
+「実際の報酬（Monte Carlo）」と「1ステップ予測（TD誤差）」の<strong>いいとこ取り</strong>をして、アドバンテージのバラツキとバイアスをバランスさせる。</li>
+<li><strong>直感的なイメージ</strong>：<br>
+パンチを打った瞬間（今の予測）だけでなく、少し先の未来（実際に当たるまで）も指数関数的に重み付けして評価する。</li>
+<li><strong>パラメータ</strong>：
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span></span></span></span>（ラムダ）で「どれだけ未来を見るか」を調整（通常 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\lambda=0.95</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.95</span></span></span></span>）。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\lambda=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> ならTD誤差だけ、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\lambda=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> なら最後まで足し算（Monte Carlo）。</li>
+</ul>
+</li>
+<li><strong>MAPPOでの重要性</strong>：<br>
+相手の動きという不確定要素が加わるため報酬のノイズが大きい。集中クリティックの価値予測をベースにGAEを計算することで、<strong>ノイズに強く、質の高いアドバンテージ</strong>を得られる。</li>
+</ul>
+<h3 id="2-mappoataritrainer-の設計勘所">2. MAPPOAtariTrainer の設計勘所</h3>
+<ul>
+<li><strong>役割</strong>：<br>
+環境・ネットワーク・バッファを統括し、「データ収集 → GAE計算 → PPO更新」を一気通貫で回すコアエンジン。</li>
+<li><strong>collect_rollouts（経験収集）</strong>：
+<ul>
+<li><code>torch.no_grad()</code> でメモリ節約しつつ、1P・2Pの行動と価値を同時に取得。</li>
+<li>終了フラグ（<code>done</code>）で自動リセットし、バッファを途切れなく埋める。</li>
+<li>最後の状態の価値を取得し、バッファ内で<strong>後ろから遡るGAE計算</strong>を呼び出す。</li>
+</ul>
+</li>
+<li><strong>train_step（PPO更新）</strong>：
+<ul>
+<li>バッファのデータを <code>(batch, 2, ...)</code> → <code>(batch*2, ...)</code> にフラット化し、1P・2Pをまとめて学習（重み共有Actorを一括更新）。</li>
+<li>Actor損失：PPOクリッピング（<code>ratio</code> を <code>1±clip</code> に制限）で古いポリシーから離れすぎないようにする。</li>
+<li>Critic損失：集中クリティックの価値予測とリターンのMSE。</li>
+<li>エントロピー項：<code>ent_coef</code> で探索を促進し、同じ行動ばかり選ばないようにする。</li>
+<li>勾配クリッピングで学習の安定化。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-全体としての設計思想">3. 全体としての設計思想</h3>
+<ul>
+<li><strong>データの完全同期</strong>：<br>
+1Pの観測・2Pの観測・統合状態（joint state）・行動・報酬・価値・終了フラグを、バッファの同じインデックスで管理し、GAE計算とミニバッチ生成でズレないようにする。</li>
+<li><strong>集中クリティック＋GAEの組み合わせ</strong>：<br>
+神の視点（8ch統合状態）で価値を予測し、その予測をベースにGAEでアドバンテージを計算する。これにより、相手の動きを含む非定常環境でも安定した学習が可能になる。</li>
+<li><strong>1つのトレーナーで統合</strong>：<br>
+環境とのインタラクション、バッファ管理、GAE計算、PPO更新を1クラスにまとめることで、ボクシング用MAPPOの学習ループをシンプルかつ堅牢に実装できる。</li>
+</ul>
+
+
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p> </p>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+<p> </p>
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+
+        </body>
+        </html>
