@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+import os
 
 class MAPPOAtariTrainer:
     def __init__(self, env, agent, buffer_size=2048, batch_size=64, lr=3e-4, gamma=0.99, gae_lambda=0.95, ppo_epochs=10):
@@ -109,12 +110,34 @@ class MAPPOAtariTrainer:
 
         return total_loss
     
+
+    def save_checkpoint(self, iteration, path="checkpoints"):
+        """モデルの重みを保存する"""
+        if not os.path.exists(path):
+            os.makedirs(path)
+        self.agent.cpu()
+        # 保存するデータの作成
+        save_data = {
+            'iteration': iteration,
+            'model_state_dict': self.agent.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+        }
+        
+        # 1. 最新版として保存 (上書き用)
+        torch.save(save_data, f"{path}/mappo_agent_latest.pth")
+        
+        # 2. 定期バックアップとして保存
+        torch.save(save_data, f"{path}/mappo_agent_iter_{iteration}.pth")
+        self.agent.to(self.device)
+        print(f"Checkpoint saved at iteration {iteration}")
+
 def train():
     # 全体の統合
     env = get_env()
     agent = MAPPOAgent(action_space_n=18)
     trainer = MAPPOAtariTrainer(env, agent)
-
+    save_interval = 20  # 20イテレーションごとに保存
+    
     # 学習ループ
     for iteration in range(100):
         trainer.collect_rollouts() # 1. データを溜める
@@ -122,3 +145,24 @@ def train():
 
         if iteration % 10 == 0:
             print(f"Iteration {iteration}, Loss: {loss:.4f}")
+
+        # パラメータの保存先を Google ドライブに変更
+        if iteration > 0 and iteration % save_interval == 0:
+            trainer.save_checkpoint(iteration, path=CHECKPOINT_DIR)
+
+def load_latest_checkpoint(agent, optimizer, path=CHECKPOINT_DIR):
+    latest_path = f"{path}/mappo_agent_latest.pth"
+    
+    if os.path.exists(latest_path):
+        print(f"Checking for checkpoint at {latest_path}...")
+        checkpoint = torch.load(latest_path)
+        
+        agent.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_iter = checkpoint['iteration']
+        
+        print(f"Successfully loaded checkpoint. Resuming from iteration {start_iter}")
+        return start_iter
+    else:
+        print("No checkpoint found. Starting from scratch.")
+        return 0
