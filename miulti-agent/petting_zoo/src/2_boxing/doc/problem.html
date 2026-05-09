@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x554f;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <p>昨日<a href="https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000">導入したPettingZoo</a>を用いてMARLの試行を行っていきます。
+今回はAtariの強化学習環境でボクシングを題材をして選定しようと思います。
+解くための情報を集めていると、唯のボクシングと侮れない部分がありました。
+本日はその侮れない部分について語っていきます。</p>
+<p>Atariのボクシングゲームはこんな感じのゲームです。
+<img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\problem\atari_boxing.gif" width="500"></p>
+<h2 id="問題">問題</h2>
+<p>今回のボクシングゲームが抱える問題は、<strong>相手が学習によって動いてしまうこと</strong>です。
+このため、単一のエージェントにおける強化学習では正しく経験学習させることが難しく、学習段階では、マルチエージェント強化学習で使われる集中学習が必要となります。</p>
+<p>実行時はバラバラなのに学習時だけ「集中（Centralized）」させるのかには、非常に明確な理論的理由があります。
+一言で言えば、<strong>「相手が学習によって動いてしまうことで、環境のルールが常に変わってしまう問題（非定常性）」を解決するため</strong>です。</p>
+<h3 id="1-非定常性non-stationarityの問題">1. 非定常性（Non-stationarity）の問題</h3>
+<p>単一エージェントの強化学習（DQNや通常のPPOなど）では、「壁は動かない」「穴に落ちたら死ぬ」という環境のルールが固定されていることが前提です。</p>
+<p>しかし、ボクシングのような対戦ゲームで、エージェントAとBが同時に独立して学習すると、以下のことが起こります。</p>
+<ul>
+<li>エージェントAから見ると、昨日まで「右に避ければ安全」だったのに、今日はエージェントBが賢くなって「右にパンチを打ってくる」ようになる。</li>
+<li>つまり、<strong>「環境（相手）の挙動が学習中にどんどん変わる」</strong> ため、Aは何が正しい行動なのか確信が持てず、学習が収束しません。</li>
+</ul>
+<h3 id="2-集中学習分散実行ctdeの役割">2. 集中学習・分散実行（CTDE）の役割</h3>
+<p>この問題を解決するために考案されたのが <strong>CTDE (Centralized Training, Decentralized Execution)</strong> という枠組みです。</p>
+<p>(CTDEとは？と感じたらこちらの<a href="https://yoshishinnze.hatenablog.com/entry/2025/11/18/053506">記事</a>もご参考下さい。)</p>
+<p><strong>学習時：集中（Centralized Training）</strong></p>
+<p>学習フェーズでは、シミュレータ内のすべての情報（自分と相手の画像、相手が選んだ行動など）を「神の視点」で見ることができます。</p>
+<ul>
+<li><strong>メリット</strong>: クリティック（価値を判断する部分）が、「相手が今こう動こうとしているから、この状況の価値はこれくらいだ」と、相手の意図を含めて正しく評価できます。これにより、非定常性の影響を抑え、安定した学習が可能になります。</li>
+</ul>
+<p><strong>実行時：分散（Decentralized Execution）</strong></p>
+<p>一方で、実際にゲームをプレイする時は、自分の画面（観測）だけで判断しなければなりません。</p>
+<ul>
+<li><strong>仕組み</strong>: 実行時は「神の視点（クリティック）」を捨て、学習済みの「自分の目（アクター）」だけで動きます。学習時に「相手がこう来るかもしれない」という可能性を考慮して訓練されているため、自分の視界だけでも賢く動けるようになっています。</li>
+</ul>
+<h3 id="3-強化学習アルゴリズムの選定">3. 強化学習アルゴリズムの選定</h3>
+<p>今回問題を解くアルゴリズムの選定を行います。</p>
+<p><strong>CTDEアルゴリズムの比較・判定</strong></p>
+<p>評価基準は学習の探索性、非定常性への対応力、学習の安定性に設定の上、評価を行いました。</p>
+<table>
+<thead>
+<tr>
+<th>アルゴリズム</th>
+<th>探索性</th>
+<th>非定常性への対応力</th>
+<th>学習の安定性</th>
+<th>特徴と選定理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MAPPO</strong></td>
+<td><strong>○</strong></td>
+<td><strong>○</strong></td>
+<td><strong>◎</strong></td>
+<td><strong>最有力候補。</strong> PPOをベースにしており、クリッピングによって学習が非常に安定します。ボクシングのような画像入力環境でも収束しやすく、CTDEの恩恵を最も受けやすいです。</td>
+</tr>
+<tr>
+<td><strong>MADDPG</strong></td>
+<td><strong>△</strong></td>
+<td><strong>○</strong></td>
+<td><strong>△</strong></td>
+<td>決定論的ポリシーのため探索が不足しがちです。また、ハイパーパラメータに敏感で、学習が発散しやすい欠点があります。連続的なアクションには強いですが、Atariのような離散アクションには不向きな面があります。</td>
+</tr>
+<tr>
+<td><strong>QMIX</strong></td>
+<td><strong>○</strong></td>
+<td><strong>△</strong></td>
+<td><strong>○</strong></td>
+<td><strong>協力型に特化。</strong> 各エージェントのQ値を統合（Mixing）しますが、ボクシングのような「対戦（ゼロサム）」では報酬が対立するため、価値関数の単調性仮定が崩れ、本来の性能を発揮しにくいです。</td>
+</tr>
+<tr>
+<td><strong>COMA</strong></td>
+<td><strong>○</strong></td>
+<td><strong>○</strong></td>
+<td><strong>△</strong></td>
+<td>カウンターファクチュアル（もし自分が別の行動をしていたら）を計算して報酬を割り振ります。理論上は非定常性に強いですが、実装が複雑で、分散が大きくなりやすいため学習が不安定です。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推奨アルゴリズムの選定</strong></p>
+<p>ボクシングゲームの実装において、最もおすすめするのは <strong>MAPPO (Multi-Agent PPO)</strong> です。</p>
+<p><strong>MAPPOが最適な理由</strong></p>
+<ul>
+<li><strong>安定性の高さ</strong>: PPO譲りの安定性により、対戦相手が急に動きを変えても、パラメータが極端に破壊されることがありません。</li>
+<li><strong>共有クリティックによる非定常性の解消</strong>: 「相手の画像」をクリティックに含めることで、相手の改善による報酬の変化を「環境の変化」ではなく「状態の変化」として正しく捉えられます。</li>
+<li><strong>実装の容易さ</strong>: すでにPPOの知識がある場合、クリティックの入力層を拡張するだけでMAPPOの根幹を実装できるため、自作コードとの相性も抜群です。</li>
+</ul>
+<h2 id="問題の解き方">問題の解き方</h2>
+<p>自作MAPPOの実装に向けて、<strong>「集中学習（Centralized Training）」</strong> の核となる概念図と、その具体的なネットワーク構造の設計指針をまとめました。
+なぜ集中学習が必要なのか、その構造を視覚的に理解すると、コードへの落とし込みがスムーズになります。</p>
+<h3 id="1-mappoの基本アーキテクチャ">1. MAPPOの基本アーキテクチャ</h3>
+<p>MAPPO（Multi-Agent PPO）の最大の特徴は、<strong>Actor（行動決定）</strong> と<strong>Critic（価値評価）</strong> で入力する情報が異なる点です。</p>
+<p><strong>Actor (分散実行 / Decentralized Execution)</strong></p>
+<ul>
+<li><strong>役割</strong>: 自分の目の前の画面（観測）だけを見て、パンチや移動を決定します。</li>
+<li><strong>入力</strong>: エージェント自身が見ている画像（84x84x4など）。</li>
+<li><strong>出力</strong>: 18種類の行動に対する確率分布。</li>
+<li><strong>数式イメージ</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false">(</mo><msub><mi>a</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><msub><mi>o</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\pi(a_i | o_i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></li>
+</ul>
+<p><strong>Critic (集中学習 / Centralized Training)</strong></p>
+<ul>
+<li><strong>役割</strong>: 「自分」と「相手」の両方の状況を</li>
+<li>俯瞰して、現在の状況がどれくらい有利（価値があるか）を判断します。</li>
+<li><strong>入力</strong>: 全エージェントの観測を結合（Concatenate）したもの、あるいはゲーム全体のグローバルな状態。</li>
+<li><strong>出力</strong>: 状態価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span>（スカラー値）。</li>
+<li><strong>数式イメージ</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>s</mi><mn>2</mn></msub><mo separator="true">,</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo separator="true">,</mo><msub><mi>s</mi><mi>n</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(s_1, s_2, ..., s_n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">...</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></li>
+</ul>
+<h3 id="2-なぜこれが非定常性を解決するのか">2. なぜこれが「非定常性」を解決するのか</h3>
+<p>ボクシング環境において、相手（エージェントB）が急に強くなった場面を想像してください。</p>
+<ol>
+<li><strong>独立学習（通常のPPO）の場合</strong>:
+エージェントAは「昨日と同じ行動をしたのに、なぜか報酬が減った。自分の行動が間違っていたのか？」と混乱します。</li>
+<li><strong>集中学習（MAPPO）の場合</strong>:
+Criticは <strong>「相手の状態」</strong> も見ています。「報酬が減ったのは、Aが悪くなったのではなく、Bがこう動いたからだ」と正しく評価できます。その結果、Actorに送られるアドバンテージ（報酬の質）が正確になり、Aは冷静に「Bの新しい動きに対する対策」を学習できます。</li>
+</ol>
+<h3 id="3-自作実装時のネットワーク構成案">3. 自作実装時のネットワーク構成案</h3>
+<p>ボクシング環境を自作コードで動かす場合の、推奨されるネットワーク設計です。</p>
+<p><strong>共通モジュール (CNN Encoder)</strong></p>
+<p>画像から特徴を抽出する部分は、ActorとCriticで共有（あるいは同構造を別々に保持）します。</p>
+<ul>
+<li><code>Conv2d</code> -&gt; <code>ReLU</code> -&gt; <code>Conv2d</code> -&gt; <code>ReLU</code> -&gt; <code>Flatten</code> -&gt; <code>Dense(512)</code></li>
+</ul>
+<p><strong>Criticの入力結合ロジック</strong></p>
+<p>ラッパーを使わずロジックを自作する場合、ここが一番のポイントです。</p>
+<pre><code class="language-python"><span class="hljs-comment"># イメージコード</span>
+obs_a = cnn_encoder(agent_a_obs) <span class="hljs-comment"># Aの画像特徴</span>
+obs_b = cnn_encoder(agent_b_obs) <span class="hljs-comment"># Bの画像特徴</span>
+
+<span class="hljs-comment"># AとBの特徴をガッチャンコしてCriticに渡す</span>
+joint_features = torch.cat([obs_a, obs_b], dim=-<span class="hljs-number">1</span>)
+value_a = critic_head_a(joint_features)
+value_b = critic_head_b(joint_features)
+</code></pre>
+<h3 id="4-学習のステップ">4. 学習のステップ</h3>
+<p>自作MAPPOを回す際は、以下の手順でデータを処理します。</p>
+<ol>
+<li><strong>収集</strong>: 各エージェントが自分のActorに従って行動し、軌跡（観測、行動、報酬、<strong>相手の観測</strong>）をバッファに保存。</li>
+<li><strong>評価</strong>: 保存した「自分の観測＋相手の観測」を集中Criticに入れ、価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> を計算。</li>
+<li><strong>更新</strong>: PPOの目的関数に基づき、ActorとCriticの重みを更新。</li>
+</ol>
+<h2 id="概略設計">概略設計</h2>
+<p>自作のMAPPOをボクシング環境向けに実装するための設計概略をまとめました。
+MAPPOの肝は、<strong>「Actorは自分の情報だけを見るが、Criticは全員の情報を見る」</strong> という構造をどうデータフローに落とし込むかです。</p>
+<h3 id="1-全体構造の設計">1. 全体構造の設計</h3>
+<p>MAPPOは「集中学習・分散実行（CTDE）」を実現するため、以下の3つの主要コンポーネントで構成します。</p>
+<p><strong>A. Actor（分散ポリシー）</strong></p>
+<p>各エージェント（1P, 2P）が個別に持ちます。</p>
+<ul>
+<li><strong>入力</strong>: 自分の観測画像（84x84x4）</li>
+<li><strong>出力</strong>: 行動の確率分布（18次元）</li>
+<li><strong>役割</strong>: 推論時（ゲームプレイ時）はこのネットワークのみを使用します。</li>
+</ul>
+<p><strong>B. Centralized Critic（集中クリティック）</strong></p>
+<p>__学習時のみ使用する「神の視点」を持つ評価器です。</p>
+<ul>
+<li><strong>入力</strong>: 全エージェントの情報を結合したもの。
+<ul>
+<li>基本形：<code>concat(エージェント1の観測, エージェント2の観測)</code></li>
+<li>理想形：画像特徴量に加え、現在のスコアや残り時間などの数値を付与。</li>
+</ul>
+</li>
+<li><strong>出力</strong>: 各エージェントに対する状態価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span></li>
+<li><strong>役割</strong>: 「今の状況は自分にとってどれくらい有利か」を相手の動きを含めて判定します。</li>
+</ul>
+<p><strong>C. Buffer（経験再生バッファ）</strong>
+PPOはオンポリシー（On-policy）アルゴリズムなので、エピソードごとにデータを集めて更新します。</p>
+<ul>
+<li><strong>保存内容</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">o_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（自分の観測）, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span>（全員の観測）, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（自分の行動）, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mi>π</mi><mo stretchy="false">(</mo><msub><mi>a</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">log\pi(a_i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>（行動確率）, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">r_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（自分の報酬）。</li>
+</ul>
+<h3 id="2-ネットワーク設計pytorchイメージ">2. ネットワーク設計（PyTorchイメージ）</h3>
+<p>Atariの画像を処理するため、バックボーンにはCNNを使用します。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\problem\1778032551192.png" alt="1778032551192"></p>
+<p><strong>Actorの設計</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Actor</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, action_dim</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-comment"># 共有のCNNバックボーン</span>
+        self.cnn = nn.Sequential(
+            nn.Conv2d(<span class="hljs-number">4</span>, <span class="hljs-number">32</span>, <span class="hljs-number">8</span>, stride=<span class="hljs-number">4</span>), nn.ReLU(),
+            nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">64</span>, <span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>), nn.ReLU(),
+            nn.Conv2d(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>, <span class="hljs-number">3</span>, stride=<span class="hljs-number">1</span>), nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(<span class="hljs-number">64</span> * <span class="hljs-number">7</span> * <span class="hljs-number">7</span>, <span class="hljs-number">512</span>), nn.ReLU()
+        )
+        self.action_head = nn.Linear(<span class="hljs-number">512</span>, action_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        <span class="hljs-comment"># x: (batch, 4, 84, 84)</span>
+        features = self.cnn(x)
+        probs = F.softmax(self.action_head(features), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> probs
+</code></pre>
+<p><strong>Centralized Criticの設計</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">CentralizedCritic</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-comment"># 入力チャンネル数が 4*2(エージェント数) = 8 になる</span>
+        self.cnn = nn.Sequential(
+            nn.Conv2d(<span class="hljs-number">8</span>, <span class="hljs-number">32</span>, <span class="hljs-number">8</span>, stride=<span class="hljs-number">4</span>), nn.ReLU(), <span class="hljs-comment"># 入力chを倍にする</span>
+            <span class="hljs-comment"># ... Actorと同様の構造 ...</span>
+            nn.Flatten(),
+            nn.Linear(<span class="hljs-number">64</span> * <span class="hljs-number">7</span> * <span class="hljs-number">7</span>, <span class="hljs-number">512</span>), nn.ReLU()
+        )
+        self.value_head = nn.Linear(<span class="hljs-number">512</span>, <span class="hljs-number">1</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, joint_obs</span>):
+        <span class="hljs-comment"># joint_obs: (batch, 8, 84, 84) -&gt; 1Pと2Pの画像をチャンネル方向に結合</span>
+        features = self.cnn(joint_obs)
+        <span class="hljs-keyword">return</span> self.value_head(features)
+</code></pre>
+<h3 id="3-学習のアルゴリズムフロー">3. 学習のアルゴリズム・フロー</h3>
+<p>自作する場合、以下のステップをループさせます。</p>
+<ol>
+<li>
+<p><strong>データ収集 (Rollout)</strong>:</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">o_1, o_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を取得し、各Actorで行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">a_1, a_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を決定。</li>
+<li>環境を1ステップ進め、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>r</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">r_1, r_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> と次状態を取得。</li>
+<li>集中学習用に、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>o</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>o</mi><mn>2</mn></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(o_1, o_2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> を結合した状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> を記録。</li>
+</ul>
+</li>
+<li>
+<p><strong>アドバンテージ算出</strong>:</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> を Critic に入れ、各ステップの価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>S</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mclose">)</span></span></span></span> を計算。</li>
+<li>一般化アドバンテージ推定（GAE）を用いて、アドバンテージ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>A</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{A}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9468em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">A</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">^</span></span></span></span></span></span></span></span></span></span> を算出。</li>
+<li><strong>ポイント</strong>: 集中Criticのおかげで、相手が強くなったことによる報酬の低下を、価値の低下として正しく分離できます。</li>
+</ul>
+</li>
+<li>
+<p><strong>パラメータ更新</strong>:</p>
+<ul>
+<li>Actor損失：PPOのクリッピング関数を用いて更新。</li>
+<li>Critic損失：平均二乗誤差（MSE）を用いて <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false">(</mo><mi>S</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">V(S)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mclose">)</span></span></span></span> が実際の報酬和に近づくよう更新。</li>
+<li><strong>エントロピー項</strong>: 探索を促すために追加。</li>
+</ul>
+</li>
+</ol>
+<h3 id="4-実装上の工夫ボクシング特化">4. 実装上の工夫：ボクシング特化</h3>
+<ul>
+<li><strong>Self-Play</strong>: 最初はランダムな相手（または組み込みAI）と戦わせ、ある程度強くなったら「過去の自分（のチェックポイント）」と対戦させるようにループを組みます。</li>
+<li><strong>報酬の正規化</strong>: 報酬が +1 / -1 と極端なので、移動平均でスケーリングすると学習が安定します。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>ということで折角解こうと思っても、結構ヘビーということが分かりました。
+ボクシング環境で自作MAPPOを実装する際の最重要ポイントを、5つの項目に凝縮してまとめました。</p>
+<p><strong>1. 集中学習・分散実行 (CTDE) の徹底</strong></p>
+<p>MAPPOのアイデンティティは、<strong>「情報の非対称性」</strong> を学習に利用することです。</p>
+<ul>
+<li><strong>Actor (推論用)</strong>: 自分の観測（自分側の画像）のみを入力。実戦（対戦）で使える形にします。</li>
+<li><strong>Critic (学習用)</strong>: 自分と相手の両方の観測を結合して入力。「相手がどう動こうとしているか」を考慮して、現在の状況の価値を正確に評価させます。</li>
+</ul>
+<p><strong>2. Atari特有の「前処理」パイプライン</strong></p>
+<p>生のピクセルデータは情報過多で学習が進みません。以下の加工を<strong>Actor/Critic両方の入力前</strong>に行う必要があります。</p>
+<ul>
+<li><strong>リサイズ &amp; グレースケール</strong>: 84x84程度の白黒画像に圧縮。</li>
+<li><strong>フレームスタッキング</strong>: 直近4フレームを重ねて「動き（速度・方向）」を認識可能にする。</li>
+<li><strong>型変換 &amp; 正規化</strong>: <code>uint8</code> (0-255) から <code>float32</code> (0.0-1.0) へ変換。</li>
+</ul>
+<p><strong>3. セルフプレイ (Self-Play) の導入</strong></p>
+<p>対戦相手が固定（ランダムや弱いAI）だと、ある一定のレベルで学習が頭打ちになります。</p>
+<ul>
+<li>過去の自分自身のモデル（チェックポイント）と戦わせることで、常に「自分と同等か、少し強い相手」と対戦し続け、戦略を段階的に進化させます。</li>
+</ul>
+<p><strong>4. オンポリシーデータの同期</strong></p>
+<p>MAPPOはPPOベースのオンポリシーアルゴリズムです。</p>
+<ul>
+<li>1Pと2Pのデータ（観測、行動、報酬、ログ確率）を<strong>ペアで保存</strong>し、同時にバッチ更新を行う必要があります。片方のエージェントだけを更新すると、対戦相手とのバランスが崩れ、学習が不安定になります。</li>
+</ul>
+<p><strong>5. 集中クリティックのネットワーク設計</strong></p>
+<p>自作実装で最も工夫が必要な箇所です。</p>
+<ul>
+<li><strong>入力の結合</strong>: 1Pと2Pの画像をチャンネル方向に重ねる（例: 4枚スタック×2人分 = 8チャンネル）手法が一般的です。</li>
+<li><strong>アドバンテージ算出</strong>: 集中クリティックから得られた安定した価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span> を使って <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mi>A</mi><mi>E</mi></mrow><annotation encoding="application/x-tex">GAE</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span></span></span></span>（一般化アドバンテージ推定）を計算することで、相手の挙動に左右されない「純粋な自分の行動の良さ」を抽出します。</li>
+</ul>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+        </body>
+        </html>
