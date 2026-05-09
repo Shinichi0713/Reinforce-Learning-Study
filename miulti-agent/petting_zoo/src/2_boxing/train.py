@@ -1,62 +1,98 @@
-import ray
-from ray import air, tune
-from ray.rllib.algorithms.ppo import PPOConfig
-from ray.rllib.env.wrappers.pettingzoo_env import ParallelPettingZooEnv
+import torch
+import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
 from pettingzoo.atari import boxing_v2
+from ray.rllib.env.wrappers.pettingzoo_env import ParallelPettingZooEnv
 import supersuit as ss
-from ray.tune.registry import register_env
 
-def env_creator(args):
-    # 1. 環境の生成
-    env = boxing_v2.parallel_env(render_mode="rgb_array")
-    
-    # 2. 前処理（順序が非常に重要です）
-    env = ss.max_observation_v0(env, 2)
-    env = ss.frame_skip_v0(env, 4)
+def preprocess_joint_obs(obs_dict, device="cpu"):
+    """
+    1Pと2Pの個別の観測(84, 84, 4)を(4, 84, 84)に変換し、
+    それらを結合して集中クリティック用の状態(8, 84, 84)を作る
+    """
+    # 1. テンソル化 (この時点では [84, 84, 4])
+    t1 = torch.as_tensor(obs_dict['first_0'], dtype=torch.float32, device=device)
+    t2 = torch.as_tensor(obs_dict['second_0'], dtype=torch.float32, device=device)
+
+    # 2. 軸の入れ替え [H, W, C] -> [C, H, W] に変換
+    # これにより PyTorch の Conv2d が扱える形状 [4, 84, 84] になる
+    obs_1p = t1.permute(2, 0, 1) / 255.0
+    obs_2p = t2.permute(2, 0, 1) / 255.0
+
+    # 3. チャンネル方向(dim=0)に結合して 8チャンネルにする
+    # 形状: (8, 84, 84)
+    joint_state = torch.cat([obs_1p, obs_2p], dim=0)
+
+    return obs_1p, obs_2p, joint_state
+
+def visualize_check(joint_s):
+    """統合された状態を可視化して確認する"""
+    imgs = joint_s.cpu().numpy()
+    fig, axes = plt.subplots(2, 4, figsize=(12, 5))
+    fig.suptitle("Debug: Joint Observation (Top: 1P, Bottom: 2P)", fontsize=14)
+
+    for i in range(4):
+        # 1Pのフレームを表示
+        axes[0, i].imshow(imgs[i], cmap='gray')
+        axes[0, i].set_title(f"1P-F{i}")
+        axes[0, i].axis('off')
+
+        # 2Pのフレームを表示
+        axes[1, i].imshow(imgs[i+4], cmap='gray')
+        axes[1, i].set_title(f"2P-F{i}")
+        axes[1, i].axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+# --- クリティックモデル定義 ---
+class CentralizedCritic(nn.Module):
+    def __init__(self, input_channels=8):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(input_channels, 32, kernel_size=8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.Flatten()
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(3136, 512),
+            nn.ReLU(),
+            nn.Linear(512, 1)
+        )
+
+    def forward(self, joint_obs):
+        # バッチ次元がない場合は追加 [8, 84, 84] -> [1, 8, 84, 84]
+        if joint_obs.dim() == 3:
+            joint_obs = joint_obs.unsqueeze(0)
+        features = self.encoder(joint_obs)
+        value = self.fc(features)
+        return value
+
+# --- 環境の準備 ---
+def get_env():
+    env = boxing_v2.parallel_env()
     env = ss.resize_v1(env, 84, 84)
     env = ss.color_reduction_v0(env, mode='full')
-    env = ss.reshape_v0(env, (84, 84, 1))
-    env = ss.dtype_v0(env, "float32") # ←【重要】ここを追加：入力をfloat型に変換
-    env = ss.normalize_obs_v0(env, env_min=0, env_max=1) # 0-1に正規化
+    env = ss.dtype_v0(env, "float32")
     env = ss.frame_stack_v1(env, 4)
-    
     return ParallelPettingZooEnv(env)
 
-# Rayのクリーンな初期化
-if ray.is_initialized():
-    ray.shutdown()
-ray.init(num_cpus=2)
+# --- 実行確認 ---
+env = get_env()
+obs_dict, info = env.reset()
 
-register_env("boxing_mappo", lambda config: env_creator(config))
+# 統合処理の実行
+obs_1p, obs_2p, joint_s = preprocess_joint_obs(obs_dict)
 
-# 3. MAPPOの設定
-config = (
-    PPOConfig()
-    .environment("boxing_mappo")
-    .framework("torch")
-    # 最新Rayでの型エラーと設定の混乱を避けるため、新しいAPIスタックを一旦オフにする
-    .api_stack(enable_rl_module_and_learner=False, enable_env_runner_and_connector_v2=False)
-    .env_runners(num_env_runners=1)
-    .training(
-        gamma=0.99,
-        lr=2.5e-4,
-        model={
-            "conv_filters": [[16, [8, 8], 4], [32, [4, 4], 2], [512, [11, 11], 1]],
-        }
-    )
-    .multi_agent(
-        policies={"p0", "p1"},
-        policy_mapping_fn=lambda agent_id, *args, **kwargs: "p0" if "first" in agent_id else "p1",
-    )
-)
+print(f"Original Obs Shape: {obs_dict['first_0'].shape}") # (84, 84, 4)
+print(f"Processed 1P Shape: {obs_1p.shape}")            # (4, 84, 84)
+print(f"Joint State Shape: {joint_s.shape}")             # (8, 84, 84)
 
-# 4. 学習の実行
-tuner = tune.Tuner(
-    "PPO",
-    run_config=air.RunConfig(stop={"timesteps_total": 100000}),
-    param_space=config.to_dict(),
-)
-
-print("データ型とAPIスタックを修正して学習を開始します...")
-results = tuner.fit()
-ray.shutdown()
+# 可視化して確認
+visualize_check(joint_s)
