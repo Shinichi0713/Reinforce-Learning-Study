@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x89e3;&#x6cd5;&#x306e;&#x30b7;&#x30ca;&#x30ea;&#x30aa;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>昨日のボクシングゲームをMARLで経験学習するネットワークを構築していきます。</p>
+<p><strong>ここまでの関連記事</strong></p>
+<ol>
+<li>
+<p>petting-zooの導入(MARL環境の導入)
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000">https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000</a></p>
+</li>
+<li>
+<p>解くためのアルゴリズム選定</p>
+</li>
+</ol>
+<h2 id="解法のシナリオ">解法のシナリオ</h2>
+<p>以下の流れに沿って今回のボクシングゲームの解決を行っていきます。</p>
+<ol>
+<li>データパイプライン構築: ゲームの画像から「集中クリティック用の入力」を作成し、バッファに正しく保存・取り出しができる仕組みを作ります。</li>
+<li>ネットワーク設計: 210x160の画像を処理するための畳み込み層を設計します。</li>
+<li>学習用エージェント設計: 学習を実際に進めるエージェントを構築します。</li>
+<li>強化学習してエージェントにデモプレイします。</li>
+</ol>
+<p>今回は1. データパイプライン構築を実施していきます。</p>
+<h2 id="データパイプライン構築">データパイプライン構築</h2>
+<p>ここで行うことは、ゲームの画面を学習用に加工して、エージェントとクリティックモデルが使えるようにすることです。
+そしてそのために行うことは、ゲームの画面を2人のエージェントのものとして取り出して、統合することです。</p>
+<h3 id="なぜ統合するのか">なぜ統合するのか</h3>
+<p>物理的な画像は1枚ですが、MAPPOの心臓部である「集中クリティック（Centralized Critic）」を機能させるためには、1つの画面を「2つの異なる役割」として使い分ける必要があります。</p>
+<p>なぜ実装上、1枚の画像だけでは足りない（2人分として扱わなければならない）のか、その理由は以下の3点に集約されます。</p>
+<p><strong>1. 「自分」と「相手」を区別するため</strong></p>
+<p>ボクシングの画面には「白いボクサー」と「黒いボクサー」が映っています。</p>
+<ul>
+<li>Actor（1P用）にとっては、自分が「白」で相手が「黒」です。</li>
+<li>Actor（2P用）にとっては、自分が「黒」で相手が「白」です。</li>
+</ul>
+<p>ニューラルネットワーク（Actor）は「自分がどちらか」を理解していません。そのため、1Pの学習時には「1Pから見た視点」として画像を処理し、2Pの学習時には「2Pから見た視点」として処理します。これを同時に行うため、データ上は2つの画像（観測）として扱います。</p>
+<p><strong>2. クリティックに「全体像」を理解させるため</strong></p>
+<p>MAPPOの最大の特徴は、クリティックに「すべてのエージェントの情報」を流し込むことです。</p>
+<p>もし1枚の画像（4フレームスタック）だけをクリティックに渡すと、それは単一エージェントのPPOと同じになってしまいます。MAPPOでは、「1Pがどう動こうとしているか」と「2Pがどう動こうとしているか」を同時に評価するために、2人分の情報（観測のペア）をガッチャンコして入力します。</p>
+<p><strong>3. 実装上の「チャンネル」の重なり</strong></p>
+<p>具体的にコードに落とし込む際、以下のようなデータの作り方をします。</p>
+<ul>
+<li><strong>1Pの観測</strong>: 4枚の連続した画像（スタック） = <code>(4, 84, 84)</code></li>
+<li><strong>2Pの観測</strong>: 4枚の連続した画像（スタック） = <code>(4, 84, 84)</code></li>
+<li><strong>集中クリティックへの入力</strong>: これらを重ねた <strong>8枚分</strong> の画像 = <code>(8, 84, 84)</code></li>
+</ul>
+<p>このように、「1枚の画面から抽出した2つの視点」を重ねて1つの巨大な情報（8チャンネルの画像）に作り変えるステップがあるため、「2人分の画像が必要」という表現になります。</p>
+<p><strong>まとめ：なぜ2人分必要なのか？</strong></p>
+<ol>
+<li><strong>Actor用</strong>: 1Pと2Pがそれぞれ「自分の行動」を決めるために、個別の入力として必要。</li>
+<li><strong>Critic用</strong>: 2人の位置関係や意図を「神の視点」で同時に評価するために、2人分を合体させた入力が必要。</li>
+</ol>
+<p>もしこれを1人分（1枚の画像）だけで済ませようとすると、それは「マルチエージェント」ではなく「1人で環境を操作している」ことになり、相手の学習による変化（非定常性）に対応できなくなってしまいます。</p>
+<h2 id="実装">実装</h2>
+<p>ここからパイプラインの構築を行います。
+自作MAPPOを動作させるための「データパイプライン構築」の手順を、実装の流れに沿って整理します。
+ボクシングの1画面から、MAPPOの心臓部である「8チャンネルの状態」を作り出す工程は以下の<strong>4つのステップ</strong>で構成されます。</p>
+<h3 id="ステップ1環境から辞書形式の観測を受け取る">ステップ1：環境から「辞書形式」の観測を受け取る</h3>
+<p>まずは環境から観測情報を受け取ることからです。
+ボクシングの環境を <code>ParallelPettingZooEnv</code> を通した環境では、<code>env.step()</code> や <code>env.reset()</code> の戻り値は、エージェント名をキーとした辞書になります。</p>
+<pre><code class="language-python"><span class="hljs-comment"># 環境を1ステップ進める</span>
+obs_dict, rewards, terminations, truncations, infos = env.step(actions)
+
+<span class="hljs-comment"># obs_dictの中身（イメージ）:</span>
+<span class="hljs-comment"># {</span>
+<span class="hljs-comment">#   &#x27;first_0&#x27;: array([4, 84, 84]),  &lt;- 1Pの4フレームスタック画像</span>
+<span class="hljs-comment">#   &#x27;second_0&#x27;: array([4, 84, 84])  &lt;- 2Pの4フレームスタック画像</span>
+<span class="hljs-comment"># }</span>
+
+</code></pre>
+<blockquote>
+<p><strong>ParallelPettingZooEnv</strong><br>
+このラッパーは <strong>「PettingZooというマルチエージェント環境を、標準的なGym（Gymnasium）の形式として扱えるように翻訳する」</strong> 役割を担っています。
+主な役割は以下の3点です。
+<strong>1. インターフェースの統一</strong><br>
+PettingZooの <code>parallel_env</code> は、もともとエージェントごとの辞書形式でデータを返しますが、AIのライブラリ（Ray/RLlibなど）や自作のループで扱う際、標準的なGymのメソッド（<code>reset</code>, <code>step</code>）と戻り値の形式が微妙に異なる場合があります。
+このラッパーを通すことで、<strong>「どんなマルチエージェント環境でも同じ書き方で動かせる」</strong> 状態にしてくれます。
+<strong>2. 戻り値の「タプル化」の保証</strong><br>
+先ほどエラーが出た <code>obs, info = env.reset()</code> という形式は、最新のGymnasiumの標準仕様です。
+PettingZoo単体だと古いAPI（<code>obs</code> のみ返す）で動くことがありますが、このラッパーを被せることで、強制的に <strong>「観測データ（obs）」と「付随情報（info）」の2つをセットで返す</strong> ように変換してくれます。これが先ほどのエラー（NoneTypeのアンパック失敗）を解決した直接の理由です。
+<strong>3. エージェント情報の管理</strong><br>
+このラッパーを適用すると、環境オブジェクトの中に以下の情報が整理されます。</p>
+<ul>
+<li><code>env.possible_agents</code>: 全エージェントの名前リスト（<code>['first_0', 'second_0']</code>）</li>
+<li><code>env.observation_space</code>: 共通の観測空間の定義</li>
+<li><code>env.action_space</code>: 共通の行動空間の定義
+これがあるおかげで、自作MAPPOのネットワークを作る際に「入力サイズは何にすべきか？」を自動的に取得できるようになります。
+自作MAPPOを組む際、このラッパーを通した環境を使うことで、データパイプラインは以下のようにスッキリします。</li>
+<li><strong>Input</strong>: ラッパーがAtariの複雑な内部状態を整理し、<code>(4, 84, 84)</code> の綺麗な画像スタックにして渡してくれる。</li>
+<li><strong>Output</strong>: こちらが送る <code>actions = {'first_0': 1, 'second_0': 0}</code> という辞書を、正しくゲーム画面（Atari）に反映してくれる。
+PettingZooが生の「ボクシングゲーム機」だとしたら、<code>ParallelPettingZooEnv</code> は <strong>「パソコンで操作しやすくするための専用コントローラー変換アダプター」</strong> です。</li>
+</ul>
+</blockquote>
+<h3 id="ステップ2numpy配列をpytorchテンソルに変換正規化">ステップ2：NumPy配列をPyTorchテンソルに変換・正規化</h3>
+<p>Atariの画像データは通常 <code>0-255</code> の整数（uint8）です。これを計算可能な浮動小数点に変換し、<code>0.0-1.0</code> に正規化します。
+また、PyTorchでは (チャンネル, 高さ, 幅) の順序にする必要があります。
+データ取得の後にテンソル並べ替え→正規化を行います。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 1Pと2Pの画像をそれぞれテンソル化</span>
+<span class="hljs-comment"># 形状: [4, 84, 84]</span>
+t1 = torch.as_tensor(obs_dict[<span class="hljs-string">&#x27;first_0&#x27;</span>], dtype=torch.float32, device=device)
+t2 = torch.as_tensor(obs_dict[<span class="hljs-string">&#x27;second_0&#x27;</span>], dtype=torch.float32, device=device)
+
+<span class="hljs-comment"># 2. 軸の入れ替え [H, W, C] -&gt; [C, H, W] に変換</span>
+<span class="hljs-comment"># これにより PyTorch の Conv2d が扱える形状 [4, 84, 84] になる</span>
+obs_1p = t1.permute(<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>) / <span class="hljs-number">255.0</span>
+obs_2p = t2.permute(<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>) / <span class="hljs-number">255.0</span>
+
+</code></pre>
+<h3 id="ステップ3チャンネル方向に結合concatenateする">ステップ3：チャンネル方向に「結合（Concatenate）」する</h3>
+<p>ここが最も重要なステップです。2人分の4枚スタック画像を「重ねる」ことで、<strong>8チャンネルの1つのデータ</strong>にします。
+PyTorchの <code>torch.cat</code> を使い、<code>dim=0</code>（チャンネル次元）で結合します。</p>
+<pre><code class="language-python"><span class="hljs-comment"># 2つの画像を重ねて「統合状態（Joint State）」を作る</span>
+<span class="hljs-comment"># [4, 84, 84] + [4, 84, 84] -&gt; [8, 84, 84]</span>
+joint_state = torch.cat([obs_1p, obs_2p], dim=<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># バッチ処理のために先頭に次元を追加 (1, 8, 84, 84)</span>
+joint_state_input = joint_state.unsqueeze(<span class="hljs-number">0</span>)
+
+</code></pre>
+<h3 id="ステップ4集中クリティックモデルへ入力する">ステップ4：集中クリティックモデルへ入力する</h3>
+<p>作成した8チャンネルのデータを、集中クリティックのCNNに入力します。CNNの最初の層（<code>Conv2d</code>）の <code>in_channels</code> は <strong>8</strong> で設計しておく必要があります。</p>
+<pre><code class="language-python"><span class="hljs-comment"># モデルの定義（抜粋）</span>
+<span class="hljs-comment"># self.conv1 = nn.Conv2d(in_channels=8, out_channels=32, kernel_size=8, stride=4)</span>
+
+<span class="hljs-comment"># 予測実行</span>
+state_value = critic_model(joint_state_input)
+<span class="hljs-comment"># 出力: 1Pと2Pの状況を俯瞰した上での「現在の盤面の価値（スコア予測）」</span>
+
+</code></pre>
+<p><strong>実装上の注意点：1P用と2P用のクリティック</strong></p>
+<p>MAPPOにおいて、クリティックは「全員の情報をみる」ものですが、<strong>出力（価値）はエージェントごと</strong>に計算します。</p>
+<ol>
+<li><strong>共通入力</strong>: 常に <code>joint_state</code> (8ch) を入力。</li>
+<li><strong>個別出力</strong>:</li>
+</ol>
+<ul>
+<li>クリティックAの出力：1Pにとっての価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">V_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li>クリティックBの出力：2Pにとっての価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">V_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.2222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>
+（※1つのネットワークで出力を2つに分岐させるのが効率的です）</li>
+</ul>
+<h3 id="まとめデータフローのコード">まとめ：データフローのコード</h3>
+<p>これらをまとめた、1ステップごとの統合処理の全容です。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_critic_input</span>(<span class="hljs-params">obs_dict, device</span>):
+    <span class="hljs-comment"># 1. 抽出</span>
+    o1 = obs_dict[<span class="hljs-string">&#x27;first_0&#x27;</span>]
+    o2 = obs_dict[<span class="hljs-string">&#x27;second_0&#x27;</span>]
+    
+    <span class="hljs-comment"># 2. テンソル化 &amp; 正規化</span>
+    t1 = torch.as_tensor(o1, dtype=torch.float32, device=device) / <span class="hljs-number">255.0</span>
+    t2 = torch.as_tensor(o2, dtype=torch.float32, device=device) / <span class="hljs-number">255.0</span>
+    
+    <span class="hljs-comment"># 3. 結合 (4ch + 4ch = 8ch)</span>
+    joint_s = torch.cat([t1, t2], dim=<span class="hljs-number">0</span>)
+    
+    <span class="hljs-keyword">return</span> joint_s <span class="hljs-comment"># これをバッファに保存し、Criticに渡す</span>
+
+</code></pre>
+<p>取得したテンソルデータが正しいかを可視化してみました。</p>
+<p>ボクシング環境が開始（reset）された直後の時点では、まだ「過去の映像」が存在しません。</p>
+<ul>
+<li>Frame 4 (最新): 現在の画面が映ります。</li>
+<li>Frame 1〜3 (過去): 過去の履歴がないため、デフォルト値である「0（真っ黒）」で埋められます。</li>
+</ul>
+<p>ということで以下のように絵が得られました。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\1_data_pipeline\1778305113863.png" alt="1778305113863"></p>
+<h2 id="総括">総括</h2>
+<p>今回は環境から得られる画像情報をニューラルネットワーク用に加工するデータパイプラインの構築を行いました。</p>
+<p>ボクシングゲームのMAPPOにおけるCriticモデルへのデータ生成の勘所は、<strong>「1枚の画面を2人の視点に分解し、それらを1つの8チャンネル状態に統合してCriticに渡す」</strong> という点に集約されます。</p>
+<h3 id="1-なぜ2人分の観測が必要か">1. なぜ2人分の観測が必要か</h3>
+<ul>
+<li>Actorは「自分から見た観測」だけを使って行動を決めるので、1P用・2P用で別々の観測（4フレームスタック）が必要です。</li>
+<li>Criticは「全エージェントの状況を同時に見て価値を評価する」ため、1P・2Pの観測を<strong>両方</strong>まとめた入力が必要です。</li>
+<li>1枚の画面だけでは、相手の行動や位置関係を考慮した「マルチエージェントとしての評価」ができず、非定常な相手の変化に追従できません。</li>
+</ul>
+<h3 id="2-8チャンネル状態の作り方データパイプラインの要">2. 8チャンネル状態の作り方（データパイプラインの要）</h3>
+<ol>
+<li><strong>環境から辞書形式の観測を取得</strong>
+<ul>
+<li><code>obs_dict['first_0']</code>（1P用）と <code>obs_dict['second_0']</code>（2P用）の4フレームスタック画像 <code>(4,84,84)</code> を取得します。</li>
+</ul>
+</li>
+<li><strong>PyTorchテンソル化＋正規化</strong>
+<ul>
+<li><code>torch.as_tensor</code> で <code>float32</code> に変換し、<code>0-255</code> → <code>0.0-1.0</code> に正規化します。</li>
+<li><code>permute</code> で <code>(H,W,C)</code> → <code>(C,H,W)</code> に並べ替え、CNNが扱える形状 <code>(4,84,84)</code> にします。</li>
+</ul>
+</li>
+<li><strong>チャンネル方向で結合</strong>
+<ul>
+<li><code>torch.cat([obs_1p, obs_2p], dim=0)</code> で <code>(4,84,84)</code> + <code>(4,84,84)</code> → <code>(8,84,84)</code> の統合状態（joint state）を作ります。</li>
+</ul>
+</li>
+<li><strong>Criticへの入力</strong>
+<ul>
+<li>CriticのCNNの <code>in_channels=8</code> で設計し、この8チャンネル状態を入力します。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-実装上の注意点">3. 実装上の注意点</h3>
+<ul>
+<li>Criticは**入力は共通（8ch）**ですが、<strong>出力はエージェントごと</strong>（1P用の価値V₁、2P用の価値V₂）に分けて計算します。</li>
+<li>リセット直後は過去フレームがないため、Frame 1–3 は0（真っ黒）で埋められますが、スタックが溜まれば自然に過去フレームも反映されます。</li>
+<li><code>ParallelPettingZooEnv</code> ラッパーを通すことで、PettingZooの辞書形式をGym風に統一し、1P/2Pの観測を安定して取得できます。</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
