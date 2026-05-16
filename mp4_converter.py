@@ -1,4 +1,4 @@
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip  # 修正：.editorを削除
 
 def mp4_to_gif(input_path, output_path, fps=10):
     """
@@ -9,19 +9,24 @@ def mp4_to_gif(input_path, output_path, fps=10):
         output_path (str): 出力gifファイルのパス
         fps (int): 出力gifのフレームレート（デフォルト10）
     """
-    # 動画を読み込み
-    clip = VideoFileClip(input_path)
-    
-    # 必要に応じてリサイズやトリミングを追加
-    # clip = clip.resize(0.5)  # サイズを半分に
-    # clip = clip.subclip(0, 5)  # 0〜5秒だけ切り出す
-    
-    # gifとして書き出し
-    clip.write_gif(output_path, fps=fps)
-    
-    # リソース解放
-    clip.close()
+    # with文を使うことで、処理終了後やエラー時に自動でリソースが解放されます
+    with VideoFileClip(input_path) as clip:
+        
+        # 必要に応じてリサイズやトリミングを追加
+        # clip = clip.resized(0.5)    # 2.xでは resize -> resized に変更
+        # clip = clip.subclipped(0, 5) # 2.xでは subclip -> subclipped に変更
+        
+        # gifとして書き出し
+        clip.write_gif(output_path, fps=fps)
 
 # 使用例
 if __name__ == "__main__":
-    mp4_to_gif("input.mp4", "output.gif", fps=10)
+    # ファイルの存在を確認してから実行することをお勧めします
+    import os
+    path_input = r"D:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\4_train_result\boxing_eval_iter780_reward_0.mp4"
+    dir_output = os.path.dirname(path_input)
+    path_output = os.path.join(dir_output, "output.gif")
+    if os.path.exists(path_input):
+        mp4_to_gif(path_input, path_output, fps=10)
+    else:
+        print("エラー: input.mp4 が見つかりません。")
