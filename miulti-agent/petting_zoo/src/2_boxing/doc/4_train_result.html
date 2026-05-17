@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x89e3;&#x6cd5;&#x306e;&#x30b7;&#x30ca;&#x30ea;&#x30aa;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <p>連日Atariのボクシングを強化学習エージェントで勝利するためのアルゴリズム構築を行っています。</p>
+<p><strong>ここまでの関連記事</strong></p>
+<ol>
+<li>petting-zooの導入(MARL環境の導入)</li>
+</ol>
+<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000">https://yoshishinnze.hatenablog.com/entry/2026/05/09/043000</a></p>
+<ol start="2">
+<li>解くためのアルゴリズム選定</li>
+<li>データパイプライン構築</li>
+</ol>
+<h2 id="解法のシナリオ">解法のシナリオ</h2>
+<p>以下の流れに沿って今回のボクシングゲームの解決を行っていきます。</p>
+<ol>
+<li>データパイプライン構築: ゲームの画像から「集中クリティック用の入力」を作成し、バッファに正しく保存・取り出しができる仕組みを作ります。</li>
+<li>ネットワーク設計: 210x160の画像を処理するための畳み込み層を設計します。</li>
+<li>学習用エージェント設計: 学習を実際に進めるエージェントを構築します。</li>
+<li>強化学習してエージェントにデモプレイします。</li>
+</ol>
+<p>今回は4. 強化学習してエージェントにデモプレイを実施していきます。</p>
+<h2 id="学習中の確認点">学習中の確認点</h2>
+<p>強化学習は通常の教師あり学習に比べると学習が不安定と言えます。
+このため、学習の度に状態監視を行いうまくいっていない場合、原因分析を行うことが重要と思われます。
+強化学習、特にマルチエージェント（MAPPO）でのボクシング攻略において、学習が「順調か」「停滞しているか」「崩壊しているか」を判断するための重要な指標を整理しました。
+これらを出力する、あるいは単純な <code>matplotlib</code> でグラフ化して確認することをお勧めします。</p>
+<h3 id="1-報酬reward--score">1. 報酬（Reward / Score）</h3>
+<p>最も直感的な指標ですが、ボクシングのような対戦型では少し工夫が必要です。</p>
+<ul>
+<li><strong>エピソードごとの合計報酬</strong>: 1Pと2Pそれぞれのスコアを確認します。</li>
+<li><strong>勝率・得点差</strong>: 1Pと2Pが同じネットワークを共有している場合、互いに高め合うため得点差は小さくなる傾向がありますが、ランダムな動きの相手（初期状態）に対してどれだけ差を広げられるかが重要です。</li>
+<li><strong>エピソードの長さ</strong>: ボクシングはKOかタイムアップで終わります。学習が進むと、効率的にKOを奪ってエピソードが短くなるか、逆に守備が上手くなって長期戦になるかの変化が現れます。</li>
+</ul>
+<h3 id="2-損失関数loss">2. 損失関数（Loss）</h3>
+<p>モデルが正しく数学的に最適化されているかを確認します。</p>
+<ul>
+<li>
+<p><strong>Policy Loss (Actor Loss)</strong>:</p>
+</li>
+<li>
+<p>緩やかに減少、または一定の範囲で振動するのが理想です。</p>
+</li>
+<li>
+<p>急激なスパイク（跳ね上がり）は、学習率が高すぎるか、 Clipping が機能していない予兆です。</p>
+</li>
+<li>
+<p><strong>Value Loss (Critic Loss)</strong>:</p>
+</li>
+<li>
+<p><strong>最も重要です。</strong> 盤面の評価が正確になれば減少します。</p>
+</li>
+<li>
+<p>これが高いままだと、エージェントは「自分の行動が良いのか悪いのか」を正しく判断できていません。</p>
+</li>
+</ul>
+<h3 id="3-ポリシーの性質policy-stats">3. ポリシーの性質（Policy Stats）</h3>
+<p>AIの「心の状態」を読み解く指標です。</p>
+<ul>
+<li><strong>エントロピー (Entropy)</strong>:</li>
+<li><strong>探索の度合い</strong>を示します。学習が進むにつれて徐々に下がっていく（行動が洗練され、迷いがなくなる）のが正常です。</li>
+<li>下がりきって「0」に張り付くと、新しい戦略を試さなくなる「早期収束」の状態です。</li>
+</ul>
+<blockquote>
+<p><strong>エントロピー</strong><br>
+強化学習における<strong>エントロピー</strong>とは、一言で言えば「エージェントの迷いや、行動の多様さ」を表す指標です。
+<strong>1. 直感的な意味</strong></p>
+<ul>
+<li><strong>エントロピーが高い</strong>: エージェントが「どの行動がベストか分からない」状態で、いろいろな行動をランダムに試そうとします（<strong>探索モード</strong>）。</li>
+<li><strong>エントロピーが低い</strong>: エージェントが「この状況ではこの行動が絶対正解だ」と確信している状態で、特定の行動に固執します（<strong>活用モード</strong>）。
+<strong>2. なぜ強化学習で重要なのか</strong><br>
+学習が進むにつれてエージェントは賢くなりますが、あまりに早く「これが正解だ」と決めつけると、もっと良い戦略（例：ボクシングでの強力なコンボなど）を見つけるチャンスを逃してしまいます。
+これを防ぐために、損失関数にエントロピー項を加え、<strong>「ある程度は迷い（多様性）を残しなさい」<strong>と命令します。これを</strong>エントロピー・ボーナス</strong>と呼びます。
+<strong>3. モニタリングのポイント</strong></li>
+<li><strong>正常な推移</strong>: 学習開始時は高く（デタラメに動く）、学習が進むにつれて緩やかに下がっていくのが理想的です。</li>
+<li><strong>異常な推移</strong>:</li>
+<li><strong>急激にゼロになる</strong>: 特定の動き（例：ずっと左に逃げるだけ）に固執して、学習が「詰まった」状態です。</li>
+<li><strong>ずっと高いまま</strong>: 学習が全く進んでおらず、報酬と行動の関係が見出せていない状態です。</li>
+</ul>
+</blockquote>
+<ul>
+<li><strong>KL散度 (KL Divergence)</strong>:</li>
+<li>更新前後のポリシーの差です。これが大きすぎると、一回の更新で動きが激変しすぎて学習が壊れます（PPOのClippingがこれを防ぎます）。</li>
+</ul>
+<h3 id="4-価値予測の精度value-estimates">4. 価値予測の精度（Value Estimates）</h3>
+<ul>
+<li>
+<p><strong>平均価値（Mean Value）</strong>:</p>
+</li>
+<li>
+<p>クリティックが予測している期待報酬です。実際の獲得報酬の推移と連動しているか確認します。</p>
+</li>
+<li>
+<p><strong>説明分散（Explained Variance）</strong>:</p>
+</li>
+<li>
+<p>実際の報酬をどれだけ価値関数で説明できているかを示す指標です。1.0に近いほど完璧で、0以下は予測がランダムより悪いことを意味します。</p>
+</li>
+</ul>
+<h3 id="モニタリングの優先順位トラブルシューティング">モニタリングの優先順位（トラブルシューティング）</h3>
+<table>
+<thead>
+<tr>
+<th>現象</th>
+<th>確認すべき指標</th>
+<th>対策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>動きが固まる</strong></td>
+<td>エントロピー</td>
+<td><code>ent_coef</code> を上げて探索を促す</td>
+</tr>
+<tr>
+<td><strong>Lossが爆発する</strong></td>
+<td>KL散度 / 勾配のノルム</td>
+<td>学習率（LR）を下げる</td>
+</tr>
+<tr>
+<td><strong>スコアが上がらない</strong></td>
+<td>Value Loss</td>
+<td>クリティックのネットワークを深くするか、学習時間を増やす</td>
+</tr>
+</tbody>
+</table>
+<h2 id="学習コードへの反映">学習コードへの反映</h2>
+<p>今回は例えば報酬とエントロピーを監視対象とします。
+この場合変更するのは <code>MAPPOAtariTrainer</code> と 学習コード です。</p>
+<p>出力する報酬については、1エピソードが終わるたびにスコアが確定するため、学習ステップ（イテレーション）ごとの「平均スコア」として算出するのが一般的です。</p>
+<h3 id="修正された-mappoataritrainer-クラス">修正された <code>MAPPOAtariTrainer</code> クラス</h3>
+<p><code>collect_rollouts</code> でエピソード報酬をカウントし、<code>train_step</code> でエントロピーを返すように変更しました。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPOAtariTrainer</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, env, agent, buffer_size=<span class="hljs-number">2048</span>, batch_size=<span class="hljs-number">64</span>, lr=<span class="hljs-number">3e-4</span>, gamma=<span class="hljs-number">0.99</span>, gae_lambda=<span class="hljs-number">0.95</span>, ppo_epochs=<span class="hljs-number">10</span></span>):
+        <span class="hljs-comment"># ... (既存の初期化コード) ...</span>
+        self.stats = {<span class="hljs-string">&quot;reward_history&quot;</span>: [], <span class="hljs-string">&quot;entropy_history&quot;</span>: []}
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">collect_rollouts</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;環境を動かしてデータを収集し、報酬を記録する&quot;&quot;&quot;</span>
+        self.buffer.clear()
+        obs_dict, _ = self.env.reset()
+        
+        episode_rewards = []
+        current_ep_reward = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">0</span>}
+
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.buffer.buffer_size):
+            o1, o2, joint_s = preprocess_joint_obs(obs_dict, self.device)
+            
+            <span class="hljs-keyword">with</span> torch.no_grad():
+                a1, logp1, _ = self.agent.get_action(o1.unsqueeze(<span class="hljs-number">0</span>))
+                a2, logp2, _ = self.agent.get_action(o2.unsqueeze(<span class="hljs-number">0</span>))
+                v1, v2 = self.agent.get_value(joint_s.unsqueeze(<span class="hljs-number">0</span>))
+            
+            actions = {<span class="hljs-string">&#x27;first_0&#x27;</span>: a1.item(), <span class="hljs-string">&#x27;second_0&#x27;</span>: a2.item()}
+            next_obs_dict, rewards, terms, truncs, infos = self.env.step(actions)
+            
+            <span class="hljs-comment"># 報酬の記録</span>
+            current_ep_reward[<span class="hljs-string">&#x27;first_0&#x27;</span>] += rewards[<span class="hljs-string">&#x27;first_0&#x27;</span>]
+            current_ep_reward[<span class="hljs-string">&#x27;second_0&#x27;</span>] += rewards[<span class="hljs-string">&#x27;second_0&#x27;</span>]
+
+            dones = [terms[<span class="hljs-string">&#x27;first_0&#x27;</span>] <span class="hljs-keyword">or</span> truncs[<span class="hljs-string">&#x27;first_0&#x27;</span>], terms[<span class="hljs-string">&#x27;second_0&#x27;</span>] <span class="hljs-keyword">or</span> truncs[<span class="hljs-string">&#x27;second_0&#x27;</span>]]
+            self.buffer.insert(
+                o1, o2, joint_s, [a1.item(), a2.item()], [logp1.item(), logp2.item()],
+                [rewards[<span class="hljs-string">&#x27;first_0&#x27;</span>], rewards[<span class="hljs-string">&#x27;second_0&#x27;</span>]], [v1.item(), v2.item()], dones
+            )
+            
+            obs_dict = next_obs_dict
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(dones):
+                <span class="hljs-comment"># エピソード終了時に報酬を保存してリセット</span>
+                episode_rewards.append(current_ep_reward[<span class="hljs-string">&#x27;first_0&#x27;</span>]) <span class="hljs-comment"># 1P側のスコアを代表値とする</span>
+                current_ep_reward = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">0</span>}
+                obs_dict, _ = self.env.reset()
+
+        <span class="hljs-comment"># 平均報酬を統計に追加</span>
+        avg_reward = np.mean(episode_rewards) <span class="hljs-keyword">if</span> episode_rewards <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+        self.stats[<span class="hljs-string">&quot;reward_history&quot;</span>].append(avg_reward)
+
+        <span class="hljs-comment"># GAE計算 (既存通り)</span>
+        _, _, last_joint_s = preprocess_joint_obs(obs_dict, self.device)
+        <span class="hljs-keyword">with</span> torch.no_grad():
+            last_v1, last_v2 = self.agent.get_value(last_joint_s.unsqueeze(<span class="hljs-number">0</span>))
+        self.buffer.compute_returns_and_advantages(
+            torch.tensor([last_v1.item(), last_v2.item()], device=self.device),
+            self.gamma, self.gae_lambda
+        )
+        <span class="hljs-keyword">return</span> avg_reward
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">train_step</span>(<span class="hljs-params">self, clip_param=<span class="hljs-number">0.2</span>, ent_coef=<span class="hljs-number">0.01</span>, vf_coef=<span class="hljs-number">0.5</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;学習を行い、平均エントロピーを返す&quot;&quot;&quot;</span>
+        entropies = []
+        
+        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.ppo_epochs):
+            <span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> self.buffer.get_batches(self.batch_size):
+                obs = batch[<span class="hljs-string">&#x27;obs&#x27;</span>].view(-<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">84</span>, <span class="hljs-number">84</span>)
+                actions = batch[<span class="hljs-string">&#x27;actions&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                old_log_probs = batch[<span class="hljs-string">&#x27;log_probs&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                advantages = batch[<span class="hljs-string">&#x27;advantages&#x27;</span>].view(-<span class="hljs-number">1</span>)
+                returns = batch[<span class="hljs-string">&#x27;returns&#x27;</span>].view(-<span class="hljs-number">1</span>)
+
+                _, new_log_probs, dist_entropy = self.agent.get_action(obs, actions)
+                entropies.append(dist_entropy.mean().item()) <span class="hljs-comment"># エントロピーを記録</span>
+
+                <span class="hljs-comment"># --- Loss計算 (既存通り) ---</span>
+                ratio = torch.exp(new_log_probs - old_log_probs)
+                surr1 = ratio * advantages
+                surr2 = torch.clamp(ratio, <span class="hljs-number">1.0</span> - clip_param, <span class="hljs-number">1.0</span> + clip_param) * advantages
+                actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean()
+
+                v1_pred, v2_pred = self.agent.get_value(batch[<span class="hljs-string">&#x27;joint_states&#x27;</span>])
+                v_preds = torch.cat([v1_pred, v2_pred], dim=<span class="hljs-number">0</span>).squeeze()
+                critic_loss = F.mse_loss(v_preds, returns)
+
+                loss = actor_loss + vf_coef * critic_loss - ent_coef * dist_entropy.mean()
+                
+                self.optimizer.zero_grad()
+                loss.backward()
+                nn.utils.clip_grad_norm_(self.agent.parameters(), <span class="hljs-number">0.5</span>)
+                self.optimizer.step()
+        
+        avg_entropy = np.mean(entropies)
+        self.stats[<span class="hljs-string">&quot;entropy_history&quot;</span>].append(avg_entropy)
+        <span class="hljs-keyword">return</span> avg_entropy
+
+</code></pre>
+<h3 id="実行とモニタリング">実行とモニタリング</h3>
+<p><code>train</code> 関数内でこれらを受け取り、表示するようにします。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">train</span>():
+    env = get_env()
+    agent = MAPPOAgent(action_space_n=<span class="hljs-number">18</span>)
+    trainer = MAPPOAtariTrainer(env, agent)
+
+    <span class="hljs-keyword">for</span> iteration <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">101</span>):
+        <span class="hljs-comment"># 1. データ収集時に平均報酬を取得</span>
+        avg_reward = trainer.collect_rollouts()
+        
+        <span class="hljs-comment"># 2. 学習時に平均エントロピーを取得</span>
+        avg_entropy = trainer.train_step()
+
+        <span class="hljs-keyword">if</span> iteration % <span class="hljs-number">10</span> == <span class="hljs-number">0</span>:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Iteration <span class="hljs-subst">{iteration:3d}</span> | Reward: <span class="hljs-subst">{avg_reward:<span class="hljs-number">6.2</span>f}</span> | Entropy: <span class="hljs-subst">{avg_entropy:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> iteration &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> iteration % <span class="hljs-number">20</span> == <span class="hljs-number">0</span>:
+            trainer.save_checkpoint(iteration)
+
+</code></pre>
+<h3 id="出力の見方">出力の見方</h3>
+<ul>
+<li><strong>Reward（報酬）</strong>:
+ボクシング環境では、相手にパンチを当てると <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">1</span></span></span></span>、食らうと <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1</span></span></span></span> です。最初は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 前後（あるいはマイナス）からスタートし、学習が進むにつれてプラスに転じていけば成功です。</li>
+<li><strong>Entropy（エントロピー）</strong>:
+最初はアクションが18種類あるため、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>18</mn><mo stretchy="false">)</mo><mo>≈</mo><mn>2.89</mn></mrow><annotation encoding="application/x-tex">\ln(18) \approx 2.89</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">ln</span><span class="mopen">(</span><span class="mord">18</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2.89</span></span></span></span> に近い値から始まります。学習が進むにつれて「無駄な動き」が削ぎ落とされ、徐々に数値が下がっていく（例：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.0</mn><mo>∼</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">1.0 \sim 1.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.5</span></span></span></span> 程度まで）のを確認してください。</li>
+</ul>
+<p>もしエントロピーが最初から極端に低い場合は、特定の行動に固執してしまっている可能性があるため、<code>ent_coef</code> を少し大きくするなどの調整を検討してみてください。</p>
+<h3 id="学習の結果">学習の結果</h3>
+<p>初回学習時に出力したrewardを確認したところ、まったく報酬が出ていませんでした。
+強化学習はここからが本番です。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\4_train_result\1778365031222.png" alt="1778365031222"></p>
+<p><strong>原因の分析</strong></p>
+<p>一旦環境についての詳細を確認します。
+まず、Atari 2600の「Boxing」におけるアクション（0〜17）は、基本的に「8方向の移動」と「パンチ（攻撃ボタン）」の組み合わせで構成されています。
+PettingZooやGymのAtari環境において、アクション番号は通常以下の順序で定義されています。</p>
+<p><strong>Boxingのアクション対応表</strong></p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>行動の内容</th>
+<th>ボタン同時押し</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td><strong>NOOP</strong> (何もしない)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>FIRE</strong> (その場でパンチ)</td>
+<td>ボタンのみ</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>UP</strong> (上に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>RIGHT</strong> (右に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>LEFT</strong> (左に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>DOWN</strong> (下に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>UPRIGHT</strong> (右上に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td><strong>UPLEFT</strong> (左上に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td><strong>DOWNRIGHT</strong> (右下に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td><strong>DOWNLEFT</strong> (左下に移動)</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><strong>UPFIRE</strong> (上に移動しながらパンチ)</td>
+<td>上 + ボタン</td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td><strong>RIGHTFIRE</strong> (右に移動しながらパンチ)</td>
+<td>右 + ボタン</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><strong>LEFTFIRE</strong> (左に移動しながらパンチ)</td>
+<td>左 + ボタン</td>
+</tr>
+<tr>
+<td><strong>13</strong></td>
+<td><strong>DOWNFIRE</strong> (下に移動しながらパンチ)</td>
+<td>下 + ボタン</td>
+</tr>
+<tr>
+<td><strong>14</strong></td>
+<td><strong>UPRIGHTFIRE</strong> (右上に移動パンチ)</td>
+<td>右上 + ボタン</td>
+</tr>
+<tr>
+<td><strong>15</strong></td>
+<td><strong>UPLEFTFIRE</strong> (左上に移動パンチ)</td>
+<td>左上 + ボタン</td>
+</tr>
+<tr>
+<td><strong>16</strong></td>
+<td><strong>DOWNRIGHTFIRE</strong> (右下に移動パンチ)</td>
+<td>右下 + ボタン</td>
+</tr>
+<tr>
+<td><strong>17</strong></td>
+<td><strong>DOWNLEFTFIRE</strong> (左下に移動パンチ)</td>
+<td>左下 + ボタン</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ログから見えるエージェントの状態</strong></p>
+<p>学習エージェントからactionとrewardを確認した結果、行動は問題ありませんでした。</p>
+<ul>
+<li><strong>多様な行動</strong>: 1（パンチ）、2（上移動）、17（左下パンチ）、14（右上パンチ）など、かなり広範囲のアクションを選択しています。</li>
+<li><strong>パンチ率</strong>: 10番以降のアクションはすべて「パンチを伴う行動」です。ログを見ると <code>14, 17, 12, 15, 13, 10, 17</code> など、<strong>かなりの頻度でパンチボタン自体は押せている</strong>ことがわかります。</li>
+</ul>
+<p><strong>なぜ報酬が 0 なのか？</strong></p>
+<p>この環境が報酬を出すのはパンチがヒットした場合のみでした。
+今回のはじめは何もわからないエージェントが報酬を得ることが非常に難しい状態となっていたということになります。</p>
+<p>そこで報酬設計を見直ししました。</p>
+<h3 id="報酬設計の見直し">報酬設計の見直し</h3>
+<p>今回実施した報酬設計の見直しにおけるエッセンスをまとめました。</p>
+<ul>
+<li>
+<p><strong>距離適応型のタスク切り替え（カリキュラム学習）</strong>
+エージェントと相手との距離に応じて、強化すべき行動を動的に変化させました。</p>
+</li>
+<li>
+<p><strong>遠距離：</strong> 「相手に近づくこと」を主報酬とし、効率的な移動を促進。</p>
+</li>
+<li>
+<p><strong>近距離：</strong> 移動報酬を切り捨て、「パンチを出すこと」に特化したボーナスを与えて攻撃を誘発。</p>
+</li>
+<li>
+<p><strong>画像解析（OpenCV）による正確な状態把握</strong>
+距離の計算にはプレーヤの座標情報が必要です。通常であればRAMから得られると思いためしたのですが、直接RAMより座標は取得できませんでした。
+そこで、画面上の色情報（1Pの白、2Pの黒）から重心を計算するロジックを採用しました。これにより、外部報酬（ゲームスコア）に頼らず、学習の初期段階から「何が良い行動か」を教え込めるようになりました。</p>
+</li>
+<li>
+<p><strong>メモリ効率と学習シグナルの両立</strong></p>
+</li>
+<li>
+<p><strong>メモリ対策：</strong> 画像データを <code>uint8</code> 型で保存し、メモリ消費を1/4に抑制。</p>
+</li>
+<li>
+<p><strong>シグナルの純粋化：</strong> ログには「純粋なゲームスコア」を出しつつ、内部の学習用報酬（Shaping Reward）は別に計算することで、学習の進捗と実力を切り分けて評価可能にしました。</p>
+</li>
+</ul>
+<p>結果、報酬がわずかに出始め、学習が進むようになりました。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\4_train_result\1778368386264.png" alt="1778368386264"></p>
+<p>そして待望のプレイでパンチを当てた報酬が確認できるようになりました。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\2_boxing\doc\image\4_train_result\1778369437385.png" alt="1778369437385"></p>
+<p>学習後の動画はこんな感じです。
+右側のボクサーが学習したエージェントで動作しています。
+徐々に近づいて距離が届くようになってからパンチを出すことが確認できるかと思います。
+ゲームをプレイするとしたら、まずは一連の動作を行えるようになったかと思います。</p>
+<p>但し、もう少し効率的なプレーが出来ればという感触は残る結果となりました。
+&lt;img src=&quot;image/4_train_result/output.gif&quot; width=&quot;500&gt;</p>
+<h2 id="総括">総括</h2>
+<p>ということで全4回に渡りボクシングゲームをMAPPOで学習するステップバイステップの環境構築を行ってきました。</p>
+<ul>
+<li>ボクシングゲームで相手の状態が変わるようなゲームで行うべき動作をMAPPOを使って強化学習した。</li>
+<li>MAPPOによりエージェントが動作を学習することを確認した。</li>
+<li>そのままの環境の場合、エージェントが相手の位置を知ることが出来ないため、画像のシルエットから相手の中心位置を割り出すことで対応した。</li>
+<li>プレーヤーがより効率的な動作を行えるようにすることが今後の課題であり、アルゴリズムか、探索空間の改善が必要と考える。</li>
+</ul>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p> </p>
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+        </body>
+        </html>
