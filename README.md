@@ -388,6 +388,27 @@ Dividing agents into a "Manager" (commander) and "Workers" (executors), or assig
 
 For more detail, please come in [here](https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent).
 
+## atari boxing
+
+Here is a concise summary of why the agent approaches the opponent but fails to punch, along with potential fixes:
+
+### **Probable Causes**
+
+* **Reward Traps (Local Optima):** The proximity reward might be too "easy" to earn. The agent learns that staying near the opponent is a safe way to maximize rewards without the risk of missing a punch or being counter-attacked.
+* **Sparse Scoring Reward:** Actual hits that result in game points are rare. The agent hasn't yet linked the "punch" action with the "score" reward, favoring the consistent "proximity" reward instead.
+* **Excessive Action Penalty:** If the penalty for missing or punching at a distance is too high, the agent learns to "fear" punching, choosing to do nothing to avoid negative feedback.
+* **Spatial Perception Limits:** The CNN might not be capturing the tiny pixel changes (like the tip of the glove) necessary to understand the exact range required for a successful hit.
+
+
+### **Recommended Fixes**
+
+* **Zero-out Proximity Rewards at Close Range:** Once the agent is within striking distance, stop giving rewards for closeness. This forces the agent to punch to get any further points.
+* **Boost Punch Action Bias:** Greatly increase the reward for the "punch" action itself when within the `CLOSE_THRESHOLD`, regardless of whether it scores a point.
+* **Increase Entropy (`ent_coef`):** Raise the entropy coefficient during training to encourage more exploration (i.e., "trying out" different actions like punching when close).
+* **Stricter Proximity Threshold:** Lower the distance required to trigger "closeness" to ensure the agent is truly within striking range before receiving bonuses.
+
+<img src="miulti-agent/petting_zoo/src/2_boxing/doc/image/4_train_result/output.gif" width="500px" >
+
 # cite
 
 in this repository, oss 'pygame-learning-environment' is used.
