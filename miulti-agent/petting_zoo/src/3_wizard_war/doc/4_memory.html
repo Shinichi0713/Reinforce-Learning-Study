@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x30e1;&#x30e2;&#x30ea;&#x5b9f;&#x88c5;&#x306e;&#x30b3;&#x30c4;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+
+            <p>先日のAtari 環境（Wizard of Wor）の実装においてネットワークの次はメモリバッファの実装を行います。</p>
+<h2 id="メモリ実装のコツ">メモリ実装のコツ</h2>
+<p>強化学習、特に MAPPO のようなマルチエージェント手法におけるメモリ（ロールアウトバッファ）設計は、学習の「速度・安定性・メモリ消費量」に直結します。
+Atari 環境を扱う上で、実戦的なコツを整理しました。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\3_wizard_war\doc\image\4_memory\1779506244085.png" alt="1779506244085"></p>
+<h3 id="1-メモリ節約データ型の最適化">1. メモリ節約：データ型の最適化</h3>
+<p>Atari の画像データ（210x160x3）を <code>float32</code> で保存すると、すぐにメモリ（RAM/VRAM）が枯渇します。</p>
+<ul>
+<li><strong><code>uint8</code> で保存する:</strong> 画像はバッファ内では <code>0-255</code> の整数（<code>uint8</code>）で保持し、<strong>学習（ミニバッチ生成）の直前で <code>float32</code> に変換して <code>255.0</code> で割る</strong>ようにします。これだけでメモリ使用量は <strong>1/4</strong> になります。</li>
+<li><strong>共有メモリの活用:</strong> もし並列環境（複数のシミュレーションを同時に回す）を使う場合は、Python の <code>multiprocessing.Array</code> などを用いてメモリを共有し、無駄なコピーを避けます。</li>
+</ul>
+<h3 id="2-mappo-特有の-tips集中-critic-用の情報">2. MAPPO 特有の Tips：集中 Critic 用の情報</h3>
+<p>MAPPO では、Critic が学習時に「自分以外の情報」を必要とします。</p>
+<ul>
+<li><strong>Global State の明示的保存:</strong> Wizard of Wor は画面全体が見えるため個人の観測（Local Obs）と全体（Global State）がほぼ同じですが、将来的に「自分にしか見えない情報」がある環境に拡張する場合、<code>state</code> 用の領域を別途確保しておくと汎用性が高まります。</li>
+<li><strong>Agent ID のインデックス化:</strong> One-hot ベクトルをそのまま保存するのではなく、整数（0 または 1）として保存し、学習時に <code>F.one_hot</code> で変換するとメモリ効率が良いです。</li>
+</ul>
+<h3 id="3-学習の安定化正規化normalization">3. 学習の安定化：正規化（Normalization）</h3>
+<p>PPO/MAPPO の論文で強く推奨されている手法です。</p>
+<ul>
+<li><strong>報酬の正規化（Reward Scaling）:</strong> 報酬をそのまま入れるのではなく、これまでの報酬の移動平均や標準偏差でスケールします。Atari はゲームによってスコアの桁が全く違うため、これは必須級の処理です。</li>
+<li><strong>アドバンテージの標準化:</strong> バッファからミニバッチを取り出す際、そのミニバッチ内のアドバンテージの平均を 0、標準偏差を 1 に正規化します。これにより、Actor の更新が安定します。</li>
+</ul>
+<h3 id="4-高度な-tipsframe-stackingフレームスタック">4. 高度な Tips：Frame Stacking（フレームスタック）</h3>
+<p>Atari ゲームにおいて、「弾がどの方向に飛んでいるか」「敵がどちらに動いているか」を認識するには、1枚の画像では不十分です。</p>
+<ul>
+<li><strong>バッファ内での工夫:</strong> 直近 4 フレームを結合して入力する場合、バッファに「4フレーム分を結合したデータ」をそのまま保存すると重複が多く、メモリが 4倍必要になります。</li>
+<li><strong>「ポインタ」による管理:</strong> 最新の 1 フレームだけを保存し、学習時にインデックスを遡って 4 フレーム分取り出すように設計すると、メモリ効率が劇的に向上します。</li>
+</ul>
+<h3 id="5-デバッグのための-tipsmaskマスクの扱い">5. デバッグのための Tips：Mask（マスク）の扱い</h3>
+<ul>
+<li><strong>Termination vs Truncation:</strong> エージェントが死んだ（Termination）のか、時間切れ（Truncation）なのかを区別して保存します。</li>
+<li><strong>Dead Agent の処理:</strong> 片方のエージェントが先に脱落した場合、そのエージェントの <code>mask</code> を <code>0</code> にして、その後のデータが勾配計算に悪影響を与えないように設計します。</li>
+</ul>
+<h3 id="メモリ構成の推奨データ構造例">メモリ構成の推奨データ構造例</h3>
+<table>
+<thead>
+<tr>
+<th>データ項目</th>
+<th>型</th>
+<th>形状 (Shape)</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>obs</code></td>
+<td><code>uint8</code></td>
+<td><code>(Steps, Agents, 3, 210, 160)</code></td>
+<td>学習直前に <code>/255.0</code></td>
+</tr>
+<tr>
+<td><code>actions</code></td>
+<td><code>int64</code></td>
+<td><code>(Steps, Agents)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rewards</code></td>
+<td><code>float32</code></td>
+<td><code>(Steps, Agents)</code></td>
+<td>報酬スケーリング推奨</td>
+</tr>
+<tr>
+<td><code>values</code></td>
+<td><code>float32</code></td>
+<td><code>(Steps, Agents)</code></td>
+<td>Critic の予測値</td>
+</tr>
+<tr>
+<td><code>masks</code></td>
+<td><code>float32</code></td>
+<td><code>(Steps, Agents)</code></td>
+<td>生存なら 1.0, 終了なら 0.0</td>
+</tr>
+<tr>
+<td><code>log_probs</code></td>
+<td><code>float32</code></td>
+<td><code>(Steps, Agents)</code></td>
+<td>サンプリング時の対数確率</td>
+</tr>
+</tbody>
+</table>
+<h2 id="メモリの実装">メモリの実装</h2>
+<p>MAPPOの学習では、エージェント全員の「観測、行動、報酬、ログ確率、価値」などを保存する、共有ロールアウトバッファ（Shared Rollout Buffer）が必要です。</p>
+<p>特にMAPPOは「集中Critic」を用いるため、各エージェントの個別データだけでなく、学習時に必要なグローバル情報も一緒に保持できる構造が望ましいです。</p>
+<h3 id="1-メモリ設計のポイント">1. メモリ設計のポイント</h3>
+<p>MAPPOの学習（PPOアルゴリズム）はオンポリシー（On-Policy）であるため、以下のサイクルで動作します。</p>
+<ol>
+<li><strong>収集:</strong> 一定ステップ（例：128〜2048ステップ）分のデータをバッファに溜める。</li>
+<li><strong>学習:</strong> バッファ内のデータを使って数エポック更新を行う。</li>
+<li><strong>破棄:</strong> 学習が終わったらデータを全て捨て、また収集に戻る。</li>
+</ol>
+<h3 id="2-mappo用共有ロールアウトバッファの実装">2. MAPPO用共有ロールアウトバッファの実装</h3>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPORolloutBuffer</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, buffer_size, num_agents, obs_shape, action_dim</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        buffer_size: 1回の学習までに溜めるステップ数
+        num_agents: エージェント数 (Wizard of Worなら 2)
+        obs_shape: 画像のサイズ (3, 210, 160)
+        &quot;&quot;&quot;</span>
+        self.buffer_size = buffer_size
+        self.num_agents = num_agents
+        
+        <span class="hljs-comment"># データの格納場所 (PyTorchテンソルで確保)</span>
+        <span class="hljs-comment"># すべて [ステップ数, エージェント数, 次元] の形に揃える</span>
+        self.obs = torch.zeros((buffer_size, num_agents, *obs_shape))
+        self.actions = torch.zeros((buffer_size, num_agents))
+        self.log_probs = torch.zeros((buffer_size, num_agents))
+        self.rewards = torch.zeros((buffer_size, num_agents))
+        self.values = torch.zeros((buffer_size, num_agents))
+        self.masks = torch.ones((buffer_size, num_agents)) <span class="hljs-comment"># 終了判定用 (dones)</span>
+        
+        self.step = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">insert</span>(<span class="hljs-params">self, obs, actions, log_probs, values, rewards, masks</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        1ステップ分の全エージェントデータを一括挿入
+        obs: {agent_id: tensor} のような辞書、または [num_agents, C, H, W] のテンソル
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># ここでは辞書からテンソルに変換して格納する例</span>
+        <span class="hljs-keyword">for</span> i, agent_id <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>([<span class="hljs-string">&#x27;first_0&#x27;</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>]):
+            self.obs[self.step, i] = obs[agent_id]
+            self.actions[self.step, i] = actions[agent_id]
+            self.log_probs[self.step, i] = log_probs[agent_id]
+            self.values[self.step, i] = values[agent_id]
+            self.rewards[self.step, i] = rewards[agent_id]
+            self.masks[self.step, i] = masks[agent_id]
+            
+        self.step = (self.step + <span class="hljs-number">1</span>) % self.buffer_size
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;学習後にポインタをリセット&quot;&quot;&quot;</span>
+        self.step = <span class="hljs-number">0</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_generator</span>(<span class="hljs-params">self, num_mini_batches, advantages, returns</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        学習用のミニバッチを生成するジェネレータ
+        &quot;&quot;&quot;</span>
+        batch_size = self.buffer_size * self.num_agents
+        mini_batch_size = batch_size // num_mini_batches
+        
+        <span class="hljs-comment"># データを平坦化 (flatten) してシャッフル</span>
+        <span class="hljs-comment"># [Step, Agent, ...] -&gt; [Step * Agent, ...]</span>
+        flat_obs = self.obs.view(-<span class="hljs-number">1</span>, *self.obs.shape[<span class="hljs-number">2</span>:])
+        flat_actions = self.actions.view(-<span class="hljs-number">1</span>)
+        flat_log_probs = self.log_probs.view(-<span class="hljs-number">1</span>)
+        flat_values = self.values.view(-<span class="hljs-number">1</span>)
+        flat_advantages = advantages.view(-<span class="hljs-number">1</span>)
+        flat_returns = returns.view(-<span class="hljs-number">1</span>)
+        
+        <span class="hljs-comment"># エージェントIDのOne-hotもフラットに作成</span>
+        <span class="hljs-comment"># [Step, Agent, ID_dim]</span>
+        ids = torch.eye(self.num_agents).repeat(self.buffer_size, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>).view(-<span class="hljs-number">1</span>, self.num_agents)
+
+        indices = np.arange(batch_size)
+        np.random.shuffle(indices)
+
+        <span class="hljs-keyword">for</span> start <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, batch_size, mini_batch_size):
+            idx = indices[start:start + mini_batch_size]
+            <span class="hljs-keyword">yield</span> (
+                flat_obs[idx],
+                ids[idx],
+                flat_actions[idx],
+                flat_log_probs[idx],
+                flat_values[idx],
+                flat_advantages[idx],
+                flat_returns[idx]
+            )
+
+</code></pre>
+<h3 id="3-なぜこの設計なのか">3. なぜこの設計なのか</h3>
+<ul>
+<li><strong>集中Criticへの対応:</strong> Criticの学習には「その時の状態の価値（Value）」と「実際に得られた収益（Return）」のペアが必要です。このバッファはエージェントごとのValueを並列に持つため、MAPPOの集中評価を効率的に扱えます。</li>
+<li><strong>フラット化（Flatten）のメリット:</strong> パラメータ共有を行っている場合、プレイヤー1のデータもプレイヤー2のデータも「1つのネットワークを更新するためのサンプル」として同等に扱えます。そのため、ミニバッチ作成時に <code>Step * Agent</code> でまとめてシャッフルすることで、学習が安定します。</li>
+<li><strong>アドバンテージの計算:</strong> PPOでは、バッファがいっぱいになった後に、逆方向に計算して <code>Advantages</code>（期待値よりどれだけ良かったか）と <code>Returns</code>（割引報酬和）を算出します。このバッファはその計算結果を後付けで受け取れるよう設計しています。</li>
+</ul>
+<p><strong>実装の注意点</strong></p>
+<p><strong>1. データの「多次元構造」と「フラット化」の同期</strong></p>
+<p>MAPPOのバッファは通常 <code>[Step, Agent, C, H, W]</code> という 5 次元の形状を持ちます。これを学習時に <code>[Step * Agent, C, H, W]</code> へ変換（フラット化）する際、<strong>他のデータも全く同じ順序で並んでいること</strong>を保証しなければなりません。</p>
+<ul>
+<li><strong><code>reshape</code> と <code>view</code> の使い分け:</strong>
+<code>view</code> はメモリが連続（contiguous）であることを前提とします。<code>insert</code> を繰り返すとメモリ配置が複雑になることがあるため、安全のために <code>reshape</code> を使うか、事前に <code>.contiguous()</code> を呼び出します。</li>
+<li><strong>ID（エージェント識別子）の生成:</strong>
+今回のように <code>torch.eye(num_agents).repeat(buffer_size, 1)</code> を使う手法は非常に安全です。これにより <code>[A1, A2, A1, A2, ...]</code> という順序が確定し、<code>obs.reshape</code> 後の順序と確実に一致します。</li>
+</ul>
+<p><strong>2. インデックス管理の厳密化</strong></p>
+<p><code>insert</code> メソッド内で「どのデータがどのエージェントのものか」を曖昧にすると、学習が崩壊します。</p>
+<ul>
+<li><strong>辞書キーの固定:</strong>
+<code>obs['first_0']</code> のようにキーで受け取る場合、ループ内で <code>enumerate(['first_0', 'second_0'])</code> を使ってインデックス（<code>i=0, 1</code>）を明示的に割り当て、バッファの <code>Agent</code> 次元に固定して格納します。</li>
+<li><strong>挿入と更新のタイミング:</strong>
+<code>self.step</code>（書き込み位置）の更新は、<strong>全エージェントのデータを書き込み終わった最後</strong>に行います。ループ内で行うと、エージェント間でステップがズレる原因になります。</li>
+</ul>
+<p><strong>3. 型変換と正規化のベストプラクティス</strong></p>
+<p>画像データ（特に Atari や Wizard of Wor）を扱う場合、メモリ効率と精度のバランスが重要です。</p>
+<ul>
+<li><strong><code>uint8</code> での保存:</strong>
+バッファ内では <code>float32</code> (0.0-1.0) ではなく <code>uint8</code> (0-255) で保持することで、メモリ使用量を 4 分の 1 に抑えられます。</li>
+<li><strong>取り出し時の正規化:</strong>
+<code>get_generator</code> でデータを取り出した直後に <code>.float() / 255.0</code> を行います。</li>
+<li><strong>注意:</strong> テストコードで検証する際は、この「正規化後の値」で判定しているか、「正規化前の値」で判定しているかを意識しないと、今回のような判定エラー（<code>val=1.000</code> なのに <code>threshold=100</code> で判定など）が発生します。</li>
+</ul>
+<h3 id="4-実装のtest">4. 実装のtest</h3>
+<p>バッファの並び順、ミニバッチのフラットが出来ているか以下のtest用コードで確認します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_buffer_integrity</span>():
+    <span class="hljs-comment"># --- 1. 設定 ---</span>
+    buffer_size = <span class="hljs-number">10</span>
+    num_agents = <span class="hljs-number">2</span>
+    obs_shape = (<span class="hljs-number">3</span>, <span class="hljs-number">210</span>, <span class="hljs-number">160</span>)
+    action_dim = <span class="hljs-number">9</span> <span class="hljs-comment"># Wizard of Wor の標準的なアクション数</span>
+    
+    buffer = MAPPORolloutBuffer(buffer_size, num_agents, obs_shape, action_dim)
+    
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Testing Buffer: Size=<span class="hljs-subst">{buffer_size}</span>, Agents=<span class="hljs-subst">{num_agents}</span>&quot;</span>)
+
+    <span class="hljs-comment"># --- 2. ダミーデータの挿入 ---</span>
+    <span class="hljs-comment"># 連続的な値を入れて、後で取り出した時に順番や対応が正しいか確認する</span>
+    <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(buffer_size):
+        <span class="hljs-comment"># 観測データ：エージェントごとに明確に違う値を入れる</span>
+        obs = {
+            <span class="hljs-string">&#x27;first_0&#x27;</span>: torch.full(obs_shape, <span class="hljs-number">10.0</span>),  <span class="hljs-comment"># P1は常に 10 (255で割ると約0.04)</span>
+            <span class="hljs-string">&#x27;second_0&#x27;</span>: torch.full(obs_shape, <span class="hljs-number">200.0</span>) <span class="hljs-comment"># P2は常に 200 (255で割ると約0.78)</span>
+        }
+        actions = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">2</span>}
+        log_probs = {<span class="hljs-string">&#x27;first_0&#x27;</span>: -<span class="hljs-number">0.5</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: -<span class="hljs-number">0.6</span>}
+        values = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">10.0</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">11.0</span>}
+        rewards = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">1.0</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">0.0</span>}
+        masks = {<span class="hljs-string">&#x27;first_0&#x27;</span>: <span class="hljs-number">1.0</span>, <span class="hljs-string">&#x27;second_0&#x27;</span>: <span class="hljs-number">1.0</span>}
+        
+        buffer.insert(obs, actions, log_probs, values, rewards, masks)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Data insertion completed.&quot;</span>)
+
+    <span class="hljs-comment"># --- 3. ミニバッチ生成のテスト ---</span>
+    <span class="hljs-comment"># GAE計算後を想定したダミーのアドバンテージとリターン</span>
+    dummy_advantages = torch.randn(buffer_size, num_agents)
+    dummy_returns = torch.randn(buffer_size, num_agents)
+    
+    num_mini_batches = <span class="hljs-number">2</span>
+    generator = buffer.get_generator(num_mini_batches, dummy_advantages, dummy_returns)
+    
+    batch = <span class="hljs-built_in">next</span>(generator)
+    obs_b, ids_b, act_b, lp_b, val_b, adv_b, ret_b = batch
+
+    <span class="hljs-comment"># --- 4. 判定ロジック ---</span>
+    errors = []
+
+    <span class="hljs-comment"># A. 形状チェック</span>
+    expected_batch_size = (buffer_size * num_agents) // num_mini_batches
+    <span class="hljs-keyword">if</span> obs_b.shape != (expected_batch_size, *obs_shape):
+        errors.append(<span class="hljs-string">f&quot;Obs shape mismatch: <span class="hljs-subst">{obs_b.shape}</span>&quot;</span>)
+    <span class="hljs-keyword">if</span> ids_b.shape != (expected_batch_size, num_agents):
+        errors.append(<span class="hljs-string">f&quot;IDs shape mismatch: <span class="hljs-subst">{ids_b.shape}</span>&quot;</span>)
+
+    <span class="hljs-comment"># B. IDとデータの対応チェック</span>
+    <span class="hljs-comment"># Player 1 (ID [1,0]) なら値は 100未満、Player 2 (ID [0,1]) なら 100以上のはず</span>
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(expected_batch_size):
+        <span class="hljs-comment"># バッファ内で /255.0 しているので、</span>
+        <span class="hljs-comment"># P1 は 0.0 以上 1.0 未満 (s / 255)</span>
+        <span class="hljs-comment"># P2 は 100/255.0 (~0.39) 以上 になるはず</span>
+        sample_val = obs_b[i].mean().item() <span class="hljs-comment"># 空間平均をとるのが確実</span>
+        is_p1 = ids_b[i, <span class="hljs-number">0</span>] == <span class="hljs-number">1.0</span> <span class="hljs-comment"># [1, 0] なら P1</span>
+        
+        <span class="hljs-comment"># 判定しきい値を 50/255.0 (約0.19) に設定</span>
+        threshold = <span class="hljs-number">0.5</span> <span class="hljs-comment"># 中間の 0.5 をしきい値にする</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(expected_batch_size):
+            sample_val = obs_b[i].mean().item()
+            is_p1 = ids_b[i, <span class="hljs-number">0</span>] == <span class="hljs-number">1.0</span> 
+            
+            <span class="hljs-keyword">if</span> is_p1 <span class="hljs-keyword">and</span> sample_val &gt; threshold:
+                errors.append(<span class="hljs-string">f&quot;Sample <span class="hljs-subst">{i}</span>: ID is P1 (val=<span class="hljs-subst">{sample_val:<span class="hljs-number">.3</span>f}</span>), but data &gt; <span class="hljs-subst">{threshold}</span>&quot;</span>)
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> is_p1 <span class="hljs-keyword">and</span> sample_val &lt; threshold:
+                errors.append(<span class="hljs-string">f&quot;Sample <span class="hljs-subst">{i}</span>: ID is P2 (val=<span class="hljs-subst">{sample_val:<span class="hljs-number">.3</span>f}</span>), but data &lt; <span class="hljs-subst">{threshold}</span>&quot;</span>)
+
+    <span class="hljs-comment"># C. 正規化チェック（正規化ロジックをバッファに入れている場合）</span>
+    <span class="hljs-keyword">if</span> obs_b.<span class="hljs-built_in">max</span>() &gt; <span class="hljs-number">1.0</span> <span class="hljs-keyword">and</span> buffer.obs.<span class="hljs-built_in">max</span>() &gt; <span class="hljs-number">1.0</span>:
+        <span class="hljs-comment"># もしバッファ内で255のままで、取り出し時に割っていないなら警告</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot; Warning: Observations are not normalized to [0, 1]. Ensure &#x27;/ 255.0&#x27; is applied.&quot;</span>)
+
+    <span class="hljs-comment"># --- 5. 結論 ---</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> errors:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">30</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot; ALL CHECKS PASSED&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot; Batch Size: <span class="hljs-subst">{expected_batch_size}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot; ID-Data Correlation: Confirmed&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">30</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;!&quot;</span>*<span class="hljs-number">30</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;INTEGRITY ERRORS FOUND &quot;</span>)
+        <span class="hljs-keyword">for</span> err <span class="hljs-keyword">in</span> errors:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot; - <span class="hljs-subst">{err}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;!&quot;</span>*<span class="hljs-number">30</span>)
+
+<span class="hljs-comment"># 実行</span>
+test_buffer_integrity()
+</code></pre>
+<p>上記を実行して以下のように表示されれば確認クリアです。</p>
+<pre><code>Testing Buffer: Size=10, Agents=2
+Data insertion completed.
+
+==============================
+ ALL CHECKS PASSED
+ Batch Size: 10
+ ID-Data Correlation: Confirmed
+==============================
+</code></pre>
+<h2 id="総括">総括</h2>
+<p>Atari（Wizard of Wor）＋ MAPPO のロールアウトバッファ実装のエッセンスを、さらにコンパクトにまとめると次の通りとします。</p>
+<ul>
+<li>
+<p><strong>メモリ節約</strong></p>
+<ul>
+<li>画像は <code>uint8</code> で保存し、ミニバッチ生成直前に <code>.float() / 255.0</code> で正規化する。</li>
+<li>並列環境では共有メモリでコピーを避ける。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPO 用設計</strong></p>
+<ul>
+<li>集中 Critic 用に <code>state</code> 領域を別途確保。</li>
+<li>Agent ID は整数で保存し、学習時に <code>F.one_hot</code> で変換する。</li>
+</ul>
+</li>
+<li>
+<p><strong>安定化</strong></p>
+<ul>
+<li>報酬を移動平均・標準偏差でスケーリング。</li>
+<li>ミニバッチ内のアドバンテージを平均 0・標準偏差 1 に正規化。</li>
+</ul>
+</li>
+<li>
+<p><strong>Frame Stacking</strong></p>
+<ul>
+<li>最新 1 フレームだけ保存し、学習時にインデックスを遡って 4 フレーム分を組み立てる。</li>
+</ul>
+</li>
+<li>
+<p><strong>マスクと終了</strong></p>
+<ul>
+<li>Termination / Truncation を区別。</li>
+<li>Dead Agent の <code>mask</code> を 0 にして勾配計算から除外。</li>
+</ul>
+</li>
+<li>
+<p><strong>バッファ構造と順序管理</strong></p>
+<ul>
+<li><code>[Step, Agent, ...]</code> → <code>[Step * Agent, ...]</code> のフラット化で、<code>obs</code>, <code>actions</code>, <code>log_probs</code>, <code>values</code> の順序を完全に一致させる。</li>
+<li><code>insert</code> 内でキーとインデックスを固定し、Agent 次元への格納順を厳密に管理。</li>
+<li>テストコードで「ID と観測値の対応」「バッチサイズ」「正規化のタイミング」を検証する。</li>
+</ul>
+</li>
+</ul>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+
+            
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+        </body>
+        </html>
