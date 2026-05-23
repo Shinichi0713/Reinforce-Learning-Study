@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>1&period; &#x30cd;&#x30c3;&#x30c8;&#x30ef;&#x30fc;&#x30af;&#x306e;&#x5168;&#x4f53;&#x69cb;&#x9020;&#xff08;&#x30a2;&#x30fc;&#x30ad;&#x30c6;&#x30af;&#x30c1;&#x30e3;&#xff09;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <p>先日<a href="https://yoshishinnze.hatenablog.com/entry/2026/05/23/043000">動作確認したWizard of War</a>の強化学習の実装を行っていきます。</p>
+<p>Wizard of Wor のようなアタリ環境で MAPPO を実装する場合、ネットワーク設計が学習の成否を分ける最大の鍵となります。</p>
+<p>「共通のCNNエンコーダ」から「分散 Actor」と「集中 Critic」へ分岐させる構成について、具体的な構造とメリットを詳しく解説します。</p>
+<h2 id="1-ネットワークの全体構造アーキテクチャ">1. ネットワークの全体構造（アーキテクチャ）</h2>
+<p>Wizard of Wor は 210x160 ピクセルの画像を入力とするため、生のピクセルから低次元の特徴量（特徴ベクトル）を抽出する <strong>CNN Encoder</strong> をフロントエンドに配置します。</p>
+<h3 id="構成イメージ">構成イメージ</h3>
+<blockquote>
+<p><strong>[入力: 画像]</strong>
+↓
+<strong>[Shared CNN Encoder]</strong>（全エージェント・全ネットワークで共通）
+↓
+├─ <strong>[Actor Head]</strong> (各エージェントの行動確率分布を出力)
+└─ <strong>[Critic Head]</strong> (集中状態に基づき価値 V を出力)</p>
+</blockquote>
+<h3 id="共通-cnn-エンコーダの役割">共通 CNN エンコーダの役割</h3>
+<p>画像処理において、エッジの検出や敵キャラクター（モンスター）、自機、弾丸の認識といった「視覚的な特徴抽出」は、行動決定（Actor）でも価値評価（Critic）でも共通して必要な能力です。</p>
+<ul>
+<li><strong>効率性:</strong> Actor と Critic で別々に CNN を持つと、パラメータ数が増大し学習が極めて遅くなります。共通化することで、視覚情報の理解を一気に加速させます。</li>
+<li><strong>勾配の安定:</strong> 報酬に基づく Critic からの勾配と、行動改善に基づく Actor からの勾配が両方 CNN に流れ込むため、より頑健な特徴表現が獲得されやすくなります。</li>
+</ul>
+<h3 id="分散-actor-decentralized-execution">分散 Actor (Decentralized Execution)</h3>
+<p>各エージェントの行動を決定する部分です。</p>
+<ul>
+<li><strong>入力:</strong> <strong>Local Observation</strong>（CNNで処理された自分の視点の特徴） + <strong>Agent ID</strong>。</li>
+<li><strong>役割:</strong> 画面内の自分の位置や周囲の敵、壁の状況から「次にどのボタンを押すべきか」を判断します。</li>
+<li><strong>MAPPO の肝:</strong> 実行時（推論時）は Critic を切り離し、この Actor 部分のみを各プレイヤーが独立して動かします。</li>
+</ul>
+<h3 id="集中-critic-centralized-training">集中 Critic (Centralized Training)</h3>
+<p>チーム全体の状況を評価する「司令塔」の視点を持つ部分です。</p>
+<ul>
+<li>
+<p><strong>入力:</strong> <strong>Global State</strong>。MAPPO では、以下のように情報を統合します。</p>
+</li>
+<li>
+<p><strong>エージェント全員の観測情報:</strong> 全プレイヤーがどこにいて、どこに弾を撃っているか。</p>
+</li>
+<li>
+<p><strong>隠れた情報:</strong> 残機数、現在のスコア、ステージ全体の敵の配置など。</p>
+</li>
+<li>
+<p><strong>役割:</strong> 「現在のチーム全体の状況は、将来的にどれだけの報酬をもたらすか（価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span>）」を計算します。</p>
+</li>
+<li>
+<p><strong>メリット:</strong> 自分の観測範囲外で味方がピンチになっていても、Critic がそれを「悪い状態」と評価できるため、エージェントは「味方を助けに行く」といった協調行動を学習できます。</p>
+</li>
+</ul>
+<h2 id="実装時の具体的なチップス">実装時の具体的なチップス</h2>
+<h3 id="agent-id-の埋め込みone-hot">Agent ID の埋め込み（One-hot）</h3>
+<p>パラメータ共有（Parameter Sharing）を行う場合、ネットワークは「自分がプレイヤー1（黄色）なのか2（青）なのか」を判別できません。CNN の出力（特徴ベクトル）に、自身の ID を示す One-hot ベクトルを結合（Concatenate）させてから全結合層に渡すのが定石です。</p>
+<p>Agent IDのOne-hotベクトルは、ActorとCriticにおいてそれぞれ <strong>「主観の特定」</strong> と <strong>「客観的な状況整理」</strong> という異なる役割を果たします。</p>
+<p>パラメータ共有（Parameter Sharing）を行っている場合、ネットワークの重み自体は共通ですが、このIDを入力に混ぜることで、ネットワークは「今、誰の視点で考えているか」を切り替えることができます。</p>
+<p><strong>1. Actorにおける役割： 「主観」の特定</strong></p>
+<p>Actor（分散実行）にとって、IDは「自分がどのキャラクターを操作しているか」を認識するための唯一の手がかりです。</p>
+<ul>
+<li><strong>色の識別:</strong> Wizard of Worではプレイヤーの色（黄色/青）が異なります。IDが入力されることで、CNNが抽出した「画面内の2つの戦士」のうち、どちらが自分の入力に応じて動く存在かを紐付けます。</li>
+<li><strong>役割の分担:</strong> 例えば「自分（ID:0）は前衛で敵を食い止め、相方（ID:1）は後ろから援護する」といった戦略的な役割分担を、同じ重みのネットワークで使い分けられるようになります。</li>
+<li><strong>誤射の回避:</strong> 「自分以外の動く味方」を認識することで、味方を撃たないようなポリシーを形成します。</li>
+</ul>
+<p><strong>2. Criticにおける役割： 「状況評価」の文脈化</strong></p>
+<p>MAPPOのCritic（集中学習）はチーム全体の価値を評価しますが、IDを渡すことで「特定のエージェントから見た状況の良し悪し」をより正確に計算できます。</p>
+<ul>
+<li><strong>個別アドバンテージの計算:</strong> MAPPOでは各エージェントに対してアドバンテージ（期待以上の結果だったか）を計算します。CriticにIDを渡すことで、「このグローバルな盤面において、エージェントA（自分）にとって現在の状況はどれほど有利か」を個別に評価できます。</li>
+<li><strong>責任の所在（Credit Assignment）:</strong> チーム全体の報酬が発生した際、それが「ID:0のナイスプレイによるものか、ID:1のミスをカバーしたものか」を区別して価値予測に反映させる助けになります。</li>
+</ul>
+<p><strong>3. 具体的な結合（Concatenate）イメージ</strong></p>
+<p>実装上は、CNNで画像を低次元のベクトルに圧縮した直後にIDを結合します。</p>
+<table>
+<thead>
+<tr>
+<th>入力要素</th>
+<th>次元例</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CNN Feature</strong></td>
+<td>512</td>
+<td>画像から抽出された空間・物体情報</td>
+</tr>
+<tr>
+<td><strong>Agent ID (One-hot)</strong></td>
+<td>2</td>
+<td><code>[1, 0]</code> (Player 1) または <code>[0, 1]</code> (Player 2)</td>
+</tr>
+<tr>
+<td><strong>結合後のベクトル</strong></td>
+<td><strong>514</strong></td>
+<td>これを全結合層（MLP）に流す</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. ActorとCriticでの使い方の違い（まとめ）</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Actor (分散実行)</th>
+<th>Critic (集中学習)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>視点</strong></td>
+<td>1人称（自分はどう動くか）</td>
+<td>3人称（チーム全体はどう見えるか）</td>
+</tr>
+<tr>
+<td><strong>IDの意味</strong></td>
+<td>「私が操作すべきはこっちだ」という指針</td>
+<td>「このエージェントに対する評価だ」というラベル</td>
+</tr>
+<tr>
+<td><strong>効果</strong></td>
+<td>同じ重みで異なる動き（左右分担など）が可能になる</td>
+<td>個々の行動がチームに与えた影響を正しく評価できる</td>
+</tr>
+</tbody>
+</table>
+<p>因みに実装する場合のイメージは以下のように画像の特徴量とAgent IDを結合することになります。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, image, agent_id</span>):
+    <span class="hljs-comment"># 1. CNNで共通の特徴を抽出</span>
+    <span class="hljs-comment"># image: [210, 160, 3] -&gt; features: [512]</span>
+    features = self.cnn_encoder(image)
+    
+    <span class="hljs-comment"># 2. 特徴ベクトルとIDを結合</span>
+    <span class="hljs-comment"># agent_id: [1, 0] or [0, 1]</span>
+    <span class="hljs-comment"># combined: [514]</span>
+    combined = torch.cat([features, agent_id], dim=-<span class="hljs-number">1</span>)
+    
+    <span class="hljs-comment"># 3. 結合された情報を元に、それぞれの頭（Head）で計算</span>
+    <span class="hljs-comment"># IDの情報が混ざっているため、出力は「そのエージェント専用」の結果になる</span>
+    action_logits = self.actor_head(combined)  <span class="hljs-comment"># Actor: 行動のしやすさ</span>
+    state_value = self.critic_head(combined)   <span class="hljs-comment"># Critic: 状況の良さ</span>
+    
+    <span class="hljs-keyword">return</span> action_logits, state_value
+</code></pre>
+<h3 id="ネットワーク構成案">ネットワーク構成案</h3>
+<p>PyTorch での実装を想定した標準的な構成は以下の通りです。</p>
+<p><strong>1. 構造のイメージ：Y字型のネットワーク</strong></p>
+<p>このネットワークは、1本の太い幹（CNN層）から、最後に2つの枝（Actor/Critic）に分かれる「Y字型」の形をしています。</p>
+<ul>
+<li><strong>共通部分（幹）:</strong> 画像を 0-1 のピクセルから、「敵がここにいる」「味方があそこにいる」「自分はこの向きを向いている」といった<strong>意味のある数値ベクトル</strong>に変換します。</li>
+<li><strong>個別部分（枝）:</strong></li>
+<li><strong>Actor Head:</strong> 「この状況なら、右に動いて弾を撃つのがベストだ」と判断。</li>
+<li><strong>Critic Head:</strong> 「この状況は、死ぬ確率が低くスコアも高いので 85点だ」と評価。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>構成</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CNN 1</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo>×</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">8 \times 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> kernel, stride 4, 32 channels</td>
+<td>大まかな形状の把握</td>
+</tr>
+<tr>
+<td><strong>CNN 2</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo>×</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">4 \times 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> kernel, stride 2, 64 channels</td>
+<td>キャラクターの特定</td>
+</tr>
+<tr>
+<td><strong>CNN 3</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">3 \times 3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> kernel, stride 1, 64 channels</td>
+<td>細かな動きの抽出</td>
+</tr>
+<tr>
+<td><strong>Shared FC</strong></td>
+<td>Linear(512)</td>
+<td>特徴の集約</td>
+</tr>
+<tr>
+<td><strong>Actor Head</strong></td>
+<td>Linear(Action Space) + Softmax</td>
+<td>各行動の選択確率</td>
+</tr>
+<tr>
+<td><strong>Critic Head</strong></td>
+<td>Linear(1)</td>
+<td>状態価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>2. 具体的なデータの流れ（IDの注入ポイント）</strong></p>
+<p>「共通の特徴量」をどこまで使い、どこで「個別の判断」に切り替えるかの設計図が以下です。<strong>Agent IDは、共通のCNNが終わった直後に合流させる</strong>のが一般的です。</p>
+<ol>
+<li>
+<p><strong>Shared CNN Encoder:</strong> 画像処理.
+3層のCNNを通過。210x160の画像が、空間情報を凝縮した小さな特徴マップに圧縮されます。</p>
+</li>
+<li>
+<p><strong>Flatten &amp; Shared FC:</strong> ベクトル化.
+特徴マップを平坦化し、512次元のベクトルに変換。これが「現在の盤面全体のサマリー」になります。</p>
+</li>
+<li>
+<p><strong>Agent ID Concatenation:</strong> コンテキストの付与.
+ここで <strong>512次元の共通特徴量 + 2次元のOne-hot ID</strong> を結合し、<strong>514次元</strong>のベクトルにします。</p>
+</li>
+<li>
+<p><strong>Multi-Head Output:</strong> 分岐.
+514次元の入力を受けて、Actor Headは行動確率（Softmax）を、Critic Headは価値（単一の数値）をそれぞれ独立した全結合層で計算します。</p>
+</li>
+</ol>
+<h2 id="実装コード">実装コード</h2>
+<p>上記を踏まえて実装したコードは以下のようになります。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">WizardOfWorMAPPONet</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, action_space_n, num_agents=<span class="hljs-number">2</span></span>):
+        <span class="hljs-built_in">super</span>(WizardOfWorMAPPONet, self).__init__()
+        
+        <span class="hljs-comment"># 1. 共通の CNN Encoder (共通の「目」)</span>
+        <span class="hljs-comment"># 入力画像サイズ: (3, 210, 160) を想定</span>
+        self.cnn_encoder = nn.Sequential(
+            nn.Conv2d(<span class="hljs-number">3</span>, <span class="hljs-number">32</span>, kernel_size=<span class="hljs-number">8</span>, stride=<span class="hljs-number">4</span>),
+            nn.ReLU(),
+            nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>),
+            nn.ReLU(),
+            nn.Conv2d(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">1</span>),
+            nn.ReLU(),
+            nn.Flatten()
+        )
+        
+        <span class="hljs-comment"># CNN出力次元の計算 (210x160入力の場合、64*22*16 = 22528次元程度)</span>
+        <span class="hljs-comment"># shared_fc を通して 512次元に圧縮</span>
+        self.shared_fc = nn.Sequential(
+            nn.Linear(<span class="hljs-number">64</span> * <span class="hljs-number">22</span> * <span class="hljs-number">16</span>, <span class="hljs-number">512</span>),
+            nn.ReLU()
+        )
+        
+        <span class="hljs-comment"># 2. Actor Head (分散実行用の「脳」)</span>
+        <span class="hljs-comment"># 入力: 512 (画像特徴) + num_agents (Agent ID の One-hot)</span>
+        self.actor_head = nn.Sequential(
+            nn.Linear(<span class="hljs-number">512</span> + num_agents, <span class="hljs-number">256</span>),
+            nn.ReLU(),
+            nn.Linear(<span class="hljs-number">256</span>, action_space_n) <span class="hljs-comment"># 行動ごとのロジットを出力</span>
+        )
+        
+        <span class="hljs-comment"># 3. Critic Head (集中学習用の「司令塔」)</span>
+        <span class="hljs-comment"># MAPPOではCriticもIDを受け取り「そのエージェントから見た価値」を計算</span>
+        self.critic_head = nn.Sequential(
+            nn.Linear(<span class="hljs-number">512</span> + num_agents, <span class="hljs-number">256</span>),
+            nn.ReLU(),
+            nn.Linear(<span class="hljs-number">256</span>, <span class="hljs-number">1</span>) <span class="hljs-comment"># 状態価値 V(s) を出力</span>
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, obs, agent_id_onehot</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        引数:
+            obs: 画像テンソル [Batch, 3, 210, 160] (0.0~1.0に正規化済み)
+            agent_id_onehot: IDのOne-hotテンソル [Batch, num_agents]
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 共通バックボーンで特徴抽出</span>
+        cnn_features = self.cnn_encoder(obs)
+        latent = self.shared_fc(cnn_features)
+        
+        <span class="hljs-comment"># 特徴ベクトルと Agent ID を結合 (Concatenate)</span>
+        <span class="hljs-comment"># [Batch, 512] + [Batch, 2] -&gt; [Batch, 514]</span>
+        combined = torch.cat([latent, agent_id_onehot], dim=-<span class="hljs-number">1</span>)
+        
+        <span class="hljs-comment"># Actor: 行動分布 (Categorical分布の作成用にロジットを返す)</span>
+        action_logits = self.actor_head(combined)
+        
+        <span class="hljs-comment"># Critic: 状態価値</span>
+        state_value = self.critic_head(combined)
+        
+        <span class="hljs-keyword">return</span> action_logits, state_value
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_action</span>(<span class="hljs-params">self, obs, agent_id_onehot, deterministic=<span class="hljs-literal">False</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;推論時に行動を選択するためのヘルパーメソッド&quot;&quot;&quot;</span>
+        action_logits, _ = self.forward(obs, agent_id_onehot)
+        probs = F.softmax(action_logits, dim=-<span class="hljs-number">1</span>)
+        
+        <span class="hljs-keyword">if</span> deterministic:
+            action = torch.argmax(probs, dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 確率分布からサンプリング</span>
+            dist = torch.distributions.Categorical(probs)
+            action = dist.sample()
+            
+        <span class="hljs-keyword">return</span> action.item()
+</code></pre>
+<p>実装がうまくできたかは、環境から受け取った状態量を入力することで確認出来ます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> pettingzoo.atari <span class="hljs-keyword">import</span> wizard_of_wor_v3
+
+<span class="hljs-comment"># 1. 環境とモデルの準備</span>
+ROM_PATH = <span class="hljs-string">&quot;/usr/local/lib/python3.12/dist-packages/AutoROM/roms/&quot;</span>
+env = wizard_of_wor_v3.env(render_mode=<span class="hljs-string">&quot;rgb_array&quot;</span>, auto_rom_install_path=ROM_PATH)
+env.reset()
+
+<span class="hljs-comment"># モデルのインスタンス化 (アクション数は環境から取得)</span>
+action_space_n = env.action_space(<span class="hljs-string">&quot;first_0&quot;</span>).n
+model = WizardOfWorMAPPONet(action_space_n=action_space_n, num_agents=<span class="hljs-number">2</span>)
+model.<span class="hljs-built_in">eval</span>() <span class="hljs-comment"># 推論モード</span>
+
+<span class="hljs-comment"># 2. 実際の環境から 1 ステップ分のデータを取得</span>
+<span class="hljs-comment"># 最初のエージェントの観測を取得</span>
+obs, reward, termination, truncation, info = env.last()
+
+<span class="hljs-comment"># 3. 前処理 (Pre-processing)</span>
+<span class="hljs-comment"># PettingZooの画像は [H, W, C] なので PyTorch用の [C, H, W] に変換</span>
+obs_tensor = torch.from_numpy(obs).permute(<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>).<span class="hljs-built_in">float</span>()
+<span class="hljs-comment"># 0-255 を 0.0-1.0 に正規化し、バッチ次元を追加 [1, 3, 210, 160]</span>
+obs_tensor = obs_tensor.unsqueeze(<span class="hljs-number">0</span>) / <span class="hljs-number">255.0</span>
+
+<span class="hljs-comment"># Agent ID (Player 1 = [1, 0]) の One-hot を作成</span>
+agent_id_onehot = torch.tensor([[<span class="hljs-number">1.0</span>, <span class="hljs-number">0.0</span>]])
+
+<span class="hljs-comment"># 4. モデルへの入力と出力確認</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;--- Model Input/Output Test ---&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Input Obs Shape: <span class="hljs-subst">{obs_tensor.shape}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Input ID Shape:  <span class="hljs-subst">{agent_id_onehot.shape}</span>&quot;</span>)
+
+<span class="hljs-keyword">try</span>:
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        action_logits, state_value = model(obs_tensor, agent_id_onehot)
+    
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n[Success] モデルの順伝播に成功しました。&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Action Logits (各行動のスコア): \n<span class="hljs-subst">{action_logits.numpy()}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;State Value (状態価値 V): <span class="hljs-subst">{state_value.item():<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+    
+    <span class="hljs-comment"># 行動決定ヘルパーのテスト</span>
+    selected_action = model.get_action(obs_tensor, agent_id_onehot, deterministic=<span class="hljs-literal">True</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Selected Action (決定論的選択): <span class="hljs-subst">{selected_action}</span>&quot;</span>)
+
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n[Error] モデルの実行中にエラーが発生しました。&quot;</span>)
+    <span class="hljs-built_in">print</span>(e)
+
+<span class="hljs-keyword">finally</span>:
+    env.close()
+</code></pre>
+<p>出力は以下のように得られます。
+環境から出力(行動確率)が得られたことが確認されました。</p>
+<pre><code>--- Model Input/Output Test ---
+Input Obs Shape: torch.Size([1, 3, 210, 160])
+Input ID Shape:  torch.Size([1, 2])
+
+[Success] モデルの順伝播に成功しました。
+Action Logits (各行動のスコア): 
+[[ 0.0230882  -0.02663376  0.04022681 -0.04580431 -0.03913892 -0.04565044
+  -0.00065756  0.05635386 -0.02619662]]
+State Value (状態価値 V): -0.0588
+Selected Action (決定論的選択): 7
+</code></pre>
+<h2 id="総括">総括</h2>
+<p>Wizard of Wor（210×160ピクセル）向けのマルチエージェント強化学習ネットワーク設計を、極めて簡潔にまとめると次の通りです。</p>
+<ul>
+<li><strong>構造</strong>：共通CNNで画像から特徴を抽出し、最後にActor（行動確率）とCritic（状態価値）に分岐するY字型。</li>
+<li><strong>Actor</strong>：自分の視点特徴＋Agent IDから「次にどのボタンを押すか」を決める（分散実行）。</li>
+<li><strong>Critic</strong>：全エージェントの観測＋隠れ情報からチーム全体の価値 (V) を評価（集中学習）。</li>
+<li><strong>Agent ID</strong>：One-hotでCNN出力に結合し、同じ重みでも役割分担や個別評価を可能にする。</li>
+<li><strong>CNN構成</strong>：3層CNN → Flatten → 512次元 → ID結合 → Actor/Critic Head。</li>
+</ul>
+<p>要するに、「共通CNN＋分散Actor＋集中Critic＋ID埋め込み」で、MAPPO風の集中学習・分散実行をピクセル入力に適用した設計です。</p>
+<p><img src="file:///d:\PycharmProjects\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\3_wizard_war\doc\image\3_network_struct\1779502747495.png" alt="1779502747495"></p>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+        </body>
+        </html>
