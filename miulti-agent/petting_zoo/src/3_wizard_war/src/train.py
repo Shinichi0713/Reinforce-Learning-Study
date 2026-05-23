@@ -11,6 +11,23 @@ import supersuit as ss  # 前処理用に必要です
 # from trainer import MAPPOTrainer
 ROM_PATH = "/usr/local/lib/python3.12/dist-packages/AutoROM/roms/"
 
+
+def find_latest_checkpoint(checkpoint_dir):
+    """最新のチェックポイントファイルを検索"""
+    if not os.path.exists(checkpoint_dir):
+        return None
+    files = [f for f in os.listdir(checkpoint_dir) if f.startswith("mappo_model") and f.endswith(".pth")]
+    if len(files) == 1:
+      return os.path.join(checkpoint_dir, files[0])
+    else:
+      if not files:
+          return None
+      # update番号でソート
+      files.sort(key=lambda x: int(x.split("_")[2].split(".")[0]))
+      
+      print(files)
+      return os.path.join(checkpoint_dir, files[-1])
+
 def train_mappo():
     # --- 1. ハイパーパラメータ・設定 ---
     config = {
@@ -71,9 +88,20 @@ def train_mappo():
     )
 
     # 保存ディレクトリ
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    save_path = os.path.join(config["model_dir"], run_id)
-    os.makedirs(save_path, exist_ok=True)
+    os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+    # --- チェックポイントのロード ---
+    latest_checkpoint = find_latest_checkpoint(CHECKPOINT_DIR)
+    start_update = 0
+    if latest_checkpoint:
+        print(f"Loading checkpoint from {latest_checkpoint}")
+        checkpoint = torch.load(latest_checkpoint, map_location=device)
+        ac.load_state_dict(checkpoint['model_state_dict'])
+        trainer.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_update = checkpoint.get('update', 0) + 1  # 次の更新から再開
+        print(f"Resuming from update {start_update}")
+    else:
+        print("No checkpoint found. Starting from scratch.")
 
     agent_ids_onehot = torch.eye(config["num_agents"], device=device)
 
@@ -83,6 +111,11 @@ def train_mappo():
     
     # 辞書をテンソルに変換するヘルパー
     def dict_to_tensor(d):
+        # env.agents が空の場合の処理
+        if not env.agents:
+            # 環境をリセットして再試行
+            d, _ = env.reset()
+        # 正しくテンソルに変換
         return torch.FloatTensor(np.array([d[agent] for agent in env.agents])).to(config["device"])
 
     # 最初の観測と状態をバッファに
@@ -91,7 +124,15 @@ def train_mappo():
     buffer.insert_first(obs_init, state_init)
 
     num_updates = config["total_steps"] // config["episode_length"]
-    for update in range(num_updates):
+    
+    # 報酬とエントロピーの累積用
+    episode_rewards = []
+    entropy_history = []
+
+    for update in range(start_update, num_updates):
+        # エピソードごとの報酬合計
+        episode_reward = 0.0
+        
         for step in range(config["episode_length"]):
             cur_obs, cur_state = buffer.get_obs_step()
             
@@ -109,14 +150,53 @@ def train_mappo():
             action_dict = {agent: action[i].item() for i, agent in enumerate(env.agents)}
             
             # 環境の実行
+            agents_before = set(env.agents)
             next_obs_dict, rewards_dict, terminations, truncations, infos = env.step(action_dict)
+            agents_after = set(env.agents)
+
+            dead_agents = agents_before - agents_after
+            if dead_agents:
+                print(f"Dead agents: {dead_agents}")
+            # エピソード終了時の処理
+            if any(terminations.values()) or any(truncations.values()):
+                # 環境をリセット
+                next_obs_dict, _ = env.reset()
+                # マスクを 0 に設定（終了時）
+                masks = torch.zeros((config["num_agents"], 1), dtype=torch.float32)
+            else:
+                masks = torch.ones((config["num_agents"], 1), dtype=torch.float32)
             # print(next_obs_dict)
-            
             # データの整形
             next_obs = dict_to_tensor(next_obs_dict)
+            # print(f"next_obs shape: {next_obs.shape}")  # デバッグ用
+
+            # next_state を state_shape に合わせて生成
             next_state = next_obs.view(-1, 84, 84).repeat(config["num_agents"], 1, 1, 1)
-            rewards = torch.FloatTensor([[rewards_dict[agent]] for agent in env.agents])
+            # print(f"next_state shape before repeat: {next_state.shape}")  # デバッグ用
+
+            # state_shape が (6, 84, 84) の場合、チャンネル次元を 6 に合わせる
+            # 必ず repeat で調整する
+            if next_state.size(1) != state_shape[0]:
+                print(f"state_shape[0]: {state_shape[0]}, next_state.size(1): {next_state.size(1)}")  # デバッグ用
+                # next_state.size(1) が 0 でないことを確認
+                if next_state.size(1) == 0:
+                    raise ValueError("next_state.size(1) is 0. Check the shape of next_obs.")
+                # 安全な整数除算
+                repeat_factor = state_shape[0] // next_state.size(1)
+                next_state = next_state.repeat(1, repeat_factor, 1, 1)
+            else:
+                # 一致している場合でも、念のため repeat で調整
+                repeat_factor = state_shape[0] // next_state.size(1)
+                next_state = next_state.repeat(1, repeat_factor, 1, 1)
+            # データの整形
+            # next_obs = dict_to_tensor(next_obs_dict)
+            # next_state = next_obs.view(-1, 84, 84).repeat(config["num_agents"], 1, 1, 1)
+            # rewards = torch.FloatTensor([[rewards_dict[agent]] for agent in env.agers])
+            rewards = torch.FloatTensor([[rewards_dict[agent] * 0.01] for agent in env.agents])
             
+            # 報酬の累積（エピソード合計）
+            episode_reward += rewards.sum().item()
+
             # 終了判定 (Terminated or Truncated)
             dones = {a: terminations[a] or truncations[a] for a in env.agents}
             masks = torch.FloatTensor([[0.0] if dones[agent] else [1.0] for agent in env.agents])
@@ -144,11 +224,32 @@ def train_mappo():
         # trainer.train が None を返した場合のフォールバック
         if train_info is None:
             print(f"Update {update}: trainer.train が値を返しませんでした。")
-            train_info = {"value_loss": 0.0} # ログ出力で落ちないように初期化
+            train_info = {"value_loss": 0.0, "entropy": 0.0} # ログ出力で落ちないように初期化
+
+        # 報酬とエントロピーの記録
+        episode_rewards.append(episode_reward)
+        entropy_history.append(train_info.get('entropy', 0.0))
 
         # ログと保存
         if update % config["log_interval"] == 0:
-            print(f"Update {update}/{num_updates}: Value Loss: {train_info.get('value_loss', 0.0):.4f}")
+            # 平均報酬と平均エントロピーを計算
+            avg_reward = np.mean(episode_rewards[-config["log_interval"]:])
+            avg_entropy = np.mean(entropy_history[-config["log_interval"]:])
+            print(f"Update {update}/{num_updates}: "
+                  f"Value Loss: {train_info.get('value_loss', 0.0):.4f}, "
+                  f"Avg Reward: {avg_reward:.4f}, "
+                  f"Avg Entropy: {avg_entropy:.4f}")
+
+        # --- モデルの保存 ---
+        if update % config["save_interval"] == 0:
+            model_path = os.path.join(CHECKPOINT_DIR, f"mappo_model.pth")
+            torch.save({
+                'model_state_dict': ac.state_dict(),
+                'optimizer_state_dict': trainer.optimizer.state_dict(),
+                'update': update,
+                'config': config
+            }, model_path)
+            print(f"Model saved to {model_path}")
 
     env.close()
 
