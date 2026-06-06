@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x30e1;&#x30e2;&#x30ea;&#x30d0;&#x30c3;&#x30d5;&#x30a1;&#x306e;&#x5f79;&#x5272;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>マルチエージェントの強化学習(MARL)のチーム連携が必要となるゲーム<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>でAIエージェント学習の実装を進めています。</p>
+<p>実装は以下の順に沿って進めていきます。</p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計</li>
+<li><strong>バッファ</strong>で経験を保存・計算</li>
+<li><strong>学習ループ</strong>でPPO更新を繰り返す</li>
+<li><strong>評価・可視化</strong>で性能を確認</li>
+</ol>
+<p>前回2. Actor/Criticの実装まで進めました。
+今回は3. バッファの実装を進めます。</p>
+<p>今回のテーマ：</p>
+<blockquote>
+<p>Pursuitの環境で学習するバッファを設計・実装する</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="メモリバッファの役割">メモリバッファの役割</h2>
+<p>MAPPOでPursuit環境を学習する際の「メモリバッファ」の役割は、<strong>エージェントが環境と相互作用して得た経験（transition）を一時的に保存し、PPOの更新に必要なサンプルをまとめて提供すること</strong>です。</p>
+<p>主な役割は以下の3つです。</p>
+<h3 id="1-経験の一時保存experience-storage">1. 経験の一時保存（Experience Storage）</h3>
+<ul>
+<li>各ステップで得られる
+<ul>
+<li>観測 <code>obs</code></li>
+<li>行動 <code>action</code></li>
+<li>報酬 <code>reward</code></li>
+<li>終了フラグ <code>terminated</code> / <code>truncated</code></li>
+<li>追加情報（ログ確率、価値推定値など）</li>
+</ul>
+</li>
+<li>を、<strong>エピソードが終わるまでバッファに蓄積</strong>します。</li>
+</ul>
+<h3 id="2-ppo更新用のミニバッチ提供mini-batch-sampling">2. PPO更新用のミニバッチ提供（Mini-batch Sampling）</h3>
+<ul>
+<li>PPOは「<strong>過去のポリシーで集めたデータを使って、現在のポリシーを更新</strong>」するアルゴリズムです。</li>
+<li>バッファに溜まった経験から、<strong>ランダムにミニバッチをサンプリング</strong>し、
+<ul>
+<li>Actor（方策）の損失計算</li>
+<li>Critic（価値関数）の損失計算</li>
+<li>Advantage（優位性）の推定</li>
+</ul>
+</li>
+<li>に使います。</li>
+</ul>
+<h3 id="3-リプレイと安定化replay--stabilization">3. リプレイと安定化（Replay &amp; Stabilization）</h3>
+<ul>
+<li>同じデータを<strong>複数回（PPOのエポック数分）再利用</strong>することで、
+<ul>
+<li>サンプル効率を上げる</li>
+<li>学習を安定させる</li>
+</ul>
+</li>
+<li>という役割もあります。</li>
+</ul>
+<h3 id="mappoでの具体的な中身">MAPPOでの具体的な中身</h3>
+<p>Pursuitのようなマルチエージェント環境では、バッファには以下のような情報を保存します。</p>
+<ul>
+<li><strong>各エージェントの観測</strong>：<code>obs_i</code>（<code>(7,7,3)</code> → フラット化）</li>
+<li><strong>各エージェントの行動</strong>：<code>action_i</code>（離散行動ID）</li>
+<li><strong>各エージェントの報酬</strong>：<code>reward_i</code>（<code>shared_reward=True</code> なら全員同じ）</li>
+<li><strong>グローバル状態</strong>：<code>global_state</code>（全エージェント観測の結合）</li>
+<li><strong>終了フラグ</strong>：<code>terminated</code>, <code>truncated</code></li>
+<li><strong>追加情報</strong>：<code>log_prob</code>（行動の対数確率）、<code>value</code>（Criticの出力）など</li>
+</ul>
+<p>これらをまとめておき、PPO更新時に「<strong>全エージェント分のミニバッチ</strong>」として使うのがMAPPOのバッファの役割です。</p>
+<h2 id="メモリバッファが必要な理由">メモリバッファが必要な理由</h2>
+<p>バッファが必要になる理由は、<strong>PPO（Proximal Policy Optimization）の更新ルールと、学習の安定性・効率性</strong>にあります。</p>
+<h3 id="1-ppoはオンポリシーだが再利用する">1. PPOは「オンポリシー」だが「再利用」する</h3>
+<ul>
+<li>PPOは基本的に<strong>オンポリシー</strong>（現在のポリシーで集めたデータで更新）です。</li>
+<li>しかし、<strong>1回集めたデータを複数回（エポック数分）再利用</strong>して更新します。
+<ul>
+<li>例：K=3エポックなら、同じデータを3回使って方策を更新</li>
+</ul>
+</li>
+<li>この「<strong>再利用</strong>」のために、データを一時的に保存しておく必要があります。
+<ul>
+<li>→ バッファが必要</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-ミニバッチ学習と安定性">2. ミニバッチ学習と安定性</h3>
+<ul>
+<li>深層強化学習では、<strong>ミニバッチ学習</strong>（小さなバッチで勾配を更新）が重要です。
+<ul>
+<li>全データを一度に更新するとメモリ・計算量が膨大</li>
+<li>1サンプルずつ更新するとノイズが大きい</li>
+</ul>
+</li>
+<li>バッファに溜めたデータから<strong>ランダムにミニバッチをサンプリング</strong>することで、
+<ul>
+<li>計算効率が良い</li>
+<li>勾配の分散が小さく、学習が安定する</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-advantage推定のため">3. Advantage推定のため</h3>
+<ul>
+<li>PPOでは、<strong>Advantage（A_t）</strong> を推定して「どれだけ良い行動だったか」を評価します。</li>
+<li>Advantageは「<strong>将来の報酬の合計（Return） − 現在の価値推定（Value）</strong> 」で計算されます。</li>
+<li>これを正確に計算するには、
+<ul>
+<li>エピソード終了まで報酬を蓄積</li>
+<li>あるいは、複数ステップ分の報酬をまとめて扱う</li>
+</ul>
+</li>
+<li>必要があります。</li>
+<li>→ バッファに<strong>複数ステップ分のデータをまとめて保存</strong>しておくことで、Advantage計算がしやすくなります。</li>
+</ul>
+<h2 id="4-マルチエージェントmappoでの重要性">4. マルチエージェント（MAPPO）での重要性</h2>
+<ul>
+<li>MAPPOでは、<strong>全エージェントの経験をまとめて更新</strong>します。</li>
+<li>バッファに
+<ul>
+<li>各エージェントの観測・行動・報酬</li>
+<li>グローバル状態</li>
+</ul>
+</li>
+<li>を保存しておくことで、
+<ul>
+<li>「<strong>全エージェント分のミニバッチ</strong>」を一度にサンプリング</li>
+<li>協調的な学習（共同報酬の共有）を効率的に実現</li>
+</ul>
+</li>
+<li>できます。</li>
+</ul>
+<h2 id="バッファ設計のポイント">バッファ設計のポイント</h2>
+<p>MAPPOでPursuit環境を学習するためのバッファ設計のキーポイントは、<strong>「何を」「どの単位で」「どう保存するか」</strong> を明確にすることです。</p>
+<h3 id="1-保存するデータ項目what">1. 保存するデータ項目（What）</h3>
+<p>MAPPOでは、少なくとも以下を保存します。</p>
+<ul>
+<li><strong>各エージェントの観測</strong>：<code>obs_i</code>（<code>(7,7,3)</code> → フラット化）</li>
+<li><strong>各エージェントの行動</strong>：<code>action_i</code>（離散行動ID）</li>
+<li><strong>各エージェントの報酬</strong>：<code>reward_i</code>（<code>shared_reward=True</code> なら全員同じ）</li>
+<li><strong>グローバル状態</strong>：<code>global_state</code>（全エージェント観測の結合）</li>
+<li><strong>終了フラグ</strong>：<code>terminated</code>, <code>truncated</code></li>
+<li><strong>追加情報</strong>：
+<ul>
+<li><code>log_prob_i</code>：行動の対数確率（Actorの出力）</li>
+<li><code>value_i</code>：Criticの価値推定（グローバル状態から）</li>
+<li><code>advantage</code>：Advantage（後で計算）</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-保存単位how">2. 保存単位（How）</h3>
+<p><strong>(1) エピソード単位か、ステップ単位か</strong></p>
+<ul>
+<li><strong>エピソード単位</strong>：1エピソード終了後にまとめて保存 → PPOの標準的な実装に近い</li>
+<li><strong>ステップ単位</strong>：各ステップで逐次保存 → 実装がシンプル</li>
+</ul>
+<p>Pursuit＋MAPPOでは、<strong>ステップ単位で保存</strong>するのが実装しやすいです。</p>
+<p><strong>(2) マルチエージェントの扱い</strong></p>
+<ul>
+<li><strong>全エージェント分を1つの辞書/リストにまとめて保存</strong>：
+<ul>
+<li><code>obs = {'pursuer_0': obs0, 'pursuer_1': obs1, ...}</code></li>
+<li><code>actions = {'pursuer_0': a0, 'pursuer_1': a1, ...}</code></li>
+</ul>
+</li>
+<li>または、<strong>エージェントごとに別バッファ</strong>：
+<ul>
+<li><code>buffer_p0</code>, <code>buffer_p1</code>, ...（実装が複雑になるので非推奨）</li>
+</ul>
+</li>
+</ul>
+<p>MAPPOでは、<strong>全エージェント分を1つのバッファにまとめて保存</strong>するのが一般的です。</p>
+<h3 id="3-データ構造data-structure">3. データ構造（Data Structure）</h3>
+<p><strong>(1) リスト／配列ベース</strong></p>
+<ul>
+<li><code>obs_buffer = []</code>、<code>action_buffer = []</code>、<code>reward_buffer = []</code>、...</li>
+<li>各ステップで <code>append</code> し、サンプリング時に <code>np.array</code> に変換。</li>
+<li>シンプルで実装しやすい。</li>
+</ul>
+<p><strong>(2) 辞書ベース</strong></p>
+<ul>
+<li><code>buffer = {'obs': [], 'actions': [], 'rewards': [], ...}</code></li>
+<li>キーでアクセスしやすく、拡張性が高い。</li>
+</ul>
+<p><strong>(3) 固定サイズのリングバッファ</strong></p>
+<ul>
+<li><code>deque</code> や <code>np.roll</code> で古いデータを自動削除。</li>
+<li>メモリ使用量を制御できる。</li>
+</ul>
+<h3 id="4-サンプリング方法sampling">4. サンプリング方法（Sampling）</h3>
+<p><strong>(1) ミニバッチのサイズ</strong></p>
+<ul>
+<li><code>batch_size = 64</code> や <code>128</code> など、ネットワークのサイズに合わせて設定。</li>
+<li>Pursuit（8エージェント）なら、<strong>8の倍数</strong>にすると扱いやすい。</li>
+</ul>
+<p><strong>(2) ランダムサンプリング</strong></p>
+<ul>
+<li><code>np.random.choice</code> や <code>random.sample</code> でインデックスを選ぶ。</li>
+<li>時間相関を壊し、学習を安定させる。</li>
+</ul>
+<p><strong>(3) エージェント単位か、ステップ単位か</strong></p>
+<ul>
+<li><strong>ステップ単位サンプリング</strong>：各ミニバッチに「全エージェント分のステップ」を含める。</li>
+<li><strong>エージェント単位サンプリング</strong>：各ミニバッチに「特定エージェントの複数ステップ」を含める（複雑なので非推奨）。</li>
+</ul>
+<p>MAPPOでは、<strong>ステップ単位サンプリング</strong>が一般的です。</p>
+<h3 id="5-advantage計算の扱い">5. Advantage計算の扱い</h3>
+<ul>
+<li>Advantageは<strong>バッファに保存後、エピソード終了時にまとめて計算</strong>するのが一般的です。</li>
+<li>計算方法：
+<ul>
+<li><strong>GAE（Generalized Advantage Estimation）</strong>：将来報酬の割引和と価値推定の差分から計算。</li>
+<li><strong>Return（累積報酬） − Value</strong>：シンプルな方法。</li>
+</ul>
+</li>
+</ul>
+<p>計算したAdvantageをバッファに追加し、PPO更新時に使用します。</p>
+<h2 id="実装">実装</h2>
+<h3 id="1-実装コード">1. 実装コード</h3>
+<p>上記の設計のポイントに沿って実装しました。
+以下のレポジトリにコードを保存しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<h3 id="2-動作確認">2. 動作確認</h3>
+<p>前回までの環境ラッパーを用いて、今回実装したメモリバッファにデータ保持、デモでデータ取り出しを行います。
+以下テストコードで正常動作すれば実装は完了です。</p>
+<pre><code class="language-python"><span class="hljs-comment"># テスト実行</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_pursuit_buffer</span>():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=== Pursuit + 環境ラッパ + メモリバッファ テスト開始 ===&quot;</span>)
+    
+    <span class="hljs-comment"># 環境とラッパの初期化</span>
+    env = PursuitWrapper(render_mode=<span class="hljs-literal">None</span>, max_cycles=<span class="hljs-number">50</span>)  <span class="hljs-comment"># テスト用に短く</span>
+    num_agents = env.num_agents
+    obs_dim = env.obs_dim
+    state_dim = env.state_dim
+    action_dim = env.action_dim
+    
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;エージェント数: <span class="hljs-subst">{num_agents}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;観測次元: <span class="hljs-subst">{obs_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;グローバル状態次元: <span class="hljs-subst">{state_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;行動空間サイズ: <span class="hljs-subst">{action_dim}</span>&quot;</span>)
+    
+    <span class="hljs-comment"># メモリバッファの初期化</span>
+    buffer = MultiAgentBuffer(num_agents, obs_dim, state_dim, action_dim)
+    
+    <span class="hljs-comment"># 1エピソード実行（ランダムエージェント）</span>
+    env.reset()
+    step_count = <span class="hljs-number">0</span>
+    
+    <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.env.agent_iter():
+        <span class="hljs-comment"># 観測とグローバル状態を取得</span>
+        obs = env.get_obs(agent)
+        global_state = env.get_global_state()
+        
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> env.env.agents:
+            action = <span class="hljs-literal">None</span>
+            reward = <span class="hljs-number">0.0</span>
+            terminated = <span class="hljs-literal">True</span>
+            truncated = <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">else</span>:
+            _, _, terminated, truncated, _ = env.env.last(agent)
+            <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">or</span> truncated:
+                action = <span class="hljs-literal">None</span>
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># ランダム行動（テスト用）</span>
+                action = env.action_space.sample()
+            
+            <span class="hljs-comment"># 1ステップ進める</span>
+            reward, terminated, truncated, info = env.step(agent, action)
+        
+        <span class="hljs-comment"># 各エージェントの観測・行動・報酬・log_probを辞書でまとめる</span>
+        obs_dict = {}
+        action_dict = {}
+        reward_dict = {}
+        log_prob_dict = {}
+        
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_agents):
+            agent_name = <span class="hljs-string">f&#x27;pursuer_<span class="hljs-subst">{i}</span>&#x27;</span>
+            <span class="hljs-keyword">if</span> agent_name <span class="hljs-keyword">in</span> env.env.agents:
+                agent_obs = env.get_obs(agent_name)
+                <span class="hljs-keyword">if</span> agent_obs <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                    obs_dict[agent_name] = agent_obs
+                <span class="hljs-keyword">else</span>:
+                    obs_dict[agent_name] = np.zeros(obs_dim, dtype=np.float32)
+                
+                <span class="hljs-comment"># 行動と報酬は現在のエージェントのみ実際の値、他は0またはNone</span>
+                <span class="hljs-keyword">if</span> agent_name == agent:
+                    action_dict[agent_name] = action <span class="hljs-keyword">if</span> action <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+                    reward_dict[agent_name] = reward
+                <span class="hljs-keyword">else</span>:
+                    action_dict[agent_name] = <span class="hljs-number">0</span>
+                    reward_dict[agent_name] = <span class="hljs-number">0.0</span>
+                
+                <span class="hljs-comment"># log_probはテスト用にランダム値（実際はポリシーから計算）</span>
+                log_prob_dict[agent_name] = np.log(<span class="hljs-number">1.0</span> / action_dim)  <span class="hljs-comment"># 一様分布のlog_prob</span>
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># deadエージェントは0埋め</span>
+                obs_dict[agent_name] = np.zeros(obs_dim, dtype=np.float32)
+                action_dict[agent_name] = <span class="hljs-number">0</span>
+                reward_dict[agent_name] = <span class="hljs-number">0.0</span>
+                log_prob_dict[agent_name] = <span class="hljs-number">0.0</span>
+        
+        <span class="hljs-comment"># Criticの価値推定（テスト用に0）</span>
+        value = <span class="hljs-number">0.0</span>
+        
+        <span class="hljs-comment"># バッファに保存</span>
+        buffer.store(
+            obs_dict, action_dict, reward_dict, global_state,
+            log_prob_dict, value, terminated, truncated
+        )
+        
+        step_count += <span class="hljs-number">1</span>
+        <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">or</span> truncated:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;エピソード終了: <span class="hljs-subst">{step_count}</span>ステップ&quot;</span>)
+            <span class="hljs-keyword">break</span>
+    
+    <span class="hljs-comment"># バッファの状態を確認</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nバッファに保存されたステップ数: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(buffer)}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;エピソード長さのリスト: <span class="hljs-subst">{buffer.episode_lengths}</span>&quot;</span>)
+    
+    <span class="hljs-comment"># Advantageを計算</span>
+    buffer.compute_advantages(gamma=<span class="hljs-number">0.99</span>, gae_lambda=<span class="hljs-number">0.95</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Advantage計算完了&quot;</span>)
+    
+    <span class="hljs-comment"># ミニバッチをサンプリングして形状を確認</span>
+    batch_size = <span class="hljs-built_in">min</span>(<span class="hljs-number">16</span>, <span class="hljs-built_in">len</span>(buffer))  <span class="hljs-comment"># 小さいバッチでテスト</span>
+    batch = buffer.sample(batch_size)
+    
+    <span class="hljs-keyword">if</span> batch <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nミニバッチの形状:&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;obs: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;obs&#x27;</span>].shape}</span>&quot;</span>)           <span class="hljs-comment"># (batch, num_agents, obs_dim)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;actions: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;actions&#x27;</span>].shape}</span>&quot;</span>)    <span class="hljs-comment"># (batch, num_agents)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;rewards: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;rewards&#x27;</span>].shape}</span>&quot;</span>)    <span class="hljs-comment"># (batch, num_agents)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;global_states: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;global_states&#x27;</span>].shape}</span>&quot;</span>)  <span class="hljs-comment"># (batch, state_dim)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;log_probs: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;log_probs&#x27;</span>].shape}</span>&quot;</span>) <span class="hljs-comment"># (batch, num_agents)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;values: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;values&#x27;</span>].shape}</span>&quot;</span>)      <span class="hljs-comment"># (batch,)</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;advantages: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;advantages&#x27;</span>].shape}</span>&quot;</span>)  <span class="hljs-comment"># (batch, num_agents)</span>
+        
+        <span class="hljs-comment"># 値の範囲を簡単に確認</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n値の範囲（サンプル）:&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;rewards min/max: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;rewards&#x27;</span>].<span class="hljs-built_in">min</span>():<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;rewards&#x27;</span>].<span class="hljs-built_in">max</span>():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;advantages min/max: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;advantages&#x27;</span>].<span class="hljs-built_in">min</span>():<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;advantages&#x27;</span>].<span class="hljs-built_in">max</span>():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;log_probs min/max: <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;log_probs&#x27;</span>].<span class="hljs-built_in">min</span>():<span class="hljs-number">.3</span>f}</span>, <span class="hljs-subst">{batch[<span class="hljs-string">&#x27;log_probs&#x27;</span>].<span class="hljs-built_in">max</span>():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;バッファが空です&quot;</span>)
+    
+    <span class="hljs-comment"># バッファをクリア</span>
+    buffer.clear()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\nバッファクリア後: <span class="hljs-subst">{<span class="hljs-built_in">len</span>(buffer)}</span>&quot;</span>)
+    
+    env.close()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=== テスト終了 ===&quot;</span>)
+
+<span class="hljs-comment"># テスト実行</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    test_pursuit_buffer()
+</code></pre>
+<p><strong>出力</strong></p>
+<p>正常稼働した場合、エラーなく以下のように出力が得られます。</p>
+<pre><code>=== Pursuit + 環境ラッパ + メモリバッファ テスト開始 ===
+エージェント数: 8
+観測次元: 147
+グローバル状態次元: 1176
+行動空間サイズ: 5
+エピソード終了: 400ステップ
+
+バッファに保存されたステップ数: 400
+エピソード長さのリスト: [400]
+Advantage計算完了
+
+ミニバッチの形状:
+obs: (16, 8, 147)
+actions: (16, 8)
+rewards: (16, 8)
+global_states: (16, 1176)
+log_probs: (16, 8)
+values: (16,)
+advantages: (16, 8)
+
+値の範囲（サンプル）:
+rewards min/max: -0.095, 0.000
+advantages min/max: -0.245, -0.099
+log_probs min/max: -1.609, -1.609
+
+バッファクリア後: 0
+=== テスト終了 ===
+</code></pre>
+<h2 id="総括">総括</h2>
+<p>今回扱ったMAPPOでPursuit環境を学習する際のメモリバッファの役割と設計ポイントについては以下が要点です。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\4_petting_buffa\1780784448865.png" alt="1780784448865"></p>
+<h3 id="メモリバッファの役割-1">メモリバッファの役割</h3>
+<ul>
+<li><strong>経験の一時保存</strong>：各ステップの観測・行動・報酬・終了フラグ・追加情報（log_prob, valueなど）をエピソード終了まで蓄積する。</li>
+<li><strong>PPO更新用のミニバッチ提供</strong>：蓄積した経験からランダムにミニバッチをサンプリングし、Actor/Criticの損失計算とAdvantage推定に使う。</li>
+<li><strong>リプレイと安定化</strong>：同じデータを複数回（PPOのエポック数分）再利用することで、サンプル効率と学習の安定性を高める。</li>
+</ul>
+<h3 id="バッファが必要な理由">バッファが必要な理由</h3>
+<ul>
+<li><strong>PPOの再利用</strong>：1回集めたデータを複数回使って方策を更新するため、一時保存が必要。</li>
+<li><strong>ミニバッチ学習</strong>：小さなバッチで勾配を更新するため、ランダムサンプリングが可能なバッファが不可欠。</li>
+<li><strong>Advantage推定</strong>：将来報酬の合計（Return）と価値推定（Value）の差分を計算するため、複数ステップ分のデータをまとめて扱う必要がある。</li>
+<li><strong>マルチエージェント対応</strong>：全エージェントの経験をまとめて更新するMAPPOでは、各エージェントの観測・行動・報酬とグローバル状態を一括で扱う必要がある。</li>
+</ul>
+<h3 id="バッファ設計のポイント-1">バッファ設計のポイント</h3>
+<p><strong>1. 保存項目</strong></p>
+<ul>
+<li>各エージェントの観測・行動・報酬</li>
+<li>グローバル状態</li>
+<li>終了フラグ（terminated, truncated）</li>
+<li>追加情報（log_prob, value, advantage）</li>
+</ul>
+<p><strong>2. 保存単位</strong></p>
+<ul>
+<li><strong>ステップ単位で全エージェント分をまとめて保存</strong>（1ステップ＝全エージェントの経験）</li>
+<li>全エージェント分を1つのバッファにまとめる（エージェントごとの別バッファは非推奨）</li>
+</ul>
+<p><strong>3. データ構造</strong></p>
+<ul>
+<li>リスト／辞書ベースでシンプルに実装（<code>buffer['obs'].append(obs_dict)</code>）</li>
+<li>必要に応じて固定サイズのリングバッファでメモリ制御</li>
+</ul>
+<p><strong>4. サンプリング</strong></p>
+<ul>
+<li>ランダムにステップを選び、全エージェント分をミニバッチ化</li>
+<li>バッチサイズは8の倍数など、エージェント数に合わせて設定</li>
+</ul>
+<p><strong>5. Advantage計算</strong></p>
+<ul>
+<li>エピソード終了後にGAEなどでAdvantageを計算し、バッファに追加</li>
+<li>Return − Value またはGAEで将来報酬の割引和を扱う</li>
+</ul>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/SFCCZ89dJQU?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
