@@ -407,7 +407,22 @@ Here is a concise summary of why the agent approaches the opponent but fails to 
 * **Increase Entropy (`ent_coef`):** Raise the entropy coefficient during training to encourage more exploration (i.e., "trying out" different actions like punching when close).
 * **Stricter Proximity Threshold:** Lower the distance required to trigger "closeness" to ensure the agent is truly within striking range before receiving bonuses.
 
-<img src="miulti-agent/petting_zoo/src/2_boxing/doc/image/4_train_result/output.gif" width="500px" >
+<img src="miulti-agent/petting_zoo/src/2_boxing/doc/image/4_train_result/output.gif" width="500px" style="display: block; margin: 0 auto;">
+
+**Wizard War** is a simple multi-agent game where wizards (players) move around and shoot magic bullets at each other. The goal is to defeat enemy wizards while avoiding being hit yourself.
+
+In early training, agents learned unnatural behaviors:
+- They rushed into enemies to kill them even if it meant dying, because the reward for killing an enemy was much larger than the penalty for dying.
+- They often shot allies instead of enemies, because friendly kills gave the same reward as enemy kills.
+
+To fix this, we improved the reward design:
+- Added a large death penalty (`-50`) and a small survival reward (`+0.1`) to encourage staying alive.
+- Added a large penalty (`-50`) for suspected friendly fire (dying right after shooting).
+
+After retraining, the agent now approaches enemies safely while firing bullets, avoiding reckless charges and unnecessary friendly fire, resulting in more natural gameplay.
+
+<img src="miulti-agent/petting_zoo/src/3_wizard_war/doc/image/6_improve/episode_20260529_235615.gif" width="500px" style="display: block; margin: 0 auto;">
+
 
 # cite
 

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5b9f;&#x88c5;&#x306e;&#x9032;&#x3081;&#x65b9;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>昨日のpettingの<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>について学習するプログラムの実装を進めていきます。</p>
+<h2 id="実装の進め方">実装の進め方</h2>
+<p>PursuitをMAPPOで「初めから正しく、わかりやすく」実装するには、<strong>役割ごとにステップを分けて進める</strong>のがポイントです。</p>
+<p>以下、実装の手順をステップバイステップで整理します。</p>
+<h3 id="ステップ0準備環境とライブラリ">ステップ0：準備（環境とライブラリ）</h3>
+<ol>
+<li>PettingZooのPursuit環境が動くことを確認</li>
+<li><code>numpy</code>, <code>torch</code>（または <code>jax</code>）, <code>gymnasium</code>, <code>pettingzoo[sisl]</code> などをインストール</li>
+<li>プロジェクト用のディレクトリ・ファイル構成を決める（後述）</li>
+</ol>
+<p>※ここはGoogle Colabを使うと<code>ettingzoo</code>関係のパッケージのみで可です。</p>
+<pre><code># エミュレータとGymnasiumのインストール
+!pip install gymnasium[atari]
+!pip install gymnasium[accept-rom-license]
+!pip install pyvirtualdisplay &gt; /dev/null 2&gt;&amp;1
+!pip install AutoROM[accept-rom-license]
+!AutoROM --accept-license
+# 描画用のシステムパッケージ
+!apt-get install -y xvfb python-opengl ffmpeg &gt; /dev/null 2&gt;&amp;1
+!pip install pettingzoo[atari,accept-rom-license]
+!pip install &quot;pettingzoo[sisl]&quot;
+!pip install supersuit
+</code></pre>
+<h3 id="ステップ1環境ラッパの実装">ステップ1：環境ラッパの実装</h3>
+<p><strong>目的</strong>: Pursuit環境を、MAPPOが扱いやすい形に変換する。</p>
+<ol>
+<li>
+<p><strong>環境インスタンスの生成</strong></p>
+<ul>
+<li><code>env = pursuit_v4.env(render_mode=&quot;rgb_array&quot;, max_cycles=500, ...)</code></li>
+<li><code>shared_reward=True</code> に設定（協調型なので全員で報酬共有）</li>
+</ul>
+</li>
+<li>
+<p><strong>観測の前処理</strong></p>
+<ul>
+<li>Pursuitの観測は <code>(7, 7, 3)</code> のローカルグリッド</li>
+<li>MAPPOでは
+<ul>
+<li>CNNで処理する（画像として扱う）</li>
+<li>もしくはフラット化してMLPで処理する</li>
+</ul>
+</li>
+<li>ここでは<strong>フラット化</strong>を例にします：<pre><code class="language-python">obs_flat = obs.reshape(-<span class="hljs-number">1</span>)  <span class="hljs-comment"># (7*7*3,) のベクトル</span>
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>グローバル状態の構成</strong></p>
+<ul>
+<li>Criticには「全エージェントの観測をまとめたもの」を入力したい</li>
+<li>簡易的には「全エージェントの観測を結合したベクトル」をグローバル状態とみなす：<pre><code class="language-python">global_state = np.concatenate([obs_flat <span class="hljs-keyword">for</span> each_agent])
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>エージェントIDの扱い</strong></p>
+<ul>
+<li>各エージェントに一意のID（one-hotなど）を観測に追加すると、1つのポリシーで複数エージェントを区別できます。</li>
+</ul>
+</li>
+<li>
+<p><strong>ラッパクラスの作成</strong></p>
+<ul>
+<li><code>reset()</code> → 各エージェントの観測とグローバル状態を返す</li>
+<li><code>step(action_dict)</code> → 各エージェントの次観測・報酬・終了フラグ・グローバル状態を返す</li>
+</ul>
+</li>
+</ol>
+<h3 id="ステップ2ネットワーク設計actor--critic">ステップ2：ネットワーク設計（Actor / Critic）</h3>
+<p><strong>目的</strong>: MAPPO用のニューラルネットを定義する。</p>
+<ol>
+<li>
+<p><strong>Actorネットワーク（ポリシー）</strong></p>
+<ul>
+<li>入力: エージェント観測（＋ID）</li>
+<li>出力: 行動確率分布（softmax）</li>
+<li>例（PyTorch）:<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Actor</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, obs_dim, act_dim, hidden_size=<span class="hljs-number">64</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(obs_dim, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, act_dim)
+        )
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, obs</span>):
+        logits = self.fc(obs)
+        <span class="hljs-keyword">return</span> Categorical(logits=logits)
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Criticネットワーク（価値関数）</strong></p>
+<ul>
+<li>入力: グローバル状態</li>
+<li>出力: スカラーの状態価値 V(s)</li>
+<li>例:<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Critic</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, state_dim, hidden_size=<span class="hljs-number">64</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(state_dim, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, <span class="hljs-number">1</span>)
+        )
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, state</span>):
+        <span class="hljs-keyword">return</span> self.fc(state)
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="ステップ3バッファ経験再生の設計">ステップ3：バッファ（経験再生）の設計</h3>
+<p><strong>目的</strong>: 1エピソード分のデータを保存し、PPO更新に使える形に整える。</p>
+<ol>
+<li>
+<p><strong>保存するデータ</strong></p>
+<ul>
+<li>観測 <code>obs</code></li>
+<li>行動 <code>actions</code></li>
+<li>報酬 <code>rewards</code></li>
+<li>終了フラグ <code>dones</code>（terminated / truncated）</li>
+<li>ログ確率 <code>log_probs</code></li>
+<li>状態価値 <code>values</code>（Criticの出力）</li>
+<li>必要に応じて <code>advantages</code>, <code>returns</code></li>
+</ul>
+</li>
+<li>
+<p><strong>バッファクラスの例</strong></p>
+<ul>
+<li><code>add(obs, action, reward, done, log_prob, value)</code></li>
+<li><code>compute_advantages_returns()</code>: GAEでadvantageとreturnを計算</li>
+<li><code>get_batch()</code>: 学習用にテンソルとして返す</li>
+</ul>
+</li>
+</ol>
+<h3 id="ステップ4学習ループmappoのコア">ステップ4：学習ループ（MAPPOのコア）</h3>
+<p><strong>目的</strong>: 上記の部品を組み合わせてMAPPOの学習を行う。</p>
+<ol>
+<li>
+<p><strong>大まかな流れ</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">for</span> episode <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_episodes):
+    <span class="hljs-comment"># 1. データ収集（ロールアウト）</span>
+    obs = env.reset()
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+        action, log_prob, value = policy(obs)  <span class="hljs-comment"># Actor &amp; Critic</span>
+        next_obs, reward, done, info = env.step(action)
+        buffer.add(obs, action, reward, done, log_prob, value)
+        obs = next_obs
+
+    <span class="hljs-comment"># 2. AdvantageとReturnの計算</span>
+    buffer.compute_advantages_returns()
+
+    <span class="hljs-comment"># 3. PPO更新（複数エポック）</span>
+    <span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(ppo_epochs):
+        batch = buffer.get_batch()
+        loss = ppo_update(batch)  <span class="hljs-comment"># ActorとCriticの損失を計算して更新</span>
+
+    buffer.clear()
+</code></pre>
+</li>
+<li>
+<p><strong>PPO更新の要点</strong></p>
+<ul>
+<li>Actor損失:
+<ul>
+<li>比率 <code>r_t = π_new(a|s) / π_old(a|s)</code> を使い、<code>clip(r_t * A, 1-ε, 1+ε)</code> でクリップ</li>
+</ul>
+</li>
+<li>Critic損失:
+<ul>
+<li><code>(V(s) - Return)^2</code> のMSE</li>
+</ul>
+</li>
+<li>エントロピー項を加えると探索が促進されます</li>
+</ul>
+</li>
+</ol>
+<h3 id="ステップ5評価と可視化">ステップ5：評価と可視化</h3>
+<p><strong>目的</strong>: 学習したポリシーがPursuitをどの程度解けているかを確認する。</p>
+<ol>
+<li>
+<p><strong>報酬の推移をプロット</strong></p>
+<ul>
+<li>各エピソードの平均報酬を記録し、<code>matplotlib</code> でグラフ化</li>
+</ul>
+</li>
+<li>
+<p><strong>動画保存</strong></p>
+<ul>
+<li>一定間隔で学習済みポリシーでPursuitを実行し、GIFやMP4として保存</li>
+<li>ランダムエージェントとの比較も行うとわかりやすいです</li>
+</ul>
+</li>
+<li>
+<p><strong>観測の可視化（任意）</strong></p>
+<ul>
+<li>特定のエージェントがどのような観測を見ているかを画像で確認</li>
+</ul>
+</li>
+</ol>
+<h3 id="まとめ">まとめ</h3>
+<p>ということをまとめると以下のように進めることとします。</p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計</li>
+<li><strong>バッファ</strong>で経験を保存・計算</li>
+<li><strong>学習ループ</strong>でPPO更新を繰り返す</li>
+<li><strong>評価・可視化</strong>で性能を確認</li>
+</ol>
+<p>まずは1. 環境ラッパの作成を行います。</p>
+<h2 id="環境ラッパの実装">環境ラッパの実装</h2>
+<h3 id="環境ラッパの役割">環境ラッパの役割</h3>
+<p>環境ラッパの役割は、<strong>Pursuit環境をMAPPOが扱いやすい形に変換すること</strong>です。具体的には：</p>
+<ul>
+<li>
+<p><strong>観測の整形</strong><br>
+Pursuitの観測（ローカルグリッド）を、MAPPOのネットワークに入力しやすい形（フラットベクトルやCNN入力など）に変換する。</p>
+</li>
+<li>
+<p><strong>グローバル状態の構成</strong><br>
+Critic（価値関数）に入力するための「全エージェントの情報をまとめた状態」を作る。</p>
+</li>
+<li>
+<p><strong>報酬の扱い</strong><br>
+協調型タスクとして、全エージェントで報酬を共有する設定（<code>shared_reward=True</code>）を適用する。</p>
+</li>
+<li>
+<p><strong>APIの統一</strong><br>
+PettingZooのマルチエージェントAPIを、MAPPOの学習ループから呼び出しやすい単一のインターフェースにまとめる。</p>
+</li>
+</ul>
+<p>つまり、<strong>「Pursuitの生データを、MAPPOがそのまま使える形に整える」</strong> のが環境ラッパの役割です。</p>
+<h3 id="実装のキーポイント">実装のキーポイント</h3>
+<p>Pursuit環境をMAPPOで学習するための環境ラッパ実装のキーポイントを、<strong>設計方針・実装の要点・よくあるエラー対処</strong>に分けて整理します。</p>
+<p><strong>1. 設計方針（ラッパの役割）</strong></p>
+<p><strong>(1) ラッパの役割を明確に絞る</strong></p>
+<ul>
+<li><strong>観測整形</strong>：Pursuitの <code>(7,7,3)</code> 観測をフラット化（<code>147次元</code>）し、MAPPOのネットワークに入力しやすい形にする。</li>
+<li><strong>グローバル状態の構成</strong>：全エージェントの観測を結合して <code>1176次元</code> のグローバル状態を作る（MAPPOのCritic用）。</li>
+<li><strong>APIの統一</strong>：MAPPO側が扱いやすいインターフェース（<code>get_obs()</code>, <code>get_global_state()</code>, <code>step(agent, action)</code>）を提供する。</li>
+</ul>
+<p><strong>(2) <code>env.agent_iter()</code> のループはMAPPO側で回す</strong></p>
+<ul>
+<li>PettingZooのAEC環境は、<strong><code>env.agent_iter()</code> でエージェントを順番に返す</strong>設計です。</li>
+<li>ラッパ内でイテレータを管理しようとすると、状態管理が複雑になり、<code>KeyError</code> や <code>TypeError</code> の原因になります。</li>
+<li>安全な設計：
+<ul>
+<li>ラッパは「<strong>観測整形とグローバル状態の構成</strong>」に専念</li>
+<li><code>env.agent_iter()</code> のループは <strong>MAPPOの学習ループ側で回す</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 実装のキーポイント</strong></p>
+<p><strong>(1) 観測整形：<code>get_obs(agent)</code></strong></p>
+<ul>
+<li><code>env.last(agent)</code> から <code>obs</code> を取得し、<code>reshape(-1)</code> でフラット化。</li>
+<li><code>obs</code> が <code>None</code> の場合は <code>None</code> を返す（deadエージェント対応）。</li>
+<li>例：<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_obs</span>(<span class="hljs-params">self, agent</span>):
+    <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+    obs, _, _, _, _ = self.env.last(agent)
+    <span class="hljs-keyword">if</span> obs <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+    obs_flat = obs.reshape(-<span class="hljs-number">1</span>).astype(np.float32)
+    <span class="hljs-keyword">return</span> obs_flat
+</code></pre>
+</li>
+</ul>
+<p><strong>(2) グローバル状態：<code>get_global_state()</code></strong></p>
+<ul>
+<li><code>self.possible_agents</code> から全エージェントをループし、<code>agent in self.env.agents</code> で存在確認。</li>
+<li>存在するエージェントの観測を <code>np.concatenate()</code> で結合。</li>
+<li>例：<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_global_state</span>(<span class="hljs-params">self</span>):
+    obs_list = []
+    <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents:
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">in</span> self.env.agents:
+            obs = self.get_obs(agent)
+            <span class="hljs-keyword">if</span> obs <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                obs_list.append(obs)
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> obs_list:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+    global_state = np.concatenate(obs_list).astype(np.float32)
+    <span class="hljs-keyword">return</span> global_state
+</code></pre>
+</li>
+</ul>
+<p><strong>(3) <code>step(agent, action)</code>：deadエージェントと存在確認</strong></p>
+<ul>
+<li><strong>deadエージェントには <code>action=None</code> しか許されない</strong>（PettingZooの仕様）。</li>
+<li><code>env.last(agent)</code> を呼ぶ前に <code>agent in self.env.agents</code> で存在確認。</li>
+<li><code>env.step()</code> の後も再度存在確認（<code>step</code> で削除される可能性あり）。</li>
+<li>例：<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, agent, action</span>):
+    <span class="hljs-comment"># 存在確認</span>
+    <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}
+    
+    <span class="hljs-comment"># dead チェック</span>
+    _, _, terminated, truncated, _ = self.env.last(agent)
+    <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">or</span> truncated:
+        step_action = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">else</span>:
+        step_action = action
+    
+    self.env.step(step_action)
+    
+    <span class="hljs-comment"># 再度存在確認</span>
+    <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}
+    
+    _, reward, terminated, truncated, info = self.env.last(agent)
+    <span class="hljs-keyword">return</span> reward, terminated, truncated, info
+</code></pre>
+</li>
+</ul>
+<p><strong>(4) <code>reset()</code> はシンプルに</strong></p>
+<ul>
+<li><code>env.reset()</code> だけ呼び、<code>agent_iter</code> のイテレータはMAPPO側で作る。</li>
+<li>例：<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+    self.env.reset()
+</code></pre>
+</li>
+</ul>
+<p><strong>3. よくあるエラーと対処</strong></p>
+<p><strong>(1) <code>TypeError: 'NoneType' object is not subscriptable</code></strong></p>
+<ul>
+<li><code>env.reset()</code> の戻り値を <code>next_agent = env.reset()</code> のように扱おうとした場合に発生。</li>
+<li>修正：<code>env.reset()</code> は戻り値を持たないので、<code>agent_iter</code> はMAPPO側で作る。</li>
+</ul>
+<p><strong>(2) <code>AssertionError: action is not in action space</code></strong></p>
+<ul>
+<li><code>env.step(action)</code> を呼ぶタイミングがずれ、<code>env.agent_iter()</code> の現在エージェントと一致していない。</li>
+<li>修正：<code>env.agent_iter()</code> のループ内で、<code>env.step(action)</code> を呼ぶ。</li>
+</ul>
+<p><strong>(3) <code>KeyError: 'pursuer_0'</code></strong></p>
+<ul>
+<li>deadエージェントが <code>env.agents</code> から削除された後、<code>env.last(agent)</code> を呼んだ。</li>
+<li>修正：<code>env.last(agent)</code> を呼ぶ前に <code>agent in env.agents</code> で存在確認。</li>
+</ul>
+<p><strong>(4) <code>TypeError: 'AECOrderEnforcingIterable' object is not an iterator</code></strong></p>
+<ul>
+<li><code>env.agent_iter()</code> を <code>next()</code> で回そうとしたが、イテレータ化していない。</li>
+<li>修正：<code>agent_iter = iter(env.agent_iter())</code> としてから <code>next(agent_iter)</code> を呼ぶ。</li>
+</ul>
+<p><strong>4. MAPPO側での使い方（安全なループ）</strong></p>
+<pre><code class="language-python">env = PursuitWrapper(render_mode=<span class="hljs-string">&quot;rgb_array&quot;</span>, max_cycles=<span class="hljs-number">500</span>)
+
+<span class="hljs-comment"># リセット</span>
+env.reset()
+
+<span class="hljs-comment"># MAPPO側で agent_iter を回す</span>
+<span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.env.agent_iter():
+    <span class="hljs-comment"># 観測を取得（存在確認あり）</span>
+    obs = env.get_obs(agent)
+    global_state = env.get_global_state()
+    
+    <span class="hljs-comment"># dead かどうかを確認（存在確認あり）</span>
+    <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> env.env.agents:
+        action = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">else</span>:
+        _, _, terminated, truncated, _ = env.env.last(agent)
+        is_dead = terminated <span class="hljs-keyword">or</span> truncated
+        <span class="hljs-keyword">if</span> is_dead:
+            action = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># ここでMAPPOのポリシーに基づき行動を選択</span>
+            action = env.action_space.sample()  <span class="hljs-comment"># 例: ランダム</span>
+    
+    <span class="hljs-comment"># 1ステップ進める（ラッパ内で存在確認あり）</span>
+    reward, terminated, truncated, info = env.step(agent, action)
+    
+    <span class="hljs-comment"># バッファに保存など...</span>
+    <span class="hljs-comment"># (obs, action, reward, terminated, truncated, ...)</span>
+
+env.close()
+</code></pre>
+<h3 id="実装の確認">実装の確認</h3>
+<p>実際に作ったラッパーは以下のレポジトリに保存しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit</a></p>
+<p>そして実装コードは実際にループで稼働するか確認してみます。</p>
+<pre><code class="language-python">env = PursuitWrapper(render_mode=<span class="hljs-string">&quot;rgb_array&quot;</span>, max_cycles=<span class="hljs-number">500</span>)
+
+<span class="hljs-comment"># リセット</span>
+env.reset()
+
+<span class="hljs-comment"># MAPPO側で agent_iter を回す</span>
+<span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.env.agent_iter():
+    <span class="hljs-comment"># 観測を取得（存在確認あり）</span>
+    obs = env.get_obs(agent)
+    global_state = env.get_global_state()
+    
+    <span class="hljs-comment"># dead かどうかを確認（存在確認あり）</span>
+    <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> env.env.agents:
+        action = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">else</span>:
+        _, _, terminated, truncated, _ = env.env.last(agent)
+        is_dead = terminated <span class="hljs-keyword">or</span> truncated
+        <span class="hljs-keyword">if</span> is_dead:
+            action = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># ここでMAPPOのポリシーに基づき行動を選択</span>
+            action = env.action_space.sample()  <span class="hljs-comment"># 例: ランダム</span>
+    
+    <span class="hljs-comment"># 1ステップ進める（ラッパ内で存在確認あり）</span>
+    reward, terminated, truncated, info = env.step(agent, action)
+    
+    <span class="hljs-comment"># バッファに保存など...</span>
+    <span class="hljs-comment"># (obs, action, reward, terminated, truncated, ...)</span>
+
+env.close()
+</code></pre>
+<p>何もエラーが出なければ、実装は正常に出来たことになります。</p>
+<h2 id="総括">総括</h2>
+<p><strong>PursuitをMAPPOで実装する流れ</strong></p>
+<ol>
+<li>
+<p><strong>環境ラッパ</strong></p>
+<ul>
+<li>Pursuitの観測 <code>(7,7,3)</code> をフラット化してActorに入力。</li>
+<li>全エージェントの観測を結合してグローバル状態を作り、Criticに入力。</li>
+<li><code>env.agent_iter()</code> のループはMAPPO側で回し、ラッパは整形とAPI統一に専念。</li>
+</ul>
+</li>
+<li>
+<p><strong>Actor / Critic</strong></p>
+<ul>
+<li>Actor: 観測 → 行動確率分布。</li>
+<li>Critic: グローバル状態 → 状態価値 V(s)。</li>
+</ul>
+</li>
+<li>
+<p><strong>バッファ</strong></p>
+<ul>
+<li><code>obs</code>, <code>actions</code>, <code>rewards</code>, <code>dones</code>, <code>log_probs</code>, <code>values</code> を保存。</li>
+<li>GAEで <code>advantages</code> と <code>returns</code> を計算し、PPO更新用バッチを返す。</li>
+</ul>
+</li>
+<li>
+<p><strong>学習ループ</strong></p>
+<ul>
+<li>ロールアウト → Advantage/Return計算 → PPO更新（クリップ付き比率＋MSE）を繰り返す。</li>
+</ul>
+</li>
+<li>
+<p><strong>評価・可視化</strong></p>
+<ul>
+<li>報酬推移のプロット、学習済みポリシーでの動画保存、ランダムエージェントとの比較。</li>
+</ul>
+</li>
+</ol>
+<p><strong>環境ラッパの要点</strong></p>
+<ul>
+<li><code>get_obs(agent)</code>: <code>env.last(agent)</code> から観測を取得し <code>reshape(-1)</code>。</li>
+<li><code>get_global_state()</code>: 全エージェントの観測を <code>np.concatenate</code>。</li>
+<li><code>step(agent, action)</code>: <code>agent in env.agents</code> で存在確認し、deadなら <code>action=None</code>。</li>
+<li><code>reset()</code>: <code>env.reset()</code> だけ呼び、<code>agent_iter</code> はMAPPO側で管理。</li>
+<li>よくあるエラーは「存在確認不足」と「<code>agent_iter</code> の扱いミス」がほとんどなので、そこを丁寧に実装する。</li>
+</ul>
+<p><strong>まとめ</strong></p>
+<ul>
+<li>環境ラッパでPursuitをMAPPO向けに整形 → Actor/Critic・バッファ・学習ループを順に実装、というステップで進めると、初めから正しく・わかりやすくMAPPOを組めます。</li>
+</ul>
+<p>最期に強化学習の理論をしっかり学びたいという読者の方へおすすめの本です。</p>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+            
+        </body>
+        </html>
