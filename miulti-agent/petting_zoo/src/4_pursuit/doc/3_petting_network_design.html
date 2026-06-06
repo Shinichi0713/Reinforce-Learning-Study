@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Actor&sol;Critic&#x30cd;&#x30c3;&#x30c8;&#x30ef;&#x30fc;&#x30af;&#x306e;&#x5f79;&#x5272;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日のpettingの<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>について学習するプログラムの実装を進めていきます。</p>
+<p>実装は以下の順に沿って進めていきます。</p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計</li>
+<li><strong>バッファ</strong>で経験を保存・計算</li>
+<li><strong>学習ループ</strong>でPPO更新を繰り返す</li>
+<li><strong>評価・可視化</strong>で性能を確認</li>
+</ol>
+<p>前回は1. 環境ラッパーを実装しました。
+今回は2. Actor/Criticネットワークの実装を進めていきます。</p>
+<p>今回のテーマ：</p>
+<blockquote>
+<p>Pursuitの環境で学習するネットワークを設計・実装する</p>
+</blockquote>
+<h2 id="actorcriticネットワークの役割">Actor/Criticネットワークの役割</h2>
+<p>PursuitをMAPPOで学習するときのActor/Criticネットワークの役割は、以下のように整理できます。</p>
+<h3 id="actorポリシーネットワークの役割">Actor（ポリシーネットワーク）の役割</h3>
+<ul>
+<li><strong>入力</strong>: 各エージェントの観測（Pursuitのローカルグリッドをフラット化したベクトル）＋必要に応じてエージェントID。</li>
+<li><strong>出力</strong>: そのエージェントの行動確率分布（例: 上下左右など行動空間上の確率）。</li>
+<li><strong>役割</strong>:
+<ul>
+<li>「<strong>どのエージェントが、今の観測に対してどの行動を取るのが良いか</strong>」を決定する。</li>
+<li>Pursuitでは「追跡者（pursuer）がどの方向に動けば獲物を捕まえやすいか」を学習する。</li>
+<li>MAPPOでは<strong>全エージェントで1つのActorを共有</strong>し、観測とエージェントIDで「誰が誰か」を区別する。</li>
+</ul>
+</li>
+</ul>
+<h3 id="critic価値関数ネットワークの役割">Critic（価値関数ネットワーク）の役割</h3>
+<ul>
+<li><strong>入力</strong>: グローバル状態（全エージェントの観測を結合したベクトル）。</li>
+<li><strong>出力</strong>: スカラーの状態価値 V(s)。</li>
+<li><strong>役割</strong>:
+<ul>
+<li>「<strong>今の全エージェントの状態（グローバル状態）が、将来的にどれだけ良い報酬をもたらしそうか</strong>」を評価する。</li>
+<li>Pursuitでは「全追跡者の配置や獲物の位置を総合的に見て、このまま行けばどれだけ捕獲できそうか」を予測する。</li>
+<li>PPOの更新で、Actorの行動選択が「期待報酬に対してどれだけ良かったか（advantage）」を計算するための基準として使われる。</li>
+</ul>
+</li>
+</ul>
+<h2 id="ネットワーク設計">ネットワーク設計</h2>
+<p>Pursuit（PettingZoo）の仕様とタスクの性質を踏まえると、<strong>観測が小さなグリッド画像（7×7×3）であることから、CNNをベースにした構造が適切</strong>です。</p>
+<h3 id="pursuit環境の仕様pettingzoo公式より">Pursuit環境の仕様（PettingZoo公式より）</h3>
+<ul>
+<li><strong>観測空間</strong>: <code>(7, 7, 3)</code>（3チャンネルのローカルグリッド）
+<ul>
+<li>チャンネル1: 壁</li>
+<li>チャンネル2: 味方（追跡者）の数</li>
+<li>チャンネル3: 敵（逃走者）の数</li>
+</ul>
+</li>
+<li><strong>行動空間</strong>: <code>Discrete(5)</code>（上・下・左・右・停止）</li>
+<li><strong>報酬設計</strong>:
+<ul>
+<li>逃走者を完全に囲んで捕獲: +5</li>
+<li>逃走者に触れる: +0.01</li>
+<li>ステップごとのペナルティ: -0.1</li>
+<li><code>shared_reward=True</code> で全エージェントで報酬共有</li>
+</ul>
+</li>
+<li><strong>タスクの性質</strong>:
+<ul>
+<li>グリッド上の協調型追跡タスク</li>
+<li>観測は<strong>局所的な空間情報</strong>（周囲7×7マス）</li>
+<li>逃走者の位置・味方の配置・壁の位置を<strong>空間的に把握</strong>する必要がある</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://pettingzoo.farama.org/environments/sisl/pursuit/">PettingZoo - Pursuit</a></p>
+<h3 id="今回の環境に適したネットワーク構造の検討">今回の環境に適したネットワーク構造の検討</h3>
+<p><strong>1. 観測の性質から見た設計方針</strong></p>
+<ul>
+<li>観測は <code>(7,7,3)</code> の<strong>小さなグリッド画像</strong>であり、
+<ul>
+<li>どこに壁があるか</li>
+<li>どこに味方がいるか</li>
+<li>どこに敵がいるか<br>
+を<strong>空間的に認識</strong>する必要があります。</li>
+</ul>
+</li>
+<li>このような局所的な空間パターンは、<strong>CNN（畳み込み層）で扱うのが自然</strong>です。</li>
+<li>MLPでフラット化して扱うことも可能ですが、
+<ul>
+<li>7×7×3 = 147次元と小さいとはいえ、</li>
+<li>空間的な位置関係をMLPが明示的に学習するのはやや不利です。</li>
+</ul>
+</li>
+</ul>
+<p><strong>結論</strong>:<br>
+<strong>ActorもCriticも、CNNベースのエンコーダ＋MLPヘッド</strong>を採用するのが適切です。</p>
+<p><strong>2. Actor（ポリシー）ネットワークの構造案</strong></p>
+<p><strong>入力</strong>: <code>(7,7,3)</code> の観測（＋必要に応じてエージェントIDのone-hot）<br>
+<strong>出力</strong>: <code>Discrete(5)</code> の行動確率分布</p>
+<p><strong>推奨構造（PyTorch例）</strong>:</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Actor</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, obs_shape=(<span class="hljs-params"><span class="hljs-number">7</span>,<span class="hljs-number">7</span>,<span class="hljs-number">3</span></span>), act_dim=<span class="hljs-number">5</span>, hidden_size=<span class="hljs-number">64</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-comment"># CNNエンコーダ（小さな画像向け）</span>
+        self.cnn = nn.Sequential(
+            nn.Conv2d(obs_shape[-<span class="hljs-number">1</span>], <span class="hljs-number">16</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">1</span>, padding=<span class="hljs-number">1</span>),
+            nn.ReLU(),
+            nn.Conv2d(<span class="hljs-number">16</span>, <span class="hljs-number">32</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">1</span>, padding=<span class="hljs-number">1</span>),
+            nn.ReLU(),
+            nn.Flatten()
+        )
+        <span class="hljs-comment"># CNN出力の次元を計算（7x7x32 = 1568）</span>
+        cnn_out_dim = <span class="hljs-number">7</span> * <span class="hljs-number">7</span> * <span class="hljs-number">32</span>
+        
+        <span class="hljs-comment"># MLPヘッド</span>
+        self.mlp = nn.Sequential(
+            nn.Linear(cnn_out_dim, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, act_dim)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, obs</span>):
+        <span class="hljs-comment"># obs: (batch, 7, 7, 3) → (batch, 3, 7, 7) に並べ替え</span>
+        obs = obs.permute(<span class="hljs-number">0</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        features = self.cnn(obs)
+        logits = self.mlp(features)
+        <span class="hljs-keyword">return</span> Categorical(logits=logits)
+</code></pre>
+<p><strong>ポイント</strong>:</p>
+<ul>
+<li>観測を<strong>CNNで空間特徴に変換</strong>し、その特徴をMLPで行動確率にマッピング。</li>
+<li>7×7は小さいので、大きなCNNは不要。2〜3層の小さなCNNで十分。</li>
+<li>必要に応じて、CNN出力に<strong>エージェントIDのone-hot</strong>を結合して、1つのActorで全エージェントを区別できます。</li>
+</ul>
+<p><strong>3. Critic（価値関数）ネットワークの構造案</strong></p>
+<p><strong>入力</strong>: グローバル状態（全エージェントの観測を結合したもの、またはCNNで抽出した特徴を結合）<br>
+<strong>出力</strong>: スカラーの状態価値 V(s)</p>
+<p><strong>推奨構造</strong>:</p>
+<ul>
+<li><strong>案A（推奨）</strong>: Actorと同じCNNエンコーダを共有し、CriticはMLPヘッドのみ別にする</li>
+<li><strong>案B</strong>: Actorとは独立したCNN＋MLPを持つ</li>
+</ul>
+<p><strong>案Aの例（CNNエンコーダ共有）</strong>:</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Critic</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, cnn_encoder, state_dim, hidden_size=<span class="hljs-number">64</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.cnn = cnn_encoder  <span class="hljs-comment"># Actorと同じCNNエンコーダ</span>
+        self.mlp = nn.Sequential(
+            nn.Linear(state_dim, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, <span class="hljs-number">1</span>)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, global_state</span>):
+        <span class="hljs-comment"># global_state: (batch, num_agents * cnn_out_dim)</span>
+        value = self.mlp(global_state)
+        <span class="hljs-keyword">return</span> value
+</code></pre>
+<p><strong>使い方のイメージ</strong>:</p>
+<ol>
+<li>各エージェントの観測をActorのCNNでエンコード → <code>agent_feature</code>（例: 1568次元）</li>
+<li>全エージェントの <code>agent_feature</code> を結合 → <code>global_state</code>（例: 4エージェントなら 4×1568 = 6272次元）</li>
+<li>Criticは <code>global_state</code> を入力として V(s) を出力</li>
+</ol>
+<p><strong>メリット</strong>:</p>
+<ul>
+<li>ActorとCriticで<strong>同じCNNエンコーダを共有</strong>することで、観測の空間表現を一貫して学習できる。</li>
+<li>CNN部分のパラメータは共有、Actor/CriticのMLPヘッドのみ別に最適化する設計がシンプル。</li>
+</ul>
+<p><strong>4. MLPのみの構造との比較</strong></p>
+<p><strong>MLPのみの場合</strong>:</p>
+<ul>
+<li>観測を <code>reshape(-1)</code> で147次元ベクトルにし、MLPで処理。</li>
+<li>実装は簡単だが、<strong>空間的な位置関係を明示的に扱えない</strong>。</li>
+<li>Pursuitでは「敵がどこにいるか」「味方がどこにいるか」が重要なので、CNNの方が有利。</li>
+</ul>
+<p><strong>CNN＋MLPの場合</strong>:</p>
+<ul>
+<li>局所的な壁・味方・敵の配置を<strong>畳み込みで自然に捉えられる</strong>。</li>
+<li>7×7と小さいので、計算コストも大きく増えない。</li>
+<li>MAPPOの文献でも、<strong>グリッドベースのマルチエージェント環境ではCNNベースのエンコーダが一般的</strong>です。</li>
+</ul>
+<p><strong>5. 今回の環境に「適切」な構造のまとめ</strong></p>
+<ol>
+<li>
+<p><strong>Actor</strong></p>
+<ul>
+<li>入力: <code>(7,7,3)</code> の観測（＋エージェントID）</li>
+<li>構造: <strong>小さなCNNエンコーダ（2〜3層）＋MLPヘッド</strong></li>
+<li>出力: <code>Discrete(5)</code> の行動確率分布</li>
+</ul>
+</li>
+<li>
+<p><strong>Critic</strong></p>
+<ul>
+<li>入力: 全エージェントのCNN特徴を結合したグローバル状態</li>
+<li>構造: <strong>Actorと同じCNNエンコーダを共有＋別のMLPヘッド</strong></li>
+<li>出力: スカラーの状態価値 V(s)</li>
+</ul>
+</li>
+<li>
+<p><strong>設計のポイント</strong></p>
+<ul>
+<li>CNNエンコーダはActor/Criticで共有し、<strong>観測の空間表現を一貫して学習</strong>させる。</li>
+<li>CNN出力の特徴ベクトルを結合してグローバル状態とし、Criticに入力する。</li>
+<li>7×7と小さいので、大きなネットワークは不要。隠れ層は64〜128程度で十分。</li>
+</ul>
+</li>
+</ol>
+<p>このように、<strong>Pursuitの観測が小さなグリッド画像であることを活かし、CNNベースのエンコーダ＋MLPヘッドでActor/Criticを設計する</strong>のが、今回の環境に最も適したネットワーク構造と言えます。</p>
+<h2 id="実装">実装</h2>
+<h3 id="実装コード">実装コード</h3>
+<p>以下レポジトリに保存しています。
+ご参考下さい。</p>
+<h3 id="実装確認">実装確認</h3>
+<p>先日のラッパーに対して、今回のネットワークを適用して動作が正常に行われるかを確認します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">test_network_with_env</span>():
+    <span class="hljs-string">&quot;&quot;&quot;
+    修正版：PursuitWrapper環境でActor/Criticネットワークが正しく動作するかを確認するテスト。
+    &quot;&quot;&quot;</span>
+    env = PursuitWrapper(render_mode=<span class="hljs-literal">None</span>, max_cycles=<span class="hljs-number">10</span>)
+    obs_shape = (<span class="hljs-number">7</span>, <span class="hljs-number">7</span>, <span class="hljs-number">3</span>)
+    act_dim = env.action_dim
+    num_agents = env.num_agents
+    hidden_size = <span class="hljs-number">64</span>
+
+    cnn_encoder = CNNEncoder(obs_shape)
+    actor = Actor(cnn_encoder, act_dim, hidden_size)
+    critic = Critic(cnn_encoder, num_agents, hidden_size)
+
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;観測次元: <span class="hljs-subst">{env.obs_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;グローバル状態次元（観測ベース）: <span class="hljs-subst">{env.state_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;CNN出力次元: <span class="hljs-subst">{cnn_encoder.output_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Critic入力次元（CNNベース）: <span class="hljs-subst">{num_agents * cnn_encoder.output_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;行動空間: <span class="hljs-subst">{act_dim}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;エージェント数: <span class="hljs-subst">{num_agents}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;--- テスト開始 ---&quot;</span>)
+
+    env.reset()
+    step_count = <span class="hljs-number">0</span>
+    max_steps = <span class="hljs-number">10</span>  <span class="hljs-comment"># デバッグ用に短く</span>
+
+    <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.env.agent_iter():
+        <span class="hljs-keyword">if</span> step_count &gt;= max_steps:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;最大ステップ数(<span class="hljs-subst">{max_steps}</span>)に達したため終了&quot;</span>)
+            <span class="hljs-keyword">break</span>
+        step_count += <span class="hljs-number">1</span>
+
+        obs_np = env.get_obs(agent)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[Step <span class="hljs-subst">{step_count}</span>] Agent: <span class="hljs-subst">{agent}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  obs_np shape: <span class="hljs-subst">{obs_np.shape <span class="hljs-keyword">if</span> obs_np <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> obs_np <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            action = <span class="hljs-literal">None</span>
+            log_prob = <span class="hljs-literal">None</span>
+            value = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># NumPy → PyTorchテンソル（バッチ次元追加）</span>
+            obs_tensor = torch.from_numpy(obs_np).unsqueeze(<span class="hljs-number">0</span>).<span class="hljs-built_in">float</span>()  <span class="hljs-comment"># (1,147)</span>
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  obs_tensor shape: <span class="hljs-subst">{obs_tensor.shape}</span>&quot;</span>)
+
+            <span class="hljs-comment"># Actor: 行動とログ確率を計算</span>
+            dist = actor(obs_tensor)
+            action_tensor = dist.sample()
+            log_prob_tensor = dist.log_prob(action_tensor)
+            action = action_tensor.item()
+            log_prob = log_prob_tensor.item()
+
+            <span class="hljs-comment"># Critic用のグローバル状態を構築（CNN特徴を結合）</span>
+            agent_features = []
+            <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> env.possible_agents:
+                <span class="hljs-keyword">if</span> a <span class="hljs-keyword">in</span> env.env.agents:
+                    a_obs_np = env.get_obs(a)
+                    <span class="hljs-keyword">if</span> a_obs_np <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                        a_obs_tensor = torch.from_numpy(a_obs_np).unsqueeze(<span class="hljs-number">0</span>).<span class="hljs-built_in">float</span>()
+                        a_feat = cnn_encoder(a_obs_tensor)  <span class="hljs-comment"># CNNでエンコード</span>
+                        agent_features.append(a_feat)
+            <span class="hljs-keyword">if</span> agent_features:
+                global_state_tensor = torch.cat(agent_features, dim=-<span class="hljs-number">1</span>)  <span class="hljs-comment"># (1, num_agents * cnn_output_dim)</span>
+            <span class="hljs-keyword">else</span>:
+                global_state_tensor = <span class="hljs-literal">None</span>
+
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  global_state_tensor shape: <span class="hljs-subst">{global_state_tensor.shape <span class="hljs-keyword">if</span> global_state_tensor <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>}</span>&quot;</span>)
+
+            <span class="hljs-keyword">if</span> global_state_tensor <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                <span class="hljs-comment"># Critic: 状態価値を計算</span>
+                value_tensor = critic(global_state_tensor)
+                value = value_tensor.item()
+            <span class="hljs-keyword">else</span>:
+                value = <span class="hljs-literal">None</span>
+
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  action: <span class="hljs-subst">{action}</span>, log_prob: <span class="hljs-subst">{log_prob:<span class="hljs-number">.4</span>f}</span>, value: <span class="hljs-subst">{value:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+        reward, terminated, truncated, info = env.step(agent, action)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  reward: <span class="hljs-subst">{reward:<span class="hljs-number">.4</span>f}</span>, terminated: <span class="hljs-subst">{terminated}</span>, truncated: <span class="hljs-subst">{truncated}</span>&quot;</span>)
+
+        <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">or</span> truncated:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;エピソード終了（terminated: <span class="hljs-subst">{terminated}</span>, truncated: <span class="hljs-subst">{truncated}</span>）&quot;</span>)
+            <span class="hljs-keyword">break</span>
+
+    env.close()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;--- テスト終了 ---&quot;</span>)
+</code></pre>
+<p>上記を実行した結果、以下のように表示されれば正常に実装されてことになります。</p>
+<pre><code>観測次元: 147
+グローバル状態次元（観測ベース）: 1176
+CNN出力次元: 1568
+Critic入力次元（CNNベース）: 12544
+行動空間: 5
+エージェント数: 8
+--- テスト開始 ---
+[Step 1] Agent: pursuer_0
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 1, log_prob: -1.5316, value: 0.0293
+  reward: 0.0009, terminated: False, truncated: False
+[Step 2] Agent: pursuer_1
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 3, log_prob: -1.7593, value: 0.0419
+  reward: 0.0019, terminated: False, truncated: False
+[Step 3] Agent: pursuer_2
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 2, log_prob: -1.6115, value: 0.0349
+  reward: 0.0030, terminated: False, truncated: False
+[Step 4] Agent: pursuer_3
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 0, log_prob: -1.5269, value: 0.0338
+  reward: 0.0039, terminated: False, truncated: False
+[Step 5] Agent: pursuer_4
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 2, log_prob: -1.6068, value: 0.0395
+  reward: 0.0048, terminated: False, truncated: False
+[Step 6] Agent: pursuer_5
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 0, log_prob: -1.5264, value: 0.0180
+  reward: 0.0056, terminated: False, truncated: False
+[Step 7] Agent: pursuer_6
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 0, log_prob: -1.5306, value: 0.0419
+  reward: 0.0061, terminated: False, truncated: False
+[Step 8] Agent: pursuer_7
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 2, log_prob: -1.6121, value: 0.0444
+  reward: -0.0933, terminated: False, truncated: False
+[Step 9] Agent: pursuer_0
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 3, log_prob: -1.7598, value: 0.0193
+  reward: -0.0939, terminated: False, truncated: False
+[Step 10] Agent: pursuer_1
+  obs_np shape: (147,)
+  obs_tensor shape: torch.Size([1, 147])
+  global_state_tensor shape: torch.Size([1, 12544])
+  action: 2, log_prob: -1.6068, value: 0.0428
+  reward: -0.0945, terminated: False, truncated: False
+最大ステップ数(10)に達したため終了
+--- テスト終了 ---
+</code></pre>
+<h2 id="総括">総括</h2>
+<p><strong>実装の流れ</strong></p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形（観測フラット化・グローバル状態構成）。</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計（CNNベース＋MLP）。</li>
+<li><strong>バッファ</strong>で経験を保存・計算（obs, actions, rewards, log_probs, values）。</li>
+<li><strong>学習ループ</strong>でPPO更新（Actor: クリップ付き比率、Critic: MSE）。</li>
+<li><strong>評価・可視化</strong>で性能確認（報酬推移・動画保存）。</li>
+</ol>
+<p><strong>Actor/Criticの役割</strong></p>
+<ul>
+<li><strong>Actor</strong>: 各エージェントの観測から行動確率分布を出力。「どの方向に動けば獲物を捕まえやすいか」を学習。</li>
+<li><strong>Critic</strong>: 全エージェントの情報をまとめたグローバル状態から状態価値 V(s) を出力。「チーム全体がどれだけ良さそうか」を評価し、PPO更新の基準（advantage）を提供。</li>
+</ul>
+<p><strong>ネットワーク設計の要点</strong></p>
+<ul>
+<li>Pursuitの観測は <code>(7,7,3)</code> の小さなグリッド画像（壁・味方・敵の局所情報）。</li>
+<li><strong>CNNベースのエンコーダ＋MLPヘッド</strong>が適切（空間パターンを自然に捉えられる）。</li>
+<li>Actor/Criticで<strong>CNNエンコーダを共有</strong>し、観測の空間表現を一貫して学習。</li>
+<li>Actor: 観測 → CNN → MLP → <code>Discrete(5)</code> の行動確率。</li>
+<li>Critic: 全エージェントのCNN特徴を結合 → MLP → V(s)。</li>
+<li>7×7と小さいので、2〜3層の小さなCNN＋64〜128次元のMLPで十分。</li>
+</ul>
+<p><strong>まとめ</strong>
+PursuitをMAPPOで学習するには、<strong>CNNで観測の空間情報を抽出し、Actorで行動方針、Criticでチーム全体の価値を評価するネットワーク構造</strong>が最適です。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\image\3_petting_network_design\1780725475200.png" alt="1780725475200"></p>
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+
+            
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+        </body>
+        </html>
