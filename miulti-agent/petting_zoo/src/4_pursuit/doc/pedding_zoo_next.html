@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日まで取り組んだwizard warやボクシング以外にPettingZooで使えるマルチエージェント環境がないかを調査しました。</p>
+<h2 id="概要">概要</h2>
+<p>PettingZooには、wizard warやボクシング以外にも<strong>協調（cooperative）を前提としたマルチエージェント環境が複数存在します</strong>。</p>
+<p>代表的なものとして、<strong>SISLカテゴリ</strong>に含まれる以下の環境が挙げられます。</p>
+<h3 id="sisl環境協調マルチエージェントベンチマーク">SISL環境（協調マルチエージェントベンチマーク）</h3>
+<p>PettingZoo公式ドキュメントでは、SISL環境について</p>
+<blockquote>
+<p>The SISL environments are a set of three cooperative multi-agent benchmark environments, created at SISL (Stanford Intelligent Systems Laboratory)…<br>
+（SISL環境は、SISLで作成された3つの協調マルチエージェントベンチマーク環境のセットです）</p>
+</blockquote>
+<p>と明記されており、<strong>協調型マルチエージェント環境として設計されています</strong><a href="https://pettingzoo.farama.org/environments/sisl">PettingZoo SISL Docs</a>。</p>
+<p>このカテゴリに含まれる協調型環境の例としては、少なくとも以下が確認できます。</p>
+<ul>
+<li>
+<p><strong>Multiwalker</strong><br>
+複数の歩行ロボット（walker）が協力して前進するタスクです。個々のエージェントが単独で進むのは難しく、<strong>全体として歩行を維持・前進させるために協調が必要</strong>な設計になっています<a href="https://pettingzoo.farama.org/environments/sisl/multiwalker">PettingZoo Multiwalker</a>。</p>
+</li>
+<li>
+<p><strong>Pursuit</strong><br>
+複数の追跡エージェントが協力して、逃げるターゲットを捕まえるタスクです。個々のエージェントが単独でターゲットを捕まえるのは難しく、<strong>包囲・連携によって初めて効率的に捕獲できる</strong>ような協調構造になっています<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit</a>。</p>
+</li>
+</ul>
+<p>これらはいずれも、<strong>「全エージェントの合計報酬を最大化する」という共通の目標</strong>を持ち、<strong>エージェント間の競争ではなく協力が前提</strong>になっている点で、wizard warやボクシング（対戦型）とは明確に異なります。</p>
+<h3 id="その他の協調型環境の可能性">その他の協調型環境の可能性</h3>
+<p>PettingZooには、SISL以外にもさまざまな環境カテゴリ（Atari、Third-Party Environments など）が含まれています<a href="https://pettingzoo.farama.org/index.html">PettingZoo Documentation</a>。<br>
+それらの一部には、<strong>元々のゲームが協調プレイを想定しているもの</strong>（例：協力型シューティング、協力型パズルなど）をマルチエージェント化した環境が含まれている可能性があります。</p>
+<p>ただし、公式ドキュメント上で「cooperative」と明示されている環境は、主に<strong>SISLカテゴリ</strong>が中心です。<br>
+もし「wizard warやボクシング以外で、明示的に協調型とされている環境を知りたい」という意図であれば、<strong>Multiwalker</strong>と<strong>Pursuit</strong>が最も代表的な例になります。</p>
+<h3 id="まとめ">まとめ</h3>
+<ul>
+<li>PettingZooには、wizard warやボクシング（対戦型）とは別に、<strong>協調型マルチエージェント環境が存在します</strong>。</li>
+<li>その代表例は <strong>SISLカテゴリの Multiwalker と Pursuit</strong> で、いずれも「複数エージェントが協力して共通の目標を達成する」設計になっています<a href="https://pettingzoo.farama.org/environments/sisl">PettingZoo SISL Docs</a>。</li>
+<li>その他のカテゴリにも協調的なタスクをマルチエージェント化した環境が含まれる可能性がありますが、公式に「cooperative」と明示されているのは主にSISL環境です。</li>
+</ul>
+<p>前回までの反省点で、取り組んだゲームはお互いでチームプレーするということがありがたがられないようなゲームでした。(wizard warもスタンドプレーのベストパフォーマンスを行えばハイスコアを狙える)
+仕様を調べると Persuit はチームプレーが必要とされそうで、MARLらしいというように思いました。</p>
+<h2 id="persuitの仕様">Persuitの仕様</h2>
+<p>Pursuit環境では、<strong>プレーヤは「追跡者（pursuer）」側のエージェント</strong>で、<strong>逃げる側（evader）はランダムに動く</strong>という設定になっています。</p>
+<h3 id="プレーヤエージェントの役割">プレーヤ（エージェント）の役割</h3>
+<ul>
+<li>
+<p><strong>Pursuer（追跡者）</strong></p>
+<ul>
+<li>プレーヤが制御するエージェントです。</li>
+<li>デフォルトでは <strong>8体の赤いエージェント</strong>として登場します。</li>
+<li>グリッド上を移動し、逃げるエージェントを<strong>包囲して捕まえる</strong>ことが役割です。</li>
+</ul>
+</li>
+<li>
+<p><strong>Evader（逃げる側）</strong></p>
+<ul>
+<li>プレーヤは直接操作しません。</li>
+<li>デフォルトでは <strong>30体の青いエージェント</strong>として登場します。</li>
+<li><strong>ランダムに動く</strong>設定になっています（プレーヤが制御するのはpursuerのみ）<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="ゲームの目的と報酬">ゲームの目的と報酬</h3>
+<p>ゲームの目的は、<strong>追跡者（pursuer）が協力して、できるだけ多くの逃げるエージェント（evader）を捕まえること</strong>です。</p>
+<ul>
+<li>
+<p><strong>捕獲（完全包囲）したとき</strong></p>
+<ul>
+<li>逃げるエージェントを<strong>周囲から完全に囲んだとき</strong>、その周りにいる追跡者それぞれに <strong>+5.0</strong> の報酬が与えられます。</li>
+<li>捕まえられたエージェントは環境から取り除かれます。</li>
+</ul>
+</li>
+<li>
+<p><strong>タッチ（接触）したとき</strong></p>
+<ul>
+<li>追跡者が逃げるエージェントに<strong>触れた（タグした）とき</strong>、その追跡者に <strong>+0.01</strong> の報酬が与えられます。</li>
+</ul>
+</li>
+<li>
+<p><strong>ステップごとの「緊急度」ペナルティ</strong></p>
+<ul>
+<li>各ステップで、追跡者に <strong>-0.1</strong> の「urgency reward」が適用されます。</li>
+<li>これは、<strong>ダラダラ時間をかけるよりも素早く捕まえる方が有利</strong>になるように設計されたペナルティです<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="ゲームの終了条件">ゲームの終了条件</h3>
+<ul>
+<li>
+<p><strong>すべての逃げるエージェントを捕まえたとき</strong><br>
+→ ゲームクリア（成功）として終了します。</p>
+</li>
+<li>
+<p><strong>500サイクル経過したとき</strong><br>
+→ タイムリミットに達し、ゲーム終了となります<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</p>
+</li>
+</ul>
+<h2 id="環境とのやり取り">環境とのやり取り</h2>
+<p>前回までの反省点を踏まえてゲーム始める前に環境について理解したいところです。
+Pursuit環境からは、各エージェントに対して以下の情報が得られます。</p>
+<h3 id="観測observation">観測（Observation）</h3>
+<ul>
+<li><strong>形状</strong>: デフォルトで <code>(7, 7, 3)</code> の3次元配列（<code>obs_range</code> を変更すると <code>(obs_range, obs_range, 3)</code>）</li>
+<li><strong>値の範囲</strong>: 各要素は <code>[0, 30]</code> の整数</li>
+<li><strong>チャンネルの意味</strong>:
+<ul>
+<li><strong>チャンネル1（[:, :, 0]）</strong>: 壁の有無
+<ul>
+<li><code>1</code> が立っている位置に壁がある</li>
+</ul>
+</li>
+<li><strong>チャンネル2（[:, :, 1]）</strong>: 味方（ally）の数
+<ul>
+<li>そのセルにいる追跡者（pursuer）の数</li>
+</ul>
+</li>
+<li><strong>チャンネル3（[:, :, 2]）</strong>: 敵（opponent / evader）の数
+<ul>
+<li>そのセルにいる逃げるエージェントの数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>観測は<strong>各エージェントを中心としたローカルなグリッド</strong>として与えられます<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</p>
+<h3 id="報酬reward">報酬（Reward）</h3>
+<p>追跡者（pursuer）は、以下のような報酬を受け取ります。</p>
+<ul>
+<li>
+<p><strong>捕獲報酬（catch_reward）</strong>:</p>
+<ul>
+<li>逃げるエージェント（evader）を<strong>完全に包囲して捕まえたとき</strong>、その周りにいる追跡者それぞれに <strong>+5.0</strong> の報酬が与えられます。</li>
+</ul>
+</li>
+<li>
+<p><strong>タッチ報酬（tag_reward）</strong>:</p>
+<ul>
+<li>追跡者が逃げるエージェントに<strong>触れた（タグした）とき</strong>、<strong>+0.01</strong> の報酬が与えられます。</li>
+</ul>
+</li>
+<li>
+<p><strong>緊急度ペナルティ（urgency_reward）</strong>:</p>
+<ul>
+<li>各ステップで <strong>-0.1</strong> の報酬が加算されます。</li>
+<li>これは「時間をかけるほど不利」になるように設計されたペナルティで、<strong>素早く捕まえることを促す</strong>役割があります。</li>
+</ul>
+</li>
+<li>
+<p><strong>共有報酬（shared_reward）</strong>:</p>
+<ul>
+<li><code>shared_reward=True</code> に設定すると、上記の報酬が<strong>全エージェントで均等に分配</strong>されます（協調型タスクとして扱いやすくするためのオプション）<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="終了条件done--termination--truncation">終了条件（Done / Termination / Truncation）</h3>
+<p>エピソードは以下のいずれかの条件で終了します。</p>
+<ul>
+<li>
+<p><strong>Termination（通常終了）</strong>:</p>
+<ul>
+<li>すべての逃げるエージェント（evader）が捕まえられたとき</li>
+</ul>
+</li>
+<li>
+<p><strong>Truncation（打ち切り）</strong>:</p>
+<ul>
+<li><code>max_cycles</code>（デフォルト 500）のステップ数に達したとき</li>
+</ul>
+</li>
+</ul>
+<p>PettingZooのAPIでは、<code>terminated</code> と <code>truncated</code> を分けて返す形になっていますが、Pursuit環境では上記2パターンで終了します<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</p>
+<h3 id="info">Info</h3>
+<ul>
+<li><code>reset()</code> や <code>step()</code> で <strong>info 辞書</strong>が返されますが、Pursuit固有の特別なキーについては公式ドキュメント上で詳細に列挙されていません。</li>
+<li>一般的には、PettingZoo標準のinfo構造（環境のメタ情報など）が含まれます。</li>
+</ul>
+<p>要約すると、Pursuit環境からは</p>
+<ul>
+<li><strong>ローカルなグリッド観測</strong>（壁・味方・敵の位置情報）</li>
+<li><strong>捕獲・タッチ・時間ペナルティを含む報酬</strong></li>
+<li><strong>全evader捕獲 or 最大ステップ到達による終了フラグ</strong></li>
+<li><strong>標準的なinfo辞書</strong></li>
+</ul>
+<p>が得られる、という設計になっています<a href="https://pettingzoo.farama.org/environments/sisl/pursuit">PettingZoo Pursuit Docs</a>。</p>
+<h2 id="環境の導入">環境の導入</h2>
+<p>必要なパッケージは以下通りです。
+Google Colabでインストールしてください。</p>
+<pre><code># エミュレータとGymnasiumのインストール
+!pip install gymnasium[atari]
+!pip install gymnasium[accept-rom-license]
+!pip install pyvirtualdisplay &gt; /dev/null 2&gt;&amp;1
+!pip install AutoROM[accept-rom-license]
+!AutoROM --accept-license
+# 描画用のシステムパッケージ
+!apt-get install -y xvfb python-opengl ffmpeg &gt; /dev/null 2&gt;&amp;1
+!pip install pettingzoo[atari,accept-rom-license]
+!pip install &quot;pettingzoo[sisl]&quot;
+!pip install supersuit
+</code></pre>
+<h3 id="動作">動作</h3>
+<p>エージェントをランダムに動作させるコードを作りました。
+以下を上記のパッケージをインストール後に動作させて下さい。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> imageio
+<span class="hljs-keyword">from</span> pettingzoo.sisl <span class="hljs-keyword">import</span> pursuit_v4
+
+<span class="hljs-comment"># 動画の保存先ファイル名</span>
+video_filename = <span class="hljs-string">&quot;pursuit_random_agents.mp4&quot;</span>
+
+<span class="hljs-comment"># 環境生成（render_mode=&quot;rgb_array&quot; で画像取得可能にする）</span>
+env = pursuit_v4.env(render_mode=<span class="hljs-string">&quot;rgb_array&quot;</span>)
+
+<span class="hljs-comment"># フレームを格納するリスト</span>
+frames = []
+
+<span class="hljs-comment"># 環境リセット</span>
+env.reset()
+
+<span class="hljs-comment"># ランダムエージェントで1エピソード実行し、各ステップの画面を保存</span>
+<span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> env.agent_iter():
+    <span class="hljs-comment"># 現在の状態を取得</span>
+    obs, reward, terminated, truncated, info = env.last()
+
+    <span class="hljs-comment"># 画面を画像として取得</span>
+    frame = env.render()
+    frames.append(frame)
+
+    <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">or</span> truncated:
+        action = <span class="hljs-literal">None</span>
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># ランダム行動</span>
+        action = env.action_space(agent).sample()
+
+    env.step(action)
+
+env.close()
+
+<span class="hljs-comment"># フレームを動画にエンコードして保存</span>
+<span class="hljs-keyword">with</span> imageio.get_writer(video_filename, fps=<span class="hljs-number">10</span>) <span class="hljs-keyword">as</span> video:
+    <span class="hljs-keyword">for</span> frame <span class="hljs-keyword">in</span> frames:
+        video.append_data(frame)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;動画を保存しました: <span class="hljs-subst">{video_filename}</span>&quot;</span>)
+</code></pre>
+<p>すると以下のようにエージェントの敵味方に分かれてゲームする様子が確認されます。</p>
+<h2 id="本日まとめ">本日まとめ</h2>
+<p>ということで前回までの反省点からチームプレーが必要となるゲームの選定を行いました。
+お互い密集した方が有利や、敵を分断させるなど勝率の高い動作をMARLを通じて学習できるように次回以降、学習環境を設計していきます。</p>
+
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+            
+        </body>
+        </html>
