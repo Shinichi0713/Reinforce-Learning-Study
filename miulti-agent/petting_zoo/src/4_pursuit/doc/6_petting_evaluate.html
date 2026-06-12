@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x30e2;&#x30cb;&#x30bf;&#x30ea;&#x30f3;&#x30b0;&#x6a5f;&#x80fd;&#x3068;&#x306f;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>マルチエージェントの強化学習(MARL)のチーム連携が必要となるゲーム<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>でAIエージェント学習の実装を進めています。</p>
+<p>実装は以下の順に沿って進めています。</p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計</li>
+<li><strong>バッファ</strong>で経験を保存・計算</li>
+<li><strong>学習ループ</strong>でPPO更新を繰り返す</li>
+<li><strong>評価・可視化</strong>で性能を確認</li>
+</ol>
+<p>前回4. 学習ループの実装まで進めました。
+今回は5. 評価・可視化の実装を進めます。</p>
+<p>今回のテーマ：</p>
+<blockquote>
+<p>Pursuitの環境で学習時の性能をモニタリングする可視化・評価機能を実装</p>
+</blockquote>
+<h2 id="モニタリング機能とは">モニタリング機能とは</h2>
+<p><strong>学習時の性能をモニタリングする可視化・評価機能</strong>とは、学習中のエージェントが「どれだけうまくタスクを解けているか」を<strong>定量的・定性的に確認する仕組み</strong>です。
+著者は指標を学習サイクルの中で出力でおかしい点がないかをモニタリングしています。
+強化学習に限らず、学習と名の付く手法を用いる場合は必須と言える機能だと思います。</p>
+<h3 id="具体的にはどんな機能か">具体的にはどんな機能か？</h3>
+<p>今回のPursuiであれば以下が必要な具体例と思います。
+学習の進捗を計測する指標は、大きく分けて<strong>報酬系・タスク成功系・学習安定性系</strong>の3つに整理できます。</p>
+<p><strong>1. 報酬系の指標（最も基本的）</strong></p>
+<p><strong>(1) エピソード報酬（Episode Reward）</strong></p>
+<ul>
+<li><strong>定義</strong>: 1エピソードで得られた報酬の合計。</li>
+<li><strong>例</strong>: Pursuitなら「1エピソードでどれだけ捕獲・接触・ペナルティが発生したか」の合計。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>学習ステップごとに<strong>移動平均</strong>（例: 直近100エピソードの平均）を計算し、<strong>上昇傾向</strong>にあるか確認。</li>
+<li>ランダムエージェントの平均報酬と比較し、学習済みポリシーが明らかに優れているか確認。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) ステップあたり報酬（Reward per Step）</strong></p>
+<ul>
+<li><strong>定義</strong>: 1ステップあたりの平均報酬（総報酬 ÷ ステップ数）。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>エージェントが「無駄な動きを減らし、効率的に行動できているか」を確認。</li>
+<li>Pursuitなら「-0.1のステップペナルティをどれだけ減らせているか」を見る指標にもなります。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. タスク成功系の指標（Pursuit向け）</strong></p>
+<p><strong>(1) 捕獲数・成功率</strong></p>
+<ul>
+<li><strong>定義</strong>:
+<ul>
+<li>1エピソードで「逃走者を完全に囲んで捕獲した回数」。</li>
+<li>成功率 = （捕獲が発生したエピソード数）÷（全エピソード数）。</li>
+</ul>
+</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>報酬が増えていなくても、<strong>捕獲数が増えていれば学習は進んでいる</strong>と判断できます。</li>
+<li>Pursuitでは「囲み捕獲」が最終目標なので、<strong>最も直感的な進捗指標</strong>です。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) エピソード長（Episode Length）</strong></p>
+<ul>
+<li><strong>定義</strong>: 1エピソードが終了するまでのステップ数。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>タスクが「早く終わらせるほど良い」場合（例: 迷路脱出）は、<strong>短くなるほど良い</strong>。</li>
+<li>Pursuitでは「早く捕獲できた方が良い」ので、<strong>エピソード長が短くなれば学習が進んでいる</strong>と判断できます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 接触回数（Touch Count）</strong></p>
+<ul>
+<li><strong>定義</strong>: 1エピソードで「逃走者に触れた回数」。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>捕獲に至らなくても「接触回数が増えている」なら、追跡の精度が上がっている可能性があります。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 学習安定性・内部状態の指標</strong></p>
+<p><strong>(1) 損失（Loss）の推移</strong></p>
+<ul>
+<li><strong>Actor Loss（ポリシー損失）</strong>:
+<ul>
+<li>PPOのクリップ付き目的関数の値。</li>
+<li>急激に増減する場合は、学習率が高すぎる・クリップ範囲が不適切な可能性。</li>
+</ul>
+</li>
+<li><strong>Critic Loss（価値関数損失）</strong>:
+<ul>
+<li>V(s) と実際のリターンのMSE。</li>
+<li>0に近づくほど、価値関数が正確に学習できている。</li>
+</ul>
+</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>Actor/Criticの損失が<strong>安定して減少</strong>しているか確認。</li>
+<li>損失が振動する場合は、ハイパーパラメータ調整のサイン。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) エントロピー（Entropy）</strong></p>
+<ul>
+<li><strong>定義</strong>: 行動確率分布のエントロピー（ランダムさ）。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>エントロピーが高すぎる → まだ探索中（学習初期）。</li>
+<li>エントロピーが低すぎる → 探索が足りず、局所解に陥っている可能性。</li>
+<li>適度に減少しながら安定するのが理想的。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) Advantage（アドバンテージ）の統計</strong></p>
+<ul>
+<li><strong>平均・分散</strong>:
+<ul>
+<li>Advantageが<strong>0付近で分散が小さくなる</strong>と、ポリシーが安定してきているサイン。</li>
+</ul>
+</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>Advantageが常に正 or 常に負だと、価値関数の学習が不十分な可能性。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 勾配のノルム（Gradient Norm）</strong></p>
+<ul>
+<li><strong>定義</strong>: ネットワークパラメータの勾配のL2ノルム。</li>
+<li><strong>使い方</strong>:
+<ul>
+<li>勾配ノルムが急激に増減する → 学習が不安定（学習率が高すぎる等）。</li>
+<li>適度に減少しながら安定するのが望ましい。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. Pursuit向けの実用的な組み合わせ</strong></p>
+<p>Pursuitのようなマルチエージェント追跡タスクでは、以下の組み合わせが分かりやすいです。</p>
+<ol>
+<li>
+<p><strong>主要指標</strong></p>
+<ul>
+<li>エピソード報酬の移動平均（直近100エピソード）</li>
+<li>1エピソードあたりの捕獲数（成功率）</li>
+<li>エピソード長（短くなっているか）</li>
+</ul>
+</li>
+<li>
+<p><strong>補助指標</strong></p>
+<ul>
+<li>Actor/Critic Loss の推移</li>
+<li>エントロピーの推移（探索が適切か）</li>
+<li>動画での挙動確認（協調して囲めているか）</li>
+</ul>
+</li>
+</ol>
+<h3 id="なぜモニタリングが必要なのか">なぜモニタリングが必要なのか？</h3>
+<ol>
+<li>
+<p><strong>学習が進んでいるかどうかの確認</strong></p>
+<ul>
+<li>報酬が増えていなければ、ハイパーパラメータやネットワーク構造に問題がある可能性があります。</li>
+<li>例: 報酬がずっと -0.1 付近なら、エージェントが何も学習できていない。</li>
+</ul>
+</li>
+<li>
+<p><strong>実装ミスの早期発見</strong></p>
+<ul>
+<li>観測の整形ミス、報酬の計算ミス、ネットワークの形状ミスなどは、モニタリングで気づきやすくなります。</li>
+<li>例: Criticの出力が常に0付近なら、価値関数が学習できていない可能性。</li>
+</ul>
+</li>
+<li>
+<p><strong>ハイパーパラメータの調整</strong></p>
+<ul>
+<li>学習率・クリップ範囲・GAEのλなど、PPOのパラメータを「報酬の推移」や「動画での挙動」を見ながら調整できます。</li>
+</ul>
+</li>
+<li>
+<p><strong>収束のタイミングの判断</strong></p>
+<ul>
+<li>報酬が頭打ちになったら学習を止める、あるいは探索を増やすなどの判断材料になります。</li>
+</ul>
+</li>
+<li>
+<p><strong>再現性と比較のため</strong></p>
+<ul>
+<li>同じ設定で複数回学習したときの性能のばらつきを確認し、アルゴリズムの安定性を評価できます。</li>
+</ul>
+</li>
+</ol>
+<h2 id="エントロピとは">エントロピとは</h2>
+<p>主要指標の中でエントロピについては少し分かりづらいので補足の説明をしていきます。</p>
+<p>強化学習における<strong>エントロピー（entropy）</strong> は、「行動確率分布のランダムさ（不確実性）」を表す指標です。</p>
+<h3 id="1-エントロピーの直感的な意味">1. エントロピーの直感的な意味</h3>
+<ul>
+<li>
+<p><strong>エントロピーが高い</strong><br>
+→ 行動確率がほぼ均等で、どの行動を選ぶかが<strong>ランダム（不確実）</strong> 。<br>
+→ 例: 上下左右停止の確率がすべて 0.2 ずつ。</p>
+</li>
+<li>
+<p><strong>エントロピーが低い</strong><br>
+→ ある行動の確率がほぼ 1.0 で、他の行動はほぼ 0。<br>
+→ 例: 「上」の確率が 0.99、他は 0.01 ずつ → <strong>ほぼ決定的（確定的）</strong> 。</p>
+</li>
+</ul>
+<h3 id="2-数式的な定義categorical分布の場合">2. 数式的な定義（Categorical分布の場合）</h3>
+<p>Actor（ポリシー）が出力する行動確率分布を <code>p(a)</code>（例: <code>[0.2, 0.2, 0.2, 0.2, 0.2]</code>）とすると、エントロピーは以下のように定義されます。</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>H</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>a</mi></munder><mi>p</mi><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">H(p) = - \sum_{a} p(a) \log p(a)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.3em;vertical-align:-1.25em;"></span><span class="mord">−</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.9em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.25em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span></span></p>
+<ul>
+<li><code>p(a)</code> が均等に近いほど、<code>H(p)</code> は<strong>大きくなる</strong>（エントロピーが高い）。</li>
+<li><code>p(a)</code> が1つの行動に集中するほど、<code>H(p)</code> は<strong>小さくなる</strong>（エントロピーが低い）。</li>
+</ul>
+<p>PyTorchでは、<code>Categorical</code> 分布に対して <code>dist.entropy()</code> で計算できます。</p>
+<h3 id="3-強化学習での役割">3. 強化学習での役割</h3>
+<p><strong>(1) 探索（Exploration）の指標</strong></p>
+<ul>
+<li><strong>学習初期</strong>
+<ul>
+<li>エントロピーが高い → ランダムに行動を試しており、<strong>探索が活発</strong>。</li>
+</ul>
+</li>
+<li><strong>学習が進むと</strong>
+<ul>
+<li>エントロピーが徐々に下がる → 良い行動に集中し、<strong>探索が減り、活用（exploitation）が増える</strong>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) エントロピー正則化（Entropy Regularization）</strong>
+PPOなどのアルゴリズムでは、<strong>エントロピーを目的関数に加える</strong>ことがあります。</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>L</mi><mo>=</mo><msub><mi>L</mi><mrow><mi>P</mi><mi>P</mi><mi>O</mi></mrow></msub><mo>+</mo><mi>β</mi><mi>H</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">L = L_{PPO} + \beta H(p)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">PPO</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mclose">)</span></span></span></span></span></p>
+<ul>
+<li><code>β</code> はエントロピー係数（例: 0.01）。</li>
+<li><strong>目的</strong>:
+<ul>
+<li>エントロピーが高くなるように少し「押し上げる」ことで、<strong>早すぎる収束（局所解へのハマり）を防ぎ、探索を維持</strong>する。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 学習の安定性の指標</strong></p>
+<ul>
+<li><strong>エントロピーが急激に下がる</strong><br>
+→ ポリシーが急に硬直し、探索がほぼゼロになる可能性。<br>
+→ 学習率が高すぎる・クリップ範囲が狭すぎるなどのサイン。</li>
+<li><strong>エントロピーが適度に減少しながら安定</strong><br>
+→ 学習が順調に進み、徐々に良い行動に集中している状態。</li>
+</ul>
+<h3 id="4-pursuitmappoでの具体的な見方">4. Pursuit＋MAPPOでの具体的な見方</h3>
+<p>Pursuit環境でMAPPOを学習する場合、エントロピーは以下のように解釈できます。</p>
+<ul>
+<li><strong>学習初期</strong>
+<ul>
+<li>エントロピーが高い → 追跡者がランダムに動き回っている。</li>
+</ul>
+</li>
+<li><strong>学習が進むと</strong>
+<ul>
+<li>エントロピーが徐々に下がる → 追跡者が「獲物を囲む動き」など、良い行動に集中。</li>
+</ul>
+</li>
+<li><strong>エントロピーが低すぎる（ほぼ0）</strong>
+<ul>
+<li>常に同じ動きしかせず、環境変化に対応できない可能性。</li>
+<li>エントロピー係数 <code>entropy_coef</code> を調整するサイン。</li>
+</ul>
+</li>
+</ul>
+<h2 id="性能指標の実装">性能指標の実装</h2>
+<p>今回はPursuitの環境でエージェントがうまく立ち回ったか、学習がうまく進んだかを確認する指標として</p>
+<ol>
+<li>1エピソードあたりの捕獲数</li>
+<li>Actor/Critic Loss</li>
+<li>エントロピ
+の3点を実装していきます。</li>
+</ol>
+<h3 id="1-1エピソードあたりの捕獲数成功率">1. 1エピソードあたりの捕獲数（成功率）</h3>
+<p><strong>実装箇所</strong></p>
+<ul>
+<li><strong>学習ループ内（1ステップごと）</strong><br>
+→ <code>env.step(agent, action)</code> の直後。</li>
+</ul>
+<p><strong>計算方法</strong></p>
+<ul>
+<li>Pursuitでは、<strong>逃走者を完全に囲んで捕獲したときに +5 の報酬</strong>が入るので、<br>
+<code>reward == 5.0</code> の回数を数えます。</li>
+</ul>
+<pre><code class="language-python"><span class="hljs-comment"># 1ステップ進める</span>
+reward, terminated, truncated, info = env.step(agent, action)
+episode_reward += reward
+
+<span class="hljs-comment"># 報酬が +5 なら捕獲発生</span>
+<span class="hljs-keyword">if</span> reward == <span class="hljs-number">5.0</span>:
+    episode_captures += <span class="hljs-number">1</span>
+</code></pre>
+<p><strong>モニタリング</strong></p>
+<ul>
+<li>エピソード終了後、<code>episode_captures</code> を <code>capture_buffer</code> に追加し、<strong>移動平均</strong>を出力。</li>
+</ul>
+<pre><code class="language-python">capture_buffer.append(episode_captures)
+avg_captures = np.mean(capture_buffer)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Avg Captures: <span class="hljs-subst">{avg_captures:<span class="hljs-number">.2</span>f}</span>&quot;</span>)
+</code></pre>
+<h3 id="2-actorcritic-loss-の推移">2. Actor/Critic Loss の推移</h3>
+<p><strong>実装箇所</strong></p>
+<ul>
+<li><strong>MAPPO.update メソッド内</strong><br>
+→ PPO更新の各エポックで損失を計算し、<strong>平均を返す</strong>。</li>
+</ul>
+<p><strong>計算方法</strong></p>
+<ul>
+<li><code>actor_loss</code>（PPOクリップ付き損失）と <code>critic_loss</code>（MSE）を各エポックで記録し、平均を返す。</li>
+</ul>
+<pre><code class="language-python"><span class="hljs-comment"># 損失・エントロピーの記録用リスト</span>
+actor_losses = []
+critic_losses = []
+entropies = []
+
+<span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(epochs):
+    <span class="hljs-comment"># Actor更新</span>
+    dist = self.actor(obs.view(-<span class="hljs-number">1</span>, self.obs_dim))
+    <span class="hljs-comment"># ...（PPO損失計算）</span>
+    actor_losses.append(actor_loss.item())
+
+    <span class="hljs-comment"># Critic更新</span>
+    values = self.critic(global_states).squeeze()
+    critic_loss = nn.MSELoss()(values, returns.mean(dim=<span class="hljs-number">1</span>))
+    critic_losses.append(critic_loss.item())
+
+<span class="hljs-comment"># エポック平均を返す</span>
+avg_actor_loss = np.mean(actor_losses)
+avg_critic_loss = np.mean(critic_losses)
+<span class="hljs-keyword">return</span> avg_actor_loss, avg_critic_loss, avg_entropy
+</code></pre>
+<h3 id="モニタリング">モニタリング</h3>
+<ul>
+<li>学習ループ側で <code>mappo.update(batch)</code> の返り値を受け取り、<strong>エピソードごとに出力</strong>。</li>
+</ul>
+<pre><code class="language-python">actor_loss, critic_loss, entropy = mappo.update(batch)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Actor Loss: <span class="hljs-subst">{actor_loss:<span class="hljs-number">.4</span>f}</span> | Critic Loss: <span class="hljs-subst">{critic_loss:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+</code></pre>
+<h3 id="3-エントロピーの推移探索の適切さ">3. エントロピーの推移（探索の適切さ）</h3>
+<p><strong>実装箇所</strong></p>
+<ul>
+<li><strong>MAPPO.update メソッド内（Actor更新部分）</strong><br>
+→ <code>dist.entropy().mean()</code> でバッチ平均のエントロピーを計算。</li>
+</ul>
+<p><strong>計算方法</strong></p>
+<ul>
+<li>Actorの出力分布（Categorical）からエントロピーを取得し、各エポックで記録。</li>
+</ul>
+<pre><code class="language-python">dist = self.actor(obs.view(-<span class="hljs-number">1</span>, self.obs_dim))
+entropy = dist.entropy().mean()  <span class="hljs-comment"># バッチ平均</span>
+entropies.append(entropy.item())
+</code></pre>
+<p><strong>モニタリング</strong></p>
+<ul>
+<li><code>update</code> メソッドが <code>entropy</code> を返すようにし、学習ループ側で出力。</li>
+</ul>
+<pre><code class="language-python">actor_loss, critic_loss, entropy = mappo.update(batch)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Avg Entropy: <span class="hljs-subst">{entropy:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+</code></pre>
+<h3 id="4-学習ループ側での統合まとめ">4. 学習ループ側での統合（まとめ）</h3>
+<pre><code class="language-python"><span class="hljs-comment"># モニタリング用のバッファ</span>
+reward_buffer = deque(maxlen=<span class="hljs-number">100</span>)
+capture_buffer = deque(maxlen=<span class="hljs-number">100</span>)
+
+<span class="hljs-keyword">for</span> episode <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_episodes):
+    <span class="hljs-comment"># 1エピソード実行（捕獲数・報酬を計測）</span>
+    <span class="hljs-comment"># ...</span>
+
+    <span class="hljs-comment"># Advantage計算</span>
+    mappo.buffer.compute_advantages(gamma=gamma, gae_lambda=gae_lambda)
+
+    <span class="hljs-comment"># PPO更新（Actor/Critic Loss・エントロピーを計測）</span>
+    actor_losses_episode = []
+    critic_losses_episode = []
+    entropies_episode = []
+
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(update_epochs):
+        batch = mappo.buffer.sample(batch_size)
+        actor_loss, critic_loss, entropy = mappo.update(batch)
+
+        actor_losses_episode.append(actor_loss)
+        critic_losses_episode.append(critic_loss)
+        entropies_episode.append(entropy)
+
+    avg_actor_loss = np.mean(actor_losses_episode)
+    avg_critic_loss = np.mean(critic_losses_episode)
+    avg_entropy = np.mean(entropies_episode)
+
+    <span class="hljs-comment"># ログ出力</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Episode <span class="hljs-subst">{episode}</span>: &quot;</span>
+          <span class="hljs-string">f&quot;Avg Reward: <span class="hljs-subst">{np.mean(reward_buffer):<span class="hljs-number">.2</span>f}</span> | &quot;</span>
+          <span class="hljs-string">f&quot;Avg Captures: <span class="hljs-subst">{np.mean(capture_buffer):<span class="hljs-number">.2</span>f}</span> | &quot;</span>
+          <span class="hljs-string">f&quot;Actor Loss: <span class="hljs-subst">{avg_actor_loss:<span class="hljs-number">.4</span>f}</span> | &quot;</span>
+          <span class="hljs-string">f&quot;Critic Loss: <span class="hljs-subst">{avg_critic_loss:<span class="hljs-number">.4</span>f}</span> | &quot;</span>
+          <span class="hljs-string">f&quot;Avg Entropy: <span class="hljs-subst">{avg_entropy:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+</code></pre>
+<h3 id="5-実装のポイントまとめ">5. 実装のポイントまとめ</h3>
+<ul>
+<li>
+<p><strong>捕獲数</strong></p>
+<ul>
+<li><code>reward == 5.0</code> の回数を数える（Pursuit仕様）。</li>
+<li>エピソードごとに <code>capture_buffer</code> で移動平均。</li>
+</ul>
+</li>
+<li>
+<p><strong>Actor/Critic Loss</strong></p>
+<ul>
+<li><code>MAPPO.update</code> 内で各エポックの損失を記録し、<strong>平均を返す</strong>。</li>
+<li>学習ループ側でエピソードごとに出力。</li>
+</ul>
+</li>
+<li>
+<p><strong>エントロピー</strong></p>
+<ul>
+<li><code>dist.entropy().mean()</code> でバッチ平均を計算。</li>
+<li><code>update</code> メソッドが返すようにし、学習ループ側で出力。</li>
+</ul>
+</li>
+</ul>
+<p>これにより、</p>
+<ul>
+<li><strong>タスクの成功度（捕獲数）</strong></li>
+<li><strong>学習の安定性（Loss）</strong></li>
+<li><strong>探索の適切さ（エントロピー）</strong><br>
+を同時にモニタリングできるようになります。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>今回はPursuitに性能指標を実装を行い、学習の進み具合や、うまく学習しているかを確認できるようにしました。</p>
+<p><strong>1. 1エピソードあたりの捕獲数（成功率）</strong></p>
+<ul>
+<li><strong>実装箇所</strong>: 学習ループ内（<code>env.step</code> 直後）。</li>
+<li><strong>計算方法</strong>: <code>reward == 5.0</code> の回数を数える（Pursuitの捕獲報酬）。</li>
+<li><strong>モニタリング</strong>: <code>capture_buffer</code> で移動平均を出力。</li>
+</ul>
+<p><strong>2. Actor/Critic Loss の推移</strong></p>
+<ul>
+<li><strong>実装箇所</strong>: <code>MAPPO.update</code> 内。</li>
+<li><strong>計算方法</strong>: 各エポックのPPO損失（Actor）とMSE損失（Critic）を記録し、平均を返す。</li>
+<li><strong>モニタリング</strong>: 学習ループ側でエピソードごとに出力。</li>
+</ul>
+<p><strong>3. エントロピーの推移（探索の適切さ）</strong></p>
+<ul>
+<li><strong>実装箇所</strong>: <code>MAPPO.update</code> 内（Actor更新部分）。</li>
+<li><strong>計算方法</strong>: <code>dist.entropy().mean()</code> でバッチ平均のエントロピーを計算。</li>
+<li><strong>モニタリング</strong>: <code>update</code> の返り値として受け取り、エピソードごとに出力。</li>
+</ul>
+<p><strong>まとめ</strong></p>
+<ul>
+<li><strong>捕獲数</strong>: タスクの成功度（どれだけ獲物を捕まえられたか）。</li>
+<li><strong>Loss</strong>: 学習の安定性（Actor/Criticが正しく更新されているか）。</li>
+<li><strong>エントロピー</strong>: 探索の適切さ（ランダムすぎないか・硬直しすぎていないか）。</li>
+</ul>
+
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/tVyxRx70C4E?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+<p></p>
+            
+        </body>
+        </html>
