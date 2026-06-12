@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.distributions import Categorical
+import torch.optim as optim
+
 
 class CNNEncoder(nn.Module):
     def __init__(self, obs_shape=(7,7,3), channels=(16, 32)):
@@ -52,11 +54,12 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    def __init__(self, cnn_encoder, num_agents=4, hidden_size=64):
+    def __init__(self, cnn_encoder, num_agents=8, hidden_size=64):
         super().__init__()
         self.cnn = cnn_encoder
-        # グローバル状態の次元: num_agents * cnn_output_dim
-        state_dim = num_agents * self.cnn.output_dim
+        # グローバル状態の次元: num_agents * obs_dim（147*8=1176）
+        # CNNエンコーダの出力次元（1568）とは別物なので注意
+        state_dim = num_agents * 147  # 147は観測次元（7*7*3）
         self.mlp = nn.Sequential(
             nn.Linear(state_dim, hidden_size),
             nn.ReLU(),
@@ -68,91 +71,159 @@ class Critic(nn.Module):
         return value
 
 
-def test_network_with_env():
-    """
-    修正版：PursuitWrapper環境でActor/Criticネットワークが正しく動作するかを確認するテスト。
-    """
-    env = PursuitWrapper(render_mode=None, max_cycles=10)
-    obs_shape = (7, 7, 3)
-    act_dim = env.action_dim
-    num_agents = env.num_agents
-    hidden_size = 64
 
-    cnn_encoder = CNNEncoder(obs_shape)
-    actor = Actor(cnn_encoder, act_dim, hidden_size)
-    critic = Critic(cnn_encoder, num_agents, hidden_size)
+class MAPPO:
+    """MAPPOの学習クラス（CNNベース）"""
+    def __init__(self, num_agents, obs_dim, state_dim, action_dim,
+                 lr_actor=3e-4, lr_critic=3e-4, gamma=0.99, gae_lambda=0.95,
+                 clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
+                 device=torch.device("cpu")):
+        self.num_agents = num_agents
+        self.obs_dim = obs_dim
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+        self.gamma = gamma
+        self.gae_lambda = gae_lambda
+        self.clip_epsilon = clip_epsilon
+        self.value_coef = value_coef
+        self.entropy_coef = entropy_coef
+        self.device = device
 
-    print(f"観測次元: {env.obs_dim}")
-    print(f"グローバル状態次元（観測ベース）: {env.state_dim}")
-    print(f"CNN出力次元: {cnn_encoder.output_dim}")
-    print(f"Critic入力次元（CNNベース）: {num_agents * cnn_encoder.output_dim}")
-    print(f"行動空間: {act_dim}")
-    print(f"エージェント数: {num_agents}")
-    print("--- テスト開始 ---")
+        # CNNエンコーダの共有
+        self.cnn_encoder = CNNEncoder().to(device)
 
-    env.reset()
-    step_count = 0
-    max_steps = 10  # デバッグ用に短く
+        # Actor/Criticネットワーク（CNNベース）
+        self.actor = Actor(self.cnn_encoder, act_dim=action_dim).to(device)
+        self.critic = Critic(self.cnn_encoder, num_agents=num_agents).to(device)
 
-    for agent in env.env.agent_iter():
-        if step_count >= max_steps:
-            print(f"最大ステップ数({max_steps})に達したため終了")
-            break
-        step_count += 1
+        # 最適化器
+        self.optimizer_actor = optim.Adam(self.actor.parameters(), lr=lr_actor)
+        self.optimizer_critic = optim.Adam(self.critic.parameters(), lr=lr_critic)
 
-        obs_np = env.get_obs(agent)
-        print(f"[Step {step_count}] Agent: {agent}")
-        print(f"  obs_np shape: {obs_np.shape if obs_np is not None else None}")
+        # メモリバッファ
+        self.buffer = MultiAgentBuffer(num_agents, obs_dim, state_dim, action_dim)
 
-        if obs_np is None:
-            action = None
-            log_prob = None
-            value = None
-        else:
-            # NumPy → PyTorchテンソル（バッチ次元追加）
-            obs_tensor = torch.from_numpy(obs_np).unsqueeze(0).float()  # (1,147)
-            print(f"  obs_tensor shape: {obs_tensor.shape}")
+    def get_action(self, obs, greedy=False):
+        """
+        観測から行動とlog_probを取得
 
-            # Actor: 行動とログ確率を計算
-            dist = actor(obs_tensor)
-            action_tensor = dist.sample()
-            log_prob_tensor = dist.log_prob(action_tensor)
-            action = action_tensor.item()
-            log_prob = log_prob_tensor.item()
+        Args:
+            obs: (num_agents, obs_dim) のテンソル（CPU or GPU）
+            greedy: Trueなら最大確率の行動を選択（評価用）
 
-            # Critic用のグローバル状態を構築（CNN特徴を結合）
-            agent_features = []
-            for a in env.possible_agents:
-                if a in env.env.agents:
-                    a_obs_np = env.get_obs(a)
-                    if a_obs_np is not None:
-                        a_obs_tensor = torch.from_numpy(a_obs_np).unsqueeze(0).float()
-                        a_feat = cnn_encoder(a_obs_tensor)  # CNNでエンコード
-                        agent_features.append(a_feat)
-            if agent_features:
-                global_state_tensor = torch.cat(agent_features, dim=-1)  # (1, num_agents * cnn_output_dim)
+        Returns:
+            actions: (num_agents,) の行動ID（CPU上のnumpy）
+            log_probs: (num_agents,) のlog_prob（CPU上のnumpy）
+        """
+        # obsをdeviceに送る（呼び出し側で既にto(device)していても明示的に送る）
+        obs = obs.to(self.device)
+
+        with torch.no_grad():
+            dist = self.actor(obs)  # (num_agents, action_dim) のlogitsを持つ分布
+
+            if greedy:
+                actions = torch.argmax(dist.logits, dim=-1)
             else:
-                global_state_tensor = None
+                actions = dist.sample()
 
-            print(f"  global_state_tensor shape: {global_state_tensor.shape if global_state_tensor is not None else None}")
+            log_probs = dist.log_prob(actions)
+            # CPUに戻してnumpyで返す（バッファ保存用）
+            return actions.cpu().numpy(), log_probs.cpu().numpy()
 
-            if global_state_tensor is not None:
-                # Critic: 状態価値を計算
-                value_tensor = critic(global_state_tensor)
-                value = value_tensor.item()
-            else:
-                value = None
+    def get_value(self, state):
+        """
+        グローバル状態から価値を取得
 
-            print(f"  action: {action}, log_prob: {log_prob:.4f}, value: {value:.4f}")
+        Args:
+            state: (state_dim,) のテンソル（CPU or GPU）
 
-        reward, terminated, truncated, info = env.step(agent, action)
-        print(f"  reward: {reward:.4f}, terminated: {terminated}, truncated: {truncated}")
+        Returns:
+            value: スカラー（CPU上のfloat）
+        """
+        # stateをdeviceに送る
+        state = state.to(self.device)
 
-        if terminated or truncated:
-            print(f"エピソード終了（terminated: {terminated}, truncated: {truncated}）")
-            break
+        with torch.no_grad():
+            value = self.critic(state.unsqueeze(0))
+            # CPUに戻してスカラーで返す（バッファ保存用）
+            return value.item()
 
-    env.close()
-    print("--- テスト終了 ---")
+    def update(self, batch, epochs=3):
+        """
+        PPO更新（複数エポック）
 
+        Args:
+            batch: バッファからサンプリングしたミニバッチ（CPU上のnumpy/リスト）
+            epochs: 更新エポック数
+        """
+        if batch is None:
+            return
 
+        # テンソル化してdeviceに送る
+        obs = torch.FloatTensor(batch['obs']).to(self.device)           # (batch, num_agents, obs_dim)
+        actions = torch.LongTensor(batch['actions']).to(self.device)     # (batch, num_agents)
+        old_log_probs = torch.FloatTensor(batch['log_probs']).to(self.device)  # (batch, num_agents)
+        advantages = torch.FloatTensor(batch['advantages']).to(self.device)  # (batch, num_agents)
+        returns = torch.FloatTensor(batch['rewards']).to(self.device)    # (batch, num_agents)
+        global_states = torch.FloatTensor(batch['global_states']).to(self.device)  # (batch, state_dim)
+        old_values = torch.FloatTensor(batch['values']).to(self.device)  # (batch,)
+
+        # 正規化（オプション）
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+        for epoch in range(epochs):
+            # Actor更新（各エージェント分をまとめて処理）
+            # obs: (batch, num_agents, obs_dim) -> (batch*num_agents, obs_dim)
+            dist = self.actor(obs.view(-1, self.obs_dim))
+            new_log_probs = dist.log_prob(actions.view(-1))  # (batch*num_agents,)
+            entropy = dist.entropy().mean()
+
+            # 確率比
+            ratio = torch.exp(new_log_probs - old_log_probs.view(-1))
+
+            # PPOのクリップ損失
+            surr1 = ratio * advantages.view(-1)
+            surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * advantages.view(-1)
+            actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy
+
+            self.optimizer_actor.zero_grad()
+            actor_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 0.5)
+            self.optimizer_actor.step()
+
+            # Critic更新
+            values = self.critic(global_states).squeeze()  # (batch,)
+            value_loss = nn.MSELoss()(values, returns.mean(dim=1))  # グローバル報酬で学習
+
+            self.optimizer_critic.zero_grad()
+            value_loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 0.5)
+            self.optimizer_critic.step()
+
+            # ログ出力（オプション）
+            if epoch == 0:
+                print(f"Epoch {epoch}: Actor Loss: {actor_loss.item():.4f}, Value Loss: {value_loss.item():.4f}")
+
+    def load_checkpoint(self, checkpoint_path):
+        """
+        MAPPOのチェックポイントを読み込み
+
+        Args:
+            checkpoint_path: チェックポイントファイルのパス
+        Returns:
+            episode: 保存時のエピソード番号
+        """
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+
+        # モデル・エンコーダの状態をロード
+        self.actor.load_state_dict(checkpoint['actor_state_dict'])
+        self.critic.load_state_dict(checkpoint['critic_state_dict'])
+        self.cnn_encoder.load_state_dict(checkpoint['cnn_encoder_state_dict'])
+
+        # 最適化器の状態をロード
+        self.optimizer_actor.load_state_dict(checkpoint['optimizer_actor_state_dict'])
+        self.optimizer_critic.load_state_dict(checkpoint['optimizer_critic_state_dict'])
+
+        episode = checkpoint['episode']
+        print(f"チェックポイントを読み込み: {checkpoint_path} (episode: {episode})")
+        return episode
