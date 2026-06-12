@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5b66;&#x7fd2;&#x30eb;&#x30fc;&#x30d7;&#x306e;&#x69cb;&#x6210;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>マルチエージェントの強化学習(MARL)のチーム連携が必要となるゲーム<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>でAIエージェント学習の実装を進めています。</p>
+<p>実装は以下の順に沿って進めています。</p>
+<ol>
+<li><strong>環境ラッパ</strong>でPursuitをMAPPO向けに整形</li>
+<li><strong>Actor/Criticネットワーク</strong>を設計</li>
+<li><strong>バッファ</strong>で経験を保存・計算</li>
+<li><strong>学習ループ</strong>でPPO更新を繰り返す</li>
+<li><strong>評価・可視化</strong>で性能を確認</li>
+</ol>
+<p>前回3. バッファの実装まで進めました。
+今回は4. 学習ループの実装を進めます。</p>
+<h2 id="学習ループの構成">学習ループの構成</h2>
+<p>環境と実際に情報のやり取りを行い、ネットワークアーキテクチャの保存や、デバッグを行う学習ループ部と、学習においてマルチエージェントPPO（MAPPO）の「学習アルゴリズム本体」(以下学習エージェントとします)の2段構えで実装を進めていきます。</p>
+<p>以下に、<strong>学習ループ部</strong>と<strong>学習エージェント（MAPPO本体）</strong> の役割を説明します。</p>
+<h3 id="1-学習ループ部の役割環境とのインターフェース">1. 学習ループ部の役割（環境とのインターフェース）</h3>
+<p>学習ループ部は、<strong>「環境と実際に情報のやり取りを行い、学習の流れを制御する」</strong> 役割を担います。</p>
+<p><strong>主な役割</strong></p>
+<ul>
+<li><strong>環境とのインタラクション</strong>
+<ul>
+<li>環境のリセット（<code>env.reset()</code>）</li>
+<li>各エージェントの観測取得（<code>env.get_obs(agent)</code>）</li>
+<li>グローバル状態の取得（<code>env.get_global_state()</code>）</li>
+<li>行動の適用と報酬の取得（<code>env.step(agent, action)</code>）</li>
+</ul>
+</li>
+<li><strong>学習の進行管理</strong>
+<ul>
+<li>エピソードループ（<code>for episode in range(max_episodes)</code>）</li>
+<li>ステップループ（<code>for agent in env.env.agent_iter()</code>）</li>
+<li>エピソード終了条件（<code>terminated</code> / <code>truncated</code>）の監視</li>
+</ul>
+</li>
+<li><strong>データの整形と橋渡し</strong>
+<ul>
+<li>観測のテンソル化（<code>torch.FloatTensor(obs)</code>）</li>
+<li>グローバル状態のテンソル化</li>
+<li>各エージェントの行動・報酬・log_probの辞書化</li>
+</ul>
+</li>
+<li><strong>学習の進捗管理</strong>
+<ul>
+<li>報酬の集計（<code>episode_reward</code>）</li>
+<li>ステップ数の記録</li>
+<li>ログ出力（<code>print(f&quot;Episode {episode}: Reward = {episode_reward:.2f}&quot;)</code>）</li>
+</ul>
+</li>
+<li><strong>チェックポイントの保存</strong>
+<ul>
+<li>特定のインターバルでのモデル保存（<code>save_checkpoint(mappo, episode)</code>）</li>
+<li>学習の再開（<code>load_checkpoint(mappo, checkpoint_path)</code>）</li>
+</ul>
+</li>
+</ul>
+<p><strong>特徴</strong></p>
+<ul>
+<li><strong>環境依存</strong>：Pursuit環境の仕様（エージェント数・観測形状・行動空間）に強く依存</li>
+<li><strong>実装詳細</strong>：deadエージェントの扱い、観測の整形、グローバル状態の構成など、環境固有の処理を担当</li>
+<li><strong>制御フロー</strong>：学習の流れ（リセット→行動選択→ステップ→更新）を管理</li>
+</ul>
+<h3 id="2-学習エージェントmappo本体の役割アルゴリズムの実装">2. 学習エージェント（MAPPO本体）の役割（アルゴリズムの実装）</h3>
+<p>学習エージェントは、<strong>「マルチエージェントPPOの学習アルゴリズムを実装し、ネットワークの更新を担当する」</strong> 役割を担います。</p>
+<p><strong>主な役割</strong></p>
+<ul>
+<li><strong>ネットワークアーキテクチャの管理</strong>
+<ul>
+<li>Actorネットワーク（各エージェントの行動確率分布）</li>
+<li>Criticネットワーク（グローバル状態からの価値推定）</li>
+<li>CNNエンコーダ（観測の特徴抽出）</li>
+</ul>
+</li>
+<li><strong>行動選択（推論）</strong>
+<ul>
+<li><code>get_action(obs_tensor)</code>：各エージェントの行動とlog_probを取得</li>
+<li>学習中は探索（確率的サンプリング）、評価時は貪欲（最大確率）に切り替え可能</li>
+</ul>
+</li>
+<li><strong>価値推定</strong>
+<ul>
+<li><code>get_value(global_state_tensor)</code>：グローバル状態から価値を推定</li>
+<li>Advantage計算（GAE）やリターン計算に必要な状態価値を提供</li>
+</ul>
+</li>
+<li><strong>PPO更新（学習）</strong>
+<ul>
+<li><code>update(batch)</code>：バッファからサンプリングしたミニバッチを用いてPPO更新</li>
+<li>Actor更新：確率比とAdvantageからPPOクリッピング損失を計算</li>
+<li>Critic更新：リターンとのMSEで価値関数を更新</li>
+<li>エントロピー正則化：方策の多様性を維持</li>
+</ul>
+</li>
+<li><strong>メモリバッファとの連携</strong>
+<ul>
+<li><code>MultiAgentBuffer</code> を内部に保持し、経験の保存・Advantage計算・サンプリングを統括</li>
+<li>エピソード終了後に <code>buffer.compute_advantages()</code> を呼び出し、PPO更新に必要なAdvantageを準備</li>
+</ul>
+</li>
+</ul>
+<p><strong>特徴</strong></p>
+<ul>
+<li><strong>環境非依存</strong>：観測次元・行動空間・エージェント数は引数で受け取り、環境に依存しない設計</li>
+<li><strong>アルゴリズム実装</strong>：PPOの数式（クリッピング損失・GAE・エントロピー正則化）を実装</li>
+<li><strong>ネットワーク更新</strong>：勾配計算・最適化器の更新を担当</li>
+</ul>
+<h3 id="3-2段構えのメリット">3. 2段構えのメリット</h3>
+<p><strong>役割の分離</strong></p>
+<ul>
+<li><strong>学習ループ部</strong>：環境とのインターフェース、データ整形、学習の進行管理</li>
+<li><strong>学習エージェント</strong>：アルゴリズムの実装、ネットワーク更新、メモリ管理</li>
+</ul>
+<p><strong>再利用性</strong></p>
+<ul>
+<li><strong>学習エージェント</strong>は環境に依存しないため、他のマルチエージェント環境（例：MADDPG環境）にも流用可能</li>
+<li><strong>学習ループ部</strong>は環境固有の処理を担当するため、環境が変わっても修正が最小限で済む</li>
+</ul>
+<p><strong>デバッグの容易さ</strong></p>
+<ul>
+<li><strong>学習ループ部</strong>：環境とのやり取り（観測・行動・報酬）のログを確認</li>
+<li><strong>学習エージェント</strong>：ネットワークの出力（行動確率・価値）や損失の推移を確認</li>
+</ul>
+<h2 id="設計">設計</h2>
+<p>以下に、<strong>学習ループ部</strong>と<strong>学習エージェント（MAPPO本体）</strong> の実装におけるキーポイントを整理します。</p>
+<h3 id="1-学習ループ部の実装キーポイント">1. 学習ループ部の実装キーポイント</h3>
+<p><strong>1-1. 環境とのインターフェース設計</strong></p>
+<ul>
+<li><strong>観測の整形</strong>：Pursuitの観測 <code>(7,7,3)</code> をフラット化（147次元）し、テンソル化</li>
+<li><strong>グローバル状態の構成</strong>：全エージェントの観測を結合（1176次元）し、Criticに渡す</li>
+<li><strong>deadエージェントの扱い</strong>：<code>agent in env.agents</code> で生存確認し、観測・行動・報酬をゼロ埋め</li>
+</ul>
+<p><strong>1-2. データの橋渡し</strong></p>
+<ul>
+<li><strong>観測のテンソル化</strong>：<code>torch.FloatTensor(obs)</code> でネットワーク入力に変換</li>
+<li><strong>行動の辞書化</strong>：各エージェントの行動・報酬・log_probを辞書でまとめ、バッファに保存</li>
+<li><strong>グローバル状態の保持</strong>：Critic用にグローバル状態を毎ステップ保存</li>
+</ul>
+<p><strong>1-3. 学習の進行管理</strong></p>
+<ul>
+<li><strong>エピソードループ</strong>：<code>for episode in range(max_episodes)</code> で学習回数を制御</li>
+<li><strong>ステップループ</strong>：<code>for agent in env.env.agent_iter()</code> で各エージェントの順番を処理</li>
+<li><strong>終了条件の監視</strong>：<code>terminated</code> / <code>truncated</code> でエピソード終了を判定</li>
+</ul>
+<p><strong>1-4. チェックポイントとログ</strong></p>
+<ul>
+<li><strong>チェックポイント保存</strong>：特定のインターバルでモデルを保存（<code>save_checkpoint</code>）</li>
+<li><strong>進捗ログ</strong>：報酬・ステップ数・損失を定期的に出力</li>
+<li><strong>評価実行</strong>：貪欲方策で環境を実行し、性能を確認</li>
+</ul>
+<h3 id="2-学習エージェントmappo本体の実装キーポイント">2. 学習エージェント（MAPPO本体）の実装キーポイント</h3>
+<p><strong>2-1. ネットワークアーキテクチャの設計</strong></p>
+<ul>
+<li><strong>CNNエンコーダの共有</strong>：Actor/Criticで共通のCNNエンコーダを使用し、観測から特徴量を抽出</li>
+<li><strong>Actorの設計</strong>：各エージェントの観測を個別に処理し、行動確率分布を出力</li>
+<li><strong>Criticの設計</strong>：グローバル状態（1176次元）をMLPで処理し、価値を出力</li>
+</ul>
+<p><strong>2-2. 行動選択と価値推定</strong></p>
+<ul>
+<li><strong>行動選択</strong>：<code>get_action(obs_tensor)</code> で各エージェントの行動とlog_probを取得</li>
+<li><strong>価値推定</strong>：<code>get_value(global_state_tensor)</code> でグローバル状態から価値を推定</li>
+<li><strong>探索と貪欲の切り替え</strong>：学習中は確率的サンプリング、評価時は最大確率行動</li>
+</ul>
+<p><strong>2-3. PPO更新の実装</strong></p>
+<ul>
+<li><strong>確率比の計算</strong>：<code>ratio = exp(new_log_probs - old_log_probs)</code></li>
+<li><strong>PPOクリッピング</strong>：<code>surr1 = ratio * advantages</code>, <code>surr2 = clamp(ratio) * advantages</code></li>
+<li><strong>Actor損失</strong>：<code>-min(surr1, surr2).mean()</code> ＋ エントロピー正則化</li>
+<li><strong>Critic損失</strong>：<code>MSE(values, returns)</code> で価値関数を更新</li>
+<li><strong>最適化器の更新</strong>：<code>optimizer.zero_grad()</code>, <code>loss.backward()</code>, <code>optimizer.step()</code></li>
+</ul>
+<p><strong>2-4. メモリバッファとの連携</strong></p>
+<ul>
+<li><strong>経験の保存</strong>：<code>buffer.store()</code> で各エージェントの観測・行動・報酬・log_prob・価値を保存</li>
+<li><strong>Advantage計算</strong>：<code>buffer.compute_advantages()</code> でGAEを用いてAdvantageを計算</li>
+<li><strong>ミニバッチサンプリング</strong>：<code>buffer.sample(batch_size)</code> でランダムにサンプリング</li>
+</ul>
+<p><strong>2-5. 環境非依存の設計</strong></p>
+<ul>
+<li><strong>引数での抽象化</strong>：<code>num_agents</code>, <code>obs_dim</code>, <code>state_dim</code>, <code>action_dim</code> を引数で受け取り、環境に依存しない</li>
+<li><strong>汎用性の確保</strong>：Pursuit以外のマルチエージェント環境にも流用可能な設計</li>
+</ul>
+<h3 id="3-2段構えの実装における注意点">3. 2段構えの実装における注意点</h3>
+<p><strong>3-1. データの整合性</strong></p>
+<ul>
+<li><strong>観測次元の一致</strong>：学習ループ部の観測整形（147次元）とActorの入力次元が一致していること</li>
+<li><strong>グローバル状態の次元</strong>：Criticの入力次元（1176次元）と学習ループ部の結合結果が一致していること</li>
+</ul>
+<p><strong>3-2. バッファの設計</strong></p>
+<ul>
+<li><strong>保存単位</strong>：ステップ単位で全エージェント分の経験を保存</li>
+<li><strong>Advantage計算</strong>：GAEの実装が正しく、<code>gamma</code> と <code>gae_lambda</code> が適切に設定されていること</li>
+</ul>
+<p><strong>3-3. 学習の安定性</strong></p>
+<ul>
+<li><strong>クリップ係数の調整</strong>：<code>clip_epsilon</code> を小さくしすぎると学習が進まない</li>
+<li><strong>学習率の調整</strong>：<code>lr_actor</code> と <code>lr_critic</code> を適切に設定し、発散を防ぐ</li>
+<li><strong>バッチサイズとエポック数</strong>：<code>batch_size</code> と <code>update_epochs</code> のバランスを取る</li>
+</ul>
+<h2 id="実装">実装</h2>
+<h3 id="実装コード">実装コード</h3>
+<p>上記の設計のポイントに沿って実装しました。
+以下のレポジトリにコードを保存しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<h3 id="動作確認">動作確認</h3>
+<p>ここまで進めてきた実装で学習に必要な機能はそろいました。
+なので、動作確認は実際に学習がエラーなく進んでいるかということを確認することとします。</p>
+<p>上記の実装コードを揃えた状態で実行して以下のように学習が進めば実装は正常に出来たことになります。</p>
+<pre><code>=== MAPPO（CNNベース）学習開始 ===
+エージェント数: 8
+観測次元: 147
+グローバル状態次元: 1176
+行動空間サイズ: 5
+Episode 0: Reward = -346.37, Steps = 4000
+Epoch 0: Actor Loss: -0.0213, Value Loss: 0.0042
+Epoch 0: Actor Loss: -0.0201, Value Loss: 0.0012
+Epoch 0: Actor Loss: -0.0272, Value Loss: 0.0011
+チェックポイントを保存: /content/drive/MyDrive/rl_pursuit/mappo_episode_0.pth
+Episode 1: Reward = -372.38, Steps = 4000
+Epoch 0: Actor Loss: -0.0262, Value Loss: 0.0013
+Epoch 0: Actor Loss: -0.0288, Value Loss: 0.0013
+Epoch 0: Actor Loss: -0.0240, Value Loss: 0.0007
+Episode 2: Reward = -377.46, Steps = 4000
+Epoch 0: Actor Loss: -0.0329, Value Loss: 0.0009
+Epoch 0: Actor Loss: -0.0238, Value Loss: 0.0011
+Epoch 0: Actor Loss: -0.0360, Value Loss: 0.0005
+</code></pre>
+<h2 id="総括">総括</h2>
+<p>以下に、<strong>学習ループ部</strong>と<strong>学習エージェント（MAPPO本体）</strong> の役割と実装キーポイントを総括します。</p>
+<h3 id="1-全体の設計方針">1. 全体の設計方針</h3>
+<p>マルチエージェントPPO（MAPPO）の実装は、<strong>「環境固有の処理」と「アルゴリズムの汎用実装」を分離する2段構え</strong>で進めます。</p>
+<ul>
+<li><strong>学習ループ部</strong>：環境とのインターフェース、データ整形、学習の進行管理</li>
+<li><strong>学習エージェント</strong>：MAPPOアルゴリズムの実装、ネットワーク更新、メモリ管理</li>
+</ul>
+<p>この分離により、<strong>環境依存の複雑さとアルゴリズムの再利用性を両立</strong>します。</p>
+<h3 id="2-学習ループ部の役割とキーポイント">2. 学習ループ部の役割とキーポイント</h3>
+<p><strong>2-1. 役割</strong></p>
+<ul>
+<li><strong>環境とのインタラクション</strong>：リセット・観測取得・行動適用・報酬取得</li>
+<li><strong>学習の進行管理</strong>：エピソードループ・ステップループ・終了条件の監視</li>
+<li><strong>データの橋渡し</strong>：観測のテンソル化・グローバル状態の構成・行動の辞書化</li>
+<li><strong>進捗管理</strong>：報酬集計・ログ出力・チェックポイント保存</li>
+</ul>
+<p><strong>2-2. 実装キーポイント</strong></p>
+<ul>
+<li><strong>観測の整形</strong>：Pursuitの観測 <code>(7,7,3)</code> をフラット化（147次元）し、テンソル化</li>
+<li><strong>グローバル状態の構成</strong>：全エージェントの観測を結合（1176次元）し、Criticに渡す</li>
+<li><strong>deadエージェントの扱い</strong>：<code>agent in env.agents</code> で生存確認し、観測・行動・報酬をゼロ埋め</li>
+<li><strong>チェックポイント保存</strong>：特定のインターバルでモデルを保存し、学習の再開を可能にする</li>
+</ul>
+<h3 id="3-学習エージェントmappo本体の役割とキーポイント">3. 学習エージェント（MAPPO本体）の役割とキーポイント</h3>
+<p><strong>3-1. 役割</strong></p>
+<ul>
+<li><strong>ネットワーク管理</strong>：Actor/Critic/CNNエンコーダの設計と共有</li>
+<li><strong>行動選択と価値推定</strong>：各エージェントの行動確率・log_prob・価値を出力</li>
+<li><strong>PPO更新</strong>：確率比・PPOクリッピング・価値損失・エントロピー正則化を実装</li>
+<li><strong>メモリ管理</strong>：マルチエージェントバッファとの連携、Advantage計算、ミニバッチサンプリング</li>
+</ul>
+<p><strong>3-2. 実装キーポイント</strong></p>
+<ul>
+<li><strong>CNNエンコーダの共有</strong>：Actor/Criticで共通のCNNを使用し、観測から特徴量を抽出</li>
+<li><strong>Actorの設計</strong>：各エージェントの観測を個別に処理し、行動確率分布を出力</li>
+<li><strong>Criticの設計</strong>：グローバル状態（1176次元）をMLPで処理し、価値を出力</li>
+<li><strong>PPO更新の実装</strong>：確率比・クリッピング・価値損失・エントロピー正則化を正確に実装</li>
+<li><strong>環境非依存の設計</strong>：<code>num_agents</code>, <code>obs_dim</code>, <code>state_dim</code>, <code>action_dim</code> を引数で受け取り、汎用性を確保</li>
+</ul>
+<h3 id="4-2段構えのメリット">4. 2段構えのメリット</h3>
+<p><strong>4-1. 役割の分離</strong></p>
+<ul>
+<li><strong>学習ループ部</strong>：環境固有の処理（観測整形・deadエージェント対応など）を担当</li>
+<li><strong>学習エージェント</strong>：アルゴリズムの汎用実装（PPO更新・ネットワーク設計）を担当</li>
+</ul>
+<p><strong>4-2. 再利用性</strong></p>
+<ul>
+<li><strong>学習エージェント</strong>は環境に依存しないため、他のマルチエージェント環境にも流用可能</li>
+<li><strong>学習ループ部</strong>は環境固有の処理を担当するため、環境が変わっても修正が最小限で済む</li>
+</ul>
+<p><strong>4-3. デバッグの容易さ</strong></p>
+<ul>
+<li><strong>学習ループ部</strong>：環境とのやり取り（観測・行動・報酬）のログを確認</li>
+<li><strong>学習エージェント</strong>：ネットワークの出力（行動確率・価値）や損失の推移を確認</li>
+</ul>
+<h3 id="5-実装における注意点">5. 実装における注意点</h3>
+<p><strong>5-1. データの整合性</strong></p>
+<ul>
+<li><strong>観測次元の一致</strong>：学習ループ部の観測整形（147次元）とActorの入力次元が一致</li>
+<li><strong>グローバル状態の次元</strong>：Criticの入力次元（1176次元）と学習ループ部の結合結果が一致</li>
+</ul>
+<p><strong>5-2. バッファの設計</strong></p>
+<ul>
+<li><strong>保存単位</strong>：ステップ単位で全エージェント分の経験を保存</li>
+<li><strong>Advantage計算</strong>：GAEの実装が正しく、<code>gamma</code> と <code>gae_lambda</code> が適切に設定</li>
+</ul>
+<p><strong>5-3. 学習の安定性</strong></p>
+<ul>
+<li><strong>クリップ係数</strong>：<code>clip_epsilon</code> を適切に設定し、学習の安定性を確保</li>
+<li><strong>学習率</strong>：<code>lr_actor</code> と <code>lr_critic</code> を調整し、発散を防ぐ</li>
+<li><strong>バッチサイズとエポック数</strong>：<code>batch_size</code> と <code>update_epochs</code> のバランスを取る</li>
+</ul>
+<h3 id="6-まとめ">6. まとめ</h3>
+<ul>
+<li><strong>学習ループ部</strong>は、環境とのインターフェースとして、観測の整形・グローバル状態の構成・deadエージェントの扱い・チェックポイント保存を担当します。</li>
+<li><strong>学習エージェント</strong>は、MAPPOアルゴリズムの実装として、ネットワーク設計・行動選択・PPO更新・メモリ管理を担当します。</li>
+<li>この2段構えにより、<strong>環境固有の複雑さとアルゴリズムの汎用性を分離</strong>し、実装の保守性・再利用性・デバッグの容易さを高めています。</li>
+</ul>
+<p>ということで今回でMAPPOを使った学習を行う環境がようやく整ったことになります。</p>
+
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/SFCCZ89dJQU?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+<div class="shop-card">
+<div class="shop-card-image"><img src="https://m.media-amazon.com/images/I/81lem2peqFL._SL1500_.jpg" alt="商品画像" /></div>
+<div class="shop-card-content">
+<div class="shop-card-title">強化学習 (機械学習プロフェッショナルシリーズ)</div>
+<div class="shop-card-description">同シリーズで緑本のPythonによる強化学習の本を何度も何度も読んだのですが、どうしても読み進めません。試しにと思って3年前に買ったこの本を読み返してみるとすっと読めました。 これからのコーディングは生成AIが書いてくれるのだから、難しい理論本で勉強してコーディングはお任せ（直すべき所は直す）というのが正解なのかもしれない。。。</div>
+<div class="shop-card-link"><a href="https://www.amazon.co.jp/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%97%E3%83%AD%E3%83%95%E3%82%A7%E3%83%83%E3%82%B7%E3%83%A7%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-%E6%A3%AE%E6%9D%91%E5%93%B2%E9%83%8E-ebook/dp/B07XJXMQGD?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&amp;crid=2Q7JANDTXMDRQ&amp;dib=eyJ2IjoiMSJ9.YZxuAtwvMTmksETM7b4V5tEFcZKwS3FH_fG2YEbWKvrGjHj071QN20LucGBJIEps.GCkT5rik7rfwPmJpLUkBFsUfiUvfOc-QO8WH5HT0oSA&amp;dib_tag=se&amp;keywords=MARL+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92&amp;qid=1777879215&amp;sprefix=marl+%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92%2Caps%2C165&amp;sr=8-1&amp;linkCode=ll2&amp;tag=yoshishinnze-22&amp;linkId=a3ac27efe00549a8b95a7d948fa658b0&amp;ref_=as_li_ss_tl" target="_blank" rel="noopener">Amazonで詳細を見る</a></div>
+</div>
+</div>
+<p>[blog:g:4207112889963697807:banner]</p>
+<p>[blog:g:10328749687175353006:banner]</p>
+<p>[blog:g:11696248318754550880:banner]</p>
+<p>[blog:g:11696248318754550877:banner]</p>
+
+            
+        </body>
+        </html>
