@@ -14,28 +14,24 @@ class MultiAgentBuffer:
             'rewards': [],
             'global_states': [],
             'log_probs': [],
-            'values': [],       # 各エージェントの辞書形式 {'pursuer_0': v, ...} に変更
+            'values': [],
             'terminated': [],
             'truncated': [],
-            'advantages': [],   # 予め初期化
-            'returns': [],      # 予め初期化
+            'advantages': [], # 予め初期化
+            'returns': [],    # 予め初期化
         }
 
         self.episode_lengths = []
         self.current_episode_steps = 0
 
     def store(self, obs_dict, action_dict, reward_dict, global_state,
-              log_prob_dict, value_dict, terminated, truncated):
-        """
-        環境の1ステップのデータを保存
-        ※ MAPPOに合わせて、value_dict も各エージェントの価値の辞書として受け取ります。
-        """
+              log_prob_dict, value, terminated, truncated):
         self.buffer['obs'].append(obs_dict)
         self.buffer['actions'].append(action_dict)
         self.buffer['rewards'].append(reward_dict)
         self.buffer['global_states'].append(global_state)
         self.buffer['log_probs'].append(log_prob_dict)
-        self.buffer['values'].append(value_dict) # 修正: エージェント毎の辞書
+        self.buffer['values'].append(value)
         self.buffer['terminated'].append(terminated)
         self.buffer['truncated'].append(truncated)
 
@@ -58,49 +54,40 @@ class MultiAgentBuffer:
         for idx in indices:
             obs_step, actions_step, rewards_step = [], [], []
             log_probs_step, advantages_step, returns_step = [], [], []
-            values_step = []
 
             for i in range(self.num_agents):
                 agent_name = f'pursuer_{i}'
                 obs_step.append(self.buffer['obs'][idx][agent_name])
                 actions_step.append(self.buffer['actions'][idx][agent_name])
+                rewards_step.append(self.buffer['rewards'][idx][agent_name])
                 log_probs_step.append(self.buffer['log_probs'][idx][agent_name])
                 
-                # MAPPO.update側が「rewards」というキーでCriticのターゲット（Returns）を
-                # 要求しているため、ここで returns_step をマッピングします。
-                if idx < len(self.buffer['returns']) and self.buffer['returns'][idx] is not None:
-                    rewards_step.append(self.buffer['returns'][idx][agent_name])
-                else:
-                    rewards_step.append(0.0)
-
-                # 状態価値 V(s) もエージェント毎に格納
-                values_step.append(self.buffer['values'][idx][agent_name])
-
-                # 安全にadvantageを取得
-                if idx < len(self.buffer['advantages']) and self.buffer['advantages'][idx] is not None:
+                # 安全にadvantageとreturnを取得
+                if idx < len(self.buffer['advantages']):
                     advantages_step.append(self.buffer['advantages'][idx][agent_name])
+                    returns_step.append(self.buffer['returns'][idx][agent_name])
                 else:
                     advantages_step.append(0.0)
+                    returns_step.append(0.0)
 
             obs_batch.append(obs_step)
             actions_batch.append(actions_step)
-            rewards_batch.append(rewards_step) # これがMAPPOの batch['rewards']（＝Returns）になります
+            rewards_batch.append(rewards_step)
             log_probs_batch.append(log_probs_step)
             advantages_batch.append(advantages_step)
-            values_batch.append(values_step)
+            returns_batch.append(returns_step)
 
-            # global_statesの保存処理
-            # もし元のデータが1次元(num_agents * obs_dim)なら、MAPPO内部で自動的に3次元に展開されます
             global_states_batch.append(self.buffer['global_states'][idx])
+            values_batch.append(self.buffer['values'][idx])
 
         batch = {
-            'obs': np.array(obs_batch, dtype=np.float32),                 # (batch, num_agents, 147)
-            'actions': np.array(actions_batch, dtype=np.int64),           # (batch, num_agents)
-            'rewards': np.array(rewards_batch, dtype=np.float32),         # (batch, num_agents) ※実質はReturns
-            'global_states': np.array(global_states_batch, dtype=np.float32), # (batch, state_dim)
-            'log_probs': np.array(log_probs_batch, dtype=np.float32),     # (batch, num_agents)
-            'values': np.array(values_batch, dtype=np.float32),           # (batch, num_agents)
-            'advantages': np.array(advantages_batch, dtype=np.float32),   # (batch, num_agents)
+            'obs': np.array(obs_batch, dtype=np.float32),
+            'actions': np.array(actions_batch, dtype=np.int64),
+            'rewards': np.array(returns_batch, dtype=np.float32), # ⚠️ MAPPO.update側が「rewards」というキーでリターンを受け取っているため、ここに returns_batch をマッピングします
+            'global_states': np.array(global_states_batch, dtype=np.float32),
+            'log_probs': np.array(log_probs_batch, dtype=np.float32),
+            'values': np.array(values_batch, dtype=np.float32),
+            'advantages': np.array(advantages_batch, dtype=np.float32),
         }
         return batch
 
@@ -120,16 +107,18 @@ class MultiAgentBuffer:
             for agent_idx in range(self.num_agents):
                 agent_name = f'pursuer_{agent_idx}'
                 agent_rewards = [r[agent_name] for r in rewards_ep]
-                
-                # 修正: 共通スカラーからエージェント個別の価値配列の取得に変更
-                agent_values = [v[agent_name] for v in values_ep]
+                agent_values = values_ep.copy()
 
+                # 【改善】未来から過去へ向かって正しくループを回す
                 advantage_ep = np.zeros(ep_len)
                 return_ep = np.zeros(ep_len)
-
-                gae = 0.0
                 
-                # 時間切れ(truncated)のブートストラップ処理の修正
+                gae = 0.0
+                future_return = 0.0
+                
+                # エピソードの最後の次の状態の価値（初期値）
+                # 本当は環境の最終ステップの次の状態の価値が必要ですが、
+                # 終了時(terminated)なら0、時間切れ(truncated)なら最後の価値でブートストラップします
                 if truncated_ep[-1]:
                     next_value = agent_values[-1]
                     future_return = agent_values[-1]
@@ -137,20 +126,19 @@ class MultiAgentBuffer:
                     next_value = 0.0
                     future_return = 0.0
 
-                # 未来から過去へ向かってループを回す
                 for t in reversed(range(ep_len)):
                     # TD誤差 𝛿_t = r_t + 𝛾 * V(s_{t+1}) - V(s_t)
                     delta = agent_rewards[t] + gamma * next_value - agent_values[t]
-
+                    
                     # GAEの累積
                     gae = delta + gamma * gae_lambda * (0.0 if terminated_ep[t] else gae)
                     advantage_ep[t] = gae
-
+                    
                     # 割引累積報酬（Return）の計算
                     future_return = agent_rewards[t] + gamma * (0.0 if terminated_ep[t] else future_return)
                     return_ep[t] = future_return
-
-                    # 過去ステップにとっての「未来の価値」を更新
+                    
+                    # 次のループ（過去ステージ）にとって、現在の価値が「未来の価値(next_value)」になる
                     next_value = agent_values[t]
 
                 # 計算した値をステップごとの辞書構造に戻して全体リストへ格納
