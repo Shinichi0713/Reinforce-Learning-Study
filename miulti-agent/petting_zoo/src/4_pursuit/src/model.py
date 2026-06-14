@@ -3,6 +3,9 @@ import torch.nn as nn
 from torch.distributions import Categorical
 import torch.optim as optim
 
+import torch
+import torch.nn as nn
+from torch.distributions import Categorical
 
 class CNNEncoder(nn.Module):
     def __init__(self, obs_shape=(7,7,3), channels=(16, 32)):
@@ -17,65 +20,123 @@ class CNNEncoder(nn.Module):
             nn.ReLU(),
             nn.Flatten()
         )
-        # CNN出力の次元を計算（7*7*32 = 1568）
+        # CNN出力の次元（7*7*32 = 1568）
         self.output_dim = 7 * 7 * c2
 
     def forward(self, obs):
         """
         Args:
-            obs: (batch, 147) のフラット観測テンソル
+            obs: (batch_size, 147) のフラット観測テンソル
         Returns:
-            features: (batch, cnn_output_dim) の特徴ベクトル
+            features: (batch_size, cnn_output_dim) の特徴ベクトル
         """
-        # (batch, 147) -> (batch, 7, 7, 3)
+        # (batch_size, 147) -> (batch_size, 7, 7, 3)
         obs = obs.view(-1, 7, 7, 3)
-        # (batch, 7, 7, 3) -> (batch, 3, 7, 7)
+        # (batch_size, 7, 7, 3) -> (batch_size, 3, 7, 7)
         obs = obs.permute(0, 3, 1, 2)
         features = self.cnn(obs)
         return features
 
 
-# Actor（ポリシー）
-class Actor(nn.Module):
-    def __init__(self, cnn_encoder, act_dim=5, hidden_size=64):
+# MAPPO Actor: ID情報を付与し、パラメータを共有して使用
+class MAPPO_Actor(nn.Module):
+    def __init__(self, cnn_encoder, num_agents=8, id_dim=8, act_dim=5, hidden_size=256):
         super().__init__()
         self.cnn = cnn_encoder
+        
+        # エージェントIDの埋め込み層
+        self.id_embedding = nn.Embedding(num_embeddings=num_agents, embedding_dim=id_dim)
+        
+        # 入力サイズ = CNN特徴量(1568) + ID埋め込み(8)
+        input_dim = self.cnn.output_dim + id_dim
+        
         self.mlp = nn.Sequential(
-            nn.Linear(self.cnn.output_dim, hidden_size),
+            nn.Linear(input_dim, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, act_dim)
         )
 
-    def forward(self, obs):
+    def forward(self, obs, agent_id):
+        """
+        Args:
+            obs: (batch_size, 147) 単一エージェントの観測
+            agent_id: (batch_size,) 単一エージェントのID
+        """
+        # 空間特徴量の抽出
         features = self.cnn(obs)
-        logits = self.mlp(features)
+        
+        # ID特徴量の抽出
+        if agent_id.dim() == 2:
+            agent_id = agent_id.squeeze(-1)
+        id_feats = self.id_embedding(agent_id)
+        
+        # 特徴量の結合
+        x = torch.cat([features, id_feats], dim=-1)
+        
+        # 行動分布の出力
+        logits = self.mlp(x)
         dist = Categorical(logits=logits)
         return dist
 
 
-class Critic(nn.Module):
-    def __init__(self, cnn_encoder, num_agents=8, hidden_size=64):
+# MAPPO Centralized Critic: 全エージェントの観測（画像）と対象IDを集約して評価
+class MAPPO_Critic(nn.Module):
+    def __init__(self, cnn_encoder, num_agents=8, id_dim=8, hidden_size=256):
         super().__init__()
+        # Actorと共有、または独立したCNNエンコーダ（MAPPOでは独立させることが多いです）
         self.cnn = cnn_encoder
-        # グローバル状態の次元: num_agents * obs_dim（147*8=1176）
-        # CNNエンコーダの出力次元（1568）とは別物なので注意
-        state_dim = num_agents * 147  # 147は観測次元（7*7*3）
+        
+        # エージェントIDの埋め込み層（「誰のための価値か」を識別するため）
+        self.id_embedding = nn.Embedding(num_embeddings=num_agents, embedding_dim=id_dim)
+        
+        # 全エージェントのCNN特徴量の合計次元 + 対象エージェントのID次元
+        total_feature_dim = (self.cnn.output_dim * num_agents) + id_dim
+        
         self.mlp = nn.Sequential(
-            nn.Linear(state_dim, hidden_size),
+            nn.Linear(total_feature_dim, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, 1)
         )
 
-    def forward(self, global_state):
-        value = self.mlp(global_state)
+    def forward(self, all_obs, agent_id):
+        """
+        Args:
+            all_obs: (batch_size, num_agents, 147) 全エージェントの共通/個別観測の集まり
+            agent_id: (batch_size,) 状態価値を計算する対象のエージェントID
+        """
+        batch_size = all_obs.shape[0]
+        num_agents = all_obs.shape[1]
+        
+        # 1. 全エージェントの全観測を効率よく一括でCNN処理するため、バッチ次元に平坦化
+        # (batch_size * num_agents, 147)
+        flat_obs = all_obs.view(-1, 147)
+        flat_features = self.cnn(flat_obs)  # (batch_size * num_agents, 1568)
+        
+        # 2. 元のバッチとエージェントの形に戻し、全エージェントの特徴量を横に結合
+        # (batch_size, num_agents * 1568)
+        combined_features = flat_features.view(batch_size, -1)
+        
+        # 3. 評価対象エージェントのID特徴量を抽出
+        if agent_id.dim() == 2:
+            agent_id = agent_id.squeeze(-1)
+        id_feats = self.id_embedding(agent_id)  # (batch_size, id_dim)
+        
+        # 4. 全員の特徴量と、対象のID特徴量を結合
+        x = torch.cat([combined_features, id_feats], dim=-1)
+        
+        # 5. 状態価値 V(s) を出力
+        value = self.mlp(x)
         return value
 
 
-
+# =====================================================================
+# 2. MAPPO トレーナークラス
+# =====================================================================
 class MAPPO:
-    """MAPPOの学習クラス（CNNベース）"""
     def __init__(self, num_agents, obs_dim, state_dim, action_dim,
-                 lr_actor=3e-4, lr_critic=3e-4, gamma=0.99, gae_lambda=0.95,
+                 lr_actor=3e-5, lr_critic=3e-5, gamma=0.99, gae_lambda=0.95,
                  clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
                  device=torch.device("cpu")):
         self.num_agents = num_agents
@@ -89,37 +150,34 @@ class MAPPO:
         self.entropy_coef = entropy_coef
         self.device = device
 
-        # CNNエンコーダの共有
+        # CNNエンコーダ（Actor/Criticで独立して管理）
         self.cnn_encoder = CNNEncoder().to(device)
+        self.critic_encoder = CNNEncoder().to(device) # 画像処理用Criticエンコーダ
 
-        # Actor/Criticネットワーク（CNNベース）
-        self.actor = Actor(self.cnn_encoder, act_dim=action_dim).to(device)
-        self.critic = Critic(self.cnn_encoder, num_agents=num_agents).to(device)
+        # ID情報に対応したActorとCritic
+        self.actor = MAPPO_Actor(self.cnn_encoder, num_agents=num_agents, act_dim=action_dim).to(device)
+        self.critic = MAPPO_Critic(self.critic_encoder, num_agents=num_agents).to(device)
 
         # 最適化器
         self.optimizer_actor = optim.Adam(self.actor.parameters(), lr=lr_actor)
         self.optimizer_critic = optim.Adam(self.critic.parameters(), lr=lr_critic)
 
-        # メモリバッファ
         self.buffer = MultiAgentBuffer(num_agents, obs_dim, state_dim, action_dim)
 
     def get_action(self, obs, greedy=False):
         """
         観測から行動とlog_probを取得
-
         Args:
-            obs: (num_agents, obs_dim) のテンソル（CPU or GPU）
-            greedy: Trueなら最大確率の行動を選択（評価用）
-
-        Returns:
-            actions: (num_agents,) の行動ID（CPU上のnumpy）
-            log_probs: (num_agents,) のlog_prob（CPU上のnumpy）
+            obs: (num_agents, obs_dim) のテンソル
         """
-        # obsをdeviceに送る（呼び出し側で既にto(device)していても明示的に送る）
         obs = obs.to(self.device)
+        
+        # 固有IDテンソルの作成 [0, 1, 2, ..., num_agents-1]
+        agent_ids = torch.arange(self.num_agents, dtype=torch.long, device=self.device)
 
         with torch.no_grad():
-            dist = self.actor(obs)  # (num_agents, action_dim) のlogitsを持つ分布
+            # ID情報を付与してポリシーに送る
+            dist = self.actor(obs, agent_ids)
 
             if greedy:
                 actions = torch.argmax(dist.logits, dim=-1)
@@ -127,63 +185,74 @@ class MAPPO:
                 actions = dist.sample()
 
             log_probs = dist.log_prob(actions)
-            # CPUに戻してnumpyで返す（バッファ保存用）
+            
             return actions.cpu().numpy(), log_probs.cpu().numpy()
 
     def get_value(self, state):
         """
-        グローバル状態から価値を取得
-
+        グローバル状態（全員の観測の集まり）から価値を取得
+        MAPPO本来の仕様に合わせ、各エージェント個別の価値を返せるように設計
         Args:
-            state: (state_dim,) のテンソル（CPU or GPU）
-
-        Returns:
-            value: スカラー（CPU上のfloat）
+            state: (num_agents * obs_dim,) または (num_agents, obs_dim) のテンソル
         """
-        # stateをdeviceに送る
-        state = state.to(self.device)
+        # stateを (1, num_agents, obs_dim) に整形
+        if state.dim() == 1:
+            state = state.view(self.num_agents, self.obs_dim)
+        state = state.unsqueeze(0).to(self.device) # バッチ次元を追加
+
+        # ここでは環境全体の良さを代表して「エージェント0」の視点、
+        # もしくはループ用に1つだけスカラーを返す元のインターフェースを維持
+        dummy_agent_id = torch.tensor([0], dtype=torch.long, device=self.device)
 
         with torch.no_grad():
-            value = self.critic(state.unsqueeze(0))
-            # CPUに戻してスカラーで返す（バッファ保存用）
+            value = self.critic(state, dummy_agent_id)
             return value.item()
 
     def update(self, batch, epochs=3):
-        """
-        PPO更新（複数エポック）
-
-        Args:
-            batch: バッファからサンプリングしたミニバッチ（CPU上のnumpy/リスト）
-            epochs: 更新エポック数
-        """
         if batch is None:
-            return
+            return 0.0, 0.0, 0.0
 
-        # テンソル化してdeviceに送る
-        obs = torch.FloatTensor(batch['obs']).to(self.device)           # (batch, num_agents, obs_dim)
-        actions = torch.LongTensor(batch['actions']).to(self.device)     # (batch, num_agents)
-        old_log_probs = torch.FloatTensor(batch['log_probs']).to(self.device)  # (batch, num_agents)
-        advantages = torch.FloatTensor(batch['advantages']).to(self.device)  # (batch, num_agents)
-        returns = torch.FloatTensor(batch['rewards']).to(self.device)    # (batch, num_agents)
-        global_states = torch.FloatTensor(batch['global_states']).to(self.device)  # (batch, state_dim)
-        old_values = torch.FloatTensor(batch['values']).to(self.device)  # (batch,)
+        batch_size = batch['obs'].shape[0]
 
-        # 正規化（オプション）
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+        obs = torch.FloatTensor(batch['obs']).to(self.device)                 # (batch, num_agents, obs_dim)
+        actions = torch.LongTensor(batch['actions']).to(self.device)           # (batch, num_agents)
+        old_log_probs = torch.FloatTensor(batch['log_probs']).to(self.device)   # (batch, num_agents)
+        advantages = torch.FloatTensor(batch['advantages']).to(self.device)     # (batch, num_agents)
+        returns = torch.FloatTensor(batch['rewards']).to(self.device)           # (batch, num_agents)
+        
+        # グローバル状態（全員の観測の並び）
+        # もし元のコードのバッファが(batch, num_agents * obs_dim)で保存していても、ここで復元
+        global_states = torch.FloatTensor(batch['global_states']).to(self.device)
+        if global_states.dim() == 2:
+            global_states = global_states.view(batch_size, self.num_agents, self.obs_dim)
+
+        # Advantageの正規化（バッチ次元のみ）
+        advantages = (advantages - advantages.mean(dim=0, keepdim=True)) / (advantages.std(dim=0, keepdim=True) + 1e-8)
+
+        actor_losses = []
+        critic_losses = []
+        entropies = []
+
+        # 更新で使い回すバッチサイズ分の基本IDシーケンス
+        # shape: (batch_size, num_agents)
+        batch_agent_ids = torch.arange(self.num_agents, dtype=torch.long, device=self.device).repeat(batch_size, 1)
 
         for epoch in range(epochs):
-            # Actor更新（各エージェント分をまとめて処理）
-            # obs: (batch, num_agents, obs_dim) -> (batch*num_agents, obs_dim)
-            dist = self.actor(obs.view(-1, self.obs_dim))
-            new_log_probs = dist.log_prob(actions.view(-1))  # (batch*num_agents,)
-            entropy = dist.entropy().mean()
+            # --- 1. Actorの更新 ---
+            flat_obs = obs.view(-1, self.obs_dim)
+            flat_ids = batch_agent_ids.view(-1)
+            
+            # IDを付与してフォワードパス
+            dist = self.actor(flat_obs, flat_ids)
+            
+            new_log_probs = dist.log_prob(actions.view(-1)).view(batch_size, self.num_agents)
+            entropy = dist.entropy().view(batch_size, self.num_agents).mean()
 
-            # 確率比
-            ratio = torch.exp(new_log_probs - old_log_probs.view(-1))
+            ratio = torch.exp(new_log_probs - old_log_probs)
 
-            # PPOのクリップ損失
-            surr1 = ratio * advantages.view(-1)
-            surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * advantages.view(-1)
+            surr1 = ratio * advantages
+            surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * advantages
+            
             actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy
 
             self.optimizer_actor.zero_grad()
@@ -191,36 +260,44 @@ class MAPPO:
             torch.nn.utils.clip_grad_norm_(self.actor.parameters(), 0.5)
             self.optimizer_actor.step()
 
-            # Critic更新
-            values = self.critic(global_states).squeeze()  # (batch,)
-            value_loss = nn.MSELoss()(values, returns.mean(dim=1))  # グローバル報酬で学習
+            # --- 2. Criticの更新 ---
+            # Centralized Criticでは全エージェント分ループ、あるいは一括処理を行います
+            critic_epoch_losses = []
+            
+            for i in range(self.num_agents):
+                # 対象エージェントIDのバッチテンソル
+                target_agent_id = torch.full((batch_size,), i, dtype=torch.long, device=self.device)
+                
+                # 画像情報を考慮した各エージェントの予測価値 V(s)
+                values = self.critic(global_states, target_agent_id).squeeze(-1) # (batch,)
+                
+                # 各エージェント個別のリターンをターゲットにする
+                target_returns = returns[:, i] # (batch,)
+                
+                critic_loss = nn.SmoothL1Loss()(values, target_returns)
+                critic_epoch_losses.append(critic_loss)
+
+            # エージェント全員分のCriticロスを合計して更新
+            total_critic_loss = torch.stack(critic_epoch_losses).mean() * self.value_coef
 
             self.optimizer_critic.zero_grad()
-            value_loss.backward()
+            total_critic_loss.backward()
             torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 0.5)
             self.optimizer_critic.step()
 
-            # ログ出力（オプション）
-            if epoch == 0:
-                print(f"Epoch {epoch}: Actor Loss: {actor_loss.item():.4f}, Value Loss: {value_loss.item():.4f}")
+            actor_losses.append(actor_loss.item())
+            critic_losses.append(total_critic_loss.item())
+            entropies.append(entropy.item())
+
+        return np.mean(actor_losses), np.mean(critic_losses), np.mean(entropies)
 
     def load_checkpoint(self, checkpoint_path):
-        """
-        MAPPOのチェックポイントを読み込み
-
-        Args:
-            checkpoint_path: チェックポイントファイルのパス
-        Returns:
-            episode: 保存時のエピソード番号
-        """
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
-
-        # モデル・エンコーダの状態をロード
         self.actor.load_state_dict(checkpoint['actor_state_dict'])
         self.critic.load_state_dict(checkpoint['critic_state_dict'])
         self.cnn_encoder.load_state_dict(checkpoint['cnn_encoder_state_dict'])
+        self.critic_encoder.load_state_dict(checkpoint['critic_encoder_state_dict'])
 
-        # 最適化器の状態をロード
         self.optimizer_actor.load_state_dict(checkpoint['optimizer_actor_state_dict'])
         self.optimizer_critic.load_state_dict(checkpoint['optimizer_critic_state_dict'])
 
