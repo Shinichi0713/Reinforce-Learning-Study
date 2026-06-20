@@ -4,6 +4,10 @@
 しかし、これだけでうまく学習が進むわけではありません。
 強化学習は学習が出来るようになった後の改修が必要です。
 
+因みに学習前の各エージェントの動作はこのような感じでした。
+
+<img src="pursuit_small (1).gif">
+
 本日テーマ：
 >うまくエージェントの学習が進むようにコードの改修を行う
 
@@ -114,7 +118,7 @@ critic_loss = nn.MSELoss()(values, returns_global)
 | **学習のゴール** | 偶然囲めるのを待つ（確率が低い）。 | 意志を持って「包囲網」を形成しにいく。 |
 
 この「誰もいないルートから近づくと美味しい」というインセンティブにより、  
-エージェントたちは自然とターゲットを分散して囲い込むような、高度な協調行動（サラウンド）を学習しやすくなります。
+エージェントたちは自然とターゲットを分散して囲い込むような、高度な協調行動（サラウンド）を学習しやすくなることを期待します。
 
 
 ## Actor / Critic ロスの意味と解釈
@@ -188,3 +192,122 @@ $$Critic\ Loss = (実際の累積報酬 - Criticが予測した価値)^2$$
 今後、バッファの修正版で本格的に学習が始まると、この数値がダイナミックに動き始めます。  
 まずは Actor のロスがマイナスを維持、またはさらにマイナスに深く進んでいるかを確認しながら見守ってみてください。
 
+
+## 実際の学習した結果
+
+学習を実際に回してみました。
+うーん。。。微妙な気がします。
+エポックは少ないですが、もう少しエントロピに変動が起きて然るべきかという気がします。
+
+```
+Episode 0: Reward = -117.37, Captures = 0, Avg Reward = -117.37, Avg Captures = 0.00
+Actor Loss: -0.0153 | Critic Loss: 0.0796 | Avg Entropy: 1.6086
+Episode 1: Reward = -136.60, Captures = 0, Avg Reward = -126.98, Avg Captures = 0.00
+Actor Loss: -0.0163 | Critic Loss: 0.0525 | Avg Entropy: 1.6086
+Episode 2: Reward = -146.40, Captures = 0, Avg Reward = -133.46, Avg Captures = 0.00
+Actor Loss: -0.0153 | Critic Loss: 0.0612 | Avg Entropy: 1.6088
+Episode 3: Reward = -132.11, Captures = 0, Avg Reward = -133.12, Avg Captures = 0.00
+Actor Loss: -0.0164 | Critic Loss: 0.0384 | Avg Entropy: 1.6088
+Episode 4: Reward = -131.79, Captures = 0, Avg Reward = -132.85, Avg Captures = 0.00
+Actor Loss: -0.0161 | Critic Loss: 0.0346 | Avg Entropy: 1.6088
+Episode 5: Reward = -157.69, Captures = 0, Avg Reward = -136.99, Avg Captures = 0.00
+Actor Loss: -0.0171 | Critic Loss: 0.0346 | Avg Entropy: 1.6088
+Episode 6: Reward = -127.66, Captures = 0, Avg Reward = -135.66, Avg Captures = 0.00
+Actor Loss: -0.0167 | Critic Loss: 0.0359 | Avg Entropy: 1.6087
+Episode 7: Reward = -91.41, Captures = 0, Avg Reward = -130.13, Avg Captures = 0.00
+Actor Loss: -0.0173 | Critic Loss: 0.0728 | Avg Entropy: 1.6087
+Episode 8: Reward = -104.20, Captures = 0, Avg Reward = -127.25, Avg Captures = 0.00
+Actor Loss: -0.0178 | Critic Loss: 0.0546 | Avg Entropy: 1.6086
+Episode 9: Reward = -122.71, Captures = 0, Avg Reward = -126.80, Avg Captures = 0.00
+Actor Loss: -0.0211 | Critic Loss: 0.0458 | Avg Entropy: 1.6085
+Episode 10: Reward = -97.94, Captures = 0, Avg Reward = -124.17, Avg Captures = 0.00
+Actor Loss: -0.0181 | Critic Loss: 0.0530 | Avg Entropy: 1.6083
+Checkpoint saved: checkpoints/mappo_episode.pth
+Episode 11: Reward = -137.81, Captures = 0, Avg Reward = -125.31, Avg Captures = 0.00
+Actor Loss: -0.0167 | Critic Loss: 0.0308 | Avg Entropy: 1.6081
+Episode 12: Reward = -92.24, Captures = 0, Avg Reward = -122.77, Avg Captures = 0.00
+Actor Loss: -0.0193 | Critic Loss: 0.0926 | Avg Entropy: 1.6079
+Episode 13: Reward = -122.01, Captures = 0, Avg Reward = -122.71, Avg Captures = 0.00
+Actor Loss: -0.0154 | Critic Loss: 0.0531 | Avg Entropy: 1.6077
+Episode 14: Reward = -157.67, Captures = 0, Avg Reward = -125.04, Avg Captures = 0.00
+Actor Loss: -0.0209 | Critic Loss: 0.0410 | Avg Entropy: 1.6076
+Episode 15: Reward = -59.35, Captures = 0, Avg Reward = -120.94, Avg Captures = 0.00
+Actor Loss: -0.0177 | Critic Loss: 0.0837 | Avg Entropy: 1.6076
+Episode 16: Reward = -126.14, Captures = 0, Avg Reward = -121.24, Avg Captures = 0.00
+Actor Loss: -0.0210 | Critic Loss: 0.0475 | Avg Entropy: 1.6076
+Episode 17: Reward = -113.32, Captures = 0, Avg Reward = -120.80, Avg Captures = 0.00
+
+```
+
+動画はこんな感じです。
+少しエージェントが相手のそばに付きまとうような気がしますが。
+エポックは少ないので決めつけはいけませんが、学習において、このままいけば完成するという感じではないという著者のヒューリスティックは想像です。
+
+<img src="image/7_petting_improvement/pursuit_small.gif">
+
+## 総括
+
+
+以下、今回の改修内容と学習の進み具合を総括的にまとめます。
+
+### 今回やったことの概要
+
+1. **Critic 更新部分の修正**  
+   - `returns.mean(dim=1)` を「グローバルリターン」として Critic に学習させるように変更。
+   - これにより、Critic が「状態価値 V(s) ≈ 期待グローバルリターン」を正しく学習し、Advantage が意味を持つようにしました。
+
+2. **報酬設計の見直し（距離・協調・回り込み）**  
+   - 獲物との距離が近づく／遠ざかるごとに報酬／ペナルティを与える「距離ベース報酬」を導入。
+   - 獲物の周囲に味方が複数いる場合に報酬を与える「協調行動報酬」を導入。
+   - 獲物がいる方向の「味方の混雑度（flank_allies）」を計算し、  
+     「誰もいないルートから近づく」行動にボーナスを与える「回り込み（包囲）ロジック」を追加。
+
+3. **Actor / Critic ロスの意味の整理**  
+   - Actor ロスがマイナスになるのは「良い行動の確率を上げている」正常な挙動であること。
+   - Critic ロスがプラスになるのは「予測誤差の二乗誤差」であるため、数学的に当然であること。
+   - 現在のログ（Actor: マイナス、Critic: 小さなプラス）は、  
+     「ランダムに動きつつも、少し良い行動の確率を上げようとしている」「絶望的な未来をかなり正確に予測している」状態であることを説明。
+
+4. **実際の学習ログと動画の観察**  
+   - エピソード報酬は -100〜-150 程度で推移し、捕獲数は 0 のまま。
+   - Actor ロスは -0.015〜-0.02 程度で安定、Critic ロスは 0.03〜0.09 程度で小さめ。
+   - エントロピーは 1.60 前後でほぼ一定。
+   - 動画では、エージェントが獲物の周りにまとわりつくような動きは見られるが、  
+     明確な「包囲」や「回り込み」はまだ学習されていない。
+
+### Critic 更新の修正の意味
+
+**修正前の問題点**:
+- `returns.mean(dim=1)` は「各タイムステップの全エージェントリターンの平均」であり、  
+  `shared_reward=True` の Pursuit では「各ステップのリターンそのもの」とほぼ同じ。
+- 結果として Critic は「常にほぼ同じ値」を学習し、Critic Loss がほぼ 0 に張り付く。
+
+**修正後の期待効果**:
+- `returns.mean(dim=1)` を「グローバルリターン」として Critic に学習させることで、  
+  Critic は「状態価値 V(s) ≈ 期待グローバルリターン」を学習。
+- Advantage（`returns - values`）が正しく計算され、Actor の更新が進みやすくなる。
+- Critic Loss が 0 付近から増加し、リターンに合わせて学習するようになる。
+
+### 実際の学習進捗と今後の改善ポイント
+
+__現状の学習ログから分かること__
+
+- **報酬**: エピソード報酬は -100〜-150 程度で推移しており、  
+  まだ「獲物を捕まえて高報酬を得る」状態にはなっていません。
+- **捕獲数**: 0 のままです。  
+  これは、まだ「4カ所を味方で囲んで捕獲する」という高度な協調行動が学習されていないことを示しています。
+- **ロス・エントロピー**:  
+  Actor ロスはマイナス、Critic ロスは小さなプラス、エントロピーは高止まり。  
+  これは「ランダムに動きつつも、少し良い行動の確率を上げようとしている」「絶望的な未来を正確に予測している」状態であり、  
+  学習がまだ初期段階であることを示しています。
+
+__動画から見える挙動__
+
+- エージェントが獲物の周りにまとわりつくような動きは見られますが、  
+  明確な「包囲」や「回り込み」はまだ学習されていません。
+- これは、報酬設計の修正がまだ十分に効いていない、  
+  あるいは学習エポック数が少ないためと考えられます。
+
+そして、今回の状態で進めたとして、個人個人のエージェントが良い行動をとったとしても、集中学習された時に薄まってしまい、結局なんだったか分からなくなるはずです。
+強化学習はとった行動の方向性がある程度しっかりと分からないと改善が難しい学習です。
+今回のオーソドックスな修正だけでは、まだ不足している。未だ修正すべき点は存在しているというのが著者の考えです。

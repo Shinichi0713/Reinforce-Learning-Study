@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5b9f;&#x88c5;&#x30b3;&#x30fc;&#x30c9;&#x306e;&#x4fee;&#x6b63;&#xff08;Critic&#x66f4;&#x65b0;&#x90e8;&#x5206;&#xff09;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>マルチエージェントの強化学習(MARL)のチーム連携が必要となるゲーム<a href="https://yoshishinnze.hatenablog.com/entry/2026/06/06/043000">Pursuit</a>でAIエージェント学習の実装を進めてきました。</p>
+<p>しかし、これだけでうまく学習が進むわけではありません。
+強化学習は学習が出来るようになった後の改修が必要です。</p>
+<p>因みに学習前の各エージェントの動作はこのような感じでした。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\pursuit_small (1).gif">
+<p>本日テーマ：</p>
+<blockquote>
+<p>うまくエージェントの学習が進むようにコードの改修を行う</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="実装コードの修正critic更新部分">実装コードの修正（Critic更新部分）</h2>
+<p>まずは先日作成してきたコードのレビューです。</p>
+<h3 id="現状の確認">現状の確認</h3>
+<p>学習時のCriticのロスがActorに比べて小さすぎました。何か見直すべきことがないかということで確認しました。
+バッファの<code>compute_advantages</code> メソッドを見ると、<code>returns</code> はすでに「リターン（割引累積報酬）」として正しく計算されています。
+したがって、学習エージェントMAPPOの「Criticの学習対象をリターンに修正する」が怪しいと踏みました、修正すべき箇所は <code>MAPPO.update</code> 内の Critic 更新部分のみです。</p>
+<h3 id="修正すべき箇所critic更新">修正すべき箇所（Critic更新）</h3>
+<p><strong>現在のコード（問題あり）</strong>:</p>
+<pre><code class="language-python"><span class="hljs-comment"># Critic更新</span>
+values = self.critic(global_states).squeeze()  <span class="hljs-comment"># (batch,)</span>
+critic_loss = nn.MSELoss()(values, returns.mean(dim=<span class="hljs-number">1</span>))  <span class="hljs-comment"># グローバル報酬で学習</span>
+</code></pre>
+<ul>
+<li><code>returns</code> は <code>compute_advantages</code> で計算された「各エージェントのリターン（割引累積報酬）」です。</li>
+<li><code>returns.mean(dim=1)</code> は「各タイムステップの全エージェントリターンの平均」であり、<br>
+Pursuit の <code>shared_reward=True</code> では「各ステップのリターンそのもの」とほぼ同じになります。</li>
+<li>結果として、Critic が「常にほぼ同じ値（リターンの平均）」を学習し、<strong>Critic Loss がほぼ 0</strong> になります。</li>
+</ul>
+<p><strong>修正案（グローバルリターンで学習）</strong>:</p>
+<pre><code class="language-python"><span class="hljs-comment"># Critic更新</span>
+values = self.critic(global_states).squeeze()  <span class="hljs-comment"># (batch,)</span>
+
+<span class="hljs-comment"># returns は「各エージェントのリターン（割引累積報酬）」になっている前提</span>
+returns_global = returns.mean(dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># グローバルリターン（batch,）</span>
+critic_loss = nn.MSELoss()(values, returns_global)
+</code></pre>
+<p><strong>ポイント</strong>:</p>
+<ul>
+<li><code>returns</code> は既に「リターン」として正しく計算されているので、<br>
+<code>returns.mean(dim=1)</code> を「グローバルリターン」として Critic に学習させます。</li>
+<li>これにより、Critic は「状態価値 V(s) ≈ 期待グローバルリターン」を学習し、<br>
+Advantage（<code>returns - values</code>）が正しく計算されるようになります。</li>
+</ul>
+<h3 id="修正後の期待効果">修正後の期待効果</h3>
+<ul>
+<li><strong>Critic Loss</strong>: 0 付近から増加し、<strong>リターンに合わせて学習</strong>するようになります。</li>
+<li><strong>Advantage</strong>: <code>returns - values</code> が正しく計算され、Actor の更新が進みます。</li>
+<li><strong>報酬・捕獲数</strong>: Critic が正しく学習することで、Actor が「良い行動」を選びやすくなり、<br>
+報酬・捕獲数が改善する可能性が高まります。</li>
+</ul>
+<h2 id="報酬系の見直し距離協調回り込み">報酬系の見直し（距離・協調・回り込み）</h2>
+<p>現状環境から報酬をもらえるのは4カ所を味方で囲んで敵を捕まえる場合のみですが、こんな状況偶然には絶対起きないと思われます。
+ですので接近することや、勝利に近づく行動に報酬を与えていきたいと思います。</p>
+<h3 id="1-距離ベースの報酬">(1) 距離ベースの報酬</h3>
+<p><strong>目的</strong>: 獲物との距離が近づくほど報酬を与え、追跡の進捗を評価する。</p>
+<p><strong>修正案</strong>:</p>
+<ul>
+<li>各ステップで「追跡者と獲物の距離」を計算し、距離が近づくほど +0.01〜+0.1 の報酬を与える。</li>
+<li>距離が遠ざかるほど -0.01〜-0.1 のペナルティを与える。</li>
+</ul>
+<p><strong>期待効果</strong>:</p>
+<ul>
+<li>学習初期でも「距離が近づく」ことで報酬が得られ、Critic が正の値を学習しやすくなる。</li>
+<li>Actor が「獲物に近づく行動」を選ぶインセンティブが強まる。</li>
+</ul>
+<h3 id="2-協調行動の報酬">(2) 協調行動の報酬</h3>
+<p><strong>目的</strong>: 追跡者が協調して獲物を囲む行動を評価する。</p>
+<p><strong>修正案</strong>:</p>
+<ul>
+<li>獲物の周囲に追跡者が複数いる場合、+0.1〜+0.5 の報酬を与える。</li>
+<li>獲物が「囲まれている」状態（上下左右に追跡者がいる）の場合、+1 の報酬を与える。</li>
+</ul>
+<p><strong>期待効果</strong>:</p>
+<ul>
+<li>Critic が「協調行動」の価値を学習しやすくなる。</li>
+<li>Actor が「獲物を囲む行動」を選ぶインセンティブが強まる。</li>
+</ul>
+<h3 id="3-回り込み包囲ロジックの追加">(3) 回り込み（包囲）ロジックの追加</h3>
+<p><strong>目的</strong>: 追いかけるだけでなく、味方がいない方向から獲物に回り込む行動を強化する。</p>
+<p><strong>ポイント</strong>:</p>
+<ol>
+<li>
+<p><strong>自分の視界を4つの「セクター」に分割</strong></p>
+<ul>
+<li>エージェント自身の <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>7</mn><mo>×</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">7 \times 7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">7</span></span></span></span> の視界（ローカル観測）において、<br>
+最も近い獲物が「上・下・左・右」のどのエリアにいるかをリアルタイムに判定します。</li>
+<li>例：獲物が自分より「上」にいれば、視界の上半分をスキャン。</li>
+<li>これにより、エージェントから獲物へ伸びる <strong>「進路上のエリア」</strong> を特定します。</li>
+</ul>
+</li>
+<li>
+<p><strong>進路上の「味方の混雑度（flank_allies）」をカウント</strong></p>
+<ul>
+<li>特定したセクター（エリア）の中に、自分以外の味方エージェントが何人映り込んでいるかを計算します。</li>
+<li>これにより、<strong>「今自分が狙っているルートは、すでに他の味方が通ろうとしていて混んでいるか？それともガラ空きか？」</strong> が数値として分かります。</li>
+</ul>
+</li>
+<li>
+<p><strong>「ガラ空きのルート」からの接近にボーナス</strong></p>
+<ul>
+<li>エージェントが獲物に近づいた（距離が縮まった）際、通常の距離報酬に加えて、<br>
+以下の条件を満たしている場合に <strong><code>flanking_bonus_scale</code>（回り込みボーナス）</strong> を上乗せします。
+<blockquote>
+<p><strong>条件：獲物に近づいた、かつ、そのエリアの味方数（flank_allies）が「0人」であること</strong></p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>期待される行動変化</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>修正前の挙動</th>
+<th>修正後の挙動</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ルート選択</strong></td>
+<td>全員が最短距離（直線）で獲物を追いかける。</td>
+<td>味方がいない空いているルートを探す。</td>
+</tr>
+<tr>
+<td><strong>エージェントの並び</strong></td>
+<td>獲物の後ろに一列に並んでしまう（一列追従）。</td>
+<td>獲物を挟み込むように<strong>左右の側面や前方に回り込む</strong>。</td>
+</tr>
+<tr>
+<td><strong>学習のゴール</strong></td>
+<td>偶然囲めるのを待つ（確率が低い）。</td>
+<td>意志を持って「包囲網」を形成しにいく。</td>
+</tr>
+</tbody>
+</table>
+<p>この「誰もいないルートから近づくと美味しい」というインセンティブにより、<br>
+エージェントたちは自然とターゲットを分散して囲い込むような、高度な協調行動（サラウンド）を学習しやすくなることを期待します。</p>
+<h2 id="actor--critic-ロスの意味と解釈">Actor / Critic ロスの意味と解釈</h2>
+<p>因みにActor-Criticで学習した場合よくActorのロスがマイナス、Criticのロスがプラスというようにちぐはぐになることがあります。
+これはどういう意味かということについて説明します。</p>
+<p><strong>ロスのログ</strong></p>
+<pre><code>Episode 66: Reward = -215.72, Captures = 0, Avg Reward = -237.98, Avg Captures = 0.00
+Actor Loss: -0.0086 | Critic Loss: 0.0684 | Avg Entropy: 1.5968
+Episode 67: Reward = -256.44, Captures = 0, Avg Reward = -238.25, Avg Captures = 0.00
+Actor Loss: -0.0053 | Critic Loss: 0.0580 | Avg Entropy: 1.5936
+Episode 68: Reward = -258.34, Captures = 0, Avg Reward = -238.54, Avg Captures = 0.00
+Actor Loss: -0.0120 | Critic Loss: 0.0263 | Avg Entropy: 1.5957
+Episode 69: Reward = -226.41, Captures = 0, Avg Reward = -238.37, Avg Captures = 0.00
+Actor Loss: -0.0149 | Critic Loss: 0.0493 | Avg Entropy: 1.5957
+Episode 70: Reward = -175.68, Captures = 0, Avg Reward = -237.49, Avg Captures = 0.00
+Actor Loss: -0.0177 | Critic Loss: 0.1733 | Avg Entropy: 1.5927
+</code></pre>
+<h3 id="actor-のロスがマイナスになる理由">Actor のロスが「マイナス」になる理由</h3>
+<p>結論から言うと、<strong>Actor のロスはマイナス（負の値）を目指して進むのが正解</strong>です。</p>
+<p>強化学習の目的は、累積報酬を「最大化」することです。しかし、PyTorch などの最適化器（Adam など）は、基本的に損失（ロス）を「最小化（ゼロに近づける、あるいはマイナスを大きくする）」するように動きます。</p>
+<p>そのため、プログラム内では以下のような工夫をしています。</p>
+<blockquote>
+<p><strong>「ポリシーの良さ（目的関数）」にマイナス（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">1</span></span></span></span>）を掛けて、それを「Actor のロス」とする。</strong></p>
+</blockquote>
+<ul>
+<li><strong>エージェントが良い行動をした時</strong>:<br>
+「ポリシーの良さ」がプラスの大きな値になります。そこにマイナスを掛けるため、<br>
+<strong>Actor のロスは <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">-0.02</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.02</span></span></span></span> のようにマイナスの値</strong>になります。</li>
+<li><strong>学習が進むほど</strong>:<br>
+エージェントが良い行動を選ぶ確率がさらに上がるため、ロスは <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">-0.1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.1</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">-0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.2</span></span></span></span> と、<br>
+さらにマイナス側へ深く沈んでいきます。</li>
+</ul>
+<p>つまり、Actor ロスがマイナスになっているのは、<br>
+<strong>「エージェントが、報酬を多くもらえる（Advantage がプラスの）行動の確率をうまく高められているよ」</strong> というサインです。</p>
+<h3 id="critic-のロスがプラスになる理由">Critic のロスが「プラス」になる理由</h3>
+<p>Critic のロスは、予測と実際の答えのズレ（二乗誤差：MSELoss）を計算しているため、<br>
+数学的に絶対にマイナスにはならず、必ず「プラス（正の値）」になります。</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>r</mi><mi>i</mi><mi>t</mi><mi>i</mi><mi>c</mi><mtext> </mtext><mi>L</mi><mi>o</mi><mi>s</mi><mi>s</mi><mo>=</mo><mo stretchy="false">(</mo><mtext>実際の累積報酬</mtext><mo>−</mo><mi>C</mi><mi>r</mi><mi>i</mi><mi>t</mi><mi>i</mi><mi>c</mi><mtext>が予測した価値</mtext><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">Critic\ Loss = (実際の累積報酬 - Criticが予測した価値)^2
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">i</span><span class="mord mathnormal">t</span><span class="mord mathnormal">i</span><span class="mord mathnormal">c</span><span class="mspace"> </span><span class="mord mathnormal">L</span><span class="mord mathnormal">oss</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">実際の累積報酬</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">i</span><span class="mord mathnormal">t</span><span class="mord mathnormal">i</span><span class="mord mathnormal">c</span><span class="mord cjk_fallback">が予測した価値</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>数式を見てもわかる通り、誤差を2乗しているため、どんなにズレていても必ずプラスになります。<br>
+予測が完璧に的中した時だけ <code>0.0</code> になります。</p>
+<ul>
+<li>
+<p><strong>現在のログ（0.0003 など極めて低いプラス値）</strong>:<br>
+これは Critic の予測がかなり安定していることを示しています。</p>
+</li>
+<li>
+<p><strong>今後の変化</strong>:<br>
+バッファや報酬のバグを直したことで、今後エージェントが獲物を捕まえて<br>
+「大きめのプラス報酬」を一気に得る瞬間（エピソード）が出てきます。<br>
+その瞬間、Critic は「急に大金（高報酬）が手に入った」と驚くため、<br>
+<strong>一時的に Critic のロスがプラス側へピョコッと跳ね上がります。</strong><br>
+その後、その高報酬も予測できるようになれば、またゼロに向かって下がっていきます。</p>
+</li>
+<li></li>
+</ul>
+<h3 id="現在のログの解釈">現在のログの解釈</h3>
+<p>現在のログの状態は、以下のように解釈できます。</p>
+<ul>
+<li><strong>Actor Loss がマイナス</strong>:<br>
+「ランダムに動いている割には、少しでもマシな行動（獲物に近い方向など）の確率を上げようと頑張っている」</li>
+<li><strong>Critic Loss が小さなプラス</strong>:<br>
+「現在の『どうせ失敗してマイナス300点くらいになる』という絶望的な未来を、かなり正確に予測できている」</li>
+</ul>
+<p>今後、バッファの修正版で本格的に学習が始まると、この数値がダイナミックに動き始めます。<br>
+まずは Actor のロスがマイナスを維持、またはさらにマイナスに深く進んでいるかを確認しながら見守ってみてください。</p>
+<h2 id="実際の学習した結果">実際の学習した結果</h2>
+<p>学習を実際に回してみました。
+うーん。。。微妙な気がします。
+エポックは少ないですが、もう少しエントロピに変動が起きて然るべきかという気がします。</p>
+<pre><code>Episode 0: Reward = -117.37, Captures = 0, Avg Reward = -117.37, Avg Captures = 0.00
+Actor Loss: -0.0153 | Critic Loss: 0.0796 | Avg Entropy: 1.6086
+Episode 1: Reward = -136.60, Captures = 0, Avg Reward = -126.98, Avg Captures = 0.00
+Actor Loss: -0.0163 | Critic Loss: 0.0525 | Avg Entropy: 1.6086
+Episode 2: Reward = -146.40, Captures = 0, Avg Reward = -133.46, Avg Captures = 0.00
+Actor Loss: -0.0153 | Critic Loss: 0.0612 | Avg Entropy: 1.6088
+Episode 3: Reward = -132.11, Captures = 0, Avg Reward = -133.12, Avg Captures = 0.00
+Actor Loss: -0.0164 | Critic Loss: 0.0384 | Avg Entropy: 1.6088
+Episode 4: Reward = -131.79, Captures = 0, Avg Reward = -132.85, Avg Captures = 0.00
+Actor Loss: -0.0161 | Critic Loss: 0.0346 | Avg Entropy: 1.6088
+Episode 5: Reward = -157.69, Captures = 0, Avg Reward = -136.99, Avg Captures = 0.00
+Actor Loss: -0.0171 | Critic Loss: 0.0346 | Avg Entropy: 1.6088
+Episode 6: Reward = -127.66, Captures = 0, Avg Reward = -135.66, Avg Captures = 0.00
+Actor Loss: -0.0167 | Critic Loss: 0.0359 | Avg Entropy: 1.6087
+Episode 7: Reward = -91.41, Captures = 0, Avg Reward = -130.13, Avg Captures = 0.00
+Actor Loss: -0.0173 | Critic Loss: 0.0728 | Avg Entropy: 1.6087
+Episode 8: Reward = -104.20, Captures = 0, Avg Reward = -127.25, Avg Captures = 0.00
+Actor Loss: -0.0178 | Critic Loss: 0.0546 | Avg Entropy: 1.6086
+Episode 9: Reward = -122.71, Captures = 0, Avg Reward = -126.80, Avg Captures = 0.00
+Actor Loss: -0.0211 | Critic Loss: 0.0458 | Avg Entropy: 1.6085
+Episode 10: Reward = -97.94, Captures = 0, Avg Reward = -124.17, Avg Captures = 0.00
+Actor Loss: -0.0181 | Critic Loss: 0.0530 | Avg Entropy: 1.6083
+Checkpoint saved: checkpoints/mappo_episode.pth
+Episode 11: Reward = -137.81, Captures = 0, Avg Reward = -125.31, Avg Captures = 0.00
+Actor Loss: -0.0167 | Critic Loss: 0.0308 | Avg Entropy: 1.6081
+Episode 12: Reward = -92.24, Captures = 0, Avg Reward = -122.77, Avg Captures = 0.00
+Actor Loss: -0.0193 | Critic Loss: 0.0926 | Avg Entropy: 1.6079
+Episode 13: Reward = -122.01, Captures = 0, Avg Reward = -122.71, Avg Captures = 0.00
+Actor Loss: -0.0154 | Critic Loss: 0.0531 | Avg Entropy: 1.6077
+Episode 14: Reward = -157.67, Captures = 0, Avg Reward = -125.04, Avg Captures = 0.00
+Actor Loss: -0.0209 | Critic Loss: 0.0410 | Avg Entropy: 1.6076
+Episode 15: Reward = -59.35, Captures = 0, Avg Reward = -120.94, Avg Captures = 0.00
+Actor Loss: -0.0177 | Critic Loss: 0.0837 | Avg Entropy: 1.6076
+Episode 16: Reward = -126.14, Captures = 0, Avg Reward = -121.24, Avg Captures = 0.00
+Actor Loss: -0.0210 | Critic Loss: 0.0475 | Avg Entropy: 1.6076
+Episode 17: Reward = -113.32, Captures = 0, Avg Reward = -120.80, Avg Captures = 0.00
+
+</code></pre>
+<p>動画はこんな感じです。
+少しエージェントが相手のそばに付きまとうような気がしますが。
+エポックは少ないので決めつけはいけませんが、学習において、このままいけば完成するという感じではないという著者のヒューリスティックは想像です。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\7_petting_improvement\pursuit_small.gif">
+<h2 id="総括">総括</h2>
+<p>以下、今回の改修内容と学習の進み具合を総括的にまとめます。</p>
+<h3 id="今回やったことの概要">今回やったことの概要</h3>
+<ol>
+<li>
+<p><strong>Critic 更新部分の修正</strong></p>
+<ul>
+<li><code>returns.mean(dim=1)</code> を「グローバルリターン」として Critic に学習させるように変更。</li>
+<li>これにより、Critic が「状態価値 V(s) ≈ 期待グローバルリターン」を正しく学習し、Advantage が意味を持つようにしました。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬設計の見直し（距離・協調・回り込み）</strong></p>
+<ul>
+<li>獲物との距離が近づく／遠ざかるごとに報酬／ペナルティを与える「距離ベース報酬」を導入。</li>
+<li>獲物の周囲に味方が複数いる場合に報酬を与える「協調行動報酬」を導入。</li>
+<li>獲物がいる方向の「味方の混雑度（flank_allies）」を計算し、<br>
+「誰もいないルートから近づく」行動にボーナスを与える「回り込み（包囲）ロジック」を追加。</li>
+</ul>
+</li>
+<li>
+<p><strong>Actor / Critic ロスの意味の整理</strong></p>
+<ul>
+<li>Actor ロスがマイナスになるのは「良い行動の確率を上げている」正常な挙動であること。</li>
+<li>Critic ロスがプラスになるのは「予測誤差の二乗誤差」であるため、数学的に当然であること。</li>
+<li>現在のログ（Actor: マイナス、Critic: 小さなプラス）は、<br>
+「ランダムに動きつつも、少し良い行動の確率を上げようとしている」「絶望的な未来をかなり正確に予測している」状態であることを説明。</li>
+</ul>
+</li>
+<li>
+<p><strong>実際の学習ログと動画の観察</strong></p>
+<ul>
+<li>エピソード報酬は -100〜-150 程度で推移し、捕獲数は 0 のまま。</li>
+<li>Actor ロスは -0.015〜-0.02 程度で安定、Critic ロスは 0.03〜0.09 程度で小さめ。</li>
+<li>エントロピーは 1.60 前後でほぼ一定。</li>
+<li>動画では、エージェントが獲物の周りにまとわりつくような動きは見られるが、<br>
+明確な「包囲」や「回り込み」はまだ学習されていない。</li>
+</ul>
+</li>
+</ol>
+<h3 id="critic-更新の修正の意味">Critic 更新の修正の意味</h3>
+<p><strong>修正前の問題点</strong>:</p>
+<ul>
+<li><code>returns.mean(dim=1)</code> は「各タイムステップの全エージェントリターンの平均」であり、<br>
+<code>shared_reward=True</code> の Pursuit では「各ステップのリターンそのもの」とほぼ同じ。</li>
+<li>結果として Critic は「常にほぼ同じ値」を学習し、Critic Loss がほぼ 0 に張り付く。</li>
+</ul>
+<p><strong>修正後の期待効果</strong>:</p>
+<ul>
+<li><code>returns.mean(dim=1)</code> を「グローバルリターン」として Critic に学習させることで、<br>
+Critic は「状態価値 V(s) ≈ 期待グローバルリターン」を学習。</li>
+<li>Advantage（<code>returns - values</code>）が正しく計算され、Actor の更新が進みやすくなる。</li>
+<li>Critic Loss が 0 付近から増加し、リターンに合わせて学習するようになる。</li>
+</ul>
+<h3 id="実際の学習進捗と今後の改善ポイント">実際の学習進捗と今後の改善ポイント</h3>
+<p><strong>現状の学習ログから分かること</strong></p>
+<ul>
+<li><strong>報酬</strong>: エピソード報酬は -100〜-150 程度で推移しており、<br>
+まだ「獲物を捕まえて高報酬を得る」状態にはなっていません。</li>
+<li><strong>捕獲数</strong>: 0 のままです。<br>
+これは、まだ「4カ所を味方で囲んで捕獲する」という高度な協調行動が学習されていないことを示しています。</li>
+<li><strong>ロス・エントロピー</strong>:<br>
+Actor ロスはマイナス、Critic ロスは小さなプラス、エントロピーは高止まり。<br>
+これは「ランダムに動きつつも、少し良い行動の確率を上げようとしている」「絶望的な未来を正確に予測している」状態であり、<br>
+学習がまだ初期段階であることを示しています。</li>
+</ul>
+<p><strong>動画から見える挙動</strong></p>
+<ul>
+<li>エージェントが獲物の周りにまとわりつくような動きは見られますが、<br>
+明確な「包囲」や「回り込み」はまだ学習されていません。</li>
+<li>これは、報酬設計の修正がまだ十分に効いていない、<br>
+あるいは学習エポック数が少ないためと考えられます。</li>
+</ul>
+<p>そして、今回の状態で進めたとして、個人個人のエージェントが良い行動をとったとしても、集中学習された時に薄まってしまい、結局なんだったか分からなくなるはずです。
+強化学習はとった行動の方向性がある程度しっかりと分からないと改善が難しい学習です。
+今回のオーソドックスな修正だけでは、まだ不足している。未だ修正すべき点は存在しているというのが著者の考えです。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/TACRmufLfko?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
