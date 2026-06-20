@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x96c6;&#x4e2d;&#x5b66;&#x7fd2;&#x306e;&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回の学習コードの見直しの上で学習してみてもまだエージェントは思ったような動作をしませんでした。
+課題として考えたことはCriticのみの集中評価に限界があるのではないかと考えました。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>MAPPOの集中評価からハイブリッド報酬に切り替えて学習が改善するか確認</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="集中学習の課題">集中学習の課題</h2>
+<p>前回までのCriticモデルがすべての報酬を決めるという評価を行う場合「クレジット割り当て問題（Credit Assignment Problem）」と呼ばれる、マルチエージェント強化学習における最も古典的かつ致命的な課題が生じます。</p>
+<p>報酬がチーム全体の「集中報酬（チーム全体の成果に対する一括の評価）」のみで決まり、個々のエージェントの具体的な貢献（隠れたファインプレーなど）が評価されない場合、Pursuit環境を解くうえで以下のような課題があると考えました。</p>
+<h3 id="1-サボり魔lazy-agentの大量発生">1. 「サボり魔（Lazy Agent）」の大量発生</h3>
+<p>報酬が全員一律（例：誰かが捕まえたら全員に <code>+10</code>）である場合、ネットワークは「誰か特定の1〜2体が頑張ってターゲットを捕まえ、残りの6体は何もせずただ突っ立っている（あるいは邪魔にならないように端っこで静止している）」という手抜きの戦略を学習しやすくなります。</p>
+<ul>
+<li><strong>理由</strong>:
+強化学習は「最も効率よく、最もリスク（移動コストや衝突ペナルティ）を避けて報酬を得る方法」を探します。自分が動いて衝突ペナルティを受けるリスクを冒すより、「優秀な味方に任せて自分は寝て待つ」ほうが、エージェント個人の目線からは合理的（ローカルな最適解）になってしまうためです。結果として、8体による連携包囲網ではなく、ワンマンプレイのゲームになってしまいます。</li>
+</ul>
+<h3 id="2-優秀な行動のノイズ化評価の埋没">2. 優秀な行動の「ノイズ化（評価の埋没）」</h3>
+<p>例えば、エージェントAがターゲットを角に追い詰めるという完璧なアシスト（包囲行動）をしたとします。しかし、その瞬間に別のはるか遠くにいるエージェントBが味方同士で衝突してマイナス行動をとっていたり、ランダムにウロウロしていたりすると、チーム全体の報酬は相殺されて「普通、あるいは低い値」になってしまいます。</p>
+<ul>
+<li><strong>理由</strong>:
+エージェントAからすると、「素晴らしい包囲をしたのに、なぜか報酬が良くない」という状況になり、何が正解行動だったのか分からなくなります。良い行動のシグナルが、他のエージェントのランダム行動（環境のノイズ）に埋もれてしまい、包囲に必要な「おとり役」や「ルート遮断」といった高度な協調性がいつまで経っても学習されません。</li>
+</ul>
+<h3 id="3-学習の超長期化不必要なランダム探索の増加">3. 学習の超長期化（不必要なランダム探索の増加）</h3>
+<p>個人の行動が直接評価されないため、エージェントたちは「自分のどの動きがチームの勝利に貢献したのか」を完全に運（確率）に頼って探るしかなくなります。</p>
+<ul>
+<li><strong>理由</strong>:
+「8体が偶然、同時に正しい位置に動いて捕獲に成功する」という奇跡的な瞬間が何度も起きない限り、個々の正しい動きのステップが強化されません。これは単体エージェントの学習に比べて、必要なデータ量やエピソード数が数万倍に跳ね上がる原因になります。</li>
+</ul>
+<h2 id="報酬の見直し">報酬の見直し</h2>
+<p>そこで、個人の優れた行動とチームとしての評価を組み合わせたハイブリッド報酬系を考案します。</p>
+<ul>
+<li><strong>集中Critic ＋ 個別アドバンテージ</strong>:
+MAPPOでは、Critic（指導教官）が「チーム全体の状況」を俯瞰で見つつも、各エージェントに対して「今、お前（エージェント0）が取ったその行動は、チーム全体の期待値をこれだけ引き上げた（＝個別アドバンテージがプラス）」という形で、個人の貢献度を切り分けて評価（クレジットの割り当て）してくれます。</li>
+</ul>
+<p>これにより、チーム全体の「捕獲」という大目標を見据えつつも、エージェント一人ひとりが「自分がどう動けば褒められるか」を明確に理解できるようになり、サボり魔を出さずに個人が出来ること、チームとしての一体行動が出来るのではと考えました。</p>
+<p><strong>実装に当たって</strong></p>
+<p>上記を行うには、個々のエージェントの見分けがつく必要があります。
+すでに前ステップまでの修正で、Criticが「エージェント個別の価値（視点）」を認識できるようになっているため、コード側の基盤はハイブリッド報酬を受け入れる準備ができています。</p>
+<p>これをどのように実装し、エージェントがどう変化するのかを具体的に解説します。</p>
+<h2 id="実装のキーポイント">実装のキーポイント</h2>
+<p>実装におけるキーポイントについてまとめます。</p>
+<h3 id="1-報酬の用意データの発生">1. 報酬の用意（データの発生）</h3>
+<ul>
+<li><strong>チーム報酬</strong>: ターゲット捕獲時に、全員共通で得られる大きな報酬。</li>
+<li><strong>個別報酬</strong>: 各エージェントの行動（ターゲットへの接近、壁への衝突回避など）に応じて、エージェントごとに別々に計算される小さな報酬。</li>
+</ul>
+<h3 id="2-ハイブリッド報酬の算出と保存">2. ハイブリッド報酬の算出と保存</h3>
+<ul>
+<li>ラッパー（<code>PursuitWrapper</code>）内で、上記2つを足し合わせた <strong>「ハイブリッド報酬（チーム報酬 ＋ 個別報酬）」</strong> をエージェントごとに作成します。</li>
+<li>これを <code>MultiAgentBuffer</code> の <code>rewards</code> に、エージェント別の辞書型データ（<code>{'pursuer_0': r0, 'pursuer_1': r1, ...}</code>）としてステップごとに保存します。</li>
+</ul>
+<h3 id="3-ネットワークパラメータの更新学習">3. ネットワークパラメータの更新（学習）</h3>
+<ul>
+<li><strong>Critic（評価）</strong>:
+保存されたハイブリッド報酬を元に、「割引累積報酬（Return）」と「アドバンテージ（Advantage）」を<strong>エージェントごとに個別に計算</strong>します。中央集中型Criticは、全エージェントの画像情報を見ながら「エージェント <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> にとって、今の状況はどれくらい良いか」を個別に評価（学習）します。</li>
+<li><strong>Actor（行動）</strong>:
+各Actorは、Criticが計算してくれた「自分専用のアドバンテージ（自分の行動が、自分［チーム含む］にとってどれだけ価値があったか）」の数値を基準にして、ネットワークのパラメータを更新します。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\8_petting_improvement_v2\1781923778258.png" alt="1781923778258"></p>
+<h2 id="実装">実装</h2>
+<p>実装コードは以下レポジトリに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<h3 id="1-ハイブリッド報酬の設計例pursuit環境">1. ハイブリッド報酬の設計例（Pursuit環境）</h3>
+<p>協調性を崩さずに個々の動きを洗練させるための、具体的な報酬設計の数式とバランス（一例）です。</p>
+<p><strong>各エージェント <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> が受け取る報酬の構成</strong></p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>R</mi><mi>e</mi><mi>w</mi><mi>a</mi><mi>r</mi><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><msub><mi>R</mi><mrow><mi>t</mi><mi>e</mi><mi>a</mi><mi>m</mi></mrow></msub><mo>+</mo><msub><mi>w</mi><mn>1</mn></msub><mo>×</mo><msub><mi>R</mi><mrow><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo separator="true">,</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>w</mi><mn>2</mn></msub><mo>×</mo><msub><mi>R</mi><mrow><mi>c</mi><mi>o</mi><mi>l</mi><mi>l</mi><mi>i</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi><mo separator="true">,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Reward_i = R_{team} + w_1 \times R_{distance, i} + w_2 \times R_{collision, i}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">am</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">an</span><span class="mord mathnormal mtight">ce</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">co</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">ll</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<ul>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mrow><mi>t</mi><mi>e</mi><mi>a</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">R_{team}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">am</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> （チーム全体の捕獲報酬）</strong>:
+ターゲットを捕獲した瞬間に、現場にいたかどうかにかかわらず**全員一律で <code>+5.0**</code> を与えます。これで「全員で協力して捕獲する」という大目的を維持します。</li>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mrow><mi>d</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>a</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo separator="true">,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">R_{distance, i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">an</span><span class="mord mathnormal mtight">ce</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> （個人の接近報酬 / シェイピング）</strong>:
+エージェント <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> がターゲットに一歩近づいたら <code>+0.1</code>、遠ざかったら <code>-0.1</code> を与えます。これで報酬の希薄化を防ぎ、ゲーム開始直後から「ターゲットを追いかける」という基本動作を最速で学習させます。</li>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mrow><mi>c</mi><mi>o</mi><mi>l</mi><mi>l</mi><mi>i</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi><mo separator="true">,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">R_{collision, i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">co</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">ll</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">s</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> （個人の衝突ペナルティ）</strong>:
+エージェント <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> が壁や他の味方にぶつかったら **単独で <code>-0.1**</code> のペナルティを与えます。これで「お互いの進路を邪魔し合わない」キビキビとした回避行動を学習させます。</li>
+</ul>
+<h3 id="2-実装方法pursuitwrapper-の-step-を修正する">2. 実装方法：<code>PursuitWrapper</code> の <code>step</code> を修正する</h3>
+<p>これを実現する場合、環境を管理している <code>PursuitWrapper</code> クラスの <code>step</code> メソッド内で、環境本来の報酬（チーム報酬）に対して、エージェント個別の情報を足し合わせる修正を行います。</p>
+<p><strong>ラッパーの修正コード案</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">PursuitWrapper</span>:
+    <span class="hljs-comment"># ... (他の初期化処理などはそのまま) ...</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, agent, action</span>):
+        <span class="hljs-comment"># 1. 環境本来のステップを実行（env.env.step）</span>
+        <span class="hljs-comment"># ※PettingZooのAPI仕様に合わせて内部で処理を呼び出している想定</span>
+        self.env.step(action)
+        
+        <span class="hljs-comment"># 2. 環境から本来の共通報酬を取得</span>
+        _, reward, terminated, truncated, info = self.env.last(agent)
+        
+        <span class="hljs-comment"># --- 🌟 ここから個別報酬（ハイブリッド化）の追加 ---</span>
+        agent_idx = <span class="hljs-built_in">int</span>(agent.split(<span class="hljs-string">&#x27;_&#x27;</span>)[-<span class="hljs-number">1</span>])
+        
+        <span class="hljs-comment"># 例A: 接近報酬（前後のステップでのターゲットとの距離の変化を計算）</span>
+        <span class="hljs-comment"># ※現在の距離と1ステップ前の距離の差分から報酬を計算</span>
+        dist_reward = self._compute_distance_reward(agent)
+        
+        <span class="hljs-comment"># 例B: 衝突ペナルティ（infoや観測から衝突を検知できる場合）</span>
+        collision_penalty = -<span class="hljs-number">0.1</span> <span class="hljs-keyword">if</span> info.get(<span class="hljs-string">&#x27;wasted_move&#x27;</span>, <span class="hljs-literal">False</span>) <span class="hljs-keyword">else</span> <span class="hljs-number">0.0</span>
+
+        <span class="hljs-comment"># 3. チーム報酬 と 個別報酬 をミックス</span>
+        <span class="hljs-comment"># チーム報酬(reward)が+5(捕獲)の時はそのまま大きなプラス、</span>
+        <span class="hljs-comment"># 普段の移動時は個人の努力(dist_reward)や反省(penalty)が主導します</span>
+        hybrid_reward = reward + (<span class="hljs-number">1.0</span> * dist_reward) + (<span class="hljs-number">1.0</span> * collision_penalty)
+        
+        <span class="hljs-keyword">return</span> hybrid_reward, terminated, truncated, info
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_distance_reward</span>(<span class="hljs-params">self, agent</span>):
+        <span class="hljs-string">&quot;&quot;&quot;エージェントがターゲットに近づいたかを判定するヘルパー関数&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># ※環境内の座標情報にアクセスできる場合の擬似ロジック</span>
+        <span class="hljs-comment"># old_dist = 1ステップ前のターゲットとの最短距離</span>
+        <span class="hljs-comment"># current_dist = 現在のターゲットとの最短距離</span>
+        <span class="hljs-comment"># if current_dist &lt; old_dist: return 0.1</span>
+        <span class="hljs-comment"># elif current_dist &gt; old_dist: return -0.1</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>
+
+</code></pre>
+<h3 id="3-ハイブリッド評価の効果">3. ハイブリッド評価の効果</h3>
+<p>チーム一律の評価（以前）と、ハイブリッド評価（今回）を比較すると、学習のプロセスと最終的な振る舞いは以下のように変化します。</p>
+<table>
+<thead>
+<tr>
+<th>評価方法</th>
+<th>学習初期の挙動</th>
+<th>最終的なチームワークの質</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>チーム評価のみ</strong></td>
+<td>何をしていいか分からず、偶然捕獲できるまで全員がグリッド上をランダムに彷徨う（学習が非常に遅い）。</td>
+<td>協調性は高いが、無駄な動き（ウロウロする、味方同士で詰まるなど）が多くなりがち。</td>
+</tr>
+<tr>
+<td><strong>ハイブリッド評価</strong></td>
+<td>開始直後から全員がターゲットに向かって<strong>一直線に突進し始める</strong>（学習の立ち上がりが圧倒的に早い）。</td>
+<td>衝突ペナルティにより互いの位置を避けるため、**「一列に並んで綺麗に追い詰める」「無駄なく囲い込む」**といった洗練されたプロの動きになる。</td>
+</tr>
+</tbody>
+</table>
+<p>今回報酬の変更によって「学習が途中で停滞してしまう（局所最適にハマる）」確率がグッと減るはずです。</p>
+<p>ただし、注意点として <strong>個人の接近報酬（<code>dist_reward</code>）の倍率を高くしすぎないこと</strong> が大切です。個人の報酬が強すぎると、「ターゲットの周りに群がって満足し、誰もトドメの囲い込み（リスクのある移動）をしない」という本末転倒な状態になることがありそうです。</p>
+<p>まずは「チーム報酬（+5.0）」に対して、「個人の接近報酬（最高でも合計+0.5〜+1.0程度）」になるよう、小さな重みから試してみるのが良いと思います。</p>
+<h2 id="学習と動作">学習と動作</h2>
+<p>学習の推移をActorとCriticのロス関数の推移で表示すると以下が得られます。
+50 epochまでのロスは大きく違いは出ません。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\8_petting_improvement_v2\1781937051273.png" alt="1781937051273"></p>
+<p>実際の動作はこんな感じになりました。
+時間の経過とともに赤の味方がどんどん集まっていく様子は確認出来ます。
+また青の敵を追いかけるような動作は確認出来ます。
+ですが、肝心の組織立った囲いこむような動作がなかなか見れません。
+4人の味方が敵に合わせて囲みを小さくしていくと捕獲の確率が高くなるのでしょうが、現状そのような動作になかなかなりません。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\8_petting_improvement_v2\pursuit_mappo.gif">
+<h2 id="総括">総括</h2>
+<p>今回試行から得られる成功点と、考えられる課題については以下の通りです。</p>
+<p><strong>成功点</strong></p>
+<ul>
+<li>個別報酬の導入により、基本行動は改善：全員がターゲットに向かって突進するようになり、ランダムウォークから「追跡」への移行は早くなっていると推測される。</li>
+<li>クレジット割り当て問題へのアプローチ：個別アドバンテージを導入したことで、「誰がどの行動で貢献したか」をCriticが評価しやすくなった。</li>
+<li>報酬設計の方向性は妥当：チーム報酬＋個別シェイピング＋衝突ペナルティという構成は、協調性を崩さずに個人の動きを洗練させるという目的に合致している。</li>
+</ul>
+<p><strong>残る課題・改善余地</strong></p>
+<p>囲い込み行動が学習されていない</p>
+<p>接近報酬だけでは「追跡」は学習されても、「包囲」という高度な協調行動までは自然に生まれにくい。<br>
+追加で「包囲形状に関する報酬」（例：ターゲット周囲のマンハッタン距離の合計が減少したら報酬）などを検討する余地がある。</p>
+<p><strong>報酬の重みバランス</strong></p>
+<p>個別報酬（距離・衝突）の重みが強すぎると、「ターゲットの周りに群がるだけで、誰もリスクを取って囲い込まない」という局所最適に陥る可能性がある。<br>
+チーム報酬（+5.0）に対して、個別報酬の合計が+0.5〜+1.0程度になるよう、重み w1,w2w_1, w_2w1​,w2​ を慎重に調整する必要がある。</p>
+<p><strong>Criticの表現力・学習安定性</strong></p>
+<p>Actor/Criticロスに大きな差が出ていないことから、Criticが「個々の貢献度」をうまく評価しきれていない可能性もある。<br>
+Criticのネットワーク構造（CNNチャネル数・層数）や学習率・バッチサイズなどのハイパーパラメータ調整も検討の余地がある。</p>
+<p><strong>探索戦略の見直し</strong></p>
+<p>高度な協調行動は、ランダム探索だけではなかなか発見されにくい。<br>
+カリキュラム学習（簡単なタスクから始めて徐々に難易度を上げる）や、模倣学習（人間や既存アルゴリズムのデモから学ぶ）の導入も有効な選択肢。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
