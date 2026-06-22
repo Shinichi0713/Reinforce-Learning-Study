@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x554f;&#x984c;&#x5b9a;&#x7fa9;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>強化学習でトライしてまず解いてみる例題として名高い(!?)のは迷路を解く問題かしらと思います。
+本日は迷路の問題を解く強化学習について扱ってみたいと思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>迷路を脱出するエージェントを強化学習で作成する。今回はまず、環境コードを実装する。</p>
+</blockquote>
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="問題定義">問題定義</h2>
+<p>初めに問題定義を行います。</p>
+<p>5×5迷路脱出を行うエージェントを作ります。
+迷路は以下の絵のように5×5で定義されます。</p>
+<p><strong>迷路の例（5×5）</strong></p>
+<pre><code>S . . . .
+. W W . .
+. . . W .
+. W . . .
+. . . . G
+</code></pre>
+<ul>
+<li>S: スタート (0,0)</li>
+<li>G: ゴール (4,4)</li>
+<li>W: 壁</li>
+<li>.: 通路</li>
+</ul>
+<p><strong>ルール（環境仕様）</strong></p>
+<p>本問題のルールです。</p>
+<ol>
+<li>
+<p><strong>状態（State）</strong></p>
+<ul>
+<li>エージェントの現在位置 (x, y)。</li>
+<li>例: (0,0) がスタート、(4,4) がゴール。</li>
+</ul>
+</li>
+<li>
+<p><strong>行動（Action）</strong></p>
+<ul>
+<li>4種類: 上(↑), 下(↓), 左(←), 右(→)。</li>
+</ul>
+</li>
+<li>
+<p><strong>遷移（Transition）</strong></p>
+<ul>
+<li>行動に応じて1マス移動。</li>
+<li>壁（W）や迷路外への移動は「無効」で、その場にとどまる。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬（Reward）</strong></p>
+<ul>
+<li>ゴール到達: +10</li>
+<li>壁にぶつかる: -1</li>
+<li>通常移動: 0</li>
+</ul>
+</li>
+<li>
+<p><strong>終了条件</strong></p>
+<ul>
+<li>ゴールに到達したらエピソード終了。</li>
+</ul>
+</li>
+</ol>
+<h2 id="実装">実装</h2>
+<h3 id="迷路を読み込むコード例python">迷路を読み込むコード例（Python）</h3>
+<p><strong>前提</strong></p>
+<ul>
+<li>迷路はテキストファイル（例: <code>maze.txt</code>）に保存されているとします。</li>
+<li>1行が迷路の1行に対応し、文字はスペース区切りまたは連続文字で記述します。</li>
+</ul>
+<p><strong>迷路ファイル例（<code>maze.txt</code>）</strong></p>
+<p>以下を保存して<code>maze.txt</code>として保存してください。</p>
+<pre><code class="language-text">S . . . .
+. W W . .
+. . . W .
+. W . . .
+. . . . G
+</code></pre>
+<p><strong>コード（Python）</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MazeEnv</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    5x5迷路環境クラス
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, maze_file=<span class="hljs-string">&quot;maze.txt&quot;</span></span>):
+        self.maze = self._load_maze(maze_file)
+        self.start, self.goal = self._find_start_goal()
+        self.state = self.start
+        self.done = <span class="hljs-literal">False</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_load_maze</span>(<span class="hljs-params">self, file_path</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        迷路ファイルを読み込み、2次元リストとして返す
+        &quot;&quot;&quot;</span>
+        maze = []
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(file_path, <span class="hljs-string">&#x27;r&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:
+            <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:
+                line = line.strip()
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line:
+                    <span class="hljs-keyword">continue</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27; &#x27;</span> <span class="hljs-keyword">in</span> line:
+                    row = line.split()
+                <span class="hljs-keyword">else</span>:
+                    row = <span class="hljs-built_in">list</span>(line)
+                maze.append(row)
+        <span class="hljs-keyword">return</span> maze
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_find_start_goal</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        迷路からスタート(S)とゴール(G)の座標を探す
+        &quot;&quot;&quot;</span>
+        start = <span class="hljs-literal">None</span>
+        goal = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">for</span> i, row <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(self.maze):
+            <span class="hljs-keyword">for</span> j, cell <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(row):
+                <span class="hljs-keyword">if</span> cell == <span class="hljs-string">&#x27;S&#x27;</span>:
+                    start = (i, j)
+                <span class="hljs-keyword">elif</span> cell == <span class="hljs-string">&#x27;G&#x27;</span>:
+                    goal = (i, j)
+        <span class="hljs-keyword">return</span> start, goal
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_is_valid_move</span>(<span class="hljs-params">self, pos</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        現在位置が迷路内かつ壁でないかチェック
+        &quot;&quot;&quot;</span>
+        x, y = pos
+        <span class="hljs-keyword">if</span> x &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> y &lt; <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">if</span> x &gt;= <span class="hljs-built_in">len</span>(self.maze) <span class="hljs-keyword">or</span> y &gt;= <span class="hljs-built_in">len</span>(self.maze[<span class="hljs-number">0</span>]):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">if</span> self.maze[x][y] == <span class="hljs-string">&#x27;W&#x27;</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        環境を初期状態にリセット
+        &quot;&quot;&quot;</span>
+        self.state = self.start
+        self.done = <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">return</span> self.state
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, action</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        1ステップの遷移をシミュレート
+        action: 0:上, 1:下, 2:左, 3:右
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> self.done:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Episode is already done. Call reset() first.&quot;</span>)
+
+        x, y = self.state
+        <span class="hljs-keyword">if</span> action == <span class="hljs-number">0</span>:   <span class="hljs-comment"># 上</span>
+            next_state = (x - <span class="hljs-number">1</span>, y)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">1</span>: <span class="hljs-comment"># 下</span>
+            next_state = (x + <span class="hljs-number">1</span>, y)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">2</span>: <span class="hljs-comment"># 左</span>
+            next_state = (x, y - <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">3</span>: <span class="hljs-comment"># 右</span>
+            next_state = (x, y + <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Invalid action&quot;</span>)
+
+        <span class="hljs-comment"># 移動先が有効かチェック</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self._is_valid_move(next_state):
+            next_state = self.state  <span class="hljs-comment"># 壁なら動かない</span>
+            reward = -<span class="hljs-number">1</span>              <span class="hljs-comment"># 壁にぶつかった罰</span>
+        <span class="hljs-keyword">else</span>:
+            reward = <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># ゴール判定</span>
+        <span class="hljs-keyword">if</span> self.maze[next_state[<span class="hljs-number">0</span>]][next_state[<span class="hljs-number">1</span>]] == <span class="hljs-string">&#x27;G&#x27;</span>:
+            reward = <span class="hljs-number">10</span>
+            self.done = <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">else</span>:
+            self.done = <span class="hljs-literal">False</span>
+
+        self.state = next_state
+        <span class="hljs-keyword">return</span> self.state, reward, self.done
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        現在の迷路状態を表示（エージェント位置を表示）
+        &quot;&quot;&quot;</span>
+        maze_copy = [row[:] <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> self.maze]  <span class="hljs-comment"># コピー</span>
+        x, y = self.state
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.done:
+            maze_copy[x][y] = <span class="hljs-string">&#x27;A&#x27;</span>  <span class="hljs-comment"># エージェント位置</span>
+        <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> maze_copy:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27; &#x27;</span>.join(row))
+        <span class="hljs-built_in">print</span>()
+
+<span class="hljs-comment"># --- 使用例 ---</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    env = MazeEnv(<span class="hljs-string">&quot;maze.txt&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Initial maze:&quot;</span>)
+    env.render()
+
+    state = env.reset()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Start: <span class="hljs-subst">{state}</span>, Goal: <span class="hljs-subst">{env.goal}</span>&quot;</span>)
+
+    <span class="hljs-comment"># 簡単な動作確認</span>
+    actions = [<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>]  <span class="hljs-comment"># 右→下→下→右 の例</span>
+    <span class="hljs-keyword">for</span> i, action <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(actions):
+        next_state, reward, done = env.step(action)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Step <span class="hljs-subst">{i+<span class="hljs-number">1</span>}</span>: Action <span class="hljs-subst">{action}</span>&quot;</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;  -&gt; State <span class="hljs-subst">{next_state}</span>, Reward <span class="hljs-subst">{reward}</span>, Done <span class="hljs-subst">{done}</span>&quot;</span>)
+        env.render()
+        <span class="hljs-keyword">if</span> done:
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Reached goal!&quot;</span>)
+            <span class="hljs-keyword">break</span>
+</code></pre>
+<h3 id="強化学習の例題としての使い方">強化学習の例題としての使い方</h3>
+<ol>
+<li>上記コードで迷路を読み込み、環境（状態遷移と報酬）を定義します。</li>
+<li>Q学習やSARSAなどのアルゴリズムで、エージェントに「ゴールまでの最短経路」を学習させます。</li>
+<li>学習後、エージェントが選ぶ行動を可視化すると、壁を避けつつゴールへ向かう経路が確認できます。</li>
+</ol>
+<p>因みに動画生成の機能も実装しています。
+上記をインスタンス化して適当に動作させると以下のようになります。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\maze_episode.gif" width="500px" style="display: block; margin: 0 auto;">
+<h2 id="総括">総括</h2>
+<p>これまで構築してきた迷路環境のキーポイントを、設計・実装・拡張の観点からまとめます。</p>
+<h3 id="1-環境設計のキーポイント">1. 環境設計のキーポイント</h3>
+<p><strong>(1) 状態・行動・報酬の明確な定義</strong></p>
+<ul>
+<li><strong>状態（State）</strong>: エージェントの現在位置 <code>(x, y)</code></li>
+<li><strong>行動（Action）</strong>: 4方向（上・下・左・右）</li>
+<li><strong>報酬（Reward）</strong>:
+<ul>
+<li>ゴール到達: +10（大きな正の報酬）</li>
+<li>壁衝突: -1（負の報酬）</li>
+<li>通常移動: 0</li>
+</ul>
+</li>
+<li><strong>終了条件</strong>: ゴール到達でエピソード終了</li>
+</ul>
+<p>→ 強化学習の基本要素（状態・行動・報酬・終了条件）をシンプルに定義し、エージェントが「ゴールに早く到達する」ことを自然に学習できる設計になっています。</p>
+<p><strong>(2) 遷移ルールの単純さ</strong></p>
+<ul>
+<li>行動に応じて1マス移動。</li>
+<li>壁や迷路外への移動は「無効」で、その場にとどまる。</li>
+<li>ゴールに到達したら終了。</li>
+</ul>
+<p>→ 遷移が決定的で理解しやすく、初学者でも挙動を追いやすい環境です。</p>
+<h3 id="2-実装上のキーポイント">2. 実装上のキーポイント</h3>
+<p><strong>(1) 外部ファイルからの迷路読み込み</strong></p>
+<ul>
+<li>迷路をテキストファイル（例: <code>maze.txt</code>）で定義。</li>
+<li>文字 <code>S</code>, <code>G</code>, <code>W</code>, <code>.</code> でスタート・ゴール・壁・通路を表現。</li>
+<li><code>load_maze()</code> 関数でファイルを読み込み、2次元リストとして保持。</li>
+</ul>
+<p>→ 迷路の変更が容易で、コードを書き換えずに環境を切り替えられます。</p>
+<p><strong>(2) クラス化によるインターフェース統一</strong></p>
+<ul>
+<li><code>MazeEnv</code> クラスとしてまとめ、以下のメソッドを提供:
+<ul>
+<li><code>__init__</code>: ファイル読み込み・初期化</li>
+<li><code>reset()</code>: 状態を初期化（エピソード開始）</li>
+<li><code>step(action)</code>: 行動を実行し、<code>(next_state, reward, done)</code> を返す</li>
+<li><code>render()</code>: 現在の迷路とエージェント位置を表示</li>
+</ul>
+</li>
+</ul>
+<p>→ OpenAI Gym のような標準的な強化学習環境インターフェースに近づけており、アルゴリズム実装がしやすくなっています。</p>
+<p><strong>(3) 状態履歴の保持と動画化</strong></p>
+<ul>
+<li><code>self.history</code> に各ステップの状態を保存。</li>
+<li><code>save_video()</code> メソッドで <code>matplotlib.animation</code> を用いてアニメーションを作成し、MP4として保存。</li>
+<li>迷路背景は固定、エージェント位置だけをフレームごとに更新。</li>
+</ul>
+<p>→ 学習過程を視覚的に記録・共有でき、デバッグや結果の説明に有用です。</p>
+<h3 id="3-拡張性のキーポイント">3. 拡張性のキーポイント</h3>
+<p><strong>(1) 迷路サイズの柔軟性</strong></p>
+<ul>
+<li>3×3 → 5×5 への拡張例を示しましたが、ロジックは任意の N×M 迷路に適用可能です。</li>
+<li>ファイル形式を変えずに、行数・列数を増やすだけで拡張できます。</li>
+</ul>
+<p><strong>(2) 報酬設計の変更が容易</strong></p>
+<ul>
+<li>ゴール以外にも「宝箱」などの特別マスを追加し、報酬を変えることができます。</li>
+<li>報酬関数を変更するだけで、学習目標を柔軟に変えられます。</li>
+</ul>
+<p><strong>(3) 強化学習アルゴリズムとの組み合わせ</strong></p>
+<ul>
+<li><code>reset()</code> と <code>step()</code> のインターフェースが標準的であるため、Q学習、SARSA、DQN など多くのアルゴリズムと組み合わせやすい設計です。</li>
+<li>状態が離散的（グリッド座標）で単純なため、テーブル型手法（Qテーブル）の学習例としても適しています。</li>
+</ul>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/dovkMozp5Ck?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
