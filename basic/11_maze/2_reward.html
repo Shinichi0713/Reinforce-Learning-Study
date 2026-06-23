@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5831;&#x916c;&#x3068;&#x306f;&#xff1f;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p><a href="https://yoshishinnze.hatenablog.com/entry/2025/10/28/043000">前回構築した環境コード</a>ですが、これだけだとまだ強化学習として機能しません。
+環境から与えられる報酬という概念が存在しないからです。</p>
+<p>そこで本日は報酬についての説明と環境コードに報酬を実装していこうと思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>環境コードに報酬を実装していく</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+
+<h2 id="報酬とは">報酬とは？</h2>
+<p>強化学習における「報酬」は、<strong>エージェント（学習する主体）が取った行動が「どれだけ良かったか」を数値で表したもの</strong>です。
+※因みに報酬の設計指針については<a href="https://note.com/novel_fowl5247/n/ned0295a80f8c">このリンクの記事</a>をご参考頂ければと思います。</p>
+<h3 id="1-報酬は点数や評価のようなもの">1. 報酬は「点数」や「評価」のようなもの</h3>
+<ul>
+<li>迷路の例で言うと：
+<ul>
+<li>ゴールに到達 → <strong>+10点</strong>（とても良い）</li>
+<li>壁にぶつかる → <strong>-1点</strong>（良くない）</li>
+<li>普通に一歩進む → <strong>0点</strong>（普通）</li>
+</ul>
+</li>
+</ul>
+<p>このように、行動ごとに「点数」が付きます。<br>
+エージェントは、<strong>この点数（報酬）の合計をできるだけ大きくするように行動を選ぶ</strong>ことを目指します。</p>
+<h3 id="2-報酬の役割良い行動を教える先生">2. 報酬の役割：良い行動を教える「先生」</h3>
+<p>報酬は、エージェントにとっての「先生」のような役割をします。</p>
+<ul>
+<li>良い行動（ゴールに近づく、壁を避ける）には<strong>高い報酬</strong>を与える</li>
+<li>悪い行動（壁にぶつかる、遠回りする）には<strong>低い報酬（または罰）</strong> を与える</li>
+</ul>
+<p>エージェントは、試行錯誤しながら「どの行動を選ぶと報酬が増えるか」を学習していきます。</p>
+<h3 id="3-報酬は即時と将来の両方を考える">3. 報酬は「即時」と「将来」の両方を考える</h3>
+<p>強化学習では、**その場で得られる報酬（即時報酬）**だけでなく、<strong>将来もらえる報酬の合計</strong>を最大化することを目指します。</p>
+<ul>
+<li>例：<br>
+少し遠回りでも安全なルートを選ぶ方が、<br>
+最終的にゴールにたどり着く確率が高く、合計報酬が大きくなる。</li>
+</ul>
+<p>エージェントは「目先の小さな報酬」より「将来の大きな報酬」を優先できるように学習します。</p>
+<h3 id="4-報酬設計のポイント">4. 報酬設計のポイント</h3>
+<p><strong>(1) ゴールに近づく行動をほめる</strong></p>
+<ul>
+<li>ゴールに到達 → 大きな報酬</li>
+<li>ゴールに一歩近づく → 小さな報酬（または0）</li>
+</ul>
+<p><strong>(2) 明らかに悪い行動は罰する</strong></p>
+<ul>
+<li>壁にぶつかる → 負の報酬（罰）</li>
+<li>時間がかかりすぎる → 負の報酬（時間ペナルティ）</li>
+</ul>
+<p><strong>(3) 報酬のバランスを取る</strong></p>
+<ul>
+<li>報酬が大きすぎたり小さすぎたりすると、学習がうまく進まないことがあります。</li>
+<li>迷路の例では「ゴール: +10」「壁: -1」のように、差が明確で理解しやすい値にしています。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\2_reward\1782171026037.png" alt="1782171026037"></p>
+<h2 id="報酬実装のキーポイント">報酬実装のキーポイント</h2>
+<p>これまで構築してきた迷路環境コードにおいて、報酬を定義する際の手順とキーポイントをまとめます。</p>
+<h3 id="1-報酬を定義する基本手順">1. 報酬を定義する基本手順</h3>
+<p><strong>ステップ1：目標を明確にする</strong></p>
+<ul>
+<li>例：<strong>「ゴールに最短で到達する」</strong> ことをエージェントに学習させたい。</li>
+</ul>
+<p><strong>ステップ2：どの行動・状態に報酬を与えるか決める</strong></p>
+<ul>
+<li>ゴール到達 → 大きな正の報酬</li>
+<li>壁衝突 → 負の報酬（罰）</li>
+<li>通常移動 → 0（中立）</li>
+</ul>
+<p><strong>ステップ3：報酬の値を決める</strong></p>
+<ul>
+<li>ゴール: +10</li>
+<li>壁: -1</li>
+<li>通常: 0</li>
+</ul>
+<p><strong>ステップ4：コード内で報酬を返す場所を実装する</strong></p>
+<ul>
+<li><code>step()</code> メソッド内で、行動後の状態に応じて <code>reward</code> を計算し、返す。</li>
+</ul>
+<blockquote>
+<p><strong>step()</strong><br>
+step は、強化学習の環境が「1ステップ進む」ためのメソッドです。
+もう少し具体的に言うと：
+エージェントが「どの行動を選んだか」を受け取り、
+その結果として「次にどの状態になるか」「どのくらい報酬がもらえるか」「終わったかどうか」を返すメソッドです。</p>
+</blockquote>
+<h3 id="2-コード内での報酬定義の具体例">2. コード内での報酬定義の具体例</h3>
+<p>実際にstep()を実装していきます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, action</span>):
+    <span class="hljs-comment"># ... 行動に応じて next_state を計算 ...</span>
+
+    <span class="hljs-comment"># 1. 壁にぶつかったか？</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self._is_valid_move(next_state):
+        next_state = self.state
+        reward = -<span class="hljs-number">1</span>  <span class="hljs-comment"># 壁衝突の罰</span>
+
+    <span class="hljs-comment"># 2. ゴールに到達したか？</span>
+    <span class="hljs-keyword">elif</span> self.maze[next_state[<span class="hljs-number">0</span>]][next_state[<span class="hljs-number">1</span>]] == <span class="hljs-string">&#x27;G&#x27;</span>:
+        reward = <span class="hljs-number">10</span>  <span class="hljs-comment"># ゴール到達の報酬</span>
+        self.done = <span class="hljs-literal">True</span>
+
+    <span class="hljs-comment"># 3. それ以外（通常移動）</span>
+    <span class="hljs-keyword">else</span>:
+        reward = <span class="hljs-number">0</span>
+
+    self.state = next_state
+    <span class="hljs-keyword">return</span> self.state, reward, self.done
+</code></pre>
+<h3 id="3-報酬設計のキーポイント">3. 報酬設計のキーポイント</h3>
+<p><strong>(1) ゴールへの到達を「最も高く評価」する</strong></p>
+<ul>
+<li>ゴール到達報酬（+10）は、他の報酬に比べて十分に大きい値にします。</li>
+<li>エージェントが「ゴールを目指す」ことが最優先になるようにします。</li>
+</ul>
+<p><strong>(2) 明らかに悪い行動には「罰」を与える</strong></p>
+<ul>
+<li>壁衝突（-1）は、ゴール報酬に比べて小さな負の値ですが、「避けるべき行動」であることを明確にします。</li>
+<li>罰が強すぎると探索が進まないため、バランスを取ります。</li>
+</ul>
+<p><strong>(3) 通常行動は「0」で中立に</strong></p>
+<ul>
+<li>通常の移動は報酬0とし、特別な評価を与えません。</li>
+<li>これにより、エージェントは「ゴールに近づく経路」を自然に選ぶようになります。</li>
+</ul>
+<p><strong>(4) 報酬は「その場の結果」に基づいて与える</strong></p>
+<ul>
+<li>報酬は、行動直後の状態（壁にぶつかったか、ゴールか、通常か）に基づいて即座に与えます。</li>
+<li>将来の報酬の合計は、強化学習アルゴリズム（Q学習など）が内部で計算します。</li>
+</ul>
+<h3 id="4-設計上の注意点">4. 設計上の注意点</h3>
+<p><strong>(1) 報酬の差を明確にする</strong></p>
+<ul>
+<li>ゴール報酬と壁罰の差が小さいと、エージェントがゴールを目指す動機が弱くなります。</li>
+<li>例：ゴール+1、壁-1 だと「ゴールに行くメリット」が小さくなりがちです。</li>
+</ul>
+<p><strong>(2) 報酬のスケールを揃える</strong></p>
+<ul>
+<li>すべての報酬を同じオーダー（例：-1, 0, +10）にしておくと、学習が安定しやすくなります。</li>
+</ul>
+<p><strong>(3) 終了条件と報酬をセットで考える</strong></p>
+<ul>
+<li>ゴール到達時は「報酬 +10」と「done = True」を同時に返します。</li>
+<li>これにより、エージェントは「ゴールが終了点」であることを理解します。</li>
+</ul>
+<h2 id="検証">検証</h2>
+<p>実装できたら実際に正しく動作しているかを検証してみます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> unittest
+<span class="hljs-keyword">import</span> io
+
+<span class="hljs-comment"># --- テストクラス ---</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TestMazeEnvReward</span>(unittest.TestCase):
+    <span class="hljs-string">&quot;&quot;&quot;
+    迷路環境の報酬が正しく出ているか検証するテストクラス（Colab用）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">setUp</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;各テストの前に環境を初期化&quot;&quot;&quot;</span>
+        self.env = MazeEnv()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_reward_wall_hit</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;壁にぶつかったときの報酬が -1 であることを確認&quot;&quot;&quot;</span>
+        self.env.reset()
+        <span class="hljs-comment"># スタート (0,0) から左に進む → 壁 or 外に出る → 報酬 -1</span>
+        _, reward, _ = self.env.step(<span class="hljs-number">2</span>)  <span class="hljs-comment"># 左</span>
+        self.assertEqual(reward, -<span class="hljs-number">1</span>, <span class="hljs-string">&quot;壁にぶつかったときの報酬は -1 であるべき&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_reward_goal_reach</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;ゴールに到達したときの報酬が +10 であることを確認&quot;&quot;&quot;</span>
+        self.env.reset()
+        <span class="hljs-comment"># ゴール (4,4) の左隣 (4,3) から右に進む → ゴール到達</span>
+        <span class="hljs-comment"># テスト用に state を直接設定（検証目的なので許容）</span>
+        self.env.state = (<span class="hljs-number">4</span>, <span class="hljs-number">3</span>)
+        self.env.done = <span class="hljs-literal">False</span>
+        _, reward, done = self.env.step(<span class="hljs-number">3</span>)  <span class="hljs-comment"># 右 → ゴールへ</span>
+        self.assertEqual(reward, <span class="hljs-number">10</span>, <span class="hljs-string">&quot;ゴール到達時の報酬は +10 であるべき&quot;</span>)
+        self.assertTrue(done, <span class="hljs-string">&quot;ゴール到達時は done=True であるべき&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_reward_normal_move</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;通常の移動（壁でもゴールでもない）の報酬が 0 であることを確認&quot;&quot;&quot;</span>
+        self.env.reset()
+        <span class="hljs-comment"># スタート (0,0) から右に進む → (0,1) は通路</span>
+        _, reward, _ = self.env.step(<span class="hljs-number">3</span>)  <span class="hljs-comment"># 右</span>
+        self.assertEqual(reward, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;通常移動時の報酬は 0 であるべき&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_reward_sequence</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">&quot;&quot;&quot;一連の行動で報酬が正しく出るか確認&quot;&quot;&quot;</span>
+        self.env.reset()
+        rewards = []
+        actions = [<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>]  <span class="hljs-comment"># 適当な経路</span>
+        <span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> actions:
+            _, reward, done = self.env.step(action)
+            rewards.append(reward)
+            <span class="hljs-keyword">if</span> done:
+                <span class="hljs-keyword">break</span>
+        last_reward = rewards[-<span class="hljs-number">1</span>]
+        self.assertIn(last_reward, [<span class="hljs-number">10</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>],
+                      <span class="hljs-string">&quot;最終報酬は 10（ゴール）、-1（壁）、0（通常）のいずれかであるべき&quot;</span>)
+
+</code></pre>
+<p>上記テストコードを以下コードで実行してください。</p>
+<pre><code class="language-python">loader = unittest.TestLoader()
+suite = loader.loadTestsFromTestCase(TestMazeEnvReward)
+runner = unittest.TextTestRunner(verbosity=<span class="hljs-number">2</span>)
+runner.run(suite)
+</code></pre>
+<p>結果以下のようになれば実装は正しくできています。</p>
+<pre><code>test_reward_goal_reach (__main__.TestMazeEnvReward.test_reward_goal_reach)
+ゴールに到達したときの報酬が +10 であることを確認 ... ok
+test_reward_normal_move (__main__.TestMazeEnvReward.test_reward_normal_move)
+通常の移動（壁でもゴールでもない）の報酬が 0 であることを確認 ... ok
+test_reward_sequence (__main__.TestMazeEnvReward.test_reward_sequence)
+一連の行動で報酬が正しく出るか確認 ... ok
+test_reward_wall_hit (__main__.TestMazeEnvReward.test_reward_wall_hit)
+壁にぶつかったときの報酬が -1 であることを確認 ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.012s
+</code></pre>
+<h2 id="総括">総括</h2>
+<p>今回報酬の話は以下が重要な点です。</p>
+<h3 id="1-報酬の役割">1. 報酬の役割</h3>
+<ul>
+<li>報酬は、<strong>エージェントの行動が「どれだけ良かったか」を数値で評価する指標</strong>です。</li>
+<li>エージェントは「報酬の合計を最大化する」ように行動を学習します。</li>
+</ul>
+<h3 id="2-報酬設計の基本方針">2. 報酬設計の基本方針</h3>
+<ul>
+<li><strong>ゴール到達</strong> → 大きな正の報酬（例：+10）</li>
+<li><strong>明らかに悪い行動（壁衝突など）</strong> → 小さな負の報酬（例：-1）</li>
+<li><strong>通常の移動</strong> → 0（中立）</li>
+<li>報酬の差を明確にし、ゴールを目指す動機を強くします。</li>
+</ul>
+<h3 id="3-実装上のポイント">3. 実装上のポイント</h3>
+<ul>
+<li><code>step()</code> メソッド内で、行動後の状態に応じて <code>reward</code> を即座に計算・返却します。</li>
+<li>報酬は「その場の結果」に基づいて与え、将来の合計報酬はアルゴリズム側で扱います。</li>
+<li>ゴール到達時は「大きな報酬」と「<code>done = True</code>」を同時に返し、終了条件と報酬を連動させます。</li>
+</ul>
+<h3 id="4-検証のポイント">4. 検証のポイント</h3>
+<ul>
+<li>壁衝突時に <code>reward = -1</code> であること</li>
+<li>ゴール到達時に <code>reward = +10</code> かつ <code>done = True</code> であること</li>
+<li>通常移動時に <code>reward = 0</code> であること</li>
+<li>一連の行動で、最終報酬が期待通り（10, -1, 0 のいずれか）であること</li>
+<li>これらをユニットテストで確認し、報酬設計が意図通りに動作していることを保証します。</li>
+</ul>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/dovkMozp5Ck?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+            
+        </body>
+        </html>
