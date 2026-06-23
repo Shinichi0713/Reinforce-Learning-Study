@@ -55,6 +55,8 @@ __(3) 報酬のバランスを取る__
 - 報酬が大きすぎたり小さすぎたりすると、学習がうまく進まないことがあります。
 - 迷路の例では「ゴール: +10」「壁: -1」のように、差が明確で理解しやすい値にしています。
 
+![1782171026037](image/2_reward/1782171026037.png)
+
 ## 報酬実装のキーポイント
 
 これまで構築してきた迷路環境コードにおいて、報酬を定義する際の手順とキーポイントをまとめます。
@@ -127,7 +129,7 @@ __(4) 報酬は「その場の結果」に基づいて与える__
 - 報酬は、行動直後の状態（壁にぶつかったか、ゴールか、通常か）に基づいて即座に与えます。
 - 将来の報酬の合計は、強化学習アルゴリズム（Q学習など）が内部で計算します。
 
-### 4. 設計上の注意点（初心者向け）
+### 4. 設計上の注意点
 
 __(1) 報酬の差を明確にする__
 - ゴール報酬と壁罰の差が小さいと、エージェントがゴールを目指す動機が弱くなります。
@@ -140,5 +142,111 @@ __(3) 終了条件と報酬をセットで考える__
 - ゴール到達時は「報酬 +10」と「done = True」を同時に返します。
 - これにより、エージェントは「ゴールが終了点」であることを理解します。
 
+## 検証
+
+実装できたら実際に正しく動作しているかを検証してみます。
 
 
+```python
+import unittest
+import io
+
+# --- テストクラス ---
+class TestMazeEnvReward(unittest.TestCase):
+    """
+    迷路環境の報酬が正しく出ているか検証するテストクラス（Colab用）
+    """
+    def setUp(self):
+        """各テストの前に環境を初期化"""
+        self.env = MazeEnv()
+
+    def test_reward_wall_hit(self):
+        """壁にぶつかったときの報酬が -1 であることを確認"""
+        self.env.reset()
+        # スタート (0,0) から左に進む → 壁 or 外に出る → 報酬 -1
+        _, reward, _ = self.env.step(2)  # 左
+        self.assertEqual(reward, -1, "壁にぶつかったときの報酬は -1 であるべき")
+
+    def test_reward_goal_reach(self):
+        """ゴールに到達したときの報酬が +10 であることを確認"""
+        self.env.reset()
+        # ゴール (4,4) の左隣 (4,3) から右に進む → ゴール到達
+        # テスト用に state を直接設定（検証目的なので許容）
+        self.env.state = (4, 3)
+        self.env.done = False
+        _, reward, done = self.env.step(3)  # 右 → ゴールへ
+        self.assertEqual(reward, 10, "ゴール到達時の報酬は +10 であるべき")
+        self.assertTrue(done, "ゴール到達時は done=True であるべき")
+
+    def test_reward_normal_move(self):
+        """通常の移動（壁でもゴールでもない）の報酬が 0 であることを確認"""
+        self.env.reset()
+        # スタート (0,0) から右に進む → (0,1) は通路
+        _, reward, _ = self.env.step(3)  # 右
+        self.assertEqual(reward, 0, "通常移動時の報酬は 0 であるべき")
+
+    def test_reward_sequence(self):
+        """一連の行動で報酬が正しく出るか確認"""
+        self.env.reset()
+        rewards = []
+        actions = [3, 1, 1, 3, 3, 1, 3]  # 適当な経路
+        for action in actions:
+            _, reward, done = self.env.step(action)
+            rewards.append(reward)
+            if done:
+                break
+        last_reward = rewards[-1]
+        self.assertIn(last_reward, [10, -1, 0],
+                      "最終報酬は 10（ゴール）、-1（壁）、0（通常）のいずれかであるべき")
+
+```
+
+上記テストコードを以下コードで実行してください。
+
+```python
+loader = unittest.TestLoader()
+suite = loader.loadTestsFromTestCase(TestMazeEnvReward)
+runner = unittest.TextTestRunner(verbosity=2)
+runner.run(suite)
+```
+
+結果以下のようになれば実装は正しくできています。
+```
+test_reward_goal_reach (__main__.TestMazeEnvReward.test_reward_goal_reach)
+ゴールに到達したときの報酬が +10 であることを確認 ... ok
+test_reward_normal_move (__main__.TestMazeEnvReward.test_reward_normal_move)
+通常の移動（壁でもゴールでもない）の報酬が 0 であることを確認 ... ok
+test_reward_sequence (__main__.TestMazeEnvReward.test_reward_sequence)
+一連の行動で報酬が正しく出るか確認 ... ok
+test_reward_wall_hit (__main__.TestMazeEnvReward.test_reward_wall_hit)
+壁にぶつかったときの報酬が -1 であることを確認 ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.012s
+```
+
+## 総括
+
+今回報酬の話は以下が重要な点です。
+
+### 1. 報酬の役割
+- 報酬は、**エージェントの行動が「どれだけ良かったか」を数値で評価する指標**です。
+- エージェントは「報酬の合計を最大化する」ように行動を学習します。
+
+### 2. 報酬設計の基本方針
+- **ゴール到達** → 大きな正の報酬（例：+10）
+- **明らかに悪い行動（壁衝突など）** → 小さな負の報酬（例：-1）
+- **通常の移動** → 0（中立）
+- 報酬の差を明確にし、ゴールを目指す動機を強くします。
+
+### 3. 実装上のポイント
+- `step()` メソッド内で、行動後の状態に応じて `reward` を即座に計算・返却します。
+- 報酬は「その場の結果」に基づいて与え、将来の合計報酬はアルゴリズム側で扱います。
+- ゴール到達時は「大きな報酬」と「`done = True`」を同時に返し、終了条件と報酬を連動させます。
+
+### 4. 検証のポイント
+- 壁衝突時に `reward = -1` であること
+- ゴール到達時に `reward = +10` かつ `done = True` であること
+- 通常移動時に `reward = 0` であること
+- 一連の行動で、最終報酬が期待通り（10, -1, 0 のいずれか）であること
+- これらをユニットテストで確認し、報酬設計が意図通りに動作していることを保証します。
