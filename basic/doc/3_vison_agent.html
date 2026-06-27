@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x7d50;&#x8ad6;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>強化学習のタスクで、状態量をLinear層用の列情報として受け取った場合と、CNNで解析できる画像として受け取った場合で前者の方がエージェントは安定して、より良い学習を出来ているようです。</p>
+<p>これは一般的なことでしょうか？</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>状態量が画像になった場合、強化学習の安定性や精度に影響を受けることは一般的事実か調べてみた。</p>
+</blockquote>
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="結論">結論</h2>
+<p>「Linear層用の状態量（ベクトル）で学習した方が、CNNで画像を扱う場合より安定して良い学習ができる」という現象は、<strong>多くの研究で報告されている一般的な傾向</strong>のようです。<br>
+以下に、その背景と、それを裏付ける論文・レビューを引用しながら整理します。</p>
+<h2 id="1-一般的な傾向ベクトル状態の方が安定しやすい理由">1. 一般的な傾向：ベクトル状態の方が安定しやすい理由</h2>
+<h3 id="11-情報の密度とノイズ">1.1 情報の密度とノイズ</h3>
+<ul>
+<li>
+<p><strong>ベクトル状態</strong>：<br>
+環境から直接抽出された「意味のある数値」（位置、速度、角度など）が並んでいます。<br>
+→ 各次元が明確な意味を持ち、ノイズが少なく、エージェントが学習しやすい。</p>
+</li>
+<li>
+<p><strong>画像状態</strong>：<br>
+画素の羅列であり、多くの画素は「背景」や「無関係な情報」を含みます。<br>
+→ エージェントはまず「どこが重要か」をCNNで学習する必要があり、学習が不安定になりがちです。</p>
+</li>
+</ul>
+<h3 id="12-表現学習の負担">1.2 表現学習の負担</h3>
+<ul>
+<li>
+<p><strong>ベクトル状態</strong>：<br>
+状態そのものがすでに「抽象化された特徴」なので、Linear層は単純なマッピング（状態 → 行動）を学習するだけで済みます。</p>
+</li>
+<li>
+<p><strong>画像状態</strong>：<br>
+CNNは「画素 → 特徴 → 行動」という2段階の学習を同時に行う必要があります。<br>
+→ 表現学習（feature learning）と方策学習（policy learning）が同時に進むため、勾配が不安定になりやすいです。</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>表現学習と方策学習が同時に進むと勾配が不安定になりやすい</strong><br>
+「表現学習と方策学習が同時に進むと勾配が不安定になりやすい」理由は、主に以下の2つの要因によるものです。</p>
+<ol>
+<li><strong>表現と方策の相互依存による「動的ターゲット」問題</strong></li>
+<li><strong>勾配の経路が長く・複雑になること</strong><br>
+<strong>1. 表現と方策の相互依存による「動的ターゲット」問題</strong>
+<strong>1.1 表現学習の役割</strong></li>
+</ol>
+<ul>
+<li>表現学習（feature learning）は、<br>
+「生の観測（画像など）から、タスクに有用な特徴（feature）を抽出する」役割を持ちます。</li>
+<li>例：画像から「物体の位置」「速度」「形状」などの抽象的な特徴を抽出。
+<strong>1.2 方策学習の役割</strong></li>
+<li>方策学習（policy learning）は、<br>
+「抽出された特徴から、どの行動を取るべきか（方策）を学習する」役割を持ちます。
+<strong>1.3 同時学習の問題点</strong></li>
+<li>表現学習と方策学習を<strong>同時に</strong>行うと、</li>
+<li>方策学習は「現在の表現」を前提に最適化されます。</li>
+<li>しかし表現学習は「表現そのもの」を変えてしまいます。</li>
+<li>つまり、<strong>方策学習のターゲット（最適な方策）が、表現の変化に応じて常に動いてしまう</strong>状態になります。
+<strong>例え</strong>：</li>
+<li>あなたが「今の地図」を見て目的地への最短ルートを覚えようとしている。</li>
+<li>しかし地図そのものが毎ステップ書き換えられる。</li>
+<li>すると、覚えたルートがすぐに古くなり、また覚え直さなければならない。<br>
+このように、<strong>表現が変わるたびに方策も書き換えが必要</strong>になり、学習が不安定になります。
+<strong>2. 勾配の経路が長く・複雑になること</strong>
+<strong>2.1 勾配の伝播経路</strong></li>
+<li>CNN＋方策ネットワークのような構成では、</li>
+<li>入力 → CNN（表現学習） → 方策ネットワーク（方策学習） → 出力<br>
+という長い経路を勾配が伝わります。</li>
+<li>勾配は「出力側の誤差」から逆伝播しますが、</li>
+<li>表現層（CNN）のパラメータ更新は、<br>
+「方策側の誤差」と「表現側の勾配」の両方に依存します。
+<strong>2.2 勾配の不安定化</strong></li>
+<li>表現層のパラメータが少し変わるだけで、</li>
+<li>方策ネットワークへの入力（特徴）が大きく変わる可能性があります。</li>
+<li>すると、<strong>同じ行動・同じ報酬でも、勾配の向きや大きさが大きく変動</strong>しやすくなります。
+<strong>3. 表現の変化が方策全体に及ぼす影響の大きさ</strong>
+<strong>3.1 表現の「意味」が変わることの影響</strong></li>
+<li>表現学習は、</li>
+<li>「どの画素が重要か」</li>
+<li>「どの特徴が行動決定に効くか」を学習します。</li>
+<li>表現が少し変わると、</li>
+<li>以前は「重要だった特徴」が無視され、</li>
+<li>以前は「無関係だった特徴」が重要になる、<br>
+といったことが起こり得ます。</li>
+</ul>
+</blockquote>
+<h3 id="13-サンプル効率">1.3 サンプル効率</h3>
+<ul>
+<li>
+<p><strong>ベクトル状態</strong>：<br>
+状態が低次元でノイズが少ないため、少ないサンプルで効率的に学習できます。</p>
+</li>
+<li>
+<p><strong>画像状態</strong>：<br>
+高次元かつノイズが多いため、多くのサンプルが必要になります。<br>
+→ サンプル効率が悪く、学習が遅くなり、不安定になりがちです。</p>
+</li>
+</ul>
+<h2 id="2-論文による裏付けstate-to-visual-dagger-vs-visual-rl">2. 論文による裏付け：State-to-Visual DAgger vs Visual RL</h2>
+<p>Mu et al. (AAAI 2025) の論文<br>
+<strong>“When Should We Prefer State-to-Visual DAgger Over Visual Reinforcement Learning?”</strong><br>
+<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a></p>
+<p>では、以下のような比較が行われています。</p>
+<h3 id="21-フレームワークの違い">2.1 フレームワークの違い</h3>
+<ul>
+<li><strong>Visual RL</strong>：<br>
+画像観測（高次元）から直接方策を学習する標準的な強化学習。</li>
+<li><strong>State-to-Visual DAgger (S2V-DAgger)</strong>：
+<ol>
+<li>まず低次元の状態（privileged state）で強化学習により教師方策を学習</li>
+<li>その教師方策を用いて、画像観測から方策を模倣する（オンライン模倣学習）</li>
+</ol>
+</li>
+</ul>
+<h3 id="22-主な結果mu-et-al-2025">2.2 主な結果（Mu et al., 2025）</h3>
+<p>論文では、ManiSkill, DMControl, Adroit など16タスクで比較を行い、以下の点を報告しています<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a>：</p>
+<ul>
+<li>
+<p><strong>漸近性能（Asymptotic Performance）</strong>：</p>
+<ul>
+<li>「難しいタスク」では S2V-DAgger が Visual RL を大きく上回る。</li>
+<li>「簡単なタスク」では両者は同等か、S2V-DAgger がわずかに劣ることもある。</li>
+</ul>
+</li>
+<li>
+<p><strong>安定性（Stability）</strong>：</p>
+<ul>
+<li>S2V-DAgger は収束後に一貫して安定した性能を示す。</li>
+<li>Visual RL は性能が揺らぎやすく、場合によっては「学習の後退（unlearning）」も観察される（例：Adroit Pen タスク）。</li>
+</ul>
+</li>
+<li>
+<p><strong>サンプル効率（Environment Steps）</strong>：</p>
+<ul>
+<li>両者が収束するタスクでは、S2V-DAgger が必ずしもサンプル効率で優位とは限らない。</li>
+<li>ただし、難しいタスクでは S2V-DAgger の方が「到達できる性能」が高いため、結果的に効率が良いように見える。</li>
+</ul>
+</li>
+<li>
+<p><strong>計算コスト（Wall-clock Time）</strong>：</p>
+<ul>
+<li>S2V-DAgger はほぼすべてのタスクで、壁時計時間ベースの効率が良い。</li>
+<li>理由：高コストな視覚エンコーダの学習が第2段階に限定されるため。</li>
+</ul>
+</li>
+</ul>
+<h3 id="23-推奨事項mu-et-al-2025">2.3 推奨事項（Mu et al., 2025）</h3>
+<p>論文の結論として、以下のような推奨が示されています<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a>：</p>
+<ul>
+<li>
+<p><strong>S2V-DAgger を推奨するケース</strong>：</p>
+<ul>
+<li>標準的な Visual RL が苦戦する「難しいタスク」</li>
+<li>壁時計時間の効率が重要な場合</li>
+<li>高い安定性と一貫した性能が求められる場合</li>
+</ul>
+</li>
+<li>
+<p><strong>Visual RL を推奨するケース</strong>：</p>
+<ul>
+<li>既に有効であることが知られている「簡単なタスク」</li>
+<li>低次元の状態観測（privileged information）が利用できない場合</li>
+</ul>
+</li>
+</ul>
+<p>この結果は、<strong>「まず低次元状態で安定して学習し、その知識を画像方策に転移する」方が、画像から直接学習するより安定しやすい</strong>という、ご質問の現象を強く支持しています。</p>
+<h2 id="3-その他の関連研究レビュー">3. その他の関連研究・レビュー</h2>
+<h3 id="31-画像ベース強化学習の課題chahal-2021">3.1 画像ベース強化学習の課題（Chahal, 2021）</h3>
+<p>Chahal (2021) の解説記事では、画像ベース強化学習の学習ダイナミクスについて以下のように述べています<a href="https://karanbirchahal.medium.com/image-based-reinforcement-learning-1a6da8eacd18">Medium</a>：</p>
+<ul>
+<li>状態ベースの学習はサンプル効率が高く、安定しやすい。</li>
+<li>画像ベースの学習は柔軟性が高いが、多くのデータと計算資源を必要とし、学習が不安定になりがち。</li>
+</ul>
+<h3 id="32-医療画像解析におけるrlの限界li-et-al-2023">3.2 医療画像解析におけるRLの限界（Li et al., 2023）</h3>
+<p>医療画像解析における強化学習のレビューでは、RLの適用がまだ限定的である理由として、以下の点が挙げられています<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9924115">PMC</a>：</p>
+<ul>
+<li>高次元の画像観測から直接方策を学習するのは難しく、<br>
+多くの場合、教師あり学習や事前学習（pretraining）と組み合わせる必要がある。</li>
+<li>状態ベースのRLに比べて、画像ベースRLはサンプル効率と安定性の面で課題が多い。</li>
+</ul>
+<h2 id="4-実務上の一般的な指針論文知見を踏まえて">4. 実務上の一般的な指針（論文知見を踏まえて）</h2>
+<ol>
+<li>
+<p><strong>まずはベクトル状態で試す</strong>：</p>
+<ul>
+<li>環境から直接抽出できる数値状態（位置、速度、センサー値など）がある場合は、<br>
+まずはそれをLinear層に入力する方が、安定して良い結果を得やすいです。</li>
+<li>Mu et al. (2025) の S2V-DAgger も、この考え方を体系的に実装したものと言えます<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>どうしても画像が必要な場合だけCNNを使う</strong>：</p>
+<ul>
+<li>ゲーム画面やカメラ画像など、ベクトル化が難しい場合にCNNを検討します。</li>
+<li>その際は、S2V-DAgger のように「状態ベースの教師方策 → 画像方策の模倣」という2段階アプローチが有効な場合があります<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>ハイブリッドアプローチ</strong>：</p>
+<ul>
+<li>ベクトル状態と画像状態を両方使う（マルチモーダル入力）こともあります。</li>
+<li>例：位置・速度をLinear層へ、周囲の視覚情報をCNNへ、という構成。</li>
+</ul>
+</li>
+</ol>
+<h2 id="5-結論">5. 結論</h2>
+<ul>
+<li>
+<p><strong>「ベクトル状態＋Linear層」の方が安定して良い学習ができる</strong>というのは、多くの強化学習タスクで観察される一般的な傾向であり、Mu et al. (2025) の S2V-DAgger 研究など、近年の論文でも明確に支持されています<a href="https://ojs.aaai.org/index.php/AAAI/article/view/33604/35759">AAAI</a>。</p>
+</li>
+<li>
+<p>一方で、<strong>画像そのものが状態である場合</strong>や<strong>空間構造が重要な場合</strong>にはCNNが有利になることもありますが、その場合でも学習の安定化には工夫（2段階学習、模倣学習、事前学習など）が必要です。</p>
+</li>
+</ul>
+<p>したがって、今回気になっている現象は「一般的な傾向」と言って差し支えないと思います。<br>
+もし画像ではなくベクトル状の状態量が取得できる、かつ、手っ取り早く強化学習の成果を確認したい場合は、やはりベクトル状の状態量を活用した方が良いといえるかと思います。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/FgrpF3MLlQM?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+            
+        </body>
+        </html>
