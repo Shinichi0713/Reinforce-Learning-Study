@@ -47,4 +47,4 @@ def compress_gif_with_gifsicle(input_path, output_path, target_width=240, fps_dr
         print(f"圧縮が完了しました: {output_path}")
 
 # 実行例
-compress_gif_with_gifsicle(r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\8_petting_improvement_v2\pursuit_mappo.gif", r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\8_petting_improvement_v2\output_gifsicle.gif")
+compress_gif_with_gifsicle(r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\pursuit_mappo.gif", r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\pursuit_mappo_comp.gif")
