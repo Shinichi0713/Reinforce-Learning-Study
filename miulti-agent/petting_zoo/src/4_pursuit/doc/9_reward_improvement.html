@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x73fe;&#x72b6;&#x306e;&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回<a href="">Pursuitの報酬をチーム報酬と個人報酬のハイブリッド報酬</a>に評価するように変更しました。
+結果敵がいると隣接するように動き回る動作は確認できるようになりました。
+他方、チーム連携するような挙動はなかなかつきません。</p>
+<p>今回チーム連携の動作がしない課題に対応策を講じていきます。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>チーム連携を強化する報酬系を考案、実装する。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="現状の課題">現状の課題</h2>
+<p>前回の取り組みで課題と感じたことは以下です。</p>
+<p>事象：</p>
+<blockquote>
+<p>肝心の組織立った囲いこむような動作がなかなか見れません。
+4人の味方が敵に合わせて囲みを小さくしていくと捕獲の確率が高くなるのでしょうが、現状そのような動作になかなかなりません。</p>
+</blockquote>
+<p>この原因と考えるのが、敵の周囲に集まる可能性は非常に高く、周囲を囲むということが非常にレア。
+対して、隣接するだけであれば、弱く報酬が出てくるので、個人個人で最寄りの敵にまとわりつくことで弱い報酬がもらえて、共通の敵に隣接することが重要と学べないことにあるのではと考えました。</p>
+<h2 id="報酬の改善案">報酬の改善案</h2>
+<p>直近で実施した報酬設計の変更（<strong>敵中心の2マス以内への接近・十字配置</strong>、および<strong>重複排除条件の追加</strong>）について、強化学習の理論とPursuit環境の特性を踏まえて、その狙いと期待される効果をまとめました。</p>
+<p><strong>1. 変更の本質：Sparse Reward から Dense Reward への転換</strong></p>
+<p>修正前の環境は、最終的な「捕獲成功」という滅多に起きないイベントに対して莫大な報酬を与える <strong>Sparse Reward（疎な報酬）</strong> 状態でした。
+これだと、エージェントは何が正解行動なのか分からず、暗闇を模索するような状態になります。</p>
+<p>このため、捕獲に至るまでのプロセス（プロセス指標）を細かく評価する <strong>Dense Reward（密な報酬 / 報酬シェイピング）</strong> を取り入れます。</p>
+<p>「2マス先に近づく（マクロな接近）」 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 「上下左右に配置する（ミクロな包囲）」 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 「捕獲（ゴール）」という明確なステップが報酬として評価されることが期待されます。</p>
+<p><strong>2. 重複排除（<code>ally_layer == 1</code>）</strong></p>
+<p>1をそのままやったとして、敵の周囲の特定のセルに味方が重複して集まると意味がありません。
+このため、「同じセルに味方がいないこと」を報酬の条件に組み込みます。</p>
+<p><strong>期待される効果：マルチエージェントの「排他制御」</strong></p>
+<p>この条件により、すでに味方がいるマスに後から侵入しても報酬がゼロ（実質的な機会損失ペナルティ）になります。これにより、エージェントたちは自然と「空いているポジション（誰もいない方位）」を自律的に判断して滑り込む「排他制御（空間の譲り合い）」を学習します。</p>
+<h3 id="各報酬コンポーネントの役割とシナジー相乗効果">各報酬コンポーネントの役割とシナジー（相乗効果）</h3>
+<p>現在の報酬系は、以下のような構成とします。</p>
+<table>
+<thead>
+<tr>
+<th>報酬項目</th>
+<th>設計の狙い</th>
+<th>エージェントの行動変化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>接近報酬（距離減少）</strong></td>
+<td>敵の方向へ移動する基礎的な推進力</td>
+<td>迷子にならず、最短で敵に近づく</td>
+</tr>
+<tr>
+<td><strong>2マス以内（<code>soft_gather</code>）</strong></td>
+<td>敵の周囲への「ゆるい集結」</td>
+<td>敵の逃げ道を大枠で塞ぐ（プレ・ポジショニング）</td>
+</tr>
+<tr>
+<td><strong>十字配置（<code>cross_position</code>）</strong></td>
+<td>捕獲に直結する「決定的な包囲」</td>
+<td>上下左右をピタッとマークする</td>
+</tr>
+<tr>
+<td><strong>重複排除（<code>== 1</code>）</strong></td>
+<td>フォーメーションの「分散・最適化」</td>
+<td>団子状態を防ぎ、4方向を綺麗に分担する</td>
+</tr>
+<tr>
+<td><strong>衝突ペナルティ</strong></td>
+<td>無駄な進路妨害の抑制</td>
+<td>スムーズで無駄のないライン取り</td>
+</tr>
+</tbody>
+</table>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\1781996360166.png" alt="1781996360166"></p>
+<h2 id="観察ポイント懸念点と対策">観察ポイント（懸念点と対策）</h2>
+<p>この報酬設計には以下の「報酬ハック（ハメ技）」が起きていないか、今後のログやプレイ画面（render）で観察する必要があります。</p>
+<ul>
+<li><strong>「捕獲せず、ずっと囲み続ける」の警戒</strong>:
+上下左右に綺麗に配置されるだけで毎ステップ <code>0.25</code> の報酬が<strong>無限に</strong>手に入ります。もし捕獲成功報酬（一過性のもの）よりも、その場に留まって得られるステップ報酬の総和の方が多くなってしまうと、エージェントは「あえて捕獲を完了させず、ターゲットをいたぶるように囲み続けて永久に報酬を毟り取る」という悪知恵を学習する可能性があります。</li>
+</ul>
+<p>この場合は報酬系に、ただ囲んでいるだけだと報酬が減衰するような補正を入れることになります。</p>
+<h2 id="実装">実装</h2>
+<p>実装コードは以下レポジトリに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<h3 id="pursuitwrapper-の修正"><code>PursuitWrapper</code> の修正</h3>
+<p>今回のロジックを実装するために、<code>_analyze_observation</code> の内部で「視界内に写っているすべての敵（または特定のマス）」をベースに、周囲の味方の配置をグリッド距離（マンハッタン距離）で走査する処理を追加します。</p>
+<p>以下の変更・追加箇所を示します。</p>
+<p><strong>1. <code>__init__</code> に新しい報酬スケールを追加</strong></p>
+<pre><code class="language-python">        <span class="hljs-comment"># （既存のパラメータの下に追加）</span>
+        <span class="hljs-comment"># 新設：特定のマス（敵）をターゲットとした包囲網シェイピング報酬</span>
+        self.soft_gather_reward_scale = <span class="hljs-number">0.05</span>    <span class="hljs-comment"># 2マス先までに味方が集まっているとき（緩い報酬）</span>
+        self.cross_position_reward_scale = <span class="hljs-number">0.25</span> <span class="hljs-comment"># 上下左右のジャスト位置に配置されたとき（強めの報酬）</span>
+
+</code></pre>
+<p><strong>2. <code>_analyze_observation</code> の修正</strong></p>
+<p>視界内の各「敵（特定のマス）」に対して、周囲の味方の配置（2マス以内、および上下左右）をカウントするロジックを組み込みます。</p>
+<pre><code class="language-python">    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_analyze_observation</span>(<span class="hljs-params">self, obs</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        1つのエージェントの観測(7, 7, 3)から報酬計算用の情報を抽出する
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> obs <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.0</span>
+
+        prey_layer = obs[:, :, <span class="hljs-number">2</span>]
+        ally_layer = obs[:, :, <span class="hljs-number">1</span>]
+
+        prey_positions = np.argwhere(prey_layer &gt; <span class="hljs-number">0</span>)
+
+        min_dist = <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>)
+        closest_prey_pos = <span class="hljs-literal">None</span>
+        cy, cx = self.center_idx, self.center_idx
+
+        <span class="hljs-comment"># 1. 最も近い獲物を特定</span>
+        <span class="hljs-keyword">for</span> py, px <span class="hljs-keyword">in</span> prey_positions:
+            dist = <span class="hljs-built_in">abs</span>(py - cy) + <span class="hljs-built_in">abs</span>(px - cx)
+            <span class="hljs-keyword">if</span> dist &lt; min_dist:
+                min_dist = dist
+                closest_prey_pos = (py, px)
+
+        <span class="hljs-keyword">if</span> min_dist == <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.0</span>  <span class="hljs-comment"># 視界内に獲物がいない場合</span>
+
+        <span class="hljs-comment"># 2. 協調判定：自分の隣接4マスにいる味方の総数</span>
+        allies_count = <span class="hljs-number">0</span>
+        neighbors = [(cy-<span class="hljs-number">1</span>, cx), (cy+<span class="hljs-number">1</span>, cx), (cy, cx-<span class="hljs-number">1</span>), (cy, cx+<span class="hljs-number">1</span>)]
+        <span class="hljs-keyword">for</span> ny, nx <span class="hljs-keyword">in</span> neighbors:
+            <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= ny &lt; self.obs_range <span class="hljs-keyword">and</span> <span class="hljs-number">0</span> &lt;= nx &lt; self.obs_range:
+                allies_count += ally_layer[ny, nx]
+
+        <span class="hljs-comment"># 3. 獲物がいる「方向（セクター）」に他の味方が何人いるかをカウント</span>
+        py, px = closest_prey_pos
+        flank_allies = <span class="hljs-number">0</span>
+
+        <span class="hljs-keyword">if</span> py &lt; cy:
+            flank_allies += np.<span class="hljs-built_in">sum</span>(ally_layer[<span class="hljs-number">0</span>:cy, :])
+        <span class="hljs-keyword">elif</span> py &gt; cy:
+            flank_allies += np.<span class="hljs-built_in">sum</span>(ally_layer[cy+<span class="hljs-number">1</span>:, :])
+
+        <span class="hljs-keyword">if</span> px &lt; cx:
+            flank_allies += np.<span class="hljs-built_in">sum</span>(ally_layer[:, <span class="hljs-number">0</span>:cx])
+        <span class="hljs-keyword">elif</span> px &gt; cx:
+            flank_allies += np.<span class="hljs-built_in">sum</span>(ally_layer[:, cx+<span class="hljs-number">1</span>:])
+
+        <span class="hljs-comment"># 🌟 4. 【新設】特定のマス（最も近い敵）を基準とした包囲報酬の計算</span>
+        shaping_reward = <span class="hljs-number">0.0</span>
+        
+        <span class="hljs-comment"># 敵の周囲（縦横マスのオフセット）をチェック</span>
+        <span class="hljs-comment"># マンハッタン距離で2マス以内の全範囲を走査</span>
+        <span class="hljs-keyword">for</span> dy <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(-<span class="hljs-number">2</span>, <span class="hljs-number">3</span>):
+            <span class="hljs-keyword">for</span> dx <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(-<span class="hljs-number">2</span>, <span class="hljs-number">3</span>):
+                target_y = py + dy
+                target_x = px + dx
+                
+                <span class="hljs-comment"># 視界(7x7)の範囲内、かつ「敵のマスそのもの」は除外</span>
+                <span class="hljs-keyword">if</span> (<span class="hljs-number">0</span> &lt;= target_y &lt; self.obs_range) <span class="hljs-keyword">and</span> (<span class="hljs-number">0</span> &lt;= target_x &lt; self.obs_range) <span class="hljs-keyword">and</span> (dy != <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> dx != <span class="hljs-number">0</span>):
+                    <span class="hljs-comment"># その位置に味方がいるか（ally_layerは0または1以上）</span>
+                    <span class="hljs-keyword">if</span> ally_layer[target_y, target_x] &gt; <span class="hljs-number">0</span>:
+                        m_dist = <span class="hljs-built_in">abs</span>(dy) + <span class="hljs-built_in">abs</span>(dx)
+                        
+                        <span class="hljs-comment"># 条件A: 上下左右のジャスト位置（距離1の十字位置）の場合（やや強めの報酬）</span>
+                        <span class="hljs-keyword">if</span> m_dist == <span class="hljs-number">1</span>:
+                            shaping_reward += self.cross_position_reward_scale
+                        <span class="hljs-comment"># 条件B: 2マス先までにゆるく集まっている場合（緩い報酬）</span>
+                        <span class="hljs-keyword">elif</span> m_dist &lt;= <span class="hljs-number">2</span>:
+                            shaping_reward += self.soft_gather_reward_scale
+
+        <span class="hljs-keyword">return</span> min_dist, allies_count, flank_allies, shaping_reward
+
+</code></pre>
+<p><strong>3. <code>step</code> 内での報酬合算の修正</strong></p>
+<p>新しく計算した <code>shaping_reward</code> を <code>individual_reward</code> に加算します。</p>
+<pre><code class="language-python">    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, agent, action</span>):
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}
+
+        current_cycle = <span class="hljs-built_in">getattr</span>(self.env.unwrapped, <span class="hljs-string">&#x27;cycles&#x27;</span>, <span class="hljs-number">0</span>)
+
+        _, _, terminated, truncated, _ = self.env.last(agent)
+        step_action = <span class="hljs-literal">None</span> <span class="hljs-keyword">if</span> (terminated <span class="hljs-keyword">or</span> truncated) <span class="hljs-keyword">else</span> action
+
+        self.env.step(step_action)
+
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}
+
+        obs, team_reward, terminated, truncated, info = self.env.last(agent)
+
+        <span class="hljs-comment"># -----------------------------------------------------------------</span>
+        <span class="hljs-comment"># 🌟 個別評価報酬（Individual Reward）の計算開始</span>
+        <span class="hljs-comment"># -----------------------------------------------------------------</span>
+        individual_reward = <span class="hljs-number">0.0</span>
+
+        <span class="hljs-comment"># 🛠️ 変更：戻り値に包囲シェイピング報酬（shaping_reward）を追加</span>
+        current_min_dist, allies_count, flank_allies, shaping_reward = self._analyze_observation(obs)
+
+        <span class="hljs-comment"># 🌟 新設：包囲網シェイピング報酬の適用</span>
+        individual_reward += shaping_reward
+
+        <span class="hljs-comment"># 1. 距離・回り込みベースの評価</span>
+        reward_distance = <span class="hljs-number">0.0</span>
+        prev_dist = self.prev_min_distances.get(agent)
+        
+        <span class="hljs-comment"># （以下、既存の処理がそのまま続きます...）</span>
+
+</code></pre>
+<h2 id="学習の効果">学習の効果</h2>
+<p>学習のロス(Actor、Critic)とエントロピの学習における推移を以下に示します。
+ロスの値は報酬変わると変化します。グラフの形状で傾向確認してみると、ほぼ同じ傾向でしょうか。
+エントロピの推移は、やや早くエントロピが低下するようになったように見受けられます。
+報酬が入るタイミングが分かりやすくなったため、行動の決め手がどこか分かりやすくなったということでしょうか。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\1781997012912.png" alt="1781997012912"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\1781996995896.png" alt="1781996995896"></p>
+<p>そして実際に学習したエージェントを動作させた結果は以下です。
+赤色の味方同士が近づいていく傾向は見えますが、効果的に囲むような挙動にはなっていきません。</p>
+<p>報酬は変えたので結構できばえは変わっているはずです。
+結果は目に見える程度とは言いづらい状況でした。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\9_reward_improvement\pursuit_mappo.gif">
+<h2 id="総括">総括</h2>
+<p>今回の取り組みを整理すると、以下のようになります。</p>
+<h3 id="課題と考えていたことチーム連携が弱い理由の仮説">課題と考えていたこと（チーム連携が弱い理由の仮説）</h3>
+<ul>
+<li>報酬が「敵の周囲にいること」や「隣接すること」を主に評価しているため、<br>
+各エージェントが<strong>個別に最寄りの敵にまとわりつく</strong>だけで報酬が得られてしまいます。</li>
+<li>その結果、
+<ul>
+<li>共通の敵を<strong>全員で狙う</strong>インセンティブが弱い</li>
+<li>包囲網を<strong>時間的に絞り込む</strong>（距離を詰める）インセンティブが弱い</li>
+<li>4方向を<strong>綺麗に分担する</strong>インセンティブが弱い<br>
+といった問題が残っている可能性があります。</li>
+</ul>
+</li>
+</ul>
+<h3 id="チーム連携を強化する報酬系の改善案コンパクト提案">チーム連携を強化する報酬系の改善案（コンパクト提案）</h3>
+<p><strong>1. 「共通の敵」を強調する報酬</strong></p>
+<ul>
+<li>現状：各エージェントが「自分から見て最も近い敵」に反応</li>
+<li>改善案：
+<ul>
+<li><strong>全エージェントが同じ敵をターゲットにしている</strong>場合にボーナス報酬<br>
+（例：全員の <code>closest_prey_pos</code> が同一 or 近接している場合）</li>
+<li>これにより、「バラバラに敵を追う」よりも「1体の敵を全員で追う」行動が強化されます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 包囲網の「時間的な絞り込み」を評価する報酬</strong></p>
+<ul>
+<li>現状：敵の周囲にいること自体が報酬</li>
+<li>改善案：
+<ul>
+<li>エピソードを通じて、<strong>敵との平均距離が徐々に小さくなっている</strong>場合に報酬<br>
+（例：ステップごとに「敵との距離の減少量」を追加報酬）</li>
+<li>これにより、「囲み続けるだけ」ではなく、<strong>包囲網を絞り込む行動</strong>が強化されます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. フォーメーションの「分担」をより厳密に評価</strong></p>
+<ul>
+<li>現状：<code>ally_layer == 1</code> で重複を抑制</li>
+<li>改善案：
+<ul>
+<li>敵を中心とした<strong>4方向（上下左右）に味方が1体ずついる</strong>場合に、<br>
+追加の強い報酬（例：<code>cross_position_reward_scale</code> を大きくする）</li>
+<li>これにより、「4方向を綺麗に分担する」フォーメーションが明示的に評価されます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. 「囲み続けるだけ」の報酬ハックを防ぐ</strong></p>
+<ul>
+<li>現状：囲んでいるだけで毎ステップ報酬が入る</li>
+<li>改善案：
+<ul>
+<li>一定ステップ以上同じ敵を囲み続けていると、<strong>包囲報酬が減衰</strong>する<br>
+（例：<code>shaping_reward *= decay_factor</code>）</li>
+<li>これにより、「捕獲せずに囲み続ける」インセンティブを弱め、<br>
+実際の捕獲行動を促します。</li>
+</ul>
+</li>
+</ul>
+<h3 id="まとめ">まとめ</h3>
+<ul>
+<li>これまでの報酬設計で、<strong>敵の周囲に集まる・隣接する</strong>行動はある程度学習できています。</li>
+<li>しかし、<strong>4人が協調して包囲網を絞り込む「組織立った囲み」</strong> まではまだ到達していないため、
+<ul>
+<li>共通の敵を強調する報酬</li>
+<li>包囲網の時間的な絞り込みを評価する報酬</li>
+<li>フォーメーション分担を厳密に評価する報酬</li>
+<li>囲み続けるだけの報酬ハックを防ぐ減衰<br>
+といった追加の報酬設計が有効かもしれません。
+ただし、過去の強化学習で画像からの学習を行わせようとした場合、かなり学習が安定しなかったという実績がありました。
+別アプローチも検討すべきかと考えた今回の結果でした。</li>
+</ul>
+</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/hHC-8jTWOhA?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
