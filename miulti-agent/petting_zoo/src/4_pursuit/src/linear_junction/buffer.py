@@ -49,6 +49,7 @@ class MultiAgentBuffer:
         if len(self.buffer['obs']) == 0:
             return None
 
+        # 実際に計算が完了しているデータ数を上限にする（安全策）
         total_stored = len(self.buffer['obs'])
         indices = np.random.choice(total_stored, size=batch_size, replace=False)
 
@@ -68,11 +69,14 @@ class MultiAgentBuffer:
                 log_probs_step.append(self.buffer['log_probs'][idx][agent_name])
                 values_step.append(self.buffer['values'][idx][agent_name])
 
+                # MAPPO.update側が「rewards」というキーでCriticのターゲット（Returns）を要求するため、
+                # ここで returns の値を rewards_step にマッピングします。
                 if idx < len(self.buffer['returns']) and self.buffer['returns'][idx] is not None and agent_name in self.buffer['returns'][idx]:
                     rewards_step.append(self.buffer['returns'][idx][agent_name])
                 else:
                     rewards_step.append(0.0)
 
+                # 安全に個別advantageを取得
                 if idx < len(self.buffer['advantages']) and self.buffer['advantages'][idx] is not None and agent_name in self.buffer['advantages'][idx]:
                     advantages_step.append(self.buffer['advantages'][idx][agent_name])
                 else:
@@ -85,12 +89,13 @@ class MultiAgentBuffer:
             advantages_batch.append(advantages_step)
             values_batch.append(values_step)
 
+            # global_statesの保存 (batch, state_dim)
             global_states_batch.append(self.buffer['global_states'][idx])
 
         batch = {
             'obs': np.array(obs_batch, dtype=np.float32),                 # (batch, num_agents, obs_dim)
             'actions': np.array(actions_batch, dtype=np.int64),           # (batch, num_agents)
-            'rewards': np.array(rewards_batch, dtype=np.float32),         # (batch, num_agents) ※個別Returns
+            'rewards': np.array(rewards_batch, dtype=np.float32),         # (batch, num_agents) ※実質は個別Returns
             'global_states': np.array(global_states_batch, dtype=np.float32), # (batch, state_dim)
             'log_probs': np.array(log_probs_batch, dtype=np.float32),     # (batch, num_agents)
             'values': np.array(values_batch, dtype=np.float32),           # (batch, num_agents)
@@ -103,15 +108,11 @@ class MultiAgentBuffer:
         advantages = [None] * total_steps
         returns = [None] * total_steps
 
-        # 🌟 【安全対策】ロールアウト終了時に、まだ途中で終わっていない未完のエピソードの長さを一時的に追加
-        working_lengths = list(self.episode_lengths)
-        if self.current_episode_steps > 0:
-            working_lengths.append(self.current_episode_steps)
-
         start_idx = 0
-        for ep_len in working_lengths:
+        for ep_len in self.episode_lengths:
             end_idx = start_idx + ep_len
 
+            # 該当エピソードのデータをスライス
             rewards_ep = self.buffer['rewards'][start_idx:end_idx]
             values_ep = self.buffer['values'][start_idx:end_idx]
             terminated_ep = self.buffer['terminated'][start_idx:end_idx]
@@ -127,28 +128,38 @@ class MultiAgentBuffer:
 
                 gae = 0.0
 
-                # 🌟 時間切れ（truncated）またはロールアウトの強制的な終端である場合、最後の状態の価値でブートストラップ
-                # （未完エピソードが working_lengths で処理される際も、安全に最後の価値が引き継がれます）
-                if truncated_ep[-1] or (not terminated_ep[-1] and start_idx + ep_len == total_steps):
+                # 🌟 時間切れ（truncated）発生時のブートストラップ初期値設定の厳密化
+                # エピソードの最後のステップの「次の状態の価値 V(s_{t+1})」を決定します
+                if truncated_ep[-1]:
+                    # 時間切れの場合は、途中で遮断されただけなので最後の状態の価値をブートストラップとして使う
                     next_value = agent_values[-1]
                     future_return = agent_values[-1]
                 else:
+                    # 通常終了（terminated）またはその他の場合は 0.0
                     next_value = 0.0
                     future_return = 0.0
 
-                # 未来から過去へ向かって逆順ループ
+                # 未来(お尻)から過去(頭)へ向かって逆順ループ
                 for t in reversed(range(ep_len)):
+                    # 🌟 次のステップ t+1 が存在するか、あるいはエピソード終端かでマスクを設定
+                    # 通常、PPOでは「現在のステップ t が終了フラグ（terminated）を持つ場合、次の価値を0」とマスクします
                     is_not_terminal = 0.0 if terminated_ep[t] else 1.0
 
+                    # TD誤差 𝛿_t = r_t + 𝛾 * V(s_{t+1}) * mask - V(s_t)
                     delta = agent_rewards[t] + gamma * next_value * is_not_terminal - agent_values[t]
+
+                    # GAEの累積: 𝛿_t + 𝛾 * 𝜆 * GAE_{t+1} * mask
                     gae = delta + gamma * gae_lambda * is_not_terminal * gae
                     advantage_ep[t] = gae
 
+                    # 割引累積報酬（Return）の計算
                     future_return = agent_rewards[t] + gamma * is_not_terminal * future_return
                     return_ep[t] = future_return
 
+                    # 1つ過去のステップ（t-1）にとっての「未来の価値 V(s_{t+1})」は、現在の V(s_t)
                     next_value = agent_values[t]
 
+                # 各エージェントの計算結果をステップごとの辞書に戻して全体へ格納
                 for t_idx in range(ep_len):
                     global_idx = start_idx + t_idx
                     if advantages[global_idx] is None:
