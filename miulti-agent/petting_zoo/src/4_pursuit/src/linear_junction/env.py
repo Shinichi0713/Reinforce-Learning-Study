@@ -15,9 +15,7 @@ class PursuitWrapper:
         self.possible_agents = self.env.possible_agents
         self.num_agents = len(self.possible_agents)
 
-        # 🌟 4チャンネルのテンソル構造（7x7x4 = 196次元）に対応
-        # Ch0: 通行可能, Ch1: 壁, Ch2: 味方, Ch3: 敵
-        self.obs_dim = (obs_range * obs_range * 4)
+        self.obs_dim = (obs_range * obs_range * 3)
         self.state_dim = self.obs_dim * self.num_agents
 
         self.action_space = self.env.action_space(self.possible_agents[0])
@@ -25,11 +23,9 @@ class PursuitWrapper:
 
         # ハイブリッド報酬の重みパラメータ
         self.distance_reward_scale = 0.15     # 獲物へ接近したときの報酬
-        self.coop_reward_scale = 0.2          # 獲物の近くで味方と連携したときの報酬
+        self.coop_reward_scale = 0.2         # 獲物の近くで味方と連携したときの報酬
         self.flanking_bonus_scale = 0.2      # 他に味方がいないルートから回り込んだときの報酬
         self.surround_reward = 2.0           # 3人以上で包囲網を形成したときの報酬
-
-        # 🌟 包囲網シェイピング用のパラメータを追加
         self.soft_gather_reward_scale = 0.05    # 2マス先までに味方が集まっているとき（緩い報酬）
         self.cross_position_reward_scale = 0.25 # 上下左右のジャスト位置に配置されたとき（強めの報酬）
 
@@ -49,54 +45,34 @@ class PursuitWrapper:
         obs, _, _, _, _ = self.env.last(agent)
         if obs is None:
             return None
-
-        # 元の環境のレイヤー (7, 7, 3) をパース
-        wall_layer = obs[:, :, 0]
-        ally_layer = obs[:, :, 1]
-        prey_layer = obs[:, :, 2]
-
-        # 1. 完全に空いている（通行可能）セルの判定 (壁・味方・敵のいずれも存在しない)
-        empty_layer = ((wall_layer == 0) & (ally_layer == 0) & (prey_layer == 0)).astype(np.float32)
-
-        # 2. 4つのレイヤーを結合して (7, 7, 4) のセマンティック・テンソルを作成
-        semantic_obs = np.stack([
-            empty_layer,                   # Ch 0: 通行可能
-            wall_layer.astype(np.float32), # Ch 1: 壁
-            ally_layer.astype(np.float32), # Ch 2: 味方（重複カウント維持）
-            prey_layer.astype(np.float32)  # Ch 3: 敵
-        ], axis=-1)
-
-        # 3. バッファや既存システムとの互換性を保つため、196次元のフラットなベクトルにして返す
-        return semantic_obs.reshape(-1)
+        return obs
 
     def get_global_state(self):
         """
-        全員の観測（各196次元）を純粋にリスト化して結合し、
-        (num_agents * 196,) の1次元の元データを作成する
+        全員の観測を純粋にリスト化して結合し、(num_agents, obs_dim) の構造の元データを作成する
         """
         obs_list = []
         for agent in self.possible_agents:
-            obs_flat = self.get_obs(agent)
-            if obs_flat is not None:
-                obs_list.append(obs_flat)
+            obs = self.get_obs(agent)
+            if obs is not None:
+                # 7x7x3 画像を 147次元のフラットなベクトルに変換
+                obs_list.append(obs.reshape(-1).astype(np.float32))
             else:
                 obs_list.append(np.zeros(self.obs_dim, dtype=np.float32))
 
+        # 全員分を結合 (num_agents * obs_dim,) の1次元として返す
+        # （※MultiAgentBufferに保存され、サンプリング時に再び (Batch, num_agents, obs_dim) に復元されます）
         return np.concatenate(obs_list)
 
-    def _analyze_observation(self, obs_flat):
+    def _analyze_observation(self, obs):
         """
-        1つのエージェントの平坦化された観測(196,)から報酬計算用の情報を抽出する
+        1つのエージェントの観測(7, 7, 3)から報酬計算用の情報を抽出する
         """
-        if obs_flat is None:
+        if obs is None:
             return None, 0, 0, 0.0
 
-        # 🌟 報酬計算用に (7, 7, 4) の形状に復元
-        obs = obs_flat.reshape(self.obs_range, self.obs_range, 4)
-
-        # 4チャンネル仕様のインデックス (Ch2が味方、Ch3が敵)
-        ally_layer = obs[:, :, 2]
-        prey_layer = obs[:, :, 3]
+        prey_layer = obs[:, :, 2]
+        ally_layer = obs[:, :, 1]
 
         prey_positions = np.argwhere(prey_layer > 0)
 
@@ -135,27 +111,30 @@ class PursuitWrapper:
         elif px > cx:
             flank_allies += np.sum(ally_layer[:, cx+1:])
 
-        # 🌟 4. 特定のマス（最も近い敵）を基準とした包囲報酬の計算
+        # 🌟 4. 【アップデート版】特定のマス（最も近い敵）を基準とした包囲報酬の計算
         shaping_reward = 0.0
-
-        # 敵の周囲（マンハッタン距離で2マス以内の全範囲を走査）
+        
+        # 敵の周囲（縦横マスのオフセット）をチェック
+        # マンハッタン距離で2マス以内の全範囲を走査
         for dy in range(-2, 3):
             for dx in range(-2, 3):
                 target_y = py + dy
                 target_x = px + dx
-
+                
                 # 視界(7x7)の範囲内、かつ「敵のマスそのもの」は除外
                 if (0 <= target_y < self.obs_range) and (0 <= target_x < self.obs_range) and (dy != 0 or dx != 0):
-
-                    # その位置に味方が「1人だけ」綺麗に配置されているか？（過密ペナルティ）
+                    
+                    # 🛠️ 変更点: その位置に味方が「1人だけ」綺麗に配置されているか？
+                    # （2人以上重なっている場合は、過密ペナルティとして報酬を発生させない）
                     if ally_layer[target_y, target_x] == 1:
                         m_dist = abs(dy) + abs(dx)
-
-                        # 条件A: 上下左右のジャスト位置（距離1の十字位置）の場合（強めの報酬）
+                        
+                        # 条件A: 上下左右のジャスト位置（距離1の十字位置）の場合（やや強めの報酬）
                         if m_dist == 1:
                             shaping_reward += self.cross_position_reward_scale
-
+                        
                         # 条件B: 2マス先までにゆるく集まっている場合（緩い報酬）
+                        # ※m_dist==2 の時、および「斜め1マス(m_dist==2)」の時に対象になります
                         elif m_dist <= 2:
                             shaping_reward += self.soft_gather_reward_scale
 
@@ -175,22 +154,19 @@ class PursuitWrapper:
         if agent not in self.env.agents:
             return 0.0, True, True, {}
 
-        obs_flat, team_reward, terminated, truncated, info = self.env.last(agent)
-
-        # get_obsと同じ4チャンネル平坦化データを取得
-        obs = self.get_obs(agent)
+        obs, team_reward, terminated, truncated, info = self.env.last(agent)
 
         # -----------------------------------------------------------------
         # 🌟 個別評価報酬（Individual Reward）の計算開始
         # -----------------------------------------------------------------
         individual_reward = 0.0
 
-        # 観測データから距離、周囲の味方数、シェイピング報酬を抽出
+        # 観測データから距離、周囲の味方数を抽出
+        # current_min_dist, allies_count, flank_allies = self._analyze_observation(obs)
         current_min_dist, allies_count, flank_allies, shaping_reward = self._analyze_observation(obs)
-
+        
         # 🌟 新設：包囲網シェイピング報酬の適用
         individual_reward += shaping_reward
-
         # 1. 距離・回り込みベースの評価
         reward_distance = 0.0
         prev_dist = self.prev_min_distances.get(agent)
@@ -215,6 +191,7 @@ class PursuitWrapper:
         individual_reward += reward_coop
 
         # 3. 衝突ペナルティの評価（無駄な移動の抑制）
+        # Pursuit環境では移動が失敗した際（衝突等）に info['wasted_move'] が True になります
         if info.get('wasted_move', False):
             individual_reward += self.collision_penalty
 
@@ -230,24 +207,38 @@ class PursuitWrapper:
         # -----------------------------------------------------------------
         hybrid_reward = team_reward + individual_reward
 
-        # 🌟 先頭の戻り値として、新仕様である196次元の obs（4Chフラット）を返します
-        return obs, hybrid_reward, terminated, truncated, info
+        return hybrid_reward, terminated, truncated, info
 
     def render(self):
+        """
+        環境の現在の画面をキャプチャして返します。
+        推論用スクリプトで frames.append() して gif に保存するために使用します。
+        """
+        # 1. 内部環境（pettingzooのenv）の現在の render_mode を取得
         render_mode = getattr(self.env, "render_mode", None)
+
         if render_mode is None:
             return None
 
+        # 2. mode が "human" もしくは "rgb_array" の場合、env.render() を呼び出す
+        # pursuit_v4 の仕様上、render() は直接画像（numpy array）を返すか、
+        # もしくは内部のスクリーンバッファから画像を取得する必要があります。
         frame = self.env.render()
 
+        # 3. もし render_mode="human" で、かつ render() が None を返す（画面描画のみ行う）場合、
+        # pygame のサーフェスから直接ピクセル配列をキャプチャします。
         if frame is None and render_mode == "human":
             try:
                 import pygame
+                # 現在表示されている pygame 画面を文字列（RGB）として取得し、numpy 配列に変換
                 screen = pygame.display.get_surface()
                 if screen is not None:
+                    # ピクセルデータを RGB 形式のバイト文字列で取得
                     img_str = pygame.image.tostring(screen, "RGB")
+                    # numpy 配列 [横, 縦, 3] に変換してから、一般的な画像形式 [縦, 横, 3] に変形
                     frame = np.frombuffer(img_str, dtype=np.uint8).reshape(screen.get_size()[1], screen.get_size()[0], 3)
-            except Exception:
+            except Exception as e:
+                # pygame が入っていない、もしくはインポートエラーなどの保険
                 pass
 
         return frame
