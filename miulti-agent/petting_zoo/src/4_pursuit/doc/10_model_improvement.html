@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;&#x3068;&#x8003;&#x3048;&#x305f;&#x3053;&#x3068;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回の報酬系の変更の今一つな結果を受けて次の取り組みを考えました。
+しかし思うような結果ではありませんでした。</p>
+<p>前回の結果を踏まえて次の取り組みを検討します。</p>
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題と考えたこと">課題と考えたこと</h2>
+<p>Pursuit（追跡）環境において、従来のCNNベースのアーキテクチャでは学習が行き詰まり、Transformerへ移行することで劇的に改善する可能性が高い理由は、この環境が要求する <strong>「空間的な相対関係の把握」</strong> と <strong>「エージェント間の動的な協調（コミュニケーション）」</strong> の性質にあります。</p>
+<p>前回までエージェントとして使っていたCNNの構造的な限界と、解決するのではという仮説について考察を行います。</p>
+<h3 id="1-cnnベースのネットワークに存在した課題">1. CNNベースのネットワークに存在した「課題」</h3>
+<p>PettingZooのPursuit環境は、グリッドマップ上で複数のエージェントがターゲットを「四方から囲い込む」必要があります。CNNがこのタスクで失敗した原因は、主に以下の2点に集約されます。</p>
+<p><strong>課題①：畳み込み（Convolution）の「局所性」と受容野の限界</strong></p>
+<p>CNNは、3x3 や 5x5 といった小さなカーネル（フィルター）を使って、隣り合う画素（局所特徴）を段階的にまとめていく構造をしています。</p>
+<ul>
+<li><strong>Pursuitでの実態</strong>: 今回の観測（7x7）は一見小さいですが、エージェントが「マップ全体のどこに仲間がいて、どの方角にターゲットが逃げているか」という広域な位置関係（マクロな視点）を捉えるには、CNNの層が浅すぎたり、カーネルサイズが小さすぎたりすると、端と端の情報がネットワークの奥深く（全結合層の手前）まで統合されません。</li>
+<li><strong>結果</strong>: エージェントは「自分の目の前に敵（または味方）がいる」というミクロな情報にしか反応できず、「あっちのルートを塞ぎに行こう」という大局的な判断が困難になります。</li>
+</ul>
+<p><strong>課題②：位置情報の消失（並進対称性）</strong></p>
+<p>CNNは「画像のどこに何が写っているか」を識別するのが得意ですが、それは裏を返せば「位置が多少ズレても同じものとして認識する（位置を曖昧にする）」という特性（並進対称性）を持っています。特に、プーリング層などを挟むと厳密な座標データは失われやすくなります。</p>
+<ul>
+<li><strong>Pursuitでの実態</strong>: グリッド環境では、「味方が自分の『2マス右』にいるか『3マス右』にいるか」という<strong>1マスの正確なズレが、包囲網を敷く上で死活問題</strong>になります。CNNはゲーム的な厳密な絶対・相対座標を保持するのが苦手なため、精密な位置調整ができずにターゲットをすり抜けさせてしまいます。</li>
+</ul>
+<h3 id="2-仮説">2. 仮説</h3>
+<p>CNNではダメだった正確な位置の把握やグローバルな重要性の把握の欠如ですが、解決するならばTransformerに替えることになるのではと考えています。
+Transformer（特にSelf-Attention機構）は、CNNの上記の弱点を完全にカバーできる性質を持っています。</p>
+<p><strong>解消理由①：全域的な視野（Global Context）の一発統合</strong></p>
+<p>Transformerの核である <strong>Self-Attention（自己注意機構）</strong> は、入力されたデータの全要素（今回の場合は、7x7マップ内のすべてのマス、あるいは全エージェントの全観測データ）の<strong>ペア（2者間）の関係性をダイレクトに、かつ同時に計算</strong>します。</p>
+<ul>
+<li>CNNのように「徐々に視野を広げる」のではなく、<strong>最初からマップ全体・チーム全員の状況を一望した上で、どこに注目すべきかを判断</strong>します。これにより、「仲間が右から追い込んでいるから、自分は左を塞ぐ」という協調行動の因果関係を1ステップで結びつけることができます。</li>
+</ul>
+<p><strong>解消理由②：Positional Embedding（位置エンコーディング）による精密な座標把握</strong></p>
+<p>Transformerは、データそのものに「これは(X, Y)の位置の情報である」という厳密な位置インデックス（Positional Embedding）を足し算して入力します。</p>
+<ul>
+<li>これにより、CNNのように処理の過程で位置情報がボヤけることがなく、<strong>「ターゲットとの正確な距離」や「グリッド上の位置関係」を完璧に維持したまま特徴量を抽出</strong>できます。</li>
+</ul>
+<p><strong>解消理由③：マルチエージェントの「関係性」のモデル化</strong></p>
+<p>MAPPOのCentralized Critic（価値関数）にTransformerを採用した場合、その恩恵はさらに大きくなります。</p>
+<ul>
+<li>「味方1、味方2、……味方8」という可変、あるいは多数のエージェントの観測を「トークン（並び順に依存しない独立したデータ）」として入力できるため、「どのエージェントとどのエージェントが協力してターゲットを追い詰めているか」という動的な関係性（グラフ構造のような繋がり）をSelf-Attentionが直接学習します。</li>
+</ul>
+<h3 id="解決案の整理">解決案の整理</h3>
+<p>CNNとTransformerの特性を比較すると以下のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>CNN（従来型）</th>
+<th>Transformer（今回）</th>
+<th>Pursuit環境への影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>視野の広さ</strong></td>
+<td>局所的（層を重ねて徐々に広がる）</td>
+<td><strong>常に全体（一撃で全域をカバー）</strong></td>
+<td>仲間とターゲットの配置を瞬時に把握できる</td>
+</tr>
+<tr>
+<td><strong>位置の正確さ</strong></td>
+<td>曖昧になりやすい（識別重視）</td>
+<td><strong>厳密（位置の埋め込みを持つ）</strong></td>
+<td>1マス単位の精密な包囲・ポジショニングが可能</td>
+</tr>
+<tr>
+<td><strong>関係性の学習</strong></td>
+<td>近くの要素との連動がメイン</td>
+<td><strong>遠くの要素とも直接連動可能</strong></td>
+<td>離れたエージェント同士の協調・連携がスムーズになる</td>
+</tr>
+</tbody>
+</table>
+<p>CNNが「狭い視野で目の前の標的をがむしゃらに追いかける（結果、囲めない）」モデルだったのに対し、Transformerは「チェス盤全体を見渡して、チーム全員の最適な布陣を計算して動く」モデルへの進化を可能にします。だからこそ、今回のアーキテクチャ変更は学習を成功させるための大きな鍵となります。</p>
+<h2 id="実装のポイント">実装のポイント</h2>
+<p>「ネットワークをCNNから<strong>Transformer（MAPPO_TransformerActor / Critic）へ差し替えるために、コードのどの部分を変更・調整する必要があったか</strong>」という、実装上の具体的な変更ポイントについて整理します。</p>
+<p>キーとなる変更箇所は以下の3点です。</p>
+<h3 id="1-観測入力次元数の変更cnnの3次元からtransformerの1次元平坦化へ">1. 観測（入力）次元数の変更：CNNの3次元からTransformerの「1次元（平坦化）」へ</h3>
+<p>CNNでは画像の形状（高さ, 幅, チャンネル）をそのまま <code>(7, 7, 3)</code> で入力していましたが、Transformer（および全結合層）の入力レイヤーは<strong>1次元のベクトル</strong>、または<strong>シーケンス（トークン）の並び</strong>としてデータを受け取る必要があります。</p>
+<ul>
+<li><strong>変更点</strong>: ラッパーの <code>get_obs</code> 内で、新しく構築した4チャンネルのセマンティック・テンソル <code>(7, 7, 4)</code> を、そのまま返すのではなく、最後に <strong><code>.reshape(-1)</code> を使って <code>196次元</code> のフラットな1次元配列に変換して出力する</strong>ように変更しました。</li>
+<li><strong>理由</strong>: これにより、環境から出てくるデータのインターフェースが綺麗に1次元に統一され、Transformer Actor内の線形埋め込み層（Linear Embedding）へそのままスムーズに投入できるようになります。</li>
+</ul>
+<h3 id="2-centralized-criticへのターゲットidトークンのインジェクション実装">2. Centralized Criticへの「ターゲットID（トークン）」のインジェクション実装</h3>
+<p>今回のTransformer Criticは、全エージェントの統合情報を見つつ、「特定の一人」の価値を予測する構造（IDベース）になっています。これに対応するため、Criticを呼び出すコード側で「誰の価値を計算しているか」というID情報をテンソル化して動的に注入する必要がありました。</p>
+<ul>
+<li><strong>変更点</strong>: 価値推定を行うループの中で、以下のコードを追加しました。</li>
+</ul>
+<pre><code class="language-python">target_id_tensor = torch.tensor([i], dtype=torch.long, device=device)
+val = mappo.critic(global_state_tensor, target_id_tensor).item()
+
+</code></pre>
+<ul>
+<li><strong>理由</strong>: Transformer Criticの内部では、この <code>target_id_tensor</code> を元に、全エージェントのトークン（観測）の中から「指定されたエージェントのトピック」にSelf-Attentionを強く働かせる処理を行っています。コード側からこのIDを正確に手渡してあげる実装が必須でした。</li>
+</ul>
+<h3 id="3-critic用グローバル状態のバッチ次元シーケンス次元の成形">3. Critic用グローバル状態の「バッチ次元・シーケンス次元」の成形</h3>
+<p>TransformerのSelf-Attention機構は、基本的に <code>(バッチサイズ, シーケンス長, 特徴量次元)</code> という3次元のテンソル形状を期待します。今回のモデルでは、<strong>「シーケンス長 ＝ エージェント数（num_agents）」</strong> として処理するアーキテクチャになっています。</p>
+<ul>
+<li><strong>変更点</strong>: 全エージェントの観測（196次元 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>×</mo></mrow><annotation encoding="application/x-tex">\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">×</span></span></span></span> 8人）を集約したあと、Criticに放り込む直前で、単なるフラットな1次元ベクトルではなく、<strong><code>.unsqueeze(0)</code> を用いて明示的にバッチ次元を追加し、<code>(1, num_agents, 196)</code> という綺麗な3次元構造に組み替えてから入力する</strong>ように変更しました。</li>
+</ul>
+<pre><code class="language-python">global_state_tensor = torch.FloatTensor(np.array(global_state_list)).unsqueeze(<span class="hljs-number">0</span>).to(device)
+
+</code></pre>
+<ul>
+<li><strong>理由</strong>: この形状に整えることで、Transformer内部のマルチヘッドアテンションが「8人のエージェント（＝8つのトークン）」同士の関係性を正しくマトリックス計算できるようになります。</li>
+</ul>
+<h3 id="4-実際のコード">4. 実際のコード</h3>
+<p>以下レポジトリにコードを置いています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<p>モデルはこんな感じにしています。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">from</span> torch.distributions <span class="hljs-keyword">import</span> Categorical
+<span class="hljs-keyword">import</span> torch.optim <span class="hljs-keyword">as</span> optim
+
+<span class="hljs-comment"># =====================================================================</span>
+<span class="hljs-comment"># 1. Transformer アーキテクチャ</span>
+<span class="hljs-comment"># =====================================================================</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPO_TransformerActor</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, obs_range=<span class="hljs-number">7</span>, in_channels=<span class="hljs-number">4</span>, d_model=<span class="hljs-number">64</span>, nhead=<span class="hljs-number">4</span>, num_layers=<span class="hljs-number">2</span>, act_dim=<span class="hljs-number">5</span>, num_agents=<span class="hljs-number">8</span>, id_dim=<span class="hljs-number">8</span>, hidden_size=<span class="hljs-number">256</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.obs_range = obs_range
+        self.num_tokens = obs_range * obs_range  <span class="hljs-comment"># 7x7 = 49</span>
+        
+        <span class="hljs-comment"># 1. 各マスの4次元情報を d_model(64次元) に引き上げる線形埋め込み</span>
+        self.embedding = nn.Linear(in_channels, d_model)
+        
+        <span class="hljs-comment"># 2. 2次元空間用の学習可能な位置エンコーディング</span>
+        self.pos_embedding = nn.Parameter(torch.randn(<span class="hljs-number">1</span>, self.num_tokens, d_model))
+        
+        <span class="hljs-comment"># 3. エージェント固有IDの埋め込み（譲り合いの個性を学習）</span>
+        self.id_embedding = nn.Embedding(num_embeddings=num_agents, embedding_dim=id_dim)
+        
+        <span class="hljs-comment"># 4. Transformer Encoder（GELUを内部で採用）</span>
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=d_model * <span class="hljs-number">2</span>, 
+            activation=<span class="hljs-string">&quot;gelu&quot;</span>, batch_first=<span class="hljs-literal">True</span>
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        
+        <span class="hljs-comment"># 5. 出力用MLP：中心セルの特徴量（64） + エージェントID（8）</span>
+        input_dim = d_model + id_dim
+        self.mlp = nn.Sequential(
+            nn.Linear(input_dim, hidden_size),
+            nn.GELU(),
+            nn.Linear(hidden_size, act_dim)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, obs, agent_id</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        Args:
+            obs: (batch_size, 196) のフラットな4チャンネル観測
+            agent_id: (batch_size,) のエージェント固有ID
+        &quot;&quot;&quot;</span>
+        batch_size = obs.shape[<span class="hljs-number">0</span>]
+        
+        <span class="hljs-comment"># (batch_size, 196) -&gt; (batch_size, 49, 4) へトークン変形</span>
+        x = obs.view(batch_size, self.num_tokens, <span class="hljs-number">4</span>)
+        
+        <span class="hljs-comment"># トークン埋め込み + 位置エンコーディング</span>
+        x = self.embedding(x) + self.pos_embedding  <span class="hljs-comment"># (batch_size, 49, 64)</span>
+        
+        <span class="hljs-comment"># Transformer処理</span>
+        features = self.transformer(x)  <span class="hljs-comment"># (batch_size, 49, 64)</span>
+        
+        <span class="hljs-comment"># 視界の中心(3,3) ＝ インデックス 24 (3*7 + 3) の自身のトークン特徴量を抽出</span>
+        my_feature = features[:, <span class="hljs-number">24</span>, :]  <span class="hljs-comment"># (batch_size, 64)</span>
+        
+        <span class="hljs-comment"># ID特徴量の統合</span>
+        <span class="hljs-keyword">if</span> agent_id.dim() == <span class="hljs-number">2</span>:
+            agent_id = agent_id.squeeze(-<span class="hljs-number">1</span>)
+        id_feats = self.id_embedding(agent_id)  <span class="hljs-comment"># (batch_size, 8)</span>
+        
+        <span class="hljs-comment"># 結合して行動のカテゴリカル分布を返却</span>
+        combined = torch.cat([my_feature, id_feats], dim=-<span class="hljs-number">1</span>)
+        logits = self.mlp(combined)
+        
+        <span class="hljs-keyword">return</span> Categorical(logits=logits)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MAPPO_TransformerCritic</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, num_agents=<span class="hljs-number">8</span>, obs_range=<span class="hljs-number">7</span>, in_channels=<span class="hljs-number">4</span>, d_model=<span class="hljs-number">64</span>, nhead=<span class="hljs-number">4</span>, num_layers=<span class="hljs-number">2</span>, agent_emb_dim=<span class="hljs-number">16</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.num_agents = num_agents
+        self.num_tokens_per_agent = obs_range * obs_range  <span class="hljs-comment"># 49</span>
+        self.total_tokens = self.num_tokens_per_agent * num_agents  <span class="hljs-comment"># 49 * 8 = 392</span>
+        
+        <span class="hljs-comment"># 各エージェントマスの特徴抽出埋め込み</span>
+        self.embedding = nn.Linear(in_channels, d_model)
+        
+        <span class="hljs-comment"># 全トークン（392個）の位置・所属エージェント認識用エンコーディング</span>
+        self.pos_embedding = nn.Parameter(torch.randn(<span class="hljs-number">1</span>, self.total_tokens, d_model))
+        
+        <span class="hljs-comment"># 評価対象ターゲットエージェントのID埋め込み</span>
+        self.agent_embedding = nn.Embedding(num_agents, agent_emb_dim)
+        
+        <span class="hljs-comment"># Transformer Encoder</span>
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=d_model * <span class="hljs-number">2</span>, 
+            activation=<span class="hljs-string">&quot;gelu&quot;</span>, batch_first=<span class="hljs-literal">True</span>
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        
+        <span class="hljs-comment"># 統合価値出力ヘッド</span>
+        self.v_head = nn.Sequential(
+            nn.Linear(d_model + agent_emb_dim, <span class="hljs-number">128</span>),
+            nn.GELU(),
+            nn.Linear(<span class="hljs-number">128</span>, <span class="hljs-number">1</span>)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, global_states, target_agent_id</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        Args:
+            global_states: (batch_size, num_agents, 196) またはフラットなテンソル
+            target_agent_id: (batch_size,) の対象エージェントID
+        &quot;&quot;&quot;</span>
+        device = <span class="hljs-built_in">next</span>(self.parameters()).device
+        global_states = global_states.to(device)
+        target_agent_id = target_agent_id.to(device)
+
+        <span class="hljs-comment"># 形状の安全な復元 (batch_size, num_agents, 196)</span>
+        <span class="hljs-keyword">if</span> global_states.dim() == <span class="hljs-number">1</span>:
+            global_states = global_states.view(<span class="hljs-number">1</span>, self.num_agents, -<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">elif</span> global_states.dim() == <span class="hljs-number">2</span>:
+            global_states = global_states.view(-<span class="hljs-number">1</span>, self.num_agents, self.num_tokens_per_agent * <span class="hljs-number">4</span>)
+
+        batch_size = global_states.size(<span class="hljs-number">0</span>)
+
+        <span class="hljs-comment"># 全員分を1つの巨大なトークンシーケンスに変形 (batch_size, 392, 4)</span>
+        x = global_states.view(batch_size, self.total_tokens, <span class="hljs-number">4</span>)
+        
+        <span class="hljs-comment"># 埋め込みと自己アテンション処理</span>
+        x = self.embedding(x) + self.pos_embedding
+        features = self.transformer(x)  <span class="hljs-comment"># (batch_size, 392, 64)</span>
+        
+        <span class="hljs-comment"># 平均プーリングによるグローバル盤面表現の圧縮</span>
+        global_feature = torch.mean(features, dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># (batch_size, 64)</span>
+        
+        <span class="hljs-comment"># 評価ターゲットIDの結合</span>
+        <span class="hljs-keyword">if</span> target_agent_id.dim() == <span class="hljs-number">2</span>:
+            target_agent_id = target_agent_id.squeeze(-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">elif</span> target_agent_id.dim() == <span class="hljs-number">0</span>:
+            target_agent_id = target_agent_id.unsqueeze(<span class="hljs-number">0</span>).repeat(batch_size)
+            
+        agent_emb = self.agent_embedding(target_agent_id)
+        
+        combined = torch.cat([global_feature, agent_emb], dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> self.v_head(combined)
+</code></pre>
+<h2 id="学習の推移">学習の推移</h2>
+<p>前回報酬を設計変更した場合と、今回モデルをTransformerに置き換えた場合での学習での推移を示します。
+Lossは基本値は小さくなっていかないので、こんなものかと。
+報酬とエントロピには明確な違いが出たように思います。</p>
+<p>Transformerは報酬がどんどん高くなっていき、エントロピも低下していく様子が確認されました。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\10_model_improvement\1782554593213.png" alt="1782554593213"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\10_model_improvement\1782554605755.png" alt="1782554605755"></p>
+<p>そして学習した後のエージェントの動作はこのようになりました。
+今度は明確です。
+味方がどんどん集まっていき、敵の周りを味方で連携している様子が確認できるようになりました。
+Transformerに替えれば、という仮説が当たったということになります。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\10_model_improvement\pursuit_mappo.gif">
+<h2 id="総括">総括</h2>
+<p>久しぶりに手ごたえを感じました。
+今回取り組みをまとめていきます。</p>
+<h3 id="1-cnnが抱えていた課題">1. CNNが抱えていた課題</h3>
+<ul>
+<li>
+<p><strong>局所性と受容野の限界</strong><br>
+CNNは小さなカーネルで局所特徴を段階的に集約するため、7×7マップ全体の「誰がどこにいるか」「どの方角を塞ぐべきか」といった<strong>大局的な位置関係</strong>を捉えにくい。<br>
+結果として、目の前の敵を追うだけで、<strong>チームとしての包囲・連携</strong>がうまく学習されない。</p>
+</li>
+<li>
+<p><strong>位置情報の消失（並進対称性）</strong><br>
+CNNは「位置が多少ずれても同じもの」と見なす性質が強く、グリッド上の<strong>1マス単位の正確な相対位置</strong>を維持しづらい。<br>
+Pursuitでは「味方が右2マスか3マスか」が包囲網の成否に直結するため、精密なポジショニングができず、ターゲットをすり抜けさせてしまう。</p>
+</li>
+</ul>
+<h3 id="2-transformerへの切り替えで解決できた理由仮説">2. Transformerへの切り替えで解決できた理由（仮説）</h3>
+<ul>
+<li>
+<p><strong>全域的な視野（Global Context）</strong><br>
+Self-Attentionにより、<strong>マップ全体・全エージェントの関係性を一発で計算</strong>できる。<br>
+CNNのように「徐々に視野を広げる」のではなく、<strong>最初から全体を見渡してどこに注目すべきかを決められる</strong>ため、仲間との協調行動が取りやすくなる。</p>
+</li>
+<li>
+<p><strong>Positional Embeddingによる精密な位置保持</strong><br>
+位置エンコーディングにより、<strong>グリッド上の厳密な座標情報を維持したまま特徴量を抽出</strong>できる。<br>
+これにより、ターゲットとの距離や相対位置を正確に扱えるようになり、精密な包囲・ポジショニングが可能になる。
+(CNNの場合、畳み込みされる間に座標情報の正確さは失われていくことになる。)</p>
+</li>
+<li>
+<p><strong>マルチエージェントの関係性のモデル化</strong><br>
+各エージェントの観測を「トークン」として扱い、Self-Attentionで<strong>誰と誰が協力しているか</strong>を直接学習できる。<br>
+Centralized CriticにTransformerを採用することで、<strong>チーム全体の状況を見つつ、特定エージェントの価値を評価</strong>する構造が自然に実現できる。</p>
+</li>
+</ul>
+<h3 id="3-実装上の主な変更点">3. 実装上の主な変更点</h3>
+<ul>
+<li>
+<p><strong>観測の形状変更</strong><br>
+7×7×4のセマンティック・テンソルを <code>.reshape(-1)</code> で196次元の1次元ベクトルに変換し、Transformerの線形埋め込み層にそのまま投入できるようにした。</p>
+</li>
+<li>
+<p><strong>Centralized CriticへのターゲットID注入</strong><br>
+Critic呼び出し時に <code>target_id_tensor</code> を渡し、<strong>どのエージェントの価値を評価しているか</strong>を明示。<br>
+Transformer Critic内部で、そのIDに応じたSelf-Attentionの重み付けが行われる。</p>
+</li>
+<li>
+<p><strong>グローバル状態の形状整形</strong><br>
+全エージェントの観測を集約した後、<code>.unsqueeze(0)</code> で <code>(1, num_agents, 196)</code> に成形し、<br>
+Transformerが期待する <code>(バッチ, シーケンス長, 特徴量)</code> の形に合わせた。</p>
+</li>
+</ul>
+<h3 id="4-学習結果の変化">4. 学習結果の変化</h3>
+<ul>
+<li>
+<p><strong>報酬の上昇とエントロピーの低下</strong><br>
+Transformer導入後は、報酬が明確に上昇し、エントロピーも低下する傾向が確認された。<br>
+これは、<strong>エージェントが特定の有効な戦略に収束しつつある</strong>ことを示唆する。</p>
+</li>
+<li>
+<p><strong>エージェントの挙動改善</strong><br>
+学習後の挙動では、味方がターゲットの周囲に集まり、<strong>連携して包囲する動き</strong>がはっきりと見られるようになった。<br>
+CNNでは「目の前を追うだけ」だったのに対し、Transformerでは<strong>チームとしての戦略的な動き</strong>が学習できた。</p>
+</li>
+</ul>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/ETzUKUZ6l8c?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
