@@ -409,7 +409,8 @@ Here is a concise summary of why the agent approaches the opponent but fails to 
 
 <img src="miulti-agent/petting_zoo/src/2_boxing/doc/image/4_train_result/output.gif" width="500px" style="display: block; margin: 0 auto;">
 
-**Wizard War** is a simple multi-agent game where wizards (players) move around and shoot magic bullets at each other. The goal is to defeat enemy wizards while avoiding being hit yourself.
+## Wizard War
+Wizard War is a simple multi-agent game where wizards (players) move around and shoot magic bullets at each other. The goal is to defeat enemy wizards while avoiding being hit yourself.
 
 In early training, agents learned unnatural behaviors:
 - They rushed into enemies to kill them even if it meant dying, because the reward for killing an enemy was much larger than the penalty for dying.
@@ -423,6 +424,13 @@ After retraining, the agent now approaches enemies safely while firing bullets, 
 
 <img src="miulti-agent/petting_zoo/src/3_wizard_war/doc/image/6_improve/episode_20260529_235615.gif" width="500px" style="display: block; margin: 0 auto;">
 
+## Pursuit
+Pursuit is a game where pursuers and an evader are separated, and the pursuers cooperate to chase the evader.A single player cannot solve the task alone, and the pursuers do not receive a reward unless they surround the evader.I implemented the pursuers using the MAPPO algorithm.
+Initially, I implemented them as standard CNN-based agents, but even with MAPPO, they were unable to achieve team coordination.I considered the issues to be a lack of global and relational information from the observed images, as well as insufficient accuracy in the positional information captured by the CNN.Therefore, I changed the agents to Transformers and modified the reward structure to give rewards for gathering and cooperating.
+
+repogitory: https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit
+
+<img src="miulti-agent/petting_zoo/src/4_pursuit/doc/image/10_model_improvement/pursuit_mappo.gif" width="500px" style="display: block; margin: 0 auto;">
 
 # cite
 

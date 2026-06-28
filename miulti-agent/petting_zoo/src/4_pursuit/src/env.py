@@ -27,7 +27,7 @@ class PursuitWrapper:
         self.distance_reward_scale = 0.15     # 獲物へ接近したときの報酬
         self.coop_reward_scale = 0.2          # 獲物の近くで味方と連携したときの報酬
         self.flanking_bonus_scale = 0.2      # 他に味方がいないルートから回り込んだときの報酬
-        self.surround_reward = 2.0           # 3人以上で包囲網を形成したときの報酬
+        self.surround_reward = 4.0           # 3人以上で包囲網を形成したときの報酬
 
         # 🌟 包囲網シェイピング用のパラメータを追加
         self.soft_gather_reward_scale = 0.05    # 2マス先までに味方が集まっているとき（緩い報酬）
@@ -38,6 +38,9 @@ class PursuitWrapper:
 
         # エージェントごとの前ステップの「最も近い獲物への距離」を記録する辞書
         self.prev_min_distances = {}
+
+        self.capture_count = 0
+        self.captured_prey_ids = set()  # 捕獲済みターゲットのID（座標など）を保持
 
     def reset(self):
         self.env.reset()
@@ -84,6 +87,30 @@ class PursuitWrapper:
 
         return np.concatenate(obs_list)
 
+    def count_captures(self, prey_positions, ally_layer):
+        count_capture = 0
+        for py, px in prey_positions:
+            # このターゲットの周囲（マンハッタン距離1以内）にいる味方の数を数える
+            allies_around_prey = 0
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    if dy == 0 and dx == 0:
+                        continue
+                    ny, nx = py + dy, px + dx
+                    if 0 <= ny < self.obs_range and 0 <= nx < self.obs_range:
+                        allies_around_prey += ally_layer[ny, nx]
+
+            # 3人以上で囲まれていて、まだ捕獲済みでないターゲットを「捕獲」とみなす
+            if allies_around_prey >= 3:
+                prey_id = (py, px)  # ターゲットのID（座標で代用）
+                if prey_id not in self.captured_prey_ids:
+                    # グローバルに「捕獲済み」として登録
+                    self.captured_prey_ids.add(prey_id)
+                    self.capture_count += 1
+                    # print(f"--- 🎉 CAPTURE #{self.capture_count} (prey at {py},{px}) ---")
+                    count_capture += 1
+            return count_capture
+
     def _analyze_observation(self, obs_flat):
         """
         1つのエージェントの平坦化された観測(196,)から報酬計算用の情報を抽出する
@@ -99,6 +126,8 @@ class PursuitWrapper:
         prey_layer = obs[:, :, 3]
 
         prey_positions = np.argwhere(prey_layer > 0)
+        # 捕獲カウント
+        count_capture = self.count_captures(prey_positions, ally_layer)
 
         min_dist = float('inf')
         closest_prey_pos = None
@@ -112,7 +141,7 @@ class PursuitWrapper:
                 closest_prey_pos = (py, px)
 
         if min_dist == float('inf'):
-            return None, 0, 0, 0.0  # 視界内に獲物がいない場合
+            return None, 0, 0, 0.0, count_capture  # 視界内に獲物がいない場合
 
         # 2. 協調判定：自分の隣接4マスにいる味方の総数
         allies_count = 0
@@ -159,7 +188,7 @@ class PursuitWrapper:
                         elif m_dist <= 2:
                             shaping_reward += self.soft_gather_reward_scale
 
-        return min_dist, allies_count, flank_allies, shaping_reward
+        return min_dist, allies_count, flank_allies, shaping_reward, count_capture
 
     def step(self, agent, action):
         if agent not in self.env.agents:
@@ -186,7 +215,7 @@ class PursuitWrapper:
         individual_reward = 0.0
 
         # 観測データから距離、周囲の味方数、シェイピング報酬を抽出
-        current_min_dist, allies_count, flank_allies, shaping_reward = self._analyze_observation(obs)
+        current_min_dist, allies_count, flank_allies, shaping_reward, count_capture = self._analyze_observation(obs)
 
         # 🌟 新設：包囲網シェイピング報酬の適用
         individual_reward += shaping_reward
@@ -231,7 +260,7 @@ class PursuitWrapper:
         hybrid_reward = team_reward + individual_reward
 
         # 🌟 先頭の戻り値として、新仕様である196次元の obs（4Chフラット）を返します
-        return obs, hybrid_reward, terminated, truncated, info
+        return obs, hybrid_reward, terminated, truncated, info, count_capture
 
     def render(self):
         render_mode = getattr(self.env, "render_mode", None)
