@@ -64,8 +64,8 @@ def format_to_note_style(content, output_file):
     print(f"変換が完了しました！\n出力先: {output_file}")
 
 # 実行設定
-input_md = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\doc\2_actor_critic.md"   # 変換元のファイル名
-output_md = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\doc\2_actor_critic.md" # 変換後のファイル名
+input_md = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\3_dqn.md"   # 変換元のファイル名
+output_md = input_md # 変換後のファイル名
 is_note = False
 
 
