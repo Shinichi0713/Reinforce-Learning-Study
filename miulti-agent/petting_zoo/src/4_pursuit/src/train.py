@@ -118,12 +118,11 @@ for episode in range(start_episode, max_episodes):
             action = actions_np[agent_idx]
 
         # 3. 環境を1ステップ進める obs, hybrid_reward, terminated, truncated, info
-        obs, reward, terminated, truncated, info = env.step(agent, action)
+        obs, reward, terminated, truncated, info, count_capture = env.step(agent, action)
         episode_reward += reward
 
         # Pursuit環境特有の捕獲報酬(+5)をカウント
-        if reward == 5.0:
-            episode_captures += 1
+        episode_captures += count_capture
 
         # 4. バッファに保存するためのステップ全体の辞書データを構築
         obs_dict = {}
