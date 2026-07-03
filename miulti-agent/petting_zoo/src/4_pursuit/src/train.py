@@ -122,7 +122,7 @@ for episode in range(start_episode, max_episodes):
         episode_reward += reward
 
         # Pursuit環境特有の捕獲報酬(+5)をカウント
-        episode_captures += count_capture
+        episode_captures += count_capture if count_capture else 0
 
         # 4. バッファに保存するためのステップ全体の辞書データを構築
         obs_dict = {}
