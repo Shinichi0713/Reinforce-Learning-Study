@@ -17,11 +17,11 @@ CHECKPOINT_DIR = "/content/drive/MyDrive/rl_pursuit"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 🌟 4チャンネル化（obs_dim=196）に対応したラッパーで初期化
+# 🌟 行動履歴付き（obs_dim=236）に対応したラッパーで初期化
 env = PursuitWrapper(render_mode=None, max_cycles=max_cycles)
 num_agents = env.num_agents
-obs_dim = env.obs_dim          # 🌟 自動的に 196 (7x7x4) になります
-state_dim = env.state_dim      # 🌟 自動的に 1568 (196x8) になります
+obs_dim = env.obs_dim          # 🌟 自動的に 236 (196 + 40) になります
+state_dim = env.state_dim      # 🌟 自動的に 1888 (236 x 8) になります
 action_dim = env.action_dim
 
 # MAPPOの初期化 (内部のActor/CriticがTransformerへと自動構築されます)
@@ -35,18 +35,18 @@ mappo = MAPPO(
     device=device
 )
 
-# 🌟 外部にMultiAgentBufferを明示的に紐付け
-from __main__ import MultiAgentBuffer # 別ファイル定義の場合は適宜importを修正してください
+# 外部にMultiAgentBufferを明示的に紐付け
+from __main__ import MultiAgentBuffer 
 mappo.buffer = MultiAgentBuffer(num_agents, obs_dim, state_dim, action_dim)
 
 print("=== MAPPO（Transformer & IDベース）学習開始 ===")
 print(f"エージェント数: {num_agents}")
-print(f"観測次元 (4Chフラット): {obs_dim}")
+print(f"観測次元 (空間196 + 行動履歴40): {obs_dim}")
 print(f"グローバル状態次元: {state_dim}")
 print(f"行動空間サイズ: {action_dim}")
 print(f"使用デバイス: {device}")
 
-# 🛠️ チェックポイント復元関数のバグ防止用安全ラップ
+# 🛠️ チェックポイント復元関数の安全ラップ
 def load_checkpoint_safely(model_obj, path, device):
     try:
         checkpoint = torch.load(path, map_location=device)
@@ -97,7 +97,7 @@ for episode in range(start_episode, max_episodes):
         if terminated or truncated:
             action = None
         else:
-            # 1. 全エージェントの現在の最新4チャンネル観測(196次元)を集約
+            # 1. 全エージェントの「現在のステップ」における最新236次元観測（行動履歴含む）を集約
             obs_list = []
             for i in range(num_agents):
                 agent_name = f'pursuer_{i}'
@@ -107,8 +107,8 @@ for episode in range(start_episode, max_episodes):
                 else:
                     obs_list.append(np.zeros(obs_dim, dtype=np.float32))
 
-            # 2. テンソル化してポリシー(Transformer Actor)に入力
-            obs_tensor = torch.FloatTensor(np.array(obs_list)).to(device)  # (num_agents, 196)
+            # 2. テンソル化してポリシーに入力
+            obs_tensor = torch.FloatTensor(np.array(obs_list)).to(device)  # (num_agents, 236)
 
             # MAPPOで全エージェント分の行動と確率を同時に推論
             actions_np, log_probs_np = mappo.get_action(obs_tensor)
@@ -117,12 +117,12 @@ for episode in range(start_episode, max_episodes):
             agent_idx = int(agent.split('_')[-1])
             action = actions_np[agent_idx]
 
-        # 3. 環境を1ステップ進める obs, hybrid_reward, terminated, truncated, info
-        obs, reward, terminated, truncated, info, count_capture = env.step(agent, action)
+        # 3. 環境を1ステップ進める
+        obs, reward, terminated, truncated, info = env.step(agent, action)
         episode_reward += reward
 
-        # Pursuit環境特有の捕獲報酬(+5)をカウント
-        episode_captures += count_capture if count_capture else 0
+        if reward == 5.0:
+            episode_captures += 1
 
         # 4. バッファに保存するためのステップ全体の辞書データを構築
         obs_dict = {}
@@ -131,14 +131,17 @@ for episode in range(start_episode, max_episodes):
         log_prob_dict = {}
         value_dict = {}
 
-        # 全エージェントの情報を辞書にマッピング
+        # 🌟 変更点1: 環境ステップ通過後（＝行動履歴が更新された後）の最新状態を再取得して辞書化
+        # これにより、バッファーに保存されるobsと、Criticに入力されるglobal_stateの次元数(236)が完全に一致します
+        global_state_list = []
         for i in range(num_agents):
             agent_name = f'pursuer_{i}'
             if agent_name in env.env.agents:
                 agent_obs = env.get_obs(agent_name)
-                obs_dict[agent_name] = agent_obs if agent_obs is not None else np.zeros(obs_dim, dtype=np.float32)
+                current_obs = agent_obs if agent_obs is not None else np.zeros(obs_dim, dtype=np.float32)
+                obs_dict[agent_name] = current_obs
+                global_state_list.append(current_obs)
 
-                # 現在の行動決定エージェント以外は0（プレースホルダー）
                 if agent_name == agent:
                     action_dict[agent_name] = action if action is not None else 0
                     reward_dict[agent_name] = reward
@@ -148,14 +151,15 @@ for episode in range(start_episode, max_episodes):
 
                 log_prob_dict[agent_name] = log_probs_np[i] if 'log_probs_np' in locals() else 0.0
             else:
-                obs_dict[agent_name] = np.zeros(obs_dim, dtype=np.float32)
+                zero_obs = np.zeros(obs_dim, dtype=np.float32)
+                obs_dict[agent_name] = zero_obs
+                global_state_list.append(zero_obs)
                 action_dict[agent_name] = 0
                 reward_dict[agent_name] = 0.0
                 log_prob_dict[agent_name] = 0.0
 
         # 5. Centralized Transformer Criticによる価値推定
-        global_state_list = [obs_dict[f'pursuer_{k}'] for k in range(num_agents)]
-        # 🌟 (1, num_agents, 196) の形状で綺麗にテンソル化
+        # 🌟 変更点2: 形状を (1, num_agents, 236) に整形して Critic に入力
         global_state_tensor = torch.FloatTensor(np.array(global_state_list)).unsqueeze(0).to(device)
 
         for i in range(num_agents):
@@ -163,19 +167,19 @@ for episode in range(start_episode, max_episodes):
             if agent_name in env.env.agents:
                 target_id_tensor = torch.tensor([i], dtype=torch.long, device=device)
                 with torch.no_grad():
-                    # 🌟 Transformer Criticを介して V(s) を抽出
                     val = mappo.critic(global_state_tensor, target_id_tensor).item()
                 value_dict[agent_name] = val
             else:
                 value_dict[agent_name] = 0.0
 
-        # 6. 1次元化した global_state と共に、マルチエージェントバッファへ格納
-        global_state_flat = np.array(global_state_list).flatten() # (num_agents * 196 = 1568,)
+        # 6. マルチエージェントバッファへ格納
+        # 🌟 変更点3: 平坦化サイズは 236 * 8 = 1888 次元になります
+        global_state_flat = np.array(global_state_list).flatten()  # (1888,)
         mappo.buffer.store(
             obs_dict, action_dict, reward_dict, global_state_flat,
             log_prob_dict, value_dict, terminated, truncated
         )
-        # print(value_dict)
+
         if terminated or truncated:
             break
 
@@ -202,7 +206,6 @@ for episode in range(start_episode, max_episodes):
     for _ in range(update_epochs):
         batch = mappo.buffer.sample(batch_size)
         if batch is not None:
-            # 🌟 エポック数を内部でループさせず、サンプリングごとに1回更新を実行
             actor_loss, critic_loss, entropy = mappo.update(batch, epochs=1)
 
             actor_losses.append(actor_loss)
