@@ -13,12 +13,21 @@ class MAPPO_TransformerActor(nn.Module):
         super().__init__()
         self.obs_range = obs_range
         self.num_tokens = obs_range * obs_range  # 7x7 = 49
+        self.spatial_dim = obs_range * obs_range * in_channels  # 196
+        self.num_agents = num_agents
 
         # 1. 各マスの4次元情報を d_model(64次元) に引き上げる線形埋め込み
         self.embedding = nn.Linear(in_channels, d_model)
 
         # 2. 2次元空間用の学習可能な位置エンコーディング
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_tokens, d_model))
+
+        # 🌟 変更点1: 他エージェントの行動履歴（40次元）を処理する線形層
+        # 8人分×5行動を埋め込み、Transformerの各トークンに付加的なコンテキストとして加算/結合できるようにする
+        self.action_history_embed = nn.Sequential(
+            nn.Linear(num_agents * 5, d_model),
+            nn.GELU()
+        )
 
         # 3. エージェント固有IDの埋め込み（譲り合いの個性を学習）
         self.id_embedding = nn.Embedding(num_embeddings=num_agents, embedding_dim=id_dim)
@@ -41,21 +50,30 @@ class MAPPO_TransformerActor(nn.Module):
     def forward(self, obs, agent_id):
         """
         Args:
-            obs: (batch_size, 196) のフラットな4チャンネル観測
+            obs: (batch_size, 236) のフラットな観測 (196次元空間 + 40次元行動履歴)
             agent_id: (batch_size,) のエージェント固有ID
         """
         batch_size = obs.shape[0]
 
+        # 🌟 変更点2: 空間特徴量(196) と 行動履歴履歴(40) を分離
+        spatial_obs = obs[:, :self.spatial_dim]          # (batch_size, 196)
+        action_history = obs[:, self.spatial_dim:]       # (batch_size, 40)
+
         # (batch_size, 196) -> (batch_size, 49, 4) へトークン変形
-        x = obs.view(batch_size, self.num_tokens, 4)
+        x = spatial_obs.view(batch_size, self.num_tokens, -1)
 
         # トークン埋め込み + 位置エンコーディング
         x = self.embedding(x) + self.pos_embedding  # (batch_size, 49, 64)
 
+        # 🌟 変更点3: 行動履歴の埋め込みをブロードキャストして、空間トークンにコンテキストとして加算
+        # 全員が「直前誰がどう動いたか」を知った上で、各マスのAttentionを計算できるようにします
+        act_emb = self.action_history_embed(action_history).unsqueeze(1)  # (batch_size, 1, 64)
+        x = x + act_emb  # 空間特徴に協調コンテキストをブレンド
+
         # Transformer処理
         features = self.transformer(x)  # (batch_size, 49, 64)
 
-        # 視界の中心(3,3) ＝ インデックス 24 (3*7 + 3) の自身のトークン特徴量を抽出
+        # 視界の中心(3,3) ＝ インデックス 24 の自身のトークン特徴量を抽出
         my_feature = features[:, 24, :]  # (batch_size, 64)
 
         # ID特徴量の統合
@@ -75,6 +93,8 @@ class MAPPO_TransformerCritic(nn.Module):
         super().__init__()
         self.num_agents = num_agents
         self.num_tokens_per_agent = obs_range * obs_range  # 49
+        self.spatial_dim_per_agent = obs_range * obs_range * in_channels  # 196
+        self.obs_dim_per_agent = self.spatial_dim_per_agent + (num_agents * 5)  # 236
         self.total_tokens = self.num_tokens_per_agent * num_agents  # 49 * 8 = 392
 
         # 各エージェントマスの特徴抽出埋め込み
@@ -82,6 +102,12 @@ class MAPPO_TransformerCritic(nn.Module):
 
         # 全トークン（392個）の位置・所属エージェント認識用エンコーディング
         self.pos_embedding = nn.Parameter(torch.randn(1, self.total_tokens, d_model))
+
+        # 🌟 変更点4: Critic側でも全員の行動履歴（40次元）を集約するレイヤー
+        self.global_action_embed = nn.Sequential(
+            nn.Linear(num_agents * 5, d_model),
+            nn.GELU()
+        )
 
         # 評価対象ターゲットエージェントのID埋め込み
         self.agent_embedding = nn.Embedding(num_agents, agent_emb_dim)
@@ -93,9 +119,9 @@ class MAPPO_TransformerCritic(nn.Module):
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
-        # 統合価値出力ヘッド
+        # 統合価値出力ヘッド（グローバル行動特徴も考慮するため、入力を拡張）
         self.v_head = nn.Sequential(
-            nn.Linear(d_model + agent_emb_dim, 128),
+            nn.Linear(d_model * 2 + agent_emb_dim, 128),
             nn.GELU(),
             nn.Linear(128, 1)
         )
@@ -103,30 +129,34 @@ class MAPPO_TransformerCritic(nn.Module):
     def forward(self, global_states, target_agent_id):
         """
         Args:
-            global_states: (batch_size, num_agents, 196) またはフラットなテンソル
+            global_states: (batch_size, num_agents, 236) のテンソル
             target_agent_id: (batch_size,) の対象エージェントID
         """
         device = next(self.parameters()).device
         global_states = global_states.to(device)
         target_agent_id = target_agent_id.to(device)
 
-        # 形状の安全な復元 (batch_size, num_agents, 196)
-        if global_states.dim() == 1:
-            global_states = global_states.view(1, self.num_agents, -1)
-        elif global_states.dim() == 2:
-            global_states = global_states.view(-1, self.num_agents, self.num_tokens_per_agent * 4)
-
         batch_size = global_states.size(0)
 
+        # 🌟 変更点5: 1エージェントあたり236次元に拡張された global_states を空間と行動履歴に分離
+        # global_statesの形状: (batch_size, 8, 236)
+        spatial_states = global_states[:, :, :self.spatial_dim_per_agent]  # (batch_size, 8, 196)
+        
+        # 行動履歴は共通バッファなため、インデックス0番のエージェントの観測末尾から代表して抽出
+        action_history = global_states[:, 0, self.spatial_dim_per_agent:]  # (batch_size, 40)
+
         # 全員分を1つの巨大なトークンシーケンスに変形 (batch_size, 392, 4)
-        x = global_states.view(batch_size, self.total_tokens, 4)
+        x = spatial_states.reshape(batch_size, self.total_tokens, -1)
 
         # 埋め込みと自己アテンション処理
         x = self.embedding(x) + self.pos_embedding
         features = self.transformer(x)  # (batch_size, 392, 64)
 
         # 平均プーリングによるグローバル盤面表現の圧縮
-        global_feature = torch.mean(features, dim=1)  # (batch_size, 64)
+        global_spatial_feature = torch.mean(features, dim=1)  # (batch_size, 64)
+
+        # 🌟 変更点6: グローバル行動履歴の埋め込み
+        global_action_feature = self.global_action_embed(action_history)  # (batch_size, 64)
 
         # 評価ターゲットIDの結合
         if target_agent_id.dim() == 2:
@@ -136,7 +166,8 @@ class MAPPO_TransformerCritic(nn.Module):
 
         agent_emb = self.agent_embedding(target_agent_id)
 
-        combined = torch.cat([global_feature, agent_emb], dim=-1)
+        # 空間特徴 + 行動特徴 + ターゲットID特徴をすべて結合
+        combined = torch.cat([global_spatial_feature, global_action_feature, agent_emb], dim=-1)
         return self.v_head(combined)
 
 
@@ -144,13 +175,13 @@ class MAPPO_TransformerCritic(nn.Module):
 # 2. MAPPO トレーナークラス
 # =====================================================================
 class MAPPO:
-    def __init__(self, num_agents, obs_dim=196, state_dim=1568, action_dim=5,
+    def __init__(self, num_agents, obs_dim=236, state_dim=1888, action_dim=5,
                  lr_actor=1e-4, lr_critic=1e-4, gamma=0.99, gae_lambda=0.95,
                  clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
                  device=torch.device("cpu")):
         self.num_agents = num_agents
-        self.obs_dim = obs_dim  # 🌟 196 (7x7x4)
-        self.state_dim = state_dim  # 🌟 1568 (196x8)
+        self.obs_dim = obs_dim  # 🌟 236 に拡張 (196 + 40)
+        self.state_dim = state_dim  # 🌟 1888 に拡張 (236x8)
         self.action_dim = action_dim
         self.gamma = gamma
         self.gae_lambda = gae_lambda
@@ -159,21 +190,18 @@ class MAPPO:
         self.entropy_coef = entropy_coef
         self.device = device
 
-        # 🌟 旧CNNエンコーダを完全に廃止し、Transformerベースのモデルを初期化
+        # Transformerベースのモデルを初期化
         self.actor = MAPPO_TransformerActor(num_agents=num_agents, act_dim=action_dim).to(device)
         self.critic = MAPPO_TransformerCritic(num_agents=num_agents).to(device)
 
-        # 最適化器 (Transformerの学習安定化のため、デフォルト学習率を 1e-4 に引き上げて調整)
+        # 最適化器
         self.optimizer_actor = optim.Adam(self.actor.parameters(), lr=lr_actor)
         self.optimizer_critic = optim.Adam(self.critic.parameters(), lr=lr_critic)
-
-        # ※バッファの初期化（外部で定義されている MultiAgentBuffer を利用前提）
-        # self.buffer = MultiAgentBuffer(num_agents, obs_dim, state_dim, action_dim)
 
     def get_action(self, obs, greedy=False):
         """
         Args:
-            obs: (num_agents, 196) のテンソル
+            obs: (num_agents, 236) のテンソル
         """
         obs = obs.to(self.device)
         agent_ids = torch.arange(self.num_agents, dtype=torch.long, device=self.device)
@@ -194,6 +222,7 @@ class MAPPO:
         """
         特定のエージェント視点での中央集中型Transformer Criticの価値を算出
         """
+        # 🌟 変更点7: 形状の安全な復元次元を obs_dim=236 ベースに修正
         if state.dim() == 1:
             state = state.view(self.num_agents, self.obs_dim)
         if state.dim() == 2:
@@ -216,7 +245,7 @@ class MAPPO:
 
         batch_size = batch['obs'].shape[0]
 
-        obs = torch.FloatTensor(batch['obs']).to(self.device)                  # (batch, num_agents, 196)
+        obs = torch.FloatTensor(batch['obs']).to(self.device)                  # (batch, num_agents, 236)
         actions = torch.LongTensor(batch['actions']).to(self.device)           # (batch, num_agents)
         old_log_probs = torch.FloatTensor(batch['log_probs']).to(self.device)   # (batch, num_agents)
         advantages = torch.FloatTensor(batch['advantages']).to(self.device)     # (batch, num_agents)
