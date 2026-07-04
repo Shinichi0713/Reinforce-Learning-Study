@@ -2,7 +2,8 @@ import os
 import numpy as np
 import torch
 import imageio
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 
 # =====================================================================
 # 設定（学習コードと共通）
@@ -17,6 +18,12 @@ num_agents = env_wrapper.num_agents
 obs_dim = env_wrapper.obs_dim
 state_dim = env_wrapper.state_dim
 action_dim = env_wrapper.action_dim
+
+# フォントの設定（環境に応じてパスを調整）
+try:
+    font = ImageFont.truetype("arial.ttf", 20)
+except:
+    font = ImageFont.load_default()
 
 # MAPPO の初期化 (内部アーキテクチャはTransformer)
 mappo = MAPPO(
@@ -99,7 +106,8 @@ for agent in env_wrapper.env.agent_iter():
         action = actions_np[agent_idx]
 
     # 🌟 3. 環境を1ステップ進める（戻り値が5つに変更された点に対応！）
-    obs, reward, terminated, truncated, info = env_wrapper.step(agent, action)
+    obs, reward, terminated, truncated, info, count_capture = env_wrapper.step(agent, action)
+    episode_captures += count_capture if count_capture else 0
     episode_reward += reward
 
     # 🌟 4. 【最適化】1サイクル（全員分の行動が1周）終わったタイミングで画面をキャプチャ
@@ -107,7 +115,27 @@ for agent in env_wrapper.env.agent_iter():
     if agent == f'pursuer_{num_agents - 1}':
         frame = env_wrapper.render()
         if frame is not None:
-            frames.append(frame)
+            # NumPy配列をPIL Imageに変換
+            pil_img = Image.fromarray(frame)
+
+            # 描画オブジェクトを作成
+            draw = ImageDraw.Draw(pil_img)
+
+            # 右下の座標を計算（マージン10px）
+            text = f"Captures: {episode_captures}"
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            x = pil_img.width - text_width - 10
+            y = pil_img.height - text_height - 10
+
+            # テキストを描画（白文字＋黒縁など）
+            draw.rectangle([x-2, y-2, x+text_width+2, y+text_height+2], fill="black")
+            draw.text((x, y), text, fill="white", font=font)
+
+            # PIL ImageをNumPy配列に戻して保存
+            frame_with_text = np.array(pil_img)
+            frames.append(frame_with_text)
 
     # 🌟 5. 捕獲成功判定の修正
     # ハイブリッド報酬化により reward の値が変動するため、
@@ -117,7 +145,6 @@ for agent in env_wrapper.env.agent_iter():
         frame = env_wrapper.render()
         if frame is not None:
             frames.append(frame)
-        episode_captures += 1
         break
 
     if truncated:
