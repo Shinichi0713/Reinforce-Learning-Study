@@ -4,8 +4,8 @@ from collections import defaultdict
 class MultiAgentBuffer:
     def __init__(self, num_agents, obs_dim, state_dim, action_dim):
         self.num_agents = num_agents
-        self.obs_dim = obs_dim
-        self.state_dim = state_dim
+        self.obs_dim = obs_dim          # 🌟 236 (196空間 + 40行動履歴)
+        self.state_dim = state_dim      # 🌟 1888 (236 x 8)
         self.action_dim = action_dim
 
         self.buffer = {
@@ -54,12 +54,11 @@ class MultiAgentBuffer:
 
         obs_batch, actions_batch, rewards_batch = [], [], []
         log_probs_batch, advantages_batch, returns_batch = [], [], []
-        global_states_batch, values_batch = [], []
+        values_batch, global_states_batch = []
 
         for idx in indices:
-            obs_step, actions_step, rewards_step = [], [], []
-            log_probs_step, advantages_step, returns_step = [], [], []
-            values_step = []
+            obs_step, actions_step, log_probs_step = [], [], []
+            values_step, advantages_step, returns_step = [], [], []
 
             for i in range(self.num_agents):
                 agent_name = f'pursuer_{i}'
@@ -68,11 +67,14 @@ class MultiAgentBuffer:
                 log_probs_step.append(self.buffer['log_probs'][idx][agent_name])
                 values_step.append(self.buffer['values'][idx][agent_name])
 
+                # 🌟 変更点1: 報酬（Returns）バッチのサンプリングキーを正しく設定
+                # 元のコードの rewards_step.append(self.buffer['returns']...) に合わせつつ安全に取得
                 if idx < len(self.buffer['returns']) and self.buffer['returns'][idx] is not None and agent_name in self.buffer['returns'][idx]:
-                    rewards_step.append(self.buffer['returns'][idx][agent_name])
+                    returns_step.append(self.buffer['returns'][idx][agent_name])
                 else:
-                    rewards_step.append(0.0)
+                    returns_step.append(0.0)
 
+                # 🌟 変更点2: Advantageバッチのサンプリング
                 if idx < len(self.buffer['advantages']) and self.buffer['advantages'][idx] is not None and agent_name in self.buffer['advantages'][idx]:
                     advantages_step.append(self.buffer['advantages'][idx][agent_name])
                 else:
@@ -80,18 +82,21 @@ class MultiAgentBuffer:
 
             obs_batch.append(obs_step)
             actions_batch.append(actions_step)
-            rewards_batch.append(rewards_step)
             log_probs_batch.append(log_probs_step)
-            advantages_batch.append(advantages_step)
             values_batch.append(values_step)
+            
+            # 🌟 変更点3: リスト名とバッチキーの不整合を防ぐため、変数名をわかりやすく整理
+            returns_batch.append(returns_step)
+            advantages_batch.append(advantages_step)
 
             global_states_batch.append(self.buffer['global_states'][idx])
 
+        # MAPPO.update() が期待するNumPy配列の形状に成形
         batch = {
-            'obs': np.array(obs_batch, dtype=np.float32),                 # (batch, num_agents, obs_dim)
+            'obs': np.array(obs_batch, dtype=np.float32),                 # (batch, num_agents, 236)
             'actions': np.array(actions_batch, dtype=np.int64),           # (batch, num_agents)
-            'rewards': np.array(rewards_batch, dtype=np.float32),         # (batch, num_agents) ※個別Returns
-            'global_states': np.array(global_states_batch, dtype=np.float32), # (batch, state_dim)
+            'rewards': np.array(returns_batch, dtype=np.float32),         # (batch, num_agents) ※MAPPO側で returns として受け取るもの
+            'global_states': np.array(global_states_batch, dtype=np.float32), # (batch, num_agents, 236) またはフラット
             'log_probs': np.array(log_probs_batch, dtype=np.float32),     # (batch, num_agents)
             'values': np.array(values_batch, dtype=np.float32),           # (batch, num_agents)
             'advantages': np.array(advantages_batch, dtype=np.float32),   # (batch, num_agents)
@@ -103,7 +108,7 @@ class MultiAgentBuffer:
         advantages = [None] * total_steps
         returns = [None] * total_steps
 
-        # 🌟 【安全対策】ロールアウト終了時に、まだ途中で終わっていない未完のエピソードの長さを一時的に追加
+        # ロールアウト終了時に、まだ途中で終わっていない未完のエピソードの長さを一時的に追加
         working_lengths = list(self.episode_lengths)
         if self.current_episode_steps > 0:
             working_lengths.append(self.current_episode_steps)
@@ -127,8 +132,7 @@ class MultiAgentBuffer:
 
                 gae = 0.0
 
-                # 🌟 時間切れ（truncated）またはロールアウトの強制的な終端である場合、最後の状態の価値でブートストラップ
-                # （未完エピソードが working_lengths で処理される際も、安全に最後の価値が引き継がれます）
+                # 時間切れ（truncated）またはロールアウトの強制的な終端である場合、最後の状態の価値でブートストラップ
                 if truncated_ep[-1] or (not terminated_ep[-1] and start_idx + ep_len == total_steps):
                     next_value = agent_values[-1]
                     future_return = agent_values[-1]
