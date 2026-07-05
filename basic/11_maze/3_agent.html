@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5f37;&#x5316;&#x5b66;&#x7fd2;&#x30a8;&#x30fc;&#x30b8;&#x30a7;&#x30f3;&#x30c8;&#x304c;&#x5b66;&#x7fd2;&#x3059;&#x308b;&#x4ed5;&#x7d44;&#x307f;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p><a href="https://yoshishinnze.hatenablog.com/entry/2025/10/29/000000">昨日の環境コード</a>をもとに強化学習するエージェントの構築を行いたいと思います。
+説明の流れは強化学習のエージェントが学習する仕組みの説明→実装という流れで進めていきます。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>強化学習のエージェントの仕組みの説明と実装</p>
+</blockquote>
+
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="強化学習エージェントが学習する仕組み">強化学習エージェントが学習する仕組み</h2>
+<p>強化学習エージェントが学習する仕組みは、大きく分けて以下の流れになります。</p>
+<h3 id="1-全体の流れエージェントの学習サイクル">1. 全体の流れ（エージェントの学習サイクル）</h3>
+<ol>
+<li>
+<p><strong>環境から状態を受け取る</strong></p>
+<ul>
+<li>例：迷路の現在位置 <code>(x, y)</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>状態に基づいて行動を選ぶ</strong></p>
+<ul>
+<li>例：上・下・左・右のどれかを選ぶ。</li>
+</ul>
+</li>
+<li>
+<p><strong>環境に行動を送り、結果を受け取る</strong></p>
+<ul>
+<li><code>step(action)</code> を呼び出し、
+<ul>
+<li>次の状態 <code>next_state</code></li>
+<li>報酬 <code>reward</code></li>
+<li>終了フラグ <code>done</code><br>
+を受け取る。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>受け取った結果を使って「価値」を更新する</strong></p>
+<ul>
+<li>「この状態でこの行動を選ぶと、将来どれだけ報酬が得られるか」という**価値（Q値など）**を更新。</li>
+</ul>
+</li>
+<li>
+<p><strong>状態を更新し、終了まで繰り返す</strong></p>
+<ul>
+<li><code>state = next_state</code> として、ゴールに着くまで 2〜4 を繰り返す。</li>
+</ul>
+</li>
+<li>
+<p><strong>エピソードをリセットして再開</strong></p>
+<ul>
+<li><code>reset()</code> で初期状態に戻し、何度も繰り返して学習する。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-行動の選び方ポリシー">2. 行動の選び方（ポリシー）</h3>
+<p>エージェントは、<strong>「どの行動を選ぶか」を決めるルール（ポリシー）</strong> を持っています。</p>
+<p><strong>(1) 探索と活用のバランス</strong></p>
+<ul>
+<li><strong>活用（Exploitation）</strong>: 今まで学んだ中で「一番良さそうな行動」を選ぶ。</li>
+<li><strong>探索（Exploration）</strong>: まだ試していない行動や、たまにはランダムな行動を選ぶ。</li>
+</ul>
+<p>例：ε-greedy法</p>
+<ul>
+<li>確率 ε でランダム行動（探索）</li>
+<li>確率 1-ε で最適と思われる行動（活用）</li>
+</ul>
+<p><strong>(2) 価値に基づいて行動を選ぶ</strong></p>
+<ul>
+<li>各状態・行動の組み合わせに対して「価値（Q値）」を保持。</li>
+<li>例：<code>Q[(0,0), 右] = 5.0</code> なら、「(0,0)で右に行くのは価値が高い」と判断。</li>
+</ul>
+<h3 id="3-価値の更新ロジック例q学習">3. 価値の更新ロジック（例：Q学習）</h3>
+<p><strong>目的</strong></p>
+<ul>
+<li>「状態 s で行動 a を選んだときの、将来の報酬合計の期待値」を学習する。</li>
+</ul>
+<p><strong>Q学習の更新式（イメージ）</strong></p>
+<pre><code>Q[s, a] ← Q[s, a] + α * (reward + γ * max_a' Q[next_state, a'] - Q[s, a])
+</code></pre>
+<ul>
+<li><code>α</code>（学習率）: どれだけ急に更新するか</li>
+<li><code>γ</code>（割引率）: 将来の報酬をどれだけ重視するか</li>
+<li><code>max_a' Q[next_state, a']</code>: 次の状態で取りうる最良の行動の価値</li>
+</ul>
+<p><strong>直感的な意味</strong></p>
+<ul>
+<li>「実際に得られた報酬 + 将来の見込み報酬」と「今の予測値」の差を埋めるように更新する。</li>
+<li>これを繰り返すことで、Q値が「真の価値」に近づいていく。</li>
+</ul>
+<h3 id="4-迷路の例で見る具体的な学習ロジック">4. 迷路の例で見る具体的な学習ロジック</h3>
+<ol>
+<li>初期状態: <code>state = (0,0)</code>（スタート）</li>
+<li>行動選択: ε-greedy で行動を選ぶ（例：右）</li>
+<li><code>step(右)</code> を呼ぶ →
+<ul>
+<li><code>next_state = (0,1)</code></li>
+<li><code>reward = 0</code></li>
+<li><code>done = False</code></li>
+</ul>
+</li>
+<li>Q値を更新:
+<ul>
+<li>「(0,0)で右に行ったときの価値」を、<code>reward=0</code> と <code>(0,1)</code> での最良行動の価値を使って更新。</li>
+</ul>
+</li>
+<li><code>state = (0,1)</code> に更新し、次のステップへ。</li>
+<li>ゴールに着くまで繰り返す。</li>
+<li>何度もエピソードを繰り返すうちに、
+<ul>
+<li>ゴールに近づく行動の Q値が高くなり、</li>
+<li>壁にぶつかる行動の Q値が低くなる。</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-学習が進むとどうなるか">5. 学習が進むとどうなるか</h3>
+<ul>
+<li>エージェントは「どの状態でどの行動を選ぶと、将来の報酬が最大になるか」を学習します。</li>
+<li>迷路の例では：
+<ul>
+<li>壁を避けつつ</li>
+<li>ゴールに最短で到達する経路
+を選ぶようになります。</li>
+</ul>
+</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>以下に、強化学習のコード実装におけるキーポイントを整理しつつ、迷路環境に対する Q学習の実装例を交えて説明します。</p>
+<h3 id="1-強化学習コード実装のキーポイント全体像">1. 強化学習コード実装のキーポイント（全体像）</h3>
+<p><strong>(1) 環境インターフェースの統一</strong></p>
+<ul>
+<li><code>reset()</code>: 環境を初期状態に戻し、初期状態を返す</li>
+<li><code>step(action)</code>: 行動を実行し、<code>(next_state, reward, done)</code> を返す</li>
+<li>これにより、アルゴリズム側は環境に依存せず実装できます。</li>
+</ul>
+<p><strong>(2) エージェントの基本構造</strong></p>
+<ul>
+<li>状態・行動から価値を表すデータ構造（例：Qテーブル）を持つ</li>
+<li>行動選択ポリシー（例：ε-greedy）を実装</li>
+<li>価値更新ロジック（例：Q学習の更新式）を実装</li>
+</ul>
+<p><strong>(3) 学習ループの設計</strong></p>
+<ul>
+<li>エピソードループ（1ゲーム分の学習）</li>
+<li>ステップループ（1ステップごとの行動・更新）</li>
+<li>探索と活用のバランス（εの調整）</li>
+</ul>
+<p><strong>(4) ハイパーパラメータの設定</strong></p>
+<ul>
+<li>学習率 α</li>
+<li>割引率 γ</li>
+<li>探索率 ε</li>
+<li>エピソード数</li>
+</ul>
+<h3 id="2-迷路環境に対する-q学習の実装例python">2. 迷路環境に対する Q学習の実装例（Python）</h3>
+<p><strong>前提</strong></p>
+<ul>
+<li>前回までの <code>MazeEnv</code> クラスが利用可能とします。</li>
+<li>状態は <code>(x, y)</code> のタプル、行動は 0〜3（上・下・左・右）とします。</li>
+</ul>
+<p><strong>コード例</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> maze_env <span class="hljs-keyword">import</span> MazeEnv  <span class="hljs-comment"># 前回の環境クラス</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">QLearningAgent</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    Q学習エージェント（迷路用）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, env, alpha=<span class="hljs-number">0.1</span>, gamma=<span class="hljs-number">0.99</span>, epsilon=<span class="hljs-number">0.1</span></span>):
+        self.env = env
+        self.alpha = alpha  <span class="hljs-comment"># 学習率</span>
+        self.gamma = gamma  <span class="hljs-comment"># 割引率</span>
+        self.epsilon = epsilon  <span class="hljs-comment"># 探索率</span>
+
+        <span class="hljs-comment"># Qテーブルの初期化（状態: (x,y), 行動: 0~3）</span>
+        self.q_table = {}
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_q_value</span>(<span class="hljs-params">self, state, action</span>):
+        <span class="hljs-string">&quot;&quot;&quot;状態・行動に対するQ値を取得（未登録なら0で初期化）&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> state <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.q_table:
+            self.q_table[state] = np.zeros(<span class="hljs-number">4</span>)  <span class="hljs-comment"># 4行動分</span>
+        <span class="hljs-keyword">return</span> self.q_table[state][action]
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">choose_action</span>(<span class="hljs-params">self, state</span>):
+        <span class="hljs-string">&quot;&quot;&quot;ε-greedy法で行動を選択&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">if</span> np.random.random() &lt; self.epsilon:
+            <span class="hljs-comment"># 探索: ランダム行動</span>
+            <span class="hljs-keyword">return</span> np.random.randint(<span class="hljs-number">4</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 活用: Q値が最大の行動を選択</span>
+            q_values = [self.get_q_value(state, a) <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>)]
+            <span class="hljs-keyword">return</span> np.argmax(q_values)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update_q_value</span>(<span class="hljs-params">self, state, action, reward, next_state</span>):
+        <span class="hljs-string">&quot;&quot;&quot;Q値を更新（Q学習の更新式）&quot;&quot;&quot;</span>
+        current_q = self.get_q_value(state, action)
+        <span class="hljs-comment"># 次の状態での最大Q値</span>
+        next_max_q = <span class="hljs-built_in">max</span>([self.get_q_value(next_state, a) <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>)])
+        <span class="hljs-comment"># Q学習の更新式</span>
+        new_q = current_q + self.alpha * (reward + self.gamma * next_max_q - current_q)
+        self.q_table[state][action] = new_q
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">train</span>(<span class="hljs-params">self, episodes=<span class="hljs-number">1000</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;学習ループ&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">for</span> episode <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(episodes):
+            state = self.env.reset()
+            done = <span class="hljs-literal">False</span>
+            total_reward = <span class="hljs-number">0</span>
+
+            <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+                action = self.choose_action(state)
+                next_state, reward, done = self.env.step(action)
+                self.update_q_value(state, action, reward, next_state)
+                state = next_state
+                total_reward += reward
+
+            <span class="hljs-keyword">if</span> episode % <span class="hljs-number">100</span> == <span class="hljs-number">0</span>:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Episode <span class="hljs-subst">{episode}</span>, Total Reward: <span class="hljs-subst">{total_reward}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">play</span>(<span class="hljs-params">self, max_steps=<span class="hljs-number">50</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;学習済みポリシーで1エピソードプレイ&quot;&quot;&quot;</span>
+        state = self.env.reset()
+        done = <span class="hljs-literal">False</span>
+        steps = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done <span class="hljs-keyword">and</span> steps &lt; max_steps:
+            action = np.argmax([self.get_q_value(state, a) <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">4</span>)])
+            next_state, reward, done = self.env.step(action)
+            self.env.render()  <span class="hljs-comment"># 可視化</span>
+            state = next_state
+            steps += <span class="hljs-number">1</span>
+
+<span class="hljs-comment"># --- 使用例 ---</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    env = MazeEnv(<span class="hljs-string">&quot;maze.txt&quot;</span>)
+    agent = QLearningAgent(env, alpha=<span class="hljs-number">0.1</span>, gamma=<span class="hljs-number">0.99</span>, epsilon=<span class="hljs-number">0.1</span>)
+    agent.train(episodes=<span class="hljs-number">500</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Training finished. Playing with learned policy:&quot;</span>)
+    agent.play()
+</code></pre>
+<h3 id="3-実装のキーポイント詳細">3. 実装のキーポイント（詳細）</h3>
+<p><strong>(1) Qテーブルの設計</strong></p>
+<ul>
+<li>キー: 状態（例：<code>(x, y)</code>）</li>
+<li>値: 各行動に対するQ値の配列（例：<code>[上, 下, 左, 右]</code>）</li>
+<li>未登録の状態は0で初期化（<code>get_q_value</code> 内で動的に作成）</li>
+</ul>
+<p><strong>(2) 行動選択（ε-greedy）</strong></p>
+<ul>
+<li>確率 ε でランダム行動 → 探索</li>
+<li>確率 1-ε でQ値最大の行動 → 活用</li>
+<li>ε は最初は大きめ（0.1〜0.3）、学習が進むにつれて小さくするのも有効です。</li>
+</ul>
+<p><strong>(3) Q値の更新（Q学習）</strong></p>
+<ul>
+<li>更新式:<br>
+<code>Q[s,a] ← Q[s,a] + α * (r + γ * max_a' Q[s',a'] - Q[s,a])</code></li>
+<li><code>r + γ * max_a' Q[s',a']</code> が「実際の見込み報酬」</li>
+<li>現在の予測 <code>Q[s,a]</code> との差を学習率 α で埋める</li>
+</ul>
+<p><strong>(4) 学習ループの構造</strong></p>
+<ul>
+<li>外側ループ: エピソード数（何回ゲームをプレイするか）</li>
+<li>内側ループ: 1エピソード内のステップ（行動・更新の繰り返し）</li>
+<li>各エピソード終了時に <code>env.reset()</code> を呼び、初期状態に戻す</li>
+</ul>
+<p><strong>(5) ハイパーパラメータの役割</strong></p>
+<ul>
+<li><strong>α（学習率）</strong>: 大きいほど急に更新（0.1前後が一般的）</li>
+<li><strong>γ（割引率）</strong>: 将来の報酬をどれだけ重視するか（0.9〜0.99）</li>
+<li><strong>ε（探索率）</strong>: 探索と活用のバランス（0.05〜0.3）</li>
+</ul>
+<h3 id="4-学習が進むとどうなるか迷路の例">4. 学習が進むとどうなるか（迷路の例）</h3>
+<p>そうなるだろう、という期待を込めてですが。</p>
+<ul>
+<li>初期: Qテーブルはほぼ0 → ランダム行動</li>
+<li>学習後:
+<ul>
+<li>ゴールに近づく行動のQ値が高くなる</li>
+<li>壁にぶつかる行動のQ値が低くなる</li>
+<li>結果として、最短経路でゴールに到達するようになる</li>
+</ul>
+</li>
+</ul>
+<h2 id="学習の結果">学習の結果</h2>
+<p>今回の強化学習モデルがうまく進んでいるかは、学習の回数(Episode)が進むにつれて<code>Reward</code>の値が大きくなっているかということです。
+今回モデルで実際に学習させた結果を見てみましょう。</p>
+<pre><code>Episode 0, Total Reward: -26
+Episode 100, Total Reward: 9
+Episode 200, Total Reward: 10
+Episode 300, Total Reward: 9
+Episode 400, Total Reward: 10
+</code></pre>
+<p>徐々に<code>Reward</code>が大きくなっていることが確認出来ます。
+実際に動作させた様子はこのようになります。エージェントがゴール出来ました。</p>
+<img src="file:///d:\PycharmProjects\RL_research\maze_demo.gif" width="500">
+<h2 id="総括">総括</h2>
+<p>強化学習エージェントは、</p>
+<ul>
+<li>**環境との相互作用（状態・行動・報酬）**を通じて、</li>
+<li><strong>価値関数（Q値など）を更新し</strong>、</li>
+<li><strong>探索と活用のバランスを取りながら行動を選ぶ</strong></li>
+</ul>
+<p>という仕組みで学習します。</p>
+<p>迷路の例では、この仕組みをコードとして実装し、</p>
+<ul>
+<li>環境クラス（<code>MazeEnv</code>）</li>
+<li>Q学習エージェント（<code>QLearningAgent</code>）</li>
+<li>報酬設計（ゴール+10、壁-1、通常0）</li>
+<li>学習ループとハイパーパラメータ調整</li>
+</ul>
+<p>を組み合わせることで、エージェントが「ゴールに最短で到達する」行動を自律的に学習できることを示しました。
+この枠組みは、迷路だけでなく、さまざまな強化学習タスクに応用可能です。</p>
+<p>最期まで御覧くださってありがとうございました。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/dovkMozp5Ck?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
