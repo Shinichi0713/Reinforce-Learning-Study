@@ -1,4 +1,9 @@
+import random
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from collections import deque
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
@@ -6,12 +11,17 @@ class MazeEnv:
     """
     5x5迷路環境クラス（動画保存機能付き）
     """
-    def __init__(self, maze_file="maze.txt"):
-        self.maze = self._load_maze(maze_file)
-        self.start, self.goal = self._find_start_goal()
+    def __init__(self, maze_file="maze.txt", rows=5, cols=5):
+        if os.path.exists(maze_file):
+            self.maze = self._load_maze(maze_file)
+            self.start, self.goal = self._find_start_goal()
+        else:
+            # 自動生成メソッドを呼び出す
+            self.generate_random_maze(rows=rows, cols=cols)
+            
         self.state = self.start
         self.done = False
-        self.history = []  # 状態の履歴を保存
+        self.history = []
 
     def _load_maze(self, file_path):
         maze = []
@@ -95,6 +105,34 @@ class MazeEnv:
             print(' '.join(row))
         print()
 
+    def get_image_observation(self):
+        """
+        迷路を画像（NumPy配列）として返す
+        チャネル0: 壁 (W) = 1, それ以外 = 0
+        チャネル1: スタート (S) = 1, それ以外 = 0
+        チャネル2: ゴール (G) = 1, それ以外 = 0
+        チャネル3: エージェント位置 (A) = 1, それ以外 = 0
+        """
+        rows = len(self.maze)
+        cols = len(self.maze[0])
+        obs = np.zeros((4, rows, cols), dtype=np.float32)
+
+        for i in range(rows):
+            for j in range(cols):
+                cell = self.maze[i][j]
+                if cell == 'W':
+                    obs[0, i, j] = 1.0
+                elif cell == 'S':
+                    obs[1, i, j] = 1.0
+                elif cell == 'G':
+                    obs[2, i, j] = 1.0
+                elif cell == '.':
+                    pass  # 何も立てない
+        # エージェント位置
+        x, y = self.state
+        obs[3, x, y] = 1.0
+        return obs
+
     def save_video(self, output_path="maze_animation.mp4", fps=2):
         """
         エージェントの動きを動画として保存
@@ -156,3 +194,65 @@ class MazeEnv:
         anim.save(output_path, writer='ffmpeg', fps=fps)
         plt.close(fig)
         print(f"Animation saved to {output_path}")
+
+
+    def generate_random_maze(self, rows=5, cols=5, wall_prob=0.3):
+        """
+        条件を満たす迷路を自動生成し、self.mazeにセットする
+        条件:
+        1. S (スタート) と G (ゴール) が必ず存在する
+        2. S から G へ必ず到達できる
+        3. S と G の間には適度に障害物（W）が存在する
+        """
+        import random
+        
+        while True:
+            # 1. すべてを通路('.')で初期化
+            maze = [['.' for _ in range(cols)] for _ in range(rows)]
+            
+            # 2. スタートとゴールをランダムな位置に配置（重複しないように）
+            s_r, s_c = random.randint(0, rows - 1), random.randint(0, cols - 1)
+            while True:
+                g_r, g_c = random.randint(0, rows - 1), random.randint(0, cols - 1)
+                if (g_r, g_c) != (s_r, s_c):
+                    break
+            
+            maze[s_r][s_c] = 'S'
+            maze[g_r][g_c] = 'G'
+            
+            # 3. 確率に基づいて壁('W')を配置
+            for r in range(rows):
+                for c in range(cols):
+                    if maze[r][c] not in ['S', 'G']:
+                        if random.random() < wall_prob:
+                            maze[r][c] = 'W'
+            
+            # 4. 幅優先探索（BFS）でSからGへの経路が存在するか（到達可能か）チェック
+            queue = [(s_r, s_c)]
+            visited = set([(s_r, s_c)])
+            reachable = False
+            
+            while queue:
+                curr_r, curr_c = queue.pop(0)
+                
+                if (curr_r, curr_c) == (g_r, g_c):
+                    reachable = True
+                    break
+                    
+                # 上下左右の移動
+                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nr, nc = curr_r + dr, curr_c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols:
+                        if maze[nr][nc] != 'W' and (nr, nc) not in visited:
+                            visited.add((nr, nc))
+                            queue.append((nr, nc))
+            
+            # 5. 到達可能、かつ迷路内に少なくとも1つは壁が存在することを確認
+            # （5x5だとたまに壁が1つも生成されないことがあるため）
+            has_wall = any('W' in row for row in maze)
+            
+            if reachable and has_wall:
+                self.maze = maze
+                self.start = (s_r, s_c)
+                self.goal = (g_r, g_c)
+                break
