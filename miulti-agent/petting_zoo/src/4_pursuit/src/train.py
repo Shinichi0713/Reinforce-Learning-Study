@@ -118,11 +118,11 @@ for episode in range(start_episode, max_episodes):
             action = actions_np[agent_idx]
 
         # 3. 環境を1ステップ進める
-        obs, reward, terminated, truncated, info = env.step(agent, action)
+        obs, reward, terminated, truncated, info, count_capture = env.step(agent, action)
         episode_reward += reward
 
-        if reward == 5.0:
-            episode_captures += 1
+        # Pursuit環境特有の捕獲報酬(+5)をカウント
+        episode_captures += count_capture if count_capture else 0
 
         # 4. バッファに保存するためのステップ全体の辞書データを構築
         obs_dict = {}
@@ -159,8 +159,8 @@ for episode in range(start_episode, max_episodes):
                 log_prob_dict[agent_name] = 0.0
 
         # 5. Centralized Transformer Criticによる価値推定
-        # 🌟 変更点2: 形状を (1, num_agents, 236) に整形して Critic に入力
-        global_state_tensor = torch.FloatTensor(np.array(global_state_list)).unsqueeze(0).to(device)
+        # 🌟 .contiguous() を追加してメモリ配置の不連続性を解消
+        global_state_tensor = torch.FloatTensor(np.array(global_state_list)).unsqueeze(0).to(device).contiguous()
 
         for i in range(num_agents):
             agent_name = f'pursuer_{i}'
