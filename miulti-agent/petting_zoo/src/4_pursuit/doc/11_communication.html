@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x3053;&#x3053;&#x307e;&#x3067;&#x306e;&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回はモデルをCNNからTransformerに変更したことで、集団で追跡するチーム連携の動作が出来るようになりました。
+(ついでに捕獲の実績もカウントが入るようになりました)</p>
+<p>その後、動作を見ていると一角の捕獲を終えた後の動作にまごまごする傾向があります。
+限られた時間で捕獲を効率よく歩調を合わせた動作を行えるならないかと考えました。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>捕獲のターゲットを効率よく切り替えられるような仕組みを検討・実装</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="ここまでの課題">ここまでの課題</h2>
+<p><strong>「1体を捕獲した直後に『まごまご』と歩調が乱れる・動きが止まる」</strong> という現象から考えられる課題について考察してみます。</p>
+<h3 id="1角の捕獲直後にまごまごする3つの想定原因">1角の捕獲直後に「まごまご」する3つの想定原因</h3>
+<p>なぜ1体目を捕獲した直後、あれだけ鮮やかだった連携が急にぎこちなくなるのか。主に以下の3つの課題が絡み合っています。</p>
+<p><strong>① 報酬の不連続性と「燃え尽き症候群（Goal-Loss Panic）」</strong></p>
+<p>それまでエージェントたちは、特定の獲物を取り囲むために「じわじわと距離を詰める報酬（または捕獲報酬 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">+5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">5</span></span></span></span>）」の勾配を必死に追いかけていました。しかし、1体目を捕獲した瞬間に<strong>そのターゲット（目標）が環境から消滅、または再配置</strong>されます。</p>
+<ul>
+<li><strong>課題：</strong> 1ステップ前まで「すぐ目の前にいたはずのインセンティブ」が突然ゼロになり、次のターゲット（2体目）は遥か遠くにいる状態になります。ポリシー（Actor）から見ると、入力（状態）が不連続に大激変するため、次にどこを目指すべきか一瞬見失い、ステップごとの行動に一貫性がなくなって「まごまご」してしまいます。</li>
+</ul>
+<p><strong>② AEC（非同期ステップ）環境における「環境の過渡状態」</strong></p>
+<p>PettingZooのPursuit環境はAEC（Agent-Environment Coevolution）を採用しており、<code>pursuer_0</code> から順に1人ずつ行動を決定していきます。</p>
+<ul>
+<li><strong>課題：</strong> 例えば <code>pursuer_2</code> の行動によって捕獲が成立したとします。その直後、環境はリセット処理や獲物の再配置を行いますが、他のエージェント（<code>pursuer_3</code> や <code>pursuer_0</code>）は、<strong>「まだ古い獲物の残像（直前の位置）を意識した観測」を持ったまま、次のステップの行動選択に突入</strong>させられる時間的なズレ（過渡状態）が発生しやすく、これが足並みを乱す原因になります。</li>
+</ul>
+<p><strong>③ マルコフ性の喪失（部分観測による迷子）</strong></p>
+<p>エージェントの視野は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>7</mn><mo>×</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">7 \times 7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">7</span></span></span></span> と限定的（部分観測、POMDP）です。</p>
+<ul>
+<li><strong>課題：</strong> 1体目の捕獲に全員で群がっていたということは、エージェントたちの視野は「身内のエージェントの体」と「捕獲した獲物」で埋め尽くされていました。そこから獲物が消えた瞬間、彼らの <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>7</mn><mo>×</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">7 \times 7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">7</span></span></span></span> の狭い視野には「仲間しか映っていない（次の獲物がどこにいるか全く見えない）」状態になります。過去の記憶がない（静的な観測のみの）状態では、「どっちの方角からアプローチしてきたか」「どっちに次の獲物がいた形跡があったか」を思い出すことができず、視界が開けるまでランダムウォーク（まごまご）せざるを得なくなります。</li>
+</ul>
+<h2 id="今回とろうとする方法">今回とろうとする方法</h2>
+<p>今回は先述した課題への対応策として、<strong>「Opponent Modeling（対戦相手モデリング）」</strong> や <strong>「Action-In-Action」</strong> と呼ばれる、マルチエージェント強化学習（MARL）における手法を取り入れていこうと思います。</p>
+<h3 id="1-手法の概要">1. 手法の概要</h3>
+<p><strong>(1) 基本アイデア</strong></p>
+<ul>
+<li>各エージェントが、<strong>自身の観測</strong>に加えて、<strong>他エージェントの行動（または行動の予測）</strong> を入力として受け取ります。</li>
+<li>これにより、他エージェントの意図や戦略を推論し、<strong>協調や競合をより効果的に行う</strong>ことができます。</li>
+</ul>
+<p><strong>(2) 入力の組み込み方</strong></p>
+<ul>
+<li><strong>直近の行動履歴</strong>: 他エージェントが直前にとった行動を状態に追加。</li>
+<li><strong>行動予測（Opponent Modeling）</strong>: 他エージェントの方策を推定し、次に取りそうな行動を予測して入力に組み込む。</li>
+<li><strong>通信ベース</strong>: 他エージェントから明示的なメッセージ（意図・計画）を受け取り、状態に統合。</li>
+</ul>
+<h3 id="2-特徴">2. 特徴</h3>
+<p><strong>(1) 部分観測の補完</strong></p>
+<ul>
+<li>マルチエージェント環境では、各エージェントが世界の一部しか観測できない（部分観測）ことが多いです。</li>
+<li>他エージェントの行動を入力に加えることで、<strong>観測できない部分を推論</strong>し、より正確な意思決定が可能になります。</li>
+</ul>
+<p><strong>(2) 協調・競合の最適化</strong></p>
+<ul>
+<li>協調タスクでは、他エージェントの行動を考慮して<strong>役割分担や経路計画</strong>を最適化できます。</li>
+<li>競合タスクでは、相手の戦略を読み、<strong>先読みした行動</strong>を取ることができます。</li>
+</ul>
+<p><strong>(3) 非定常性への適応</strong></p>
+<ul>
+<li>マルチエージェント環境では、他エージェントの方策が変化するため、環境が非定常になります。</li>
+<li>他エージェントの行動をモデル化することで、<strong>変化する相手に適応</strong>しやすくなります。</li>
+</ul>
+<h3 id="3-メリット">3. メリット</h3>
+<p><strong>(1) 協調タスクでの性能向上</strong></p>
+<ul>
+<li><strong>文献</strong>: Foerster et al., &quot;Learning to Communicate with Deep Multi-Agent Reinforcement Learning&quot; (2016)
+<ul>
+<li>エージェント間でメッセージ（行動の意図）をやり取りし、協調タスクの性能を大幅に向上させた。</li>
+<li>他エージェントの意図を入力に組み込むことで、<strong>役割分担と協調が強化</strong>されることを示した。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) 競合タスクでの戦略的優位</strong></p>
+<ul>
+<li><strong>文献</strong>: He et al., &quot;Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments&quot; (MAPPOの元となるMADDPG, 2017)
+<ul>
+<li>各エージェントが他エージェントの行動を観測し、<strong>中央化されたCritic</strong>で評価する手法を提案。</li>
+<li>他エージェントの行動を考慮することで、<strong>競合環境での戦略的優位</strong>を実現。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 部分観測環境での推論能力向上</strong></p>
+<ul>
+<li><strong>文献</strong>: Lowe et al., &quot;Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments&quot; (MADDPG, 2017)
+<ul>
+<li>他エージェントの行動を状態に含めることで、<strong>部分観測下での推論能力が向上</strong>し、協調・競合タスクの両方で性能が改善することを報告。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 対戦相手モデリング（Opponent Modeling）の有効性</strong></p>
+<ul>
+<li><strong>文献</strong>: Hernandez-Leal et al., &quot;A Survey of Learning in Multiagent Environments: Dealing with Non-Stationarity&quot; (2019)
+<ul>
+<li>対戦相手モデリング（Opponent Modeling）は、<strong>非定常環境での適応</strong>に有効であると総括。</li>
+<li>他エージェントの行動を予測し、自身のポリシーを調整することで、<strong>長期的な報酬を最大化</strong>できる。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-期待する効果">4. 期待する効果</h3>
+<p>ご提示いただいた3つの課題に対して、<strong>「Action-In-Action」や「Opponent Modeling」</strong> がどのように効果的に機能するかを、それぞれの課題ごとに考察します。</p>
+<h3 id="1-報酬の不連続性と燃え尽き症候群への効果">1. 報酬の不連続性と「燃え尽き症候群」への効果</h3>
+<p><strong>課題の本質</strong></p>
+<ul>
+<li>1体目の捕獲直後に、<strong>ターゲット（獲物）が消滅・再配置</strong>され、報酬勾配が急激に変化。</li>
+<li>エージェントが「次にどこを目指すべきか」を見失い、行動が一貫性を失う。</li>
+</ul>
+<p><strong>Action-In-Action / Opponent Modeling の効果</strong></p>
+<ul>
+<li><strong>他エージェントの行動履歴や意図を入力に組み込む</strong>ことで、<strong>「次の共同ターゲット」への移行をスムーズに</strong>できます。</li>
+<li>例：
+<ul>
+<li>他エージェントが「2体目の獲物に向かって移動し始めた」という行動パターンを観測すれば、自身も自然にその方向へ追随できる。</li>
+<li>これにより、報酬が不連続に変化しても、<strong>他者の行動を手がかりに次の目標を推定</strong>できる。</li>
+</ul>
+</li>
+</ul>
+<p><strong>理由</strong></p>
+<ul>
+<li>報酬がゼロになっても、<strong>他エージェントの行動は連続的</strong>です。</li>
+<li>他者の行動を観測することで、<strong>環境の変化を補完する「擬似的な連続性」</strong> を確保できます。</li>
+</ul>
+<h3 id="2-aec環境における過渡状態への効果">2. AEC環境における「過渡状態」への効果</h3>
+<p><strong>課題の本質</strong></p>
+<ul>
+<li>AEC環境では、捕獲が成立した直後に環境が更新されるが、他のエージェントは<strong>古い観測のまま行動選択</strong>に突入する。</li>
+<li>これにより、足並みが乱れる。</li>
+</ul>
+<p><strong>Action-In-Action / Opponent Modeling の効果</strong></p>
+<ul>
+<li><strong>他エージェントの直近の行動を状態に含める</strong>ことで、<strong>「環境が更新される前の共同意図」を保持</strong>できます。</li>
+<li>例：
+<ul>
+<li>捕獲直前まで全員が「獲物A」に向かっていたという行動履歴があれば、獲物Aが消えても、<strong>「次は獲物Bに向かうべき」という共通認識</strong>を維持しやすい。</li>
+</ul>
+</li>
+</ul>
+<p><strong>理由</strong></p>
+<ul>
+<li>環境の更新タイミングとエージェントの行動タイミングにズレがあっても、<strong>他者の行動という「共通の文脈」を共有</strong>することで、過渡状態での混乱を軽減できます。</li>
+</ul>
+<h3 id="3-マルコフ性の喪失部分観測による迷子への効果">3. マルコフ性の喪失（部分観測による迷子）への効果</h3>
+<p><strong>課題の本質</strong></p>
+<ul>
+<li>視野が狭く（7×7）、捕獲直後は<strong>仲間しか映っていない</strong>状態になる。</li>
+<li>過去の記憶がないため、「次の獲物がどこにいたか」を思い出せず、ランダムウォークになる。</li>
+</ul>
+<p><strong>Action-In-Action / Opponent Modeling の効果</strong></p>
+<ul>
+<li><strong>他エージェントの行動履歴をRNNやTransformerで統合</strong>し、<strong>「過去の共同ターゲットの位置」や「移動の軌跡」</strong> を記憶できます。</li>
+<li>例：
+<ul>
+<li>捕獲前に全員が「北東方向」からアプローチしていたという履歴があれば、獲物が消えても「北東方向に次の獲物がいる可能性が高い」と推論できる。</li>
+<li>これにより、視界が開けるまでの<strong>ランダムウォークを減らし、目的志向の移動</strong>が可能になる。</li>
+</ul>
+</li>
+</ul>
+<p><strong>理由</strong></p>
+<ul>
+<li>部分観測環境では、<strong>自身の観測だけではマルコフ性を満たさない</strong>ため、他者の行動を「外部メモリ」として利用することで、<strong>実質的なマルコフ性を回復</strong>できます。</li>
+</ul>
+<h2 id="実装">実装</h2>
+<h3 id="実装のキーポイント">実装のキーポイント</h3>
+<p>「Action-In-Action」や「Opponent Modeling」を実装する際の<strong>コツ・キーポイント</strong>を、実装手順に沿って整理します。</p>
+<p><strong>1. 他エージェントの行動をどう表現するか？</strong></p>
+<p><strong>キーポイント：行動のエンコーディング</strong></p>
+<ul>
+<li><strong>離散行動</strong>の場合：one-hotベクトル（例：4方向なら長さ4のベクトル）</li>
+<li><strong>連続行動</strong>の場合：そのままの値 or 正規化した値</li>
+<li><strong>マルチエージェント</strong>の場合：各エージェントの行動を連結（例：8エージェント×4行動=32次元）</li>
+</ul>
+<p><strong>コツ</strong></p>
+<ul>
+<li>行動ベクトルを<strong>状態ベクトルと同程度のスケール</strong>に正規化する（例：-1〜1 or 0〜1）。</li>
+<li>行動の<strong>直近数ステップ分を履歴</strong>として保持し、RNNやTransformerで時系列処理する。</li>
+</ul>
+<p><strong>2. どこに組み込むか？</strong></p>
+<p><strong>(1) 状態への直接追加</strong></p>
+<ul>
+<li>自身の観測ベクトルに、他エージェントの行動ベクトルを<strong>単純に連結（concat）</strong> 。</li>
+<li>例：<code>state = [own_obs, other_actions]</code></li>
+</ul>
+<p><strong>(2) 別モジュールとして統合</strong></p>
+<ul>
+<li>他エージェントの行動を<strong>専用の埋め込み層</strong>で処理し、その後で自身の観測と統合。</li>
+<li>例：Transformerのトークンとして扱い、Self-Attentionで関係性を学習。</li>
+</ul>
+<p><strong>コツ</strong></p>
+<ul>
+<li><strong>行動情報と観測情報を分離</strong>して処理し、最後に統合する方が学習が安定しやすい。</li>
+<li>マルチエージェント環境では、<strong>エージェントID埋め込み</strong>と組み合わせると、誰の行動かが明確になる。</li>
+</ul>
+<p><strong>3. Opponent Modeling（相手方策の推定）の実装</strong></p>
+<p><strong>キーポイント：相手方策ネットワークの学習</strong></p>
+<ul>
+<li>他エージェントの観測と行動のペアから、<strong>相手の方策（ポリシー）を推定するネットワーク</strong>を学習。</li>
+<li>入力：他エージェントの観測（または共有観測）</li>
+<li>出力：他エージェントの行動分布（確率 or Q値）</li>
+</ul>
+<p><strong>コツ</strong></p>
+<ul>
+<li><strong>教師あり学習</strong>として、実際の行動をターゲットに学習（クロスエントロピー損失など）。</li>
+<li>学習済みの相手モデルの出力（行動予測）を、自身の状態に組み込む。</li>
+</ul>
+<p><strong>4. Action-In-Action（直近行動の利用）の実装</strong></p>
+<p><strong>キーポイント：行動履歴の保持</strong></p>
+<ul>
+<li>各エージェントが<strong>直近Kステップの行動履歴</strong>を保持。</li>
+<li>これをRNN（LSTM/GRU）やTransformerで処理し、<strong>「現在の共同意図」</strong> を抽出。</li>
+</ul>
+<p><strong>コツ</strong></p>
+<ul>
+<li>履歴長Kは<strong>タスクの時間スケール</strong>に合わせて調整（短すぎると情報不足、長すぎるとノイズ増加）。</li>
+<li>部分観測環境では、<strong>他者の行動が「外部メモリ」</strong> として機能するため、履歴を長めに取ると効果的。</li>
+</ul>
+<p><strong>5. マルチエージェントTransformerでの実装例</strong></p>
+<p><strong>キーポイント：トークン設計</strong></p>
+<ul>
+<li>各トークン = [エージェントの観測, エージェントの行動, エージェントID埋め込み]</li>
+<li>TransformerのSelf-Attentionで、<strong>エージェント間の関係性</strong>を学習。</li>
+</ul>
+<p><strong>コツ</strong></p>
+<ul>
+<li>位置エンコーディングに加え、<strong>エージェントID埋め込み</strong>を追加し、誰の情報かがわかるようにする。</li>
+<li>出力時には、<strong>自身のトークンの特徴量</strong>を抽出し、行動選択に利用。</li>
+</ul>
+<p><strong>6. 学習の安定化テクニック</strong></p>
+<p><strong>(1) 勾配の分離</strong></p>
+<ul>
+<li>相手モデリングネットワークの勾配を、<strong>自身のポリシー更新に直接流さない</strong>（stop_gradientなど）。</li>
+<li>これにより、相手モデルの不安定性が自身の学習に悪影響を与えにくくなる。</li>
+</ul>
+<p><strong>(2) ターゲットネットワークの利用</strong></p>
+<ul>
+<li>Opponent Modelingネットワークにも<strong>ターゲットネットワーク</strong>を導入し、更新を安定化。</li>
+<li>特に非定常環境（相手方策が変化）では重要。</li>
+</ul>
+<p><strong>(3) 経験再生の工夫</strong></p>
+<ul>
+<li>他エージェントの行動を含む経験を<strong>まとめて保存</strong>し、バッチ学習で相関を減らす。</li>
+<li>マルチエージェント対応のReplayBufferを設計。</li>
+</ul>
+<h3 id="実装コード">実装コード</h3>
+<p>以下のレポジトリにコードを保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>前回の結果と、今回の結果を比較してみます。</p>
+<p>報酬は前回の設計が少し大きかったようなので、1/5にしています。
+あんまり・・・変わらないかもしれません。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\11_communication\1783141247548.png" alt="1783141247548"></p>
+<p>ロスとエントロピは低下が早くなったように思います。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\11_communication\1783141184764.png" alt="1783141184764"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\11_communication\1783141222434.png" alt="1783141222434"></p>
+<p>前回と同程度以上には学習できたような手ごたえかと思いました。</p>
+<h3 id="実際の動作">実際の動作</h3>
+<p>開始時点は前回とあまり変わらないかもしれませんが、集まってからは敵を真ん中に置いて、周囲を囲むような動作が見えます。
+また、動画右下の <code>capture</code> は捕獲のカウントですが、味方同士が集まってから急にカウントが大きくなっています。</p>
+<p>そして、捕獲を終えてからは周囲に味方と歩調を合わせながら移動している様子が確認出来ます。
+前回に比べると、一回敵を捕獲してから味方と歩調合せながら次の行動をとるようになった感触があります。
+(指標で見てないので、断言はできませんが)</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\11_communication\pursuit_mappo_v11.gif">
+<h2 id="総括">総括</h2>
+<p>今回のまとめを行います。
+課題としたのは、捕獲直後にエージェントが「まごまご」して連携が崩れる問題を解消し、<strong>効率的なターゲット切り替え</strong>を実現することです。</p>
+<p><strong>課題の原因仮説</strong></p>
+<ol>
+<li><strong>報酬の不連続</strong>：捕獲でターゲットが消え、報酬勾配が急にゼロになる。</li>
+<li><strong>AECの過渡状態</strong>：環境更新とエージェントの行動タイミングがずれ、古い観測のまま動く。</li>
+<li><strong>部分観測による迷子</strong>：視野が狭く、捕獲直後は仲間しか見えず、過去の記憶がないと次の獲物がわからない。</li>
+</ol>
+<p><strong>今回の解決策（Action-In-Action / Opponent Modeling）</strong></p>
+<ul>
+<li>各エージェントが、<strong>自身の観測＋他者の行動（または行動予測）</strong> を状態に組み込む。</li>
+<li>これにより：
+<ul>
+<li>報酬が途切れても「他者の動き」を手がかりに次のターゲットを推定できる。</li>
+<li>AECの過渡状態でも「共通の意図」を保持し、足並みをそろえられる。</li>
+<li>部分観測を補完し、過去のターゲット位置や移動方向を推論できる。</li>
+</ul>
+</li>
+</ul>
+<p><strong>実装のポイント</strong></p>
+<ul>
+<li>他者の行動を one-hot や正規化値で表現し、状態に連結。</li>
+<li>直近Kステップの履歴をRNN/Transformerで処理し、「共同意図」を抽出。</li>
+<li>必要に応じて相手方策を推定するネットワーク（Opponent Modeling）を学習し、その出力を状態に組み込む。</li>
+<li>学習安定化のため、勾配分離・ターゲットネットワーク・マルチエージェント対応ReplayBufferを活用。</li>
+</ul>
+<p><strong>結果（手応え）</strong></p>
+<ul>
+<li>ロス・エントロピーの低下が早く、学習は安定。</li>
+<li>実際の動作では：
+<ul>
+<li>集団で獲物を囲む連携が明確になった。</li>
+<li>捕獲直後も味方と歩調を合わせて移動し、「まごまご」が軽減された。</li>
+</ul>
+</li>
+<li>指標は厳密には測っていないが、<strong>ターゲット切り替えの効率が向上した感触</strong>がある。</li>
+</ul>
+<p><strong>一言で言うと</strong><br>
+「他者の行動や意図を状態に組み込むことで、報酬の不連続・AECの過渡状態・部分観測という3つの課題を同時に緩和し、捕獲直後もスムーズに次のターゲットへ移行できるようになった」というのが、これまでの総括です。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
