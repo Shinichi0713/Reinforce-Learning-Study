@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Transformer&#x30e2;&#x30c7;&#x30eb;&#x306e;&#x6539;&#x4fee;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回迷路問題をTransformerで解くように実装を行いました。
+今回は学習を行ってみます。
+学習の前に前回コードに気になる点があったため、修正を行います。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="transformerモデルの改修">Transformerモデルの改修</h2>
+<h3 id="1-2次元グリッドに対する1次元位置エンコーディングの限界">1. 2次元グリッドに対する「1次元」位置エンコーディングの限界</h3>
+<p><strong>懸念点</strong></p>
+<p>コード内では、<code>torch.randn(1, self.num_tokens, d_model)</code> として位置エンコーディング（<code>pos_embedding</code>）をランダムに初期化しています。これは1次元のシーケンス（文章など）には有効ですが、<strong>2次元のグリッド空間における上下左右の幾何学的な近接関係（空間構造）を初期状態で全く反映していません</strong>。
+強化学習、特に追跡（Pursuit）などの空間タスクでは、「上隣のセル」と「下隣のセル」の関係性が重要ですが、ランダム初期化の1次元埋め込みだと、モデルがこの2次元の空間概念を一から学習する必要があり、学習初期の効率が落ちる可能性があります。</p>
+<p><strong>対策</strong></p>
+<p>X座標とY座標それぞれに対して位置エンコーディングを生成して結合・加算するか、2次元用に設計された固定の <strong>Sine-Cosine 位置エンコーディング</strong> を使用して固定された絶対位置を基に学習を行うようにします。</p>
+<h3 id="2-global-average-pooling-による空間解像度の喪失">2. Global Average Pooling による空間解像度の喪失</h3>
+<p><strong>懸念点</strong></p>
+<p>多分ここが一番ネガティブです。
+<code>features.mean(dim=1)</code>（全トークンの平均）によって全てのセルの特徴量を均一に潰していました。
+RLにおいて、「どこに何があるか」という空間情報（特にエージェントとターゲットの位置関係など）は決定的に重要です。単純な平均化を行うと、<strong>「左上にターゲットがいる状態」と「右下にターゲットがいる状態」の区別が難しくなる（特徴量がブレンドされてしまう）</strong> 危険性があります。</p>
+<p><strong>対策</strong></p>
+<p>以下を実施して、エージェント本人がトークンのどこにいるかを認識できるようにします。</p>
+<ul>
+<li><strong>CLSトークン（分類トークン）の導入</strong>: Vision Transformer (ViT) のように、学習可能なダミートークンを先頭に追加し、Transformer を通した後のそのトークンの出力だけを <code>self.mlp</code> に通す。</li>
+<li><strong>Flatten（展開）</strong>: 平均化せず、<code>features</code> をそのまま平坦化（<code>batch_size, num_tokens * d_model</code>）して <code>nn.Linear</code> に通す（ただし、グリッドサイズが大きいとパラメータが肥大化します）。</li>
+</ul>
+<h3 id="モデルの修正">モデルの修正</h3>
+<p>上記の懸念点を踏まえ、最小限の変更で堅牢性を高めた修正例です。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TransformerQNetwork</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels=<span class="hljs-number">4</span>, grid_size=<span class="hljs-number">5</span>, d_model=<span class="hljs-number">64</span>, nhead=<span class="hljs-number">4</span>,
+                 num_layers=<span class="hljs-number">2</span>, action_dim=<span class="hljs-number">4</span>, hidden_size=<span class="hljs-number">128</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.grid_size = grid_size
+        self.num_tokens = grid_size * grid_size
+
+        <span class="hljs-comment"># 1. トークン埋め込み</span>
+        self.embedding = nn.Linear(in_channels, d_model)
+
+        <span class="hljs-comment"># 2. CLSトークンの追加 (ベースとなる固定ベクトル)</span>
+        self.cls_token = nn.Parameter(torch.randn(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, d_model))
+
+        <span class="hljs-comment"># 【採用手法2】エージェントの現在座標 (Row, Col) をベクトルに変換する線形層</span>
+        self.agent_pos_encoder = nn.Linear(<span class="hljs-number">2</span>, d_model)
+
+        <span class="hljs-comment"># 【採用手法1】2次元位置エンコーディングのためのEmbedding層</span>
+        <span class="hljs-comment"># 縦方向(Row)と横方向(Col)の位置情報をそれぞれ個別に学習</span>
+        self.row_embedding = nn.Embedding(grid_size, d_model)
+        self.col_embedding = nn.Embedding(grid_size, d_model)
+        
+        <span class="hljs-comment"># CLSトークン用の位置埋め込み（空間情報を持たないため独立して用意）</span>
+        self.cls_pos_embedding = nn.Parameter(torch.randn(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, d_model))
+
+        <span class="hljs-comment"># 4. Transformer Encoder (Pre-LN)</span>
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=d_model * <span class="hljs-number">2</span>,
+            activation=<span class="hljs-string">&quot;gelu&quot;</span>, batch_first=<span class="hljs-literal">True</span>, norm_first=<span class="hljs-literal">True</span>
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+
+        <span class="hljs-comment"># 5. 出力MLP</span>
+        self.mlp = nn.Sequential(
+            nn.Linear(d_model, hidden_size),
+            nn.GELU(),
+            nn.Linear(hidden_size, action_dim)
+        )
+
+        <span class="hljs-comment"># 最終出力層の初期化を小さくする</span>
+        <span class="hljs-keyword">with</span> torch.no_grad():
+            self.mlp[-<span class="hljs-number">1</span>].weight.fill_(<span class="hljs-number">0.0</span>)
+            self.mlp[-<span class="hljs-number">1</span>].bias.fill_(<span class="hljs-number">0.0</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, agent_pos</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        Args:
+            x: 迷路の環境状態テンソル (batch, in_channels, grid_size, grid_size)
+            agent_pos: エージェントの現在座標テンソル (batch, 2) -&gt; [[row, col], ...]
+        &quot;&quot;&quot;</span>
+        batch_size = x.shape[<span class="hljs-number">0</span>]
+
+        <span class="hljs-comment"># (batch, in_channels, H, W) -&gt; (batch, H*W, in_channels)</span>
+        x = x.flatten(<span class="hljs-number">2</span>).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        x = self.embedding(x)  <span class="hljs-comment"># (batch, num_tokens, d_model)</span>
+
+        <span class="hljs-comment"># --- 【採用手法2】CLSトークンにエージェントの文脈をブレンド ---</span>
+        <span class="hljs-comment"># エージェントの座標 (row, col) を特徴量に変換</span>
+        agent_feat = self.agent_pos_encoder(agent_pos.<span class="hljs-built_in">float</span>())  <span class="hljs-comment"># (batch, d_model)</span>
+        
+        <span class="hljs-comment"># 固定のCLSトークンにエージェントの特徴量を足し合わせる</span>
+        cls_tokens = self.cls_token.expand(batch_size, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)  <span class="hljs-comment"># (batch, 1, d_model)</span>
+        cls_tokens = cls_tokens + agent_feat.unsqueeze(<span class="hljs-number">1</span>)       <span class="hljs-comment"># (batch, 1, d_model)</span>
+
+        <span class="hljs-comment"># 先頭に結合</span>
+        x = torch.cat((cls_tokens, x), dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># (batch, num_tokens + 1, d_model)</span>
+
+        <span class="hljs-comment"># --- 【採用手法1】2次元位置エンコーディングの動的生成 ---</span>
+        <span class="hljs-comment"># 5x5のグリッド座標インデックスを生成</span>
+        coords = torch.arange(self.grid_size, device=x.device)
+        grid_y, grid_x = torch.meshgrid(coords, coords, indexing=<span class="hljs-string">&quot;ij&quot;</span>)  <span class="hljs-comment"># 各(grid_size, grid_size)</span>
+        
+        <span class="hljs-comment"># 縦横のEmbeddingを取得して加算 -&gt; 2次元の空間情報を保持</span>
+        spatial_pos = self.row_embedding(grid_y) + self.col_embedding(grid_x)
+        spatial_pos = spatial_pos.view(<span class="hljs-number">1</span>, self.num_tokens, -<span class="hljs-number">1</span>)     <span class="hljs-comment"># (1, num_tokens, d_model)</span>
+
+        <span class="hljs-comment"># CLS用の位置埋め込みと結合して (1, num_tokens + 1, d_model) に整形</span>
+        pos_embedding = torch.cat([self.cls_pos_embedding, spatial_pos], dim=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 位置エンコーディングの加算</span>
+        x = x + pos_embedding
+
+        <span class="hljs-comment"># Transformer処理</span>
+        features = self.transformer(x)  <span class="hljs-comment"># (batch, num_tokens + 1, d_model)</span>
+
+        <span class="hljs-comment"># 先頭のCLSトークンの特徴量を抽出</span>
+        cls_feature = features[:, <span class="hljs-number">0</span>]  <span class="hljs-comment"># (batch, d_model)</span>
+
+        <span class="hljs-comment"># 行動Q値を出力</span>
+        q_values = self.mlp(cls_feature)
+        <span class="hljs-keyword">return</span> q_values
+</code></pre>
+<h2 id="環境の修正">環境の修正</h2>
+<p>環境側もゴールする時間が遅くても早くても同じ報酬が出るようになっていました。
+ですが、本来はゴールする時間も早い方が良いと思われます。
+→時間経過と同時に報酬を落とすようにします。</p>
+<p>変更箇所は前回実装した<code>step</code>のみです。</p>
+<pre><code class="language-python">
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, action</span>):
+        <span class="hljs-keyword">if</span> self.done:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Episode is already done. Call reset() first.&quot;</span>)
+
+        x, y = self.state
+        <span class="hljs-keyword">if</span> action == <span class="hljs-number">0</span>:   <span class="hljs-comment"># 上</span>
+            next_state = (x - <span class="hljs-number">1</span>, y)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">1</span>: <span class="hljs-comment"># 下</span>
+            next_state = (x + <span class="hljs-number">1</span>, y)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">2</span>: <span class="hljs-comment"># 左</span>
+            next_state = (x, y - <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">elif</span> action == <span class="hljs-number">3</span>: <span class="hljs-comment"># 右</span>
+            next_state = (x, y + <span class="hljs-number">1</span>)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Invalid action&quot;</span>)
+
+        <span class="hljs-comment"># --- 報酬設計の変更箇所 ---</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self._is_valid_move(next_state):
+            next_state = self.state
+            reward = -<span class="hljs-number">1.0</span>  <span class="hljs-comment"># 壁にぶつかったペナルティ（強め）</span>
+        <span class="hljs-keyword">else</span>:
+            reward = -<span class="hljs-number">0.02</span>  <span class="hljs-comment"># 1ステップ経過するごとのタイムペナルティ（早くゴールさせるため）</span>
+
+        <span class="hljs-keyword">if</span> self.maze[next_state[<span class="hljs-number">0</span>]][next_state[<span class="hljs-number">1</span>]] == <span class="hljs-string">&#x27;G&#x27;</span>:
+            reward = <span class="hljs-number">10.0</span>  <span class="hljs-comment"># ゴール報酬（タイムペナルティを相殺して余りあるプラス）</span>
+            self.done = <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">else</span>:
+            self.done = <span class="hljs-literal">False</span>
+        <span class="hljs-comment"># ------------------------</span>
+
+        self.state = next_state
+        self.history.append(self.state)  <span class="hljs-comment"># 履歴に追加</span>
+        <span class="hljs-keyword">return</span> self.state, reward, self.done
+</code></pre>
+<h2 id="学習">学習</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>ロスと報酬をEpisodeごとに出力しました。
+全然収束しています。</p>
+<pre><code>Episode 0, Total Reward: -48.060000000000045, Epsilon: 0.708
+Episode 100, Total Reward: 9.86, Epsilon: 0.010
+Episode 200, Total Reward: 9.86, Epsilon: 0.010
+Episode 300, Total Reward: 9.86, Epsilon: 0.010
+Episode 400, Total Reward: 9.86, Epsilon: 0.010
+</code></pre>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習後のエージェントの動作を確認します。
+対比のため、学習前と学習後両方の動作を掲載します。</p>
+<p>学習前</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\5_train\random_agent_maze.gif" width="500">
+<p>学習後</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\5_train\maze_solving.gif" width="500">
+<p>学習後で一番最短経路でゴールに向かう動作が確認されました。</p>
+<h2 id="総括">総括</h2>
+<p>以下、今回の内容を要約・総括いたします。</p>
+<h3 id="1-transformerモデルの改修ポイント">1. Transformerモデルの改修ポイント</h3>
+<p><strong>(1) 2次元グリッドに対する位置エンコーディングの改善</strong></p>
+<ul>
+<li>元コードでは <code>torch.randn(1, num_tokens, d_model)</code> によるランダムな1次元位置埋め込みを使用しており、<strong>2次元空間の上下左右の近接関係を初期状態で一切反映していなかった</strong>。</li>
+<li>改修後は、<strong>Row方向・Col方向それぞれにEmbedding層を用意し、それらを加算して2次元の空間構造を表現</strong>する方式に変更。
+<ul>
+<li><code>self.row_embedding(grid_y) + self.col_embedding(grid_x)</code> により、各セルの「縦・横」の位置情報を保持。</li>
+</ul>
+</li>
+<li>これにより、Transformerが空間構造を一から学習する負担を軽減し、学習初期の効率向上が期待できる。</li>
+</ul>
+<p><strong>(2) Global Average Pooling の廃止とCLSトークン＋エージェント位置情報の導入</strong></p>
+<ul>
+<li>元コードでは <code>features.mean(dim=1)</code> により全トークンを平均化していたため、<strong>「どこに何があるか」という空間解像度が失われる</strong>問題があった。</li>
+<li>改修後は以下の構成に変更：
+<ul>
+<li><strong>CLSトークン（分類トークン）を先頭に追加</strong>し、Transformer出力の先頭トークンだけをMLPに通す（ViT風の設計）。</li>
+<li><strong>エージェントの現在座標 (row, col) を線形層でベクトル化し、CLSトークンに加算</strong>することで、「エージェント自身の位置」を明示的にモデルに伝える。</li>
+<li>これにより、<strong>「左上にターゲットがある状態」と「右下にターゲットがある状態」を区別できる空間情報を保持</strong>したまま、行動価値関数を推定できる。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) その他の改善</strong></p>
+<ul>
+<li>CLSトークン用の位置埋め込み（<code>self.cls_pos_embedding</code>）を別途用意し、空間情報を持たないCLSトークンにも適切な位置情報を付与。</li>
+<li>出力MLPの最終層の重み・バイアスをゼロ初期化し、学習初期のQ値のばらつきを抑える工夫を追加。</li>
+</ul>
+<h3 id="2-環境側の報酬設計の変更">2. 環境側の報酬設計の変更</h3>
+<ul>
+<li>元の環境では、<strong>ゴールする時間が早くても遅くても同じ報酬</strong>になっており、時間最適化のインセンティブが弱かった。</li>
+<li>改修後は：
+<ul>
+<li>1ステップごとに <strong>-0.02 のタイムペナルティ</strong> を課す。</li>
+<li>壁にぶつかった場合は <strong>-1.0 のペナルティ</strong> を課す（強め）。</li>
+<li>ゴール時は <strong>+10.0 の報酬</strong> を与え、タイムペナルティを上回るように設計。</li>
+</ul>
+</li>
+<li>これにより、<strong>「できるだけ早く、無駄な衝突を避けてゴールする」</strong> という行動方針が自然に学習されるようになった。</li>
+</ul>
+<h3 id="3-学習結果の総括">3. 学習結果の総括</h3>
+<p><strong>(1) 学習の推移</strong></p>
+<ul>
+<li>Episode 0 では総報酬が約 -48 と大きく負（壁にぶつかりながら探索している状態）。</li>
+<li>Episode 100 以降は <strong>総報酬が約 +9.86 で安定</strong>し、探索率εも 0.01 まで低下。</li>
+<li>これは、<strong>エージェントが最短経路でゴールに到達し、タイムペナルティを最小限に抑えつつゴール報酬を獲得できている</strong>ことを示唆。</li>
+</ul>
+<p><strong>(2) エージェントの動作比較</strong></p>
+<ul>
+<li><strong>学習前（ランダムエージェント）</strong>：
+<ul>
+<li>壁にぶつかりながらランダムに移動し、ゴールにたどり着くまでに多くのステップを要する。</li>
+</ul>
+</li>
+<li><strong>学習後</strong>：
+<ul>
+<li><strong>最短経路でゴールに向かう動作</strong>が確認され、壁への衝突を避けつつ効率的にゴールへ到達。</li>
+<li>GIF画像でも、学習後のエージェントが迷路を最短で抜ける様子が視覚的に確認できる。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-まとめ">4. まとめ</h3>
+<ul>
+<li><strong>モデル側</strong>では、2次元位置エンコーディングとCLSトークン＋エージェント位置情報の導入により、<strong>空間構造とエージェントの位置を明示的に扱えるTransformer-Qネットワーク</strong>に改良。</li>
+<li><strong>環境側</strong>では、タイムペナルティとゴール報酬のバランスを調整し、<strong>「早く・安全にゴールする」</strong> という目的が自然に学習される報酬設計に変更。</li>
+<li>その結果、<strong>学習が安定して収束し、最短経路でゴールする方策が獲得された</strong>ことが、報酬推移とGIF画像の両方から確認できた。</li>
+</ul>
+<p>ということで、DDQNを用いることで画像情報を用いてエージェントの強化学習により、迷路問題が解けることが分かりました。
+次回からはランダムに構造が変化する迷路を解く問題に取り組んでいきます。</p>
+
+
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/MEmvk3ZSs0M?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
