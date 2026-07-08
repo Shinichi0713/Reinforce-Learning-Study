@@ -138,5 +138,154 @@ __特徴量 $x_1$ の SHAP値を計算する場合__
   決定木系モデル（Random Forest, XGBoost など）専用の高速アルゴリズムで、組み合わせを効率的に計算します。
 
 
+## 例題
+
+実際にSHAP値がどのように機能しているかを確認するため例題を扱ってみます。
+ここでは、**「住宅価格を予測する決定木モデル」** を例に、Tree SHAPを使って「どの特徴量が予測にどれだけ効いたか」を可視化するPythonコード例を示します。
+
+### 1. 準備：データとモデルの作成
+
+まず、簡単なシミュレーションデータを作ります。
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+import shap
+
+# 乱数シードを固定
+np.random.seed(42)
+
+# サンプル数
+n_samples = 1000
+
+# 特徴量：部屋数、築年数、駅からの距離
+rooms = np.random.randint(1, 6, n_samples)        # 1〜5部屋
+age = np.random.randint(0, 50, n_samples)          # 築0〜49年
+distance = np.random.uniform(0.1, 5.0, n_samples)  # 駅からの距離（km）
+
+# 住宅価格（目的変数）を生成
+# 部屋数が多いほど高く、築年数が古いほど安く、駅に近いほど高い、という単純な関係
+price = (
+    3000 * rooms
+    - 50 * age
+    - 200 * distance
+    + np.random.normal(0, 100, n_samples)  # ノイズ
+)
+
+# DataFrameにまとめる
+df = pd.DataFrame({
+    "rooms": rooms,
+    "age": age,
+    "distance": distance,
+    "price": price
+})
+
+X = df[["rooms", "age", "distance"]]
+y = df["price"]
+```
+
+### 2. 決定木モデルの学習
+
+```python
+# 決定木モデルを学習
+model = DecisionTreeRegressor(max_depth=4, random_state=42)
+model.fit(X, y)
+
+# 予測精度の確認（簡易）
+print("R^2 score:", model.score(X, y))
+```
+
+### 3. Tree SHAP の計算
+
+`shap.TreeExplainer` を使って SHAP値を計算します。
+
+```python
+# TreeExplainer の作成
+explainer = shap.TreeExplainer(model)
+
+# 全データの SHAP値を計算
+shap_values = explainer.shap_values(X)
+
+# 1件目のデータについて見てみる
+sample_idx = 0
+print("1件目のデータ:")
+print(X.iloc[sample_idx])
+print("実際の価格:", y.iloc[sample_idx])
+print("モデルの予測:", model.predict(X.iloc[sample_idx:sample_idx+1])[0])
+print("ベースライン（平均予測）:", explainer.expected_value)
+print("SHAP値（rooms, age, distance の順）:", shap_values[sample_idx])
+print("SHAP値の合計 + ベースライン = 予測値:",
+      explainer.expected_value + shap_values[sample_idx].sum())
+```
+
+出力結果：
+
+```
+1件目のデータ:
+rooms        4.000000
+age         11.000000
+distance     4.852569
+Name: 0, dtype: float64
+実際の価格: 10652.737694763384
+モデルの予測: 10843.612035654687
+ベースライン（平均予測）: [7251.13507144]
+SHAP値（rooms, age, distance の順）: [2957.01497369  654.08171206  -18.61972154]
+SHAP値の合計 + ベースライン = 予測値: [10843.61203565]
+```
+
+この例では：
+
+- ベースライン（平均予測）が 7251.1
+- `rooms=4` が予測を **+2957.0** 押し上げた
+- `age=11` が予測を **+654.1** 押し上げた
+- `distance=4.9` が予測を **−18.6** 押し下げた
+- 合計：7251.1 + 2957.0 + 654.1 − 18.6 = 10843.6（モデルの予測値）
+
+このように、**各特徴量がどれだけ予測に寄与したか**が一目で分かります。
+
+### 4. 可視化で効果を確認
+
+__(1) 個別予測の説明（force plot）__
+
+```python
+# 1件目のデータのSHAP値を可視化
+shap.force_plot(
+    explainer.expected_value,
+    shap_values[sample_idx],
+    X.iloc[sample_idx],
+    matplotlib=True
+)
+```
+
+- ベースラインから右に伸びるほど「価格が高い方向」、左に伸びるほど「安い方向」です。
+- `rooms` が右向き（プラス寄与）、`age` と `distance` が左向き（マイナス寄与）として表示されます。
+
+![1783544683070](image/5_shap_value/1783544683070.png)
+
+__(2) 全体的な特徴量重要度（summary plot）__
+
+```python
+# 全データのSHAP値をまとめて可視化
+shap.summary_plot(shap_values, X)
+```
+
+- 各点は1件のデータに対応します。
+- 横軸：SHAP値（予測への影響の大きさ）
+- 色：特徴量の値（青：小、赤：大）
+- 例：
+  - `rooms` が大きい（赤）ほど右側（価格が高い方向）に分布
+  - `age` が大きい（赤）ほど左側（価格が安い方向）に分布
+  - `distance` が大きい（赤）ほど左側（価格が安い方向）に分布
+
+これにより、**「部屋数が多いと価格が上がる」「築年数が古い・駅から遠いと価格が下がる」** という関係が、SHAP値として視覚的に確認できます。
+
+![1783544725629](image/5_shap_value/1783544725629.png)
+
+### 5. 例題のポイント
+
+- データ生成の式が単純なため、**「部屋数が増えると価格が上がる」** などの関係が明確です。
+- Tree SHAP を使うことで、その関係が **「予測への寄与度」として数値・グラフで表現** されます。
+- 1件ごとの説明（局所）と、全体の傾向（グローバル）の両方が見られます。
 
 
