@@ -103,3 +103,91 @@ UAVや戦車を空撮した画像・動画は、物体検知の性能検証に�
 これらを組み合わせることで、サイズ・視点・背景・動きの多様性をある程度カバーした物体検知の性能検証が可能です。必要に応じて、どのデータセットを優先的に使うか、またどのような評価指標（mAP、Recall、FPSなど）で比較するかも含めて設計されると良いと思います。
 
 
+`/content/1` という拡張子のないファイルは、Mendeley Dataの「Download All」で取得した**ZIPアーカイブ**である可能性が高いです。Mendeley Data のページでも「Download All」でまとめてダウンロードする形式が示されており、一般的にはZIPで配布されます[Mendeley Data](https://data.mendeley.com/datasets/9z7yrcrpjk/1)。
+
+---
+
+### 1. ファイル形式の確認（Linux / macOS / WSL など）
+
+まず、ターミナルで `file` コマンドを使って実際の形式を確認してください。
+
+```bash
+file /content/1
+```
+
+想定される出力例：
+- `1: Zip archive data, ...` → ZIPファイル
+- `1: gzip compressed data, ...` → gzip（.gz）
+- `1: POSIX tar archive` → tar
+
+---
+
+### 2. 形式に応じた解凍方法
+
+#### (A) ZIP の場合（最も可能性が高い）
+
+```bash
+# 例: カレントディレクトリに展開
+unzip /content/1
+
+# 特定のディレクトリに展開したい場合
+unzip /content/1 -d /path/to/destination
+```
+
+#### (B) gzip（.gz）の場合
+
+```bash
+# 単体の .gz の場合
+gunzip /content/1
+
+# tar.gz の場合（gzip + tar）
+tar xzf /content/1
+```
+
+#### (C) tar の場合
+
+```bash
+tar xf /content/1
+```
+
+---
+
+### 3. Google Colab の場合
+
+Colab の `/content/1` であれば、以下を試してください。
+
+```python
+# ZIP と仮定して解凍
+!unzip -q /content/1
+
+# もしくは、Python から解凍
+import zipfile
+with zipfile.ZipFile('/content/1', 'r') as zip_ref:
+    zip_ref.extractall('/content/dataset')
+```
+
+もし `zipfile.BadZipFile` エラーが出たら、`file` コマンドで形式を確認し直し、`tarfile` や `gzip` モジュールで対応してください。
+
+---
+
+### 4. 展開後の構造（参考）
+
+Mendeley Data の説明によると、このデータセットは
+
+- 画像ファイル（`.jpg` など）
+- YOLO形式のラベルファイル（`.txt`）
+- train / val / test のサブセット（70% / 20% / 10%）
+
+で構成されています[Mendeley Data](https://data.mendeley.com/datasets/9z7yrcrpjk/1)。
+
+展開後は、`train/`、`val/`、`test/` といったディレクトリと、その中に画像・ラベルが入っているはずです。
+
+---
+
+### まとめ
+
+1. `file /content/1` で形式を確認
+2. ZIPなら `unzip /content/1`、tarなら `tar xf /content/1`、gzipなら `gunzip /content/1` で解凍
+3. Colabなら `!unzip /content/1` をまず試し、エラーが出たら `file` で再確認
+
+これで、画像とYOLOラベルが展開されるはずです。もしうまくいかない場合は、`file` の出力結果を貼っていただければ、より具体的に対応方法をお伝えします。
