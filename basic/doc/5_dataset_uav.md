@@ -191,3 +191,253 @@ Mendeley Data の説明によると、このデータセットは
 3. Colabなら `!unzip /content/1` をまず試し、エラーが出たら `file` で再確認
 
 これで、画像とYOLOラベルが展開されるはずです。もしうまくいかない場合は、`file` の出力結果を貼っていただければ、より具体的に対応方法をお伝えします。
+
+
+すでにご紹介したもの（Mendeleyのマルチクラス軍事データセット、RoboflowのTank-drone、Hugging FaceのUAV-Aerial-View-Battle-Tank-Detection-Dataset、KaggleのKIIT-MiTA、VisDroneなど）に加えて、**UAV空撮での戦車・軍事車両・ドローン検出に使えそうなデータセット**を用途別に整理します。
+
+---
+
+## 1. 戦車・軍事車両に特化したUAVデータセット
+
+### (1) UAV-Aerial-View-Battle-Tank-Detection-Dataset（Hugging Face）
+
+- **概要**：UAV視点の戦車検出用データセット（Simuletic提供）。
+- **特徴**：戦車検出に特化したUAV視点の画像セット。
+- **形式**：Hugging Face Datasets上で提供（parquet形式など）。
+- **出典**：  
+  [Hugging Face Datasets](https://huggingface.co/datasets/Simuletic/UAV-Aerial-View-Battle-Tank-Detection-Dataset)
+
+**用途**：戦車のみを対象としたUAV視点の検証に適しています。データセットカードで画像数・解像度・ライセンスを確認してから利用するのがおすすめです。
+
+---
+
+### (2) Tank-drone Object Detection Dataset（Roboflow Universe）
+
+- **概要**：`tank` と `drone` を対象とした物体検知データセット。
+- **規模**：約 990 枚の画像（Roboflowの説明より）。
+- **アノテーション**：YOLO形式。
+- **出典**：  
+  [Roboflow Universe](https://universe.roboflow.com/sushils-workspace-yiaud/tank-drone)
+
+**用途**：戦車とドローンのみに絞った2クラス検証や、Roboflowの前処理・拡張パイプラインを活用したい場合に便利です。
+
+---
+
+### (3) KIIT-MiTA – Drone Images for Military Object Detection（Kaggle）
+
+- **概要**：軍事対象（戦車を含む）の物体検知用ドローン画像データセット。
+- **規模**：約 1,700 枚の高解像度画像。
+- **アノテーション**：YOLO形式。
+- **出典**：  
+  [Kaggle](https://www.kaggle.com/datasets/sudipchakrabarty/kiit-mita)
+
+**用途**：軍事車両や兵士など、複数の軍事対象を含むシーンでの検証に適しています。
+
+---
+
+## 2. UAV一般（車両・歩行者）の大規模ベンチマーク
+
+### (4) VisDrone Dataset
+
+- **概要**：中国の複数都市でドローンから撮影した大規模ベンチマーク。
+- **クラス**：車両（`car` など）、歩行者、自転車など（戦車や軍事車両は主対象ではない）。
+- **規模**：288 動画クリップ（261,908 フレーム）＋ 10,209 静止画。
+- **アノテーション**：物体検知・トラッキング用。
+- **出典**：  
+  [VisDrone Dataset](https://github.com/VisDrone/VisDrone-Dataset)
+
+**用途**：戦車そのものは少ないものの、「UAVから動画で物体を検出・追跡する」というタスクの性能検証には非常に有用です。軍事データセットと組み合わせて汎化性能を評価するのに向いています。
+
+---
+
+### (5) UAVDT（UAV Detection and Tracking Dataset）
+
+- **概要**：UAV視点の車両・歩行者検出・追跡用データセット。
+- **規模**：数十の動画シーケンス、数万フレーム規模。
+- **クラス**：車両（`car`, `truck`, `bus` など）、歩行者など。
+- **アノテーション**：バウンディングボックス＋トラッキングID。
+- **出典**：  
+  [UAVDT Dataset](https://github.com/VisDrone/UAVDT)
+
+**用途**：軍事車両ではないものの、UAV視点での車両検出・追跡の性能検証に広く使われています。軍事データセットと併用して、一般シーンでの性能も確認できます。
+
+---
+
+## 3. 軍事車両（必ずしもUAV視点ではないが参考になるもの）
+
+### (6) Military vehicles detection（Roboflow Universe）
+
+- **概要**：軍事車両（トラック、戦車など）の検出用データセット。
+- **クラス**：`TRUCK`, `TANK`, `PERSON` など。
+- **アノテーション**：YOLO形式。
+- **出典**：  
+  [Roboflow Universe](https://universe.roboflow.com/robert-paulson-fncbw/military-vehicles-detection-qwfnc)
+
+**用途**：必ずしもUAV視点ではありませんが、戦車や軍事車両の外観・形状を学習する補助データとして使えます。UAV視点のデータと組み合わせて、視点やスケールの違いに対するロバスト性を評価するのに役立ちます。
+
+---
+
+## 4. 合成データ・拡張データセット
+
+### (7) Toy-3 / Toy-3-Enhanced（UAV軍事ターゲット検出向け）
+
+- **概要**：UAV軍事ターゲット検出のための合成・拡張データセット（玩具モデルベース）。
+- **特徴**：UAV画像取得時の劣化要因（ぼけ、ノイズ、スケール変化など）を模倣して拡張したデータを含む。
+- **出典**：  
+  [Scientific Reports](https://www.nature.com/articles/s41598-025-26601-0)
+
+**用途**：実データが少ない場合の補助データとして、UAV軍事ターゲット検出モデルの訓練・評価に利用できます。
+
+---
+
+## 5. 用途別の組み合わせ例
+
+- **戦車＋ドローン＋兵士を含むマルチクラス検証**  
+  → Mendeleyのマルチクラス軍事データセット＋RoboflowのTank-drone＋KIIT-MiTA  
+  [Mendeley Data](https://data.mendeley.com/datasets/9z7yrcrpjk/1)
+
+- **UAV視点の動画での検出・追跡性能検証**  
+  → VisDrone / UAVDT をベースに、軍事データセットで戦車・軍事車両の性能を追加評価  
+  [VisDrone Dataset](https://github.com/VisDrone/VisDrone-Dataset)
+
+- **軍事車両の外観・形状学習（必ずしもUAV視点でなくてもよい場合）**  
+  → RoboflowのMilitary vehicles detectionなどを補助データとして利用  
+  [Roboflow Universe](https://universe.roboflow.com/robert-paulson-fncbw/military-vehicles-detection-qwfnc)
+
+---
+
+以上が、UAV空撮の戦車・軍事車両・ドローン検出に使えそうな主なデータセットです。  
+「動画での戦車追跡を重視したい」「スケールや視点のバリエーションを広く取りたい」など、具体的な用途があれば、それに合わせてどのデータセットを優先すべきかもお伝えできます。
+
+
+はい、できます。  
+ここでは、**すでに紹介したUAV・軍事データセットのリスト**からランダムに1つ選ぶPythonコードを提示します。
+
+---
+
+## データセットリストの例
+
+まず、これまで紹介した代表的なデータセットをリスト化します。
+
+```python
+datasets = [
+    {
+        "name": "A Multi-Class UAV Military Object Detection Dataset",
+        "type": "UAV軍事マルチクラス（戦車・ドローン・兵士・一般人）",
+        "url": "https://data.mendeley.com/datasets/9z7yrcrpjk/1",
+        "platform": "Mendeley Data"
+    },
+    {
+        "name": "Tank-drone Object Detection Dataset",
+        "type": "戦車・ドローン検出",
+        "url": "https://universe.roboflow.com/sushils-workspace-yiaud/tank-drone",
+        "platform": "Roboflow Universe"
+    },
+    {
+        "name": "UAV-Aerial-View-Battle-Tank-Detection-Dataset",
+        "type": "UAV視点の戦車検出",
+        "url": "https://huggingface.co/datasets/Simuletic/UAV-Aerial-View-Battle-Tank-Detection-Dataset",
+        "platform": "Hugging Face Datasets"
+    },
+    {
+        "name": "KIIT-MiTA – Drone Images for Military Object Detection",
+        "type": "軍事対象検出用ドローン画像",
+        "url": "https://www.kaggle.com/datasets/sudipchakrabarty/kiit-mita",
+        "platform": "Kaggle"
+    },
+    {
+        "name": "VisDrone Dataset",
+        "type": "UAV視点の車両・歩行者検出・追跡",
+        "url": "https://github.com/VisDrone/VisDrone-Dataset",
+        "platform": "GitHub"
+    },
+    {
+        "name": "Military vehicles detection",
+        "type": "軍事車両（トラック・戦車・人）検出",
+        "url": "https://universe.roboflow.com/robert-paulson-fncbw/military-vehicles-detection-qwfnc",
+        "platform": "Roboflow Universe"
+    }
+]
+```
+
+---
+
+## ランダムに1つ選ぶコード
+
+```python
+import random
+
+def pick_random_dataset(datasets_list):
+    """データセットリストからランダムに1つ選んで表示する"""
+    chosen = random.choice(datasets_list)
+    print("ランダムに選ばれたデータセット:")
+    print(f"名称: {chosen['name']}")
+    print(f"種別: {chosen['type']}")
+    print(f"プラットフォーム: {chosen['platform']}")
+    print(f"URL: {chosen['url']}")
+    return chosen
+
+# 実行例
+picked = pick_random_dataset(datasets)
+```
+
+**実行例（出力イメージ）**：
+
+```
+ランダムに選ばれたデータセット:
+名称: VisDrone Dataset
+種別: UAV視点の車両・歩行者検出・追跡
+プラットフォーム: GitHub
+URL: https://github.com/VisDrone/VisDrone-Dataset
+```
+
+---
+
+## 複数個ランダムに選ぶ（重複なし）
+
+```python
+def pick_random_datasets(datasets_list, k=3):
+    """データセットリストからk個ランダムに選ぶ（重複なし）"""
+    if k > len(datasets_list):
+        k = len(datasets_list)
+    chosen_list = random.sample(datasets_list, k)
+    for i, chosen in enumerate(chosen_list, 1):
+        print(f"[{i}] {chosen['name']} ({chosen['platform']})")
+        print(f"    種別: {chosen['type']}")
+        print(f"    URL: {chosen['url']}\n")
+    return chosen_list
+
+# 例: 3つランダムに選ぶ
+pick_random_datasets(datasets, k=3)
+```
+
+---
+
+## 特定の条件でフィルタしてからランダムに選ぶ
+
+たとえば「UAV視点のデータセットだけ」からランダムに選びたい場合は、以下のようにフィルタしてから `random.choice` や `random.sample` を使います。
+
+```python
+# 例: UAV視点を含むデータセットだけに絞る
+uav_datasets = [
+    ds for ds in datasets
+    if "UAV" in ds["type"] or "UAV" in ds["name"] or "drone" in ds["type"].lower()
+]
+
+# 絞り込んだ中から1つランダムに選ぶ
+if uav_datasets:
+    picked = pick_random_dataset(uav_datasets)
+else:
+    print("条件に合うデータセットが見つかりませんでした。")
+```
+
+---
+
+## 使い方のイメージ
+
+- 実験で「どのデータセットから先に試すか」をランダムに決めたい
+- 複数のデータセットを均等に評価したいが、順序をランダム化したい
+- プレゼンやデモで「今日はこのデータセットで試します」とランダムに選びたい
+
+といった場面で、上記コードをそのまま流用できます。  
+必要に応じて、`datasets` リストに新しいデータセットを追加していけば、同じコードで拡張できます。
