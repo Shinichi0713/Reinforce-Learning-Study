@@ -441,3 +441,77 @@ else:
 
 といった場面で、上記コードをそのまま流用できます。  
 必要に応じて、`datasets` リストに新しいデータセットを追加していけば、同じコードで拡張できます。
+
+
+NVIDIA が公開している SLAM 関連の GitHub リポジトリとしては、主に以下の 2 つが代表的です。
+
+---
+
+## 1. cuVSLAM（CUDA アクセラレーテッド Visual SLAM ライブラリ）
+
+- **リポジトリ**:  
+  [GitHub - nvidia-isaac/cuVSLAM](https://github.com/nvidia-isaac/cuVSLAM)
+- **内容**:  
+  - CUDA で高速化された Visual Odometry / Visual SLAM ライブラリ  
+  - ステレオカメラや IMU を用いた SLAM・オドメトリを GPU 上で実行  
+  - C++ ライブラリと Python ラッパー（PyCuVSLAM）が提供されています[GitHub - nvidia-isaac/cuVSLAM](https://github.com/nvidia-isaac/cuVSLAM)。
+
+---
+
+## 2. Isaac ROS Visual SLAM（ROS2 向けパッケージ）
+
+- **リポジトリ**:  
+  [GitHub - NVIDIA-ISAAC-ROS/isaac_ros_visual_slam](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam)
+- **内容**:  
+  - cuVSLAM をベースにした ROS2 向け Visual SLAM / Visual Odometry パッケージ  
+  - ステレオカメラ＋IMU を用いたロボットの自己位置推定・マッピング  
+  - NVIDIA Jetson などのエッジデバイスでのリアルタイム動作を想定[GitHub - NVIDIA-ISAAC-ROS/isaac_ros_visual_slam](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam)。
+
+---
+
+## 補足
+
+- これらは NVIDIA の Isaac / ROS 関連プロジェクトの一部として公開されており、**「NVIDIA が発表した SLAM」**としては、上記 2 つが中心的なリポジトリになります。
+- なお、SLAM の中核アルゴリズム部分はバイナリとして提供されており、完全なソースコードがオープンになっていない点にはご注意ください[GitHub - NVIDIA-ISAAC-ROS/isaac_ros_visual_slam#156](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam/issues/156)。
+
+用途に応じて、  
+- **ライブラリとして直接使いたい** → cuVSLAM  
+- **ROS2 環境で使いたい** → Isaac ROS Visual SLAM  
+を選ぶとよいでしょう。
+
+cuVSLAM は**ニューラルネットワークを用いる SLAM ではなく、幾何ベースの特徴点 SLAM（Visual SLAM / Visual Odometry）**です。
+
+---
+
+## 1. アルゴリズムの基本設計
+
+公式ドキュメントおよび論文によると、cuVSLAM は以下のような**古典的な幾何ベースの手法**を CUDA で高速化したライブラリです。
+
+- **2D 特徴点（2D features）**  
+  入力画像から 2D 特徴点を抽出し、それらを追跡します[cuVSLAM - NVIDIA Isaac ROS](https://nvidia-isaac-ros.github.io/concepts/visual_slam/cuvslam/index.html)。
+- **Lucas–Kanade アルゴリズムによる特徴追跡**  
+  論文では、特徴点の追跡に Lucas–Kanade 法を用いていると明記されています[cuVSLAM: CUDA accelerated visual odometry and mapping](https://arxiv.org/html/2506.04359v2)。
+- **PnP（Perspective-n-Point）による姿勢推定**  
+  3D ランドマークと 2D 特徴点の対応からカメラ姿勢を推定します。
+- **Sparse Bundle Adjustment（SBA）による地図の精緻化**  
+  再投影誤差最小化によるバンドル調整で地図と軌跡を最適化します[cuVSLAM: CUDA accelerated visual odometry and mapping](https://arxiv.org/html/2506.04359v2)。
+- **ポーズグラフ最適化**  
+  ループクロージャ時にポーズグラフを最適化し、過去の軌跡も含めて姿勢を補正します[cuVSLAM - NVIDIA Isaac ROS](https://nvidia-isaac-ros.github.io/concepts/visual_slam/cuvslam/index.html)。
+
+---
+
+## 2. ニューラルネットワーク・深層学習の有無
+
+- cuVSLAM の論文では、**「classical SLAM techniques with modern GPU acceleration」**と明記されており、  
+  **ニューラルネットワークや深層学習モジュールは用いていない**ことが示されています[cuVSLAM: CUDA accelerated visual odometry and mapping](https://arxiv.org/html/2506.04359v2)。
+- ベンチマークでは、**深層学習ベースの DPVO** や、**古典的コンピュータビジョンベースの ORB-SLAM3** と比較されており、  
+  cuVSLAM は後者（古典的幾何ベース）の系統に属します[cuVSLAM: CUDA accelerated visual odometry and mapping](https://arxiv.org/html/2506.04359v2)。
+
+---
+
+## 3. まとめ
+
+- cuVSLAM は、**ニューラルネットワークを用いた学習ベース SLAM ではなく、特徴点ベースの幾何 SLAM** です。
+- NVIDIA GPU（CUDA）上で、Lucas–Kanade 追跡・PnP・Bundle Adjustment・ポーズグラフ最適化といった**従来の幾何アルゴリズムを高速化**したライブラリとして設計されています。
+
+したがって、「ニューラルネットワークを用いる SLAM」というよりは、**「GPU で高速化された幾何ベースの Visual SLAM / Visual Odometry ライブラリ」**と理解するのが正確です。
