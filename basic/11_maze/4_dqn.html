@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>DDQN&#x306b;&#x3064;&#x3044;&#x3066;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日の<a href="https://yoshishinnze.hatenablog.com/entry/2025/10/30/000000">迷路問題</a>について迷路が変動するような環境下でもゴールを目指せるエージェントの構築を検討していきます。</p>
+<p>今回はまず、画像入力のTransformerモデルでDDQNで迷路環境の学習が可能かの検証を行っていきます。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>DDQN×画像入力のTransformerにより静的迷路のゴールが出来るか確認</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="ddqnについて">DDQNについて</h2>
+<p>まずは今回利用する予定の強化学習アルゴリズムであるDDQNとはどんなアルゴリズムであるかについて説明を行います。</p>
+<p>DDQN（Double Deep Q-Network）は、<strong>DQN（Deep Q-Network）の「過大評価バイアス」を軽減するための改良手法</strong>です。</p>
+<p>以下に、DDQNの概要・仕組み・メリットを整理します。</p>
+<h3 id="1-ddqnの位置づけ">1. DDQNの位置づけ</h3>
+<ul>
+<li><strong>ベース</strong>: DQN（Deep Q-Network）</li>
+<li><strong>目的</strong>: Q学習における「最大化バイアス（max overestimation bias）」を抑える</li>
+<li><strong>特徴</strong>: 行動選択と価値評価を分離する「Double Q-learning」の考え方を深層学習に適用</li>
+</ul>
+<h3 id="2-dqnの問題点最大化バイアス">2. DQNの問題点：最大化バイアス</h3>
+<p><strong>通常のDQNの更新式（1ステップ）</strong></p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Target</mtext><mo>=</mo><mi>r</mi><mo>+</mo><mi>γ</mi><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></munder><msub><mi>Q</mi><mtext>target</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Target} = r + \gamma \max_{a&#x27;} Q_{\text{target}}(s&#x27;, a&#x27;)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">Target</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.5459em;vertical-align:-0.744em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.356em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+<p>ここで、</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>target</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{target}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>：ターゲットネットワーク</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>max</mi><mo>⁡</mo></mrow><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msub></mrow><annotation encoding="application/x-tex"> \max_{a&#x27;} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mop"><span class="mop">max</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.328em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：次状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex"> s&#x27; </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span> で最も高いQ値を持つ行動を選択</li>
+</ul>
+<p><strong>問題点</strong></p>
+<ul>
+<li>ノイズや推定誤差により、<strong>ある行動のQ値が偶然高く見積もられると、その行動が過大評価される</strong>。</li>
+<li>これが繰り返されると、Q値が全体的に過大評価される「最大化バイアス」が生じます。</li>
+<li>結果として、学習が不安定になったり、収束が遅くなったりします。</li>
+</ul>
+<p><strong>例</strong>: 3つの行動のQ値推定</p>
+<p>次状態 s′s's′ での真のQ値が以下の通りだとします（真の値は未知）。</p>
+<p>行動Aの真のQ値: 5
+行動Bの真のQ値: 3
+行動Cの真のQ値: 1</p>
+<p>しかし、推定にはノイズが乗るため、観測されるQ値は以下のようになることがあります。</p>
+<p>行動Aの推定Q値: 5.2（少し高め）
+行動Bの推定Q値: 3.5（少し高め）
+行動Cの推定Q値: 4.0（ノイズで大きく上振れ）</p>
+<p>このとき、maxを取ると行動Cが選ばれ、Q値は4.0として扱われます。しかし真の値は1なので、 3.0も過大評価されています。
+このように、「たまたまノイズで高く出た行動」がmaxで選ばれることで、真の値よりも大きく見積もられる現象が起こります。
+本当に良い行動ではなくノイズに引っ張られることで、あるべき姿からどんどん乖離していきます。
+また一度乖離すると中々元の状態に戻れません。</p>
+<h3 id="3-ddqnのアイデア行動選択と評価の分離">3. DDQNのアイデア：行動選択と評価の分離</h3>
+<p>DDQNでは、<strong>「どの行動を取るか」の決定</strong>と <strong>「その行動の価値を評価する」こと</strong>を別々のネットワークで行います。</p>
+<p><strong>DDQNの更新式</strong></p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Target</mtext><mo>=</mo><mi>r</mi><mo>+</mo><mi>γ</mi><msub><mi>Q</mi><mtext>target</mtext></msub><mrow><mo fence="true">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><mi>arg</mi><mo>⁡</mo><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></munder><msub><mi>Q</mi><mtext>online</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{Target} = r + \gamma Q_{\text{target}}\left(s&#x27;, \arg\max_{a&#x27;} Q_{\text{online}}(s&#x27;, a&#x27;)\right)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">Target</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.894em;vertical-align:-0.744em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size2">(</span></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.356em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.744em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size2">)</span></span></span></span></span></span></span></p>
+<ul>
+<li><strong>行動選択（どの行動を取るか）</strong>: オンラインネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>online</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{online}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を使用</li>
+<li><strong>価値評価（その行動の価値はいくらか）</strong>: ターゲットネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>target</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{target}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> を使用</li>
+</ul>
+<p>評価者は急な変動に追従しません。少し良くなったということを認識していつもより良い加点を行うくらいです。
+これにより、<strong>偶然高い値が出た行動を過大評価しにくく</strong>なります。</p>
+<h3 id="4-ddqnの具体的な手順">4. DDQNの具体的な手順</h3>
+<ol>
+<li><strong>現在の状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span></strong> から、オンラインネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>online</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{online}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> で行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> を選択（ε-greedyなど）。</li>
+<li>環境から <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo separator="true">,</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex"> r, s&#x27; </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9463em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span> を得る。</li>
+<li><strong>次状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex"> s&#x27; </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></strong> での行動選択：
+<ul>
+<li>オンラインネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>online</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{online}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を用いて、最適行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>a</mi><mrow><mo mathvariant="normal">′</mo><mo>∗</mo></mrow></msup><mo>=</mo><mi>arg</mi><mo>⁡</mo><msub><mrow><mi>max</mi><mo>⁡</mo></mrow><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></msub><msub><mi>Q</mi><mtext>online</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> a&#x27;^* = \arg\max_{a&#x27;} Q_{\text{online}}(s&#x27;, a&#x27;) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span><span class="mord mtight">∗</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">max</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.328em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6828em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> を決定。</li>
+</ul>
+</li>
+<li><strong>価値評価</strong>：
+<ul>
+<li>ターゲットネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>target</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{target}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> を用いて、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>target</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mrow><mo mathvariant="normal">′</mo><mo>∗</mo></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q_{\text{target}}(s&#x27;, a&#x27;^*) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.038em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span><span class="mord mtight">∗</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> を計算。</li>
+</ul>
+</li>
+<li><strong>ターゲット値</strong>：<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Target</mtext><mo>=</mo><mi>r</mi><mo>+</mo><mi>γ</mi><msub><mi>Q</mi><mtext>target</mtext></msub><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo separator="true">,</mo><msup><mi>a</mi><mrow><mo mathvariant="normal">′</mo><mo>∗</mo></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Target} = r + \gamma Q_{\text{target}}(s&#x27;, a&#x27;^*)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">Target</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.088em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">target</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span><span class="mord mtight">∗</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+</li>
+<li>オンラインネットワーク <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Q</mi><mtext>online</mtext></msub></mrow><annotation encoding="application/x-tex"> Q_{\text{online}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">online</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を、Targetに近づくように更新。</li>
+<li>一定ステップごとにターゲットネットワークをオンラインネットワークで更新。</li>
+</ol>
+<h3 id="5-ddqnのメリット">5. DDQNのメリット</h3>
+<p><strong>(1) 過大評価バイアスの軽減</strong></p>
+<ul>
+<li>行動選択と価値評価を分離することで、<strong>ノイズによる過大評価を抑制</strong>。</li>
+<li>Q値の推定がより正確になり、学習が安定します。</li>
+</ul>
+<p><strong>(2) 学習の安定性向上</strong></p>
+<ul>
+<li>DQNに比べて、<strong>Q値の発散や振動が起こりにくい</strong>。</li>
+<li>特にノイズの多い環境や複雑なタスクで効果を発揮します。</li>
+</ul>
+<p><strong>(3) 実装の容易さ</strong></p>
+<ul>
+<li>DQNからの変更点は<strong>ターゲット値の計算部分だけ</strong>で、実装が比較的簡単です。</li>
+<li>追加のハイパーパラメータはほぼ不要。</li>
+</ul>
+<h3 id="6-ddqnのデメリット注意点">6. DDQNのデメリット・注意点</h3>
+<p><strong>(1) 計算コストのわずかな増加</strong></p>
+<ul>
+<li>次状態での行動選択にオンラインネットワークを使用するため、<strong>わずかに計算量が増える</strong>。</li>
+<li>ただし、現代のGPU環境では無視できるレベルです。</li>
+</ul>
+<p><strong>(2) すべての問題で劇的に改善するわけではない</strong></p>
+<ul>
+<li>シンプルな環境では、DQNとDDQNの差が小さい場合もあります。</li>
+<li>しかし、複雑な環境やノイズの多い環境では効果が顕著です。</li>
+</ul>
+<h2 id="画像入力のtransformerモデル">画像入力のTransformerモデル</h2>
+<p>迷路の画像を入力とし、Transformerモデルで行動を選択する場合の<strong>特徴</strong>と<strong>期待できる効果</strong>について整理します。</p>
+<h3 id="1-モデルの特徴">1. モデルの特徴</h3>
+<p><strong>(1) 画像としての迷路表現</strong></p>
+<ul>
+<li>迷路を2次元グリッドの「画像」として扱います。</li>
+<li>各チャネルに異なる情報を割り当て（例：壁・スタート・ゴール・エージェント位置）、<strong>多チャンネル画像</strong>として入力します。</li>
+<li>これにより、空間的な構造（どこに壁があるか、ゴールまでの経路はどうか）を視覚的に捉えられます。</li>
+</ul>
+<p><strong>(2) Transformerによるトークン化</strong></p>
+<ul>
+<li>画像を小さなパッチ（またはセル）に分割し、それぞれを「トークン」として扱います。</li>
+<li>各トークンを埋め込みベクトルに変換し、<strong>位置エンコーディング</strong>を加えることで、空間位置をモデルが認識できるようにします。</li>
+</ul>
+<p><strong>(3) Self-Attentionによる関係性の学習</strong></p>
+<ul>
+<li>TransformerのSelf-Attentionにより、<strong>任意の2つのセル間の関係</strong>を直接学習します。</li>
+<li>例：
+<ul>
+<li>「スタートセル」と「ゴールセル」の関係</li>
+<li>「現在位置」と「周囲の壁」の関係</li>
+<li>「遠くの分岐点」と「現在の経路選択」の関係</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 出力：行動の確率分布またはQ値</strong></p>
+<ul>
+<li>Transformerの出力をMLPに通し、<strong>各行動の確率分布（方策）またはQ値</strong>を出力します。</li>
+<li>これにより、画像から直接行動を決定する「端から端（end-to-end）」の学習が可能です。</li>
+</ul>
+<h3 id="2-期待できる効果">2. 期待できる効果</h3>
+<p><strong>(1) 空間構造の理解</strong></p>
+<ul>
+<li>CNNと同様に<strong>局所的な壁のパターン</strong>を捉えつつ、Transformerにより<strong>長距離の依存関係（スタート〜ゴールの経路）</strong> も直接扱えます。</li>
+<li>これにより、迷路全体の構造をより深く理解できます。</li>
+</ul>
+<p><strong>(2) 部分観測への適応</strong></p>
+<ul>
+<li>エージェントが周囲のみを観測する「部分観測」設定でも、Transformerが<strong>過去の観測履歴を統合</strong>し、迷路全体のメンタルマップを構築する助けになります。</li>
+<li>これはRNNの代替としても有効です。</li>
+</ul>
+<p><strong>(3) ランダム迷路への汎化</strong></p>
+<ul>
+<li>エピソードごとに迷路が変わる場合、Transformerは<strong>特定の迷路を暗記するのではなく、迷路の一般構造（壁の配置パターン、経路の性質）を学習</strong>しやすいです。</li>
+<li>これにより、訓練で見ていない新しい迷路にも適応できる「汎化性能」が期待できます。</li>
+</ul>
+<p><strong>(4) マルチエージェント環境での活用</strong></p>
+<ul>
+<li>マルチエージェント迷路では、Transformerが<strong>他エージェントの位置や行動の関係</strong>を捉えるのに適しています。</li>
+<li>各エージェントの観測画像をトークンとして統合し、協調や競合のパターンを学習できます。</li>
+</ul>
+<p><strong>(5) 探索の効率化</strong></p>
+<ul>
+<li>Self-Attentionにより、<strong>ゴールまでの経路候補</strong>や<strong>未探索領域の重要性</strong>を推定しやすくなります。</li>
+<li>これにより、無駄な探索を減らし、効率的にゴールへ向かう方策を学習できる可能性があります。</li>
+</ul>
+<h3 id="3-注意点期待しすぎない方がよい点">3. 注意点（期待しすぎない方がよい点）</h3>
+<p><strong>(1) 小規模迷路では過剰な可能性</strong></p>
+<ul>
+<li>5×5のような小規模迷路では、状態空間が非常に小さいため、<strong>単純なQ学習や小さなMLPでも十分</strong>なことが多いです。</li>
+<li>Transformerはパラメータ数が多く、計算コストも高いため、<strong>過学習や計算の無駄</strong>になる可能性があります。</li>
+</ul>
+<p><strong>(2) 学習データと計算資源</strong></p>
+<ul>
+<li>Transformerは多くのデータと計算資源を必要とします。</li>
+<li>迷路が単純でエピソード数が少ない場合、<strong>学習が進みにくい</strong>こともあります。</li>
+</ul>
+<p><strong>(3) 実装の複雑さ</strong></p>
+<ul>
+<li>画像のパッチ分割、位置エンコーディング、Transformerの層の設計など、<strong>実装がやや複雑</strong>です。</li>
+<li>初学者にとっては、シンプルな手法から始める方が理解しやすい場合もあります。</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>実装コードは以下レポジトリに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze</a></p>
+<p>画像入力＋Transformerで迷路を解くために必要な、<strong>環境コードの実装法</strong>と<strong>バッファーの実装法</strong>のキーポイントを整理します。</p>
+<h3 id="1-環境コードの実装法画像観測の提供">1. 環境コードの実装法（画像観測の提供）</h3>
+<p><strong>(1) 迷路を画像として表現する</strong>
+迷路を多チャンネル画像（例：4チャンネル）として表現します。</p>
+<ul>
+<li><strong>チャネル0</strong>: 壁（W） = 1.0、それ以外 = 0.0</li>
+<li><strong>チャネル1</strong>: スタート（S） = 1.0、それ以外 = 0.0</li>
+<li><strong>チャネル2</strong>: ゴール（G） = 1.0、それ以外 = 0.0</li>
+<li><strong>チャネル3</strong>: エージェント位置（A） = 1.0、それ以外 = 0.0</li>
+</ul>
+<p>形状は <code>(C, H, W)</code>（例：<code>(4, 5, 5)</code>）とします。</p>
+<p><strong>(2) 画像観測を返すメソッドの追加</strong>
+<code>MazeEnv</code> クラスに、迷路の現在状態を画像として返すメソッドを追加します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_image_observation</span>(<span class="hljs-params">self</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    迷路を画像（NumPy配列）として返す
+    形状: (4, H, W)
+    &quot;&quot;&quot;</span>
+    rows = <span class="hljs-built_in">len</span>(self.maze)
+    cols = <span class="hljs-built_in">len</span>(self.maze[<span class="hljs-number">0</span>])
+    obs = np.zeros((<span class="hljs-number">4</span>, rows, cols), dtype=np.float32)
+
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(rows):
+        <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(cols):
+            cell = self.maze[i][j]
+            <span class="hljs-keyword">if</span> cell == <span class="hljs-string">&#x27;W&#x27;</span>:
+                obs[<span class="hljs-number">0</span>, i, j] = <span class="hljs-number">1.0</span>
+            <span class="hljs-keyword">elif</span> cell == <span class="hljs-string">&#x27;S&#x27;</span>:
+                obs[<span class="hljs-number">1</span>, i, j] = <span class="hljs-number">1.0</span>
+            <span class="hljs-keyword">elif</span> cell == <span class="hljs-string">&#x27;G&#x27;</span>:
+                obs[<span class="hljs-number">2</span>, i, j] = <span class="hljs-number">1.0</span>
+            <span class="hljs-keyword">elif</span> cell == <span class="hljs-string">&#x27;.&#x27;</span>:
+                <span class="hljs-keyword">pass</span>  <span class="hljs-comment"># 何も立てない</span>
+    <span class="hljs-comment"># エージェント位置</span>
+    x, y = self.state
+    obs[<span class="hljs-number">3</span>, x, y] = <span class="hljs-number">1.0</span>
+    <span class="hljs-keyword">return</span> obs
+</code></pre>
+<p><strong>(3) 学習ループでの使用</strong>
+学習ループでは、<code>get_image_observation()</code> を用いて状態を取得します。</p>
+<pre><code class="language-python">state_img = env.get_image_observation()
+action = agent.act(state_img)
+next_state, reward, done = env.step(action)
+next_state_img = env.get_image_observation()
+</code></pre>
+<h3 id="2-バッファーの実装法画像データの扱い">2. バッファーの実装法（画像データの扱い）</h3>
+<p><strong>(1) 経験再生バッファーの設計</strong>
+画像データはメモリを消費するため、<strong>効率的な保存とサンプリング</strong>が重要です。</p>
+<ul>
+<li><strong>保存</strong>: 各経験を <code>(state_img, action, reward, next_state_img, done)</code> として保存。</li>
+<li><strong>サンプリング</strong>: バッチサイズ分の経験をランダムに抽出し、<code>np.stack</code> でバッチ化。</li>
+</ul>
+<p><strong>(2) ReplayBuffer クラスの実装例</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ReplayBuffer</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, capacity</span>):
+        self.buffer = deque(maxlen=capacity)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">push</span>(<span class="hljs-params">self, state, action, reward, next_state, done</span>):
+        self.buffer.append((state, action, reward, next_state, done))
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">self, batch_size</span>):
+        batch = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = <span class="hljs-built_in">zip</span>(*batch)
+        <span class="hljs-comment"># 画像データをNumPy配列にスタック</span>
+        state = np.stack(state)
+        next_state = np.stack(next_state)
+        action = np.array(action)
+        reward = np.array(reward)
+        done = np.array(done)
+        <span class="hljs-keyword">return</span> state, action, reward, next_state, done
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(self.buffer)
+</code></pre>
+<p><strong>(3) メモリ効率の工夫（必要に応じて）</strong></p>
+<ul>
+<li>画像を <code>float32</code> ではなく <code>float16</code> や <code>uint8</code> で保存（品質とメモリのトレードオフ）。</li>
+<li>大きな画像の場合は、ダウンサンプリングや圧縮を検討。</li>
+</ul>
+<h3 id="3-transformerモデルとの連携">3. Transformerモデルとの連携</h3>
+<p><strong>(1) モデル入力の形状</strong>
+Transformerモデルは、画像を以下の形状で受け取るように設計します。</p>
+<ul>
+<li>入力: <code>(batch_size, C, H, W)</code>（例：<code>(32, 4, 5, 5)</code>）</li>
+<li>モデル内で <code>(batch_size, H*W, d_model)</code> に変形し、Transformerに入力。</li>
+</ul>
+<p><strong>(2) 学習時のデータフロー</strong></p>
+<ol>
+<li>バッファーから <code>state_batch</code> をサンプリング（形状: <code>(batch_size, C, H, W)</code>）。</li>
+<li><code>state_batch</code> をTensorに変換し、Transformerモデルに入力。</li>
+<li>出力のQ値とターゲット値の誤差を最小化するように更新。</li>
+</ol>
+<h2 id="総括">総括</h2>
+<p>今回は実装までしました。
+多分、Transformerといえど、画像入力の場合はなかなかうまくいかないと思います。
+次回学習の結果を報告します。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/ETzUKUZ6l8c?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
