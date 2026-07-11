@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+<div>本日紹介するのは国際学会で採択された論文についてです。</div>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<h2 id="概要">概要</h2>
+<p>「TROLL: Trust Regions Improve Reinforcement Learning for Large Language Models」の概要と採択情報、引用状況についてご説明します。</p>
+<h3 id="1-論文の基本情報">1. 論文の基本情報</h3>
+<ul>
+<li>
+<p><strong>タイトル</strong><br>
+TROLL: Trust Regions Improve Reinforcement Learning for Large Language Models</p>
+</li>
+<li>
+<p><strong>著者</strong><br>
+Philipp Becker, Niklas Freymuth, Serge Thilges, Fabian Otto, Gerhard Neumann<br>
+（所属：Karlsruhe Institute of Technology, Microsoft Research）</p>
+</li>
+<li>
+<p><strong>採択学会・発表年</strong></p>
+<ul>
+<li>学会：<strong>ICLR 2026</strong>（International Conference on Learning Representations）</li>
+<li>発表年：<strong>2026年</strong>（arXiv 初版投稿は 2025年10月）</li>
+<li>arXiv ページに “Published as a conference paper at ICLR 2026” と明記されています<a href="https://arxiv.org/abs/2510.03817">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-論文の概要">2. 論文の概要</h3>
+<p><strong>背景</strong></p>
+<ul>
+<li>大規模言語モデル（LLM）の<strong>報酬ベースのファインチューニング</strong>では、PPO（Proximal Policy Optimization）のような<strong>クリッピング目的関数</strong>を用いた強化学習（RL）が標準になっています。</li>
+<li>しかし、PPO のクリッピングは<strong>近似に基づくヒューリスティック</strong>であり、学習の安定性や性能に限界があることが知られています。</li>
+</ul>
+<p><strong>提案手法（TROLL）</strong></p>
+<ul>
+<li>本論文は、PPO のクリッピングを<strong>厳密なトークンレベルの KL 制約</strong>に基づく「<strong>Trust Region Optimization for Large Language models (TROLL)</strong> 」で<strong>直接置き換える</strong>手法を提案します。</li>
+<li>特徴：
+<ul>
+<li><strong>離散的な微分可能な信頼領域射影（discrete differentiable trust region projection）</strong> を導入し、各トークンレベルでポリシー更新を制約します。</li>
+<li>学習時には PPO のクリッピングを置き換えるだけで、<strong>推論時のモデル挙動は一切変更しません</strong>。</li>
+<li>これにより、PPO と比較して<strong>学習の安定性・収束速度・最終性能</strong>のすべてで改善を達成しています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>実験結果</strong></p>
+<ul>
+<li><strong>数学的推論タスク</strong>や<strong>コード生成タスク</strong>など、複数のベンチマークで評価。</li>
+<li>結果として、PPO ベースの手法よりも<strong>成功率やサンプル効率が向上</strong>し、信頼領域に基づく更新が LLM の RL において有効であることを示しています。</li>
+</ul>
+<h3 id="3-引用状況について">3. 引用状況について</h3>
+<ul>
+<li>本論文は <strong>2025年10月に arXiv で公開</strong>され、<strong>ICLR 2026 に採択</strong>された比較的新しい論文です。</li>
+<li>現在（2026年7月時点）では、Google Scholar や Semantic Scholar 上で論文が登録されているものの、<strong>引用数（citation count）はまだ少ない段階</strong>です。
+<ul>
+<li>著者の Google Scholar ページには論文が掲載されていますが、引用数はまだ限定的です<a href="https://scholar.google.com/citations?user=jXx-LuQAAAAJ">Google Scholar (Philipp Becker)</a>。</li>
+<li>Semantic Scholar でもエントリは存在しますが、現時点では引用数情報が十分に集計されていない状況です<a href="https://www.semanticscholar.org/paper/fe8b857593fc43e1c641c5d41bb1539a3bf9cc78">Semantic Scholar</a>。</li>
+</ul>
+</li>
+</ul>
+<p>未だ本論文は引用数が多いとは言えません。</p>
+<h2 id="解決したい課題">解決したい課題</h2>
+<p>本論文「TROLL: Trust Regions Improve Reinforcement Learning for Large Language Models」が解決を目指した主な課題は、<strong>PPO（Proximal Policy Optimization）のクリッピング目的関数が、LLM の強化学習において「近似に基づくヒューリスティック」であり、理論的に厳密でなく、学習の安定性や性能に限界をもたらしている</strong>という点です。</p>
+<p>もう少し分解すると、以下のような課題を明確に意識しています。</p>
+<h3 id="1-ppo-のクリッピングが信頼領域を厳密に保証していない">1. PPO のクリッピングが「信頼領域」を厳密に保証していない</h3>
+<ul>
+<li>PPO は、ポリシー更新の際に「古いポリシーと新しいポリシーの KL ダイバージェンスが大きくなりすぎないように」<strong>クリッピングで更新幅を制限</strong>します。</li>
+<li>しかし、このクリッピングは
+<ul>
+<li><strong>KL 制約を直接最適化しているわけではなく</strong>、</li>
+<li><strong>トークンレベルでの厳密な信頼領域制約</strong>にはなっていません。</li>
+</ul>
+</li>
+<li>そのため、<strong>理論的な信頼領域最適化（Trust Region Optimization）の保証が弱く、学習が不安定になりやすい</strong>という問題があります。</li>
+</ul>
+<blockquote>
+<p><strong>KL 制約</strong><br>
+「KL 制約」とは、<strong>ポリシー（方策）の更新幅を制限するために、古いポリシーと新しいポリシーの「KL ダイバージェンス（Kullback–Leibler divergence）」に上限を設ける制約</strong>のことです。
+<strong>1. KL ダイバージェンスとは</strong></p>
+<ul>
+<li><strong>KL ダイバージェンス</strong>は、<strong>2つの確率分布がどれだけ「似ていないか」を測る指標</strong>です。</li>
+<li>例として、あるトークンに対して</li>
+<li>古いポリシー：<code>P_old(token)</code></li>
+<li>新しいポリシー：<code>P_new(token)</code>
+があるとき、それらの KL ダイバージェンスは</li>
+</ul>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>K</mi><mi>L</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mtext>old</mtext></msub><mi mathvariant="normal">∥</mi><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">)</mo><mo>=</mo><munder><mo>∑</mo><mtext>token</mtext></munder><msub><mi>P</mi><mtext>old</mtext></msub><mo stretchy="false">(</mo><mtext>token</mtext><mo stretchy="false">)</mo><mi>log</mi><mo>⁡</mo><mfrac><mrow><msub><mi>P</mi><mtext>old</mtext></msub><mo stretchy="false">(</mo><mtext>token</mtext><mo stretchy="false">)</mo></mrow><mrow><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">(</mo><mtext>token</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">  KL(P_{\text{old}} \| P_{\text{new}}) = \sum_{\text{token}} P_{\text{old}}(\text{token}) \log \frac{P_{\text{old}}(\text{token})}{P_{\text{new}}(\text{token})}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal">L</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∥</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.7291em;vertical-align:-1.3021em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8479em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">token</span></span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.3021em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord text"><span class="mord">token</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord text"><span class="mord">token</span></span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord text"><span class="mord">token</span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>のように定義されます。</p>
+<ul>
+<li>値が<strong>0に近いほど「似ている」</strong>、<strong>大きいほど「大きく違う」</strong> と解釈します。</li>
+</ul>
+<p><strong>2. KL 制約とは何か</strong></p>
+<ul>
+<li><strong>KL 制約</strong>とは、この KL ダイバージェンスに<strong>上限（閾値）を設ける</strong>ことです。</li>
+<li>数式的には、</li>
+</ul>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>K</mi><mi>L</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mtext>old</mtext></msub><mi mathvariant="normal">∥</mi><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">)</mo><mo>≤</mo><mi>δ</mi></mrow><annotation encoding="application/x-tex">  KL(P_{\text{old}} \| P_{\text{new}}) \le \delta
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal">L</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∥</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span></span></span></span></span></p>
+</blockquote>
+<p>という形で、「<strong>古いポリシーと新しいポリシーの違いは δ 以内に抑える</strong>」という制約を課します。</p>
+<blockquote>
+<ul>
+<li>ここで δ は小さな正の数（例：0.01, 0.1 など）で、<strong>「1ステップで大きくポリシーを変えすぎない」</strong> ためのパラメータです。</li>
+</ul>
+</blockquote>
+<h3 id="2-llm-特有の離散トークン空間でのポリシー更新の難しさ">2. LLM 特有の「離散トークン空間」でのポリシー更新の難しさ</h3>
+<ul>
+<li>LLM の出力は<strong>離散トークン列</strong>であり、連続行動空間の RL とは異なり、<strong>各トークンごとの確率分布</strong>を更新する必要があります。</li>
+<li>PPO のクリッピングは連続空間を想定した設計が多く、<strong>離散トークン空間での厳密な信頼領域制約を課すことが難しい</strong>という課題があります。</li>
+<li>その結果、<strong>トークンレベルで「どこまで更新してよいか」を厳密に制御できない</strong>ため、学習が破綻したり、性能が頭打ちになったりしやすい状況がありました。</li>
+</ul>
+<h3 id="3-既存のppo-改良手法もクリッピングに依存している">3. 既存の「PPO 改良手法」もクリッピングに依存している</h3>
+<ul>
+<li>近年、GRPO, Dr.GRPO, GSPO, REINFORCE++ など、<strong>アドバンテージ推定や正規化を改善する手法</strong>が提案されていますが、それらも<strong>PPO のクリッピングベースの更新機構に依存</strong>しています。</li>
+<li>つまり、
+<ul>
+<li>「アドバンテージの推定は良くなったが、<strong>更新そのものは依然としてヒューリスティックなクリッピング</strong>」</li>
+<li>「<strong>信頼領域の理論的保証がないまま、LLM の RL を回している</strong>」
+という構造的な課題が残っていました。
+理論的な裏付け求めるRLのプレーヤーからはがやられる要因の一つとなっていた訳です。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-troll-が目指す解決">4. TROLL が目指す解決</h3>
+<p>本論文は、上記の課題に対して、</p>
+<ul>
+<li><strong>PPO のクリッピングを、離散トークン空間における「微分可能な信頼領域射影（discrete differentiable trust region projection）」に置き換える</strong></li>
+<li>これにより、
+<ul>
+<li><strong>トークンレベルで厳密な KL 制約（信頼領域）を課す</strong></li>
+<li><strong>理論的に一貫した信頼領域最適化を LLM の RL に適用する</strong></li>
+<li><strong>学習の安定性・収束速度・最終性能を改善する</strong></li>
+</ul>
+</li>
+</ul>
+<p>という形で、<strong>「PPO のクリッピングに依存したままの LLM 強化学習」という構造的な問題を抜本的に解決しようとしている</strong>、という位置づけになります。</p>
+<p>要するに、本論文が解決を目指した課題は、</p>
+<blockquote>
+<p>「PPO のクリッピングに依存した LLM の強化学習は、理論的に厳密な信頼領域制約を持たず、学習の安定性と性能に限界がある。これを、離散トークン空間における厳密な信頼領域最適化で置き換え、LLM の RL をより安定かつ高性能にしたい」</p>
+</blockquote>
+<p>というものです。</p>
+<h2 id="関連研究">関連研究</h2>
+<p>TROLL 論文の関連研究では、主に以下の3つの流れが挙げられています。</p>
+<ol>
+<li><strong>PPO をベースとした LLM 強化学習の改良手法</strong><br>
+（GRPO, Dr.GRPO, GSPO, REINFORCE++ など）</li>
+<li><strong>信頼領域最適化（Trust Region Optimization）の古典的・連続空間での研究</strong><br>
+（TRPO, 信頼領域法全般）</li>
+<li><strong>LLM の RL における探索・安定化のための手法</strong><br>
+（エントロピー正則化、探索促進手法など）</li>
+</ol>
+<p>それぞれについて、<strong>何が主張されているか</strong>を整理します。</p>
+<h3 id="1-ppo-ベースの-llm-強化学習改良手法">1. PPO ベースの LLM 強化学習改良手法</h3>
+<p><strong>代表的な手法</strong></p>
+<ul>
+<li><strong>GRPO</strong>（Group-wise Relative Policy Optimization）</li>
+<li><strong>Dr.GRPO</strong>（Distributional GRPO）</li>
+<li><strong>GSPO</strong>（Grouped Sequence Policy Optimization）</li>
+<li><strong>REINFORCE++</strong>（REINFORCE の改良版）</li>
+</ul>
+<p><strong>主張していること（関連研究としての位置づけ）</strong></p>
+<ul>
+<li>これらの手法は、
+<ul>
+<li><strong>アドバンテージ推定の改善</strong></li>
+<li><strong>報酬の正規化・スケーリング</strong></li>
+<li><strong>トークン列やグループ単位での報酬割り当て</strong>
+などにより、<strong>PPO の性能を大きく向上させた</strong>と主張しています。</li>
+</ul>
+</li>
+<li>特に、
+<ul>
+<li><strong>長いシーケンスでのクレジット割り当て</strong></li>
+<li><strong>高分散な報酬の扱い</strong>
+を改善することで、LLM の RL がより安定し、高性能になると示しています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>TROLL から見た評価</strong></p>
+<ul>
+<li>しかし、<strong>これらの手法も依然として「PPO のクリッピング目的関数」に依存</strong>しています。</li>
+<li>つまり、
+<ul>
+<li>「<strong>アドバンテージや報酬処理は賢くなったが、ポリシー更新そのものは相変わらずヒューリスティックなクリッピング</strong>」</li>
+<li>「<strong>信頼領域の理論的保証がないまま、LLM の RL を回している</strong>」
+という構造的な問題は残っている、と TROLL は指摘します。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-信頼領域最適化trust-region-optimizationの古典的研究">2. 信頼領域最適化（Trust Region Optimization）の古典的研究</h3>
+<p><strong>代表的な手法</strong></p>
+<ul>
+<li><strong>TRPO</strong>（Trust Region Policy Optimization）</li>
+<li>連続行動空間における<strong>信頼領域法全般</strong></li>
+</ul>
+<p><strong>主張していること</strong></p>
+<ul>
+<li>TRPO は、
+<ul>
+<li><strong>KL(P_old || P_new) ≤ δ</strong> という<strong>厳密な KL 制約付き最適化</strong>を行い、</li>
+<li><strong>理論的に保証された信頼領域内でポリシーを更新</strong>する手法です。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li><strong>学習の安定性が向上</strong></li>
+<li><strong>大規模なポリシー更新でも破綻しにくい</strong>
+ことが示されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>TROLL から見た評価</strong></p>
+<ul>
+<li>しかし、TRPO は<strong>連続行動空間</strong>を想定しており、
+<ul>
+<li><strong>LLM のような離散トークン空間</strong>にそのまま適用するのは難しい。</li>
+<li>特に、<strong>トークンレベルでの確率分布更新</strong>に TRPO の枠組みを直接使うのは非自明です。</li>
+</ul>
+</li>
+<li>TROLL は、
+<ul>
+<li><strong>「TRPO のアイデア（信頼領域最適化）は正しいが、LLM にはそのまま使えない」</strong></li>
+<li><strong>「ならば、離散トークン空間で微分可能な信頼領域射影を設計しよう」</strong>
+という立場を取っています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-llm-の-rl-における探索安定化のための手法">3. LLM の RL における探索・安定化のための手法</h3>
+<p><strong>代表的なトピック</strong></p>
+<ul>
+<li><strong>エントロピー正則化</strong>（entropy regularization）</li>
+<li><strong>探索促進のための正則化・目的関数</strong></li>
+<li><strong>報酬設計・シーケンスレベルのクレジット割り当て</strong></li>
+</ul>
+<p><strong>主張していること</strong></p>
+<ul>
+<li>エントロピー正則化は、<strong>行動の多様性を高めて探索を促進する</strong>ための標準的な手法です。</li>
+<li>しかし、LLM のような<strong>大規模・高次元の離散空間</strong>では、
+<ul>
+<li>エントロピー正則化が<strong>ほとんど効かない</strong></li>
+<li>あるいは<strong>性能をむしろ悪化させる</strong>こともある
+と報告されています。</li>
+</ul>
+</li>
+<li>そのため、**「単純なエントロピー正則化では LLM の探索はうまくいかない」**という認識が広がっています。</li>
+</ul>
+<p><strong>TROLL から見た評価</strong></p>
+<ul>
+<li>TROLL は、<strong>信頼領域内での探索（Trust Region Entropy など）</strong> という発想に近く、
+<ul>
+<li>「<strong>探索はするが、信頼領域の外には出ない</strong>」</li>
+<li>「<strong>モデルが大きく壊れない範囲でだけ探索する</strong>」
+という方向性を支持しています。</li>
+</ul>
+</li>
+<li>関連研究として、
+<ul>
+<li>「<strong>エントロピー正則化が LLM でうまくいかない</strong>」</li>
+<li>「<strong>ならば、信頼領域に基づいた探索・更新を設計すべき</strong>」
+という流れを踏まえています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-troll-の関連研究全体に対する主張のまとめ">4. TROLL の関連研究全体に対する主張のまとめ</h3>
+<p>TROLL 論文は、関連研究を踏まえて以下のように主張しています。</p>
+<ol>
+<li><strong>PPO ベースの改良手法（GRPO, Dr.GRPO, GSPO, REINFORCE++ など）は、アドバンテージや報酬処理を改善したが、ポリシー更新そのものは依然としてヒューリスティックなクリッピングに依存している。</strong></li>
+<li><strong>TRPO などの信頼領域最適化は理論的に正しいが、LLM の離散トークン空間にはそのまま適用できない。</strong></li>
+<li><strong>LLM の RL では、エントロピー正則化などの単純な探索手法はうまくいかないため、信頼領域に基づいた更新・探索が重要である。</strong></li>
+</ol>
+<p>そのうえで、</p>
+<blockquote>
+<p>「<strong>PPO のクリッピングを、離散トークン空間における微分可能な信頼領域射影（TROLL）に置き換えることで、理論的に一貫した信頼領域最適化を LLM の RL に導入し、安定性と性能を向上させる</strong>」</p>
+</blockquote>
+<p>というのが、TROLL の関連研究に対する立場です。</p>
+<h2 id="提案手法">提案手法</h2>
+<p>本論文「TROLL: Trust Regions Improve Reinforcement Learning for Large Language Models」で提案されている内容は、一言で言うと、</p>
+<blockquote>
+<p><strong>PPO のクリッピング目的関数を、離散トークン空間における「微分可能な信頼領域射影（discrete differentiable trust region projection）」に置き換えることで、LLM の強化学習をより安定かつ高性能にする手法</strong></p>
+</blockquote>
+<p>です。</p>
+<p>もう少し分解して説明します。</p>
+<h3 id="1-何を置き換えるのか">1. 何を置き換えるのか</h3>
+<ul>
+<li><strong>置き換え対象</strong>：PPO（Proximal Policy Optimization）の<strong>クリッピング目的関数</strong></li>
+<li><strong>置き換え先</strong>：<strong>Trust Region Optimization for Large Language models (TROLL)</strong><br>
+（離散トークン空間における<strong>信頼領域最適化</strong>）</li>
+</ul>
+<p>PPO では、ポリシー更新を</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>L</mi><mtext>CLIP</mtext></msup><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi mathvariant="double-struck">E</mi><mi>t</mi></msub><mrow><mo fence="true">[</mo><mi>min</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><msub><mi>A</mi><mi>t</mi></msub><mo separator="true">,</mo><mtext>  </mtext><mtext>clip</mtext><mo stretchy="false">(</mo><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">)</mo><msub><mi>A</mi><mi>t</mi></msub><mo fence="true">)</mo></mrow><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">L^{\text{CLIP}}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta) A_t,\; \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t \right) \right]
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1413em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">CLIP</span></span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbb">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">[</span><span class="mop">min</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">clip</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">ϵ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal">ϵ</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mclose delimcenter" style="top:0em;">]</span></span></span></span></span></span></p>
+<p>のような<strong>クリッピング目的関数</strong>で行いますが、これは</p>
+<ul>
+<li><strong>KL 制約を直接解くのではなく、確率比 r_t をクリップすることで「だいたい更新幅を制限する」ヒューリスティック</strong></li>
+</ul>
+<p>です。</p>
+<p>TROLL は、この<strong>クリッピング部分を丸ごと置き換え</strong>ます。</p>
+<h3 id="2-提案手法のコア離散トークン空間での信頼領域射影">2. 提案手法のコア：離散トークン空間での信頼領域射影</h3>
+<p>TROLL の核心は、<strong>離散トークン空間における「微分可能な信頼領域射影（discrete differentiable trust region projection）」</strong> です。</p>
+<p><strong>(1) 信頼領域制約の設定</strong></p>
+<ul>
+<li>
+<p>各トークン位置において、<strong>古いポリシー P_old と新しいポリシー P_new の KL ダイバージェンス</strong>に上限を設けます：</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>K</mi><mi>L</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mtext>old</mtext></msub><mi mathvariant="normal">∥</mi><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">)</mo><mo>≤</mo><mi>δ</mi></mrow><annotation encoding="application/x-tex">KL(P_{\text{old}} \| P_{\text{new}}) \le \delta
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal">L</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∥</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span></span></span></span></span></p>
+</li>
+<li>
+<p>これは「<strong>1ステップでポリシーを大きく変えすぎない</strong>」という<strong>信頼領域制約</strong>です。</p>
+</li>
+</ul>
+<p><strong>(2) 離散トークン空間での「射影」</strong></p>
+<ul>
+<li>LLM の出力は<strong>離散トークン</strong>の確率分布です。</li>
+<li>TROLL は、この<strong>離散分布空間上で、信頼領域制約を満たすようにポリシーを「射影」する</strong>操作を設計します。</li>
+<li>具体的には、
+<ul>
+<li>勾配降下で得られた「制約なしの更新候補」に対して、</li>
+<li><strong>KL(P_old || P_new) ≤ δ</strong> を満たす最も近い分布に<strong>射影</strong>します。</li>
+</ul>
+</li>
+<li>この射影が<strong>微分可能</strong>であるため、<strong>通常のバックプロパゲーションと組み合わせて学習</strong>できます。</li>
+</ul>
+<p><strong>(3) PPO との違い</strong></p>
+<ul>
+<li>PPO：クリッピングで<strong>間接的に</strong>更新幅を制限（ヒューリスティック）</li>
+<li>TROLL：<strong>KL 制約を厳密に満たす射影</strong>で更新（理論的な信頼領域最適化）</li>
+</ul>
+<h3 id="3-どのような利点があるか">3. どのような利点があるか</h3>
+<p>論文で主張されている主な利点は以下の通りです。</p>
+<p><strong>(1) 学習の安定性向上</strong></p>
+<ul>
+<li><strong>トークンレベルで厳密に KL 制約を課す</strong>ため、
+<ul>
+<li>ポリシーが急激に変化しにくく、</li>
+<li>学習が<strong>破綻しにくい</strong>。</li>
+</ul>
+</li>
+<li>PPO では起こりがちな「<strong>急に報酬が崩れる</strong>」「<strong>出力品質が急に悪化する</strong>」といった現象を抑えられます。</li>
+</ul>
+<p><strong>(2) 収束速度と最終性能の改善</strong></p>
+<ul>
+<li>数学的推論タスクやコード生成タスクなど、複数のベンチマークで評価した結果、
+<ul>
+<li><strong>PPO よりも早く収束</strong>し、</li>
+<li><strong>最終的な成功率や性能も高い</strong>
+ことが報告されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 推論時の挙動は変わらない</strong></p>
+<ul>
+<li>TROLL は<strong>学習時の更新メカニズムのみを置き換える</strong>もので、
+<ul>
+<li><strong>推論時のモデル挙動（アーキテクチャや出力分布）は一切変更しません</strong>。</li>
+</ul>
+</li>
+<li>つまり、
+<ul>
+<li>「<strong>学習は安定・高性能にしつつ、既存のモデルや推論パイプラインはそのまま使える</strong>」
+という実用上の利点があります。</li>
+</ul>
+</li>
+</ul>
+<h2 id="射影法">射影法</h2>
+<p>TROLL の「信頼領域射影」は、<strong>「制約なしで勾配降下して得られた新しいポリシー候補」を、「KL(P_old || P_new) ≤ δ を満たす最も近い分布」に写す操作</strong>です。</p>
+<p>もう少し具体的に説明します。</p>
+<h3 id="1-問題設定何を射影するのか">1. 問題設定（何を射影するのか）</h3>
+<p>各トークン位置において、</p>
+<ul>
+<li><strong>古いポリシー</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext>old</mtext></msub></mrow><annotation encoding="application/x-tex"> P_{\text{old}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（現在のモデルの出力分布）</li>
+<li><strong>勾配降下で得られた新しいポリシー候補</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext>unconstrained</mtext></msub></mrow><annotation encoding="application/x-tex"> P_{\text{unconstrained}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">unconstrained</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（PPO で言う「クリップ前」の更新）</li>
+</ul>
+<p>があるとします。</p>
+<p>TROLL では、この <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext>unconstrained</mtext></msub></mrow><annotation encoding="application/x-tex"> P_{\text{unconstrained}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">unconstrained</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> をそのまま使うのではなく、</p>
+<blockquote>
+<p><strong>KL(P_old || P_new) ≤ δ</strong> を満たす <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext>new</mtext></msub></mrow><annotation encoding="application/x-tex"> P_{\text{new}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> のうち、<br>
+<strong>P_unconstrained に最も近いもの</strong>を選ぶ</p>
+</blockquote>
+<p>という<strong>射影問題</strong>を解きます。</p>
+<h3 id="2-射影の数式的なイメージ">2. 射影の数式的なイメージ</h3>
+<p>数学的には、以下のような<strong>制約付き最適化問題</strong>を解くことになります：</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><munder><mrow><mi>min</mi><mo>⁡</mo></mrow><msub><mi>P</mi><mtext>new</mtext></msub></munder></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mi>D</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mtext>unconstrained</mtext></msub><mo separator="true">,</mo><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>s.t.</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mi>K</mi><mi>L</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mtext>old</mtext></msub><mi mathvariant="normal">∥</mi><msub><mi>P</mi><mtext>new</mtext></msub><mo stretchy="false">)</mo><mo>≤</mo><mi>δ</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\min_{P_{\text{new}}} &amp;\quad D(P_{\text{unconstrained}}, P_{\text{new}}) \\
+\text{s.t.} &amp;\quad KL(P_{\text{old}} \| P_{\text{new}}) \le \delta
+\end{aligned}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:3.4844em;vertical-align:-1.4922em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.9922em;"><span style="top:-4.1522em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6679em;"><span style="top:-2.3557em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1645em;"><span style="top:-2.357em;margin-left:-0.1389em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8444em;"><span></span></span></span></span></span></span></span><span style="top:-2.1678em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">s.t.</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4922em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.9922em;"><span style="top:-4.1522em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:1em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">unconstrained</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span><span style="top:-2.1678em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:1em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mord mathnormal">L</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∥</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4922em;"><span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>ここで <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mo>⋅</mo><mo separator="true">,</mo><mo>⋅</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> D(\cdot, \cdot) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mopen">(</span><span class="mord">⋅</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">⋅</span><span class="mclose">)</span></span></span></span> は「2つの分布の距離」を測る指標です。TROLL では、<strong>KL ダイバージェンスや類似の距離</strong>を用いて、この問題を解きます。</p>
+<p><strong>直感的な解釈</strong></p>
+<ul>
+<li><strong>P_unconstrained</strong>：報酬を上げるために「理想としてはこうしたい」分布</li>
+<li><strong>P_new</strong>：ただし、「古いポリシーから大きく離れすぎない」ように制約を満たす分布</li>
+<li>射影は、<strong>「理想」を「安全圏内」に引き戻す</strong>操作です。</li>
+</ul>
+<h3 id="3-離散トークン空間での微分可能な射影">3. 離散トークン空間での「微分可能な」射影</h3>
+<p>LLM の出力は<strong>離散トークン</strong>の確率分布なので、この射影は<strong>離散分布空間上の最適化</strong>になります。</p>
+<p>TROLL のポイントは、この射影を<strong>微分可能（differentiable）</strong> に設計していることです。</p>
+<p><strong>(1) なぜ微分可能が重要か</strong></p>
+<ul>
+<li>強化学習では、<strong>勾配降下（バックプロパゲーション）</strong> でポリシーを更新します。</li>
+<li>もし射影が<strong>微分不可能</strong>だと、
+<ul>
+<li>「射影前」と「射影後」の関係が勾配で伝わらず、</li>
+<li><strong>学習がうまく進まない</strong>。</li>
+</ul>
+</li>
+<li>TROLL は、射影操作そのものを<strong>微分可能な層</strong>として実装し、<strong>通常の NN 学習と同じように勾配を流せる</strong>ようにしています。</li>
+</ul>
+<p><strong>(2) 具体的な実現方法（高レベル）</strong></p>
+<p>論文では、以下のようなアプローチが取られています（詳細は論文の式に依りますが、ここでは概念レベルで説明します）。</p>
+<ul>
+<li><strong>ラグランジュ双対問題</strong>として定式化し、
+<ul>
+<li>KL 制約に対応する<strong>ラグランジュ乗数</strong>を導入、</li>
+<li>それを<strong>勾配で更新</strong>することで射影を実現。</li>
+</ul>
+</li>
+<li>あるいは、**近接勾配法（proximal gradient）**のような考え方を用い、
+<ul>
+<li>「勾配降下ステップ」と「信頼領域への射影ステップ」を交互に行う。</li>
+</ul>
+</li>
+</ul>
+<p>いずれにせよ、</p>
+<blockquote>
+<p>「<strong>P_unconstrained から出発して、KL 制約を満たすように少しずつ P_new に近づける</strong>」</p>
+</blockquote>
+<p>という<strong>反復的な最適化</strong>を、<strong>微分可能な形で実装</strong>している、というイメージです。</p>
+<h3 id="4-ppo-のクリッピングとの違い射影の観点">4. PPO のクリッピングとの違い（射影の観点）</h3>
+<p><strong>PPO のクリッピング</strong></p>
+<ul>
+<li>PPO は、<strong>確率比 r_t</strong> をクリップすることで、
+<ul>
+<li>「<strong>r_t が 1±ε を超えたら、そこまでしか更新しない</strong>」
+という<strong>ヒューリスティックな制限</strong>をかけます。</li>
+</ul>
+</li>
+<li>これは、
+<ul>
+<li><strong>KL 制約を直接解いているわけではない</strong></li>
+<li><strong>「最も近い分布」を選んでいるわけでもない</strong>
+という点で、<strong>近似に過ぎません</strong>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>TROLL の射影</strong></p>
+<ul>
+<li>TROLL は、
+<ul>
+<li><strong>KL(P_old || P_new) ≤ δ</strong> を<strong>厳密に満たす</strong>ように、</li>
+<li><strong>P_unconstrained に最も近い P_new</strong> を選びます。</li>
+</ul>
+</li>
+<li>つまり、
+<ul>
+<li>「<strong>理想的な更新を、安全圏内で最大限実現する</strong>」
+という<strong>最適化問題</strong>を解いていることになります。</li>
+</ul>
+</li>
+</ul>
+<h2 id="実験">実験</h2>
+<p>TROLL 論文の実験では、主に<strong>数学的推論タスク</strong>と<strong>コード生成タスク</strong>を用いて、<strong>PPO や GRPO などの既存手法と比較</strong>し、<strong>学習の安定性・収束速度・最終性能</strong>の観点から評価しています。</p>
+<p>以下、実験内容と結果をまとめます。</p>
+<h3 id="1-実験の目的">1. 実験の目的</h3>
+<ul>
+<li><strong>TROLL が PPO のクリッピングを置き換えたとき、実際に性能が向上するか</strong>を検証する。</li>
+<li>特に、
+<ul>
+<li><strong>学習の安定性</strong>（報酬の急激な悪化や破綻の有無）</li>
+<li><strong>収束速度</strong>（同じステップ数での性能）</li>
+<li><strong>最終性能</strong>（十分学習した後の成功率・報酬）
+の3点で、PPO や GRPO と比較する。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-比較対象ベースライン">2. 比較対象（ベースライン）</h3>
+<p>実験で比較されている主な手法は以下の通りです。</p>
+<ul>
+<li><strong>PPO</strong>（Proximal Policy Optimization）
+<ul>
+<li>LLM の強化学習で標準的に使われる手法。</li>
+</ul>
+</li>
+<li><strong>GRPO</strong>（Group-wise Relative Policy Optimization）
+<ul>
+<li>PPO の改良版で、<strong>グループ単位での報酬割り当て</strong>により性能を向上させた手法。</li>
+</ul>
+</li>
+<li>その他、<strong>Dr.GRPO, GSPO, REINFORCE++</strong> など、PPO ベースの改良手法も一部比較されています。</li>
+</ul>
+<p>TROLL は、<strong>これらの手法の「クリッピング部分」を置き換える形</strong>で比較されます。</p>
+<h3 id="3-実験タスク">3. 実験タスク</h3>
+<p><strong>(1) 数学的推論タスク（Mathematical Reasoning）</strong></p>
+<ul>
+<li><strong>内容</strong>：数学の問題（方程式、数列、証明など）を解かせるタスク。</li>
+<li><strong>報酬</strong>：正解かどうか（あるいは部分点）に基づく報酬。</li>
+<li><strong>例</strong>：GSM8K に近いような数学問題セットを用いて、<strong>正答率（success rate）</strong> を評価。</li>
+</ul>
+<p><strong>(2) コード生成タスク（Code Generation）</strong></p>
+<ul>
+<li><strong>内容</strong>：自然言語の仕様からプログラムコードを生成するタスク。</li>
+<li><strong>報酬</strong>：生成コードがテストケースを通過するかどうか（pass@k など）に基づく報酬。</li>
+<li><strong>例</strong>：HumanEval や類似のコードベンチマークを用いて、<strong>正解率・pass率</strong>を評価。</li>
+</ul>
+<h3 id="4-評価指標">4. 評価指標</h3>
+<ul>
+<li><strong>成功率（Success Rate）</strong>：タスクを正しく解けた割合。</li>
+<li><strong>報酬（Reward）</strong>：各ステップでの平均報酬。</li>
+<li><strong>サンプル効率（Sample Efficiency）</strong>：同じステップ数でどれだけ性能が上がるか。</li>
+<li><strong>学習曲線（Learning Curve）</strong>：ステップ数に対する報酬・成功率の推移。</li>
+<li><strong>安定性</strong>：報酬が急激に悪化したり、学習が破綻したりする頻度。</li>
+</ul>
+<h3 id="5-主な結果の傾向">5. 主な結果の傾向</h3>
+<p>論文で報告されている主な傾向は以下の通りです。</p>
+<p><strong>(1) 数学的推論タスク</strong></p>
+<ul>
+<li><strong>TROLL は PPO より早く収束</strong>し、<strong>最終的な成功率も高い</strong>。</li>
+<li>同じステップ数で比較すると、
+<ul>
+<li>PPO や GRPO がまだ低い成功率にとどまっている段階で、</li>
+<li><strong>TROLL はすでに高い成功率に達している</strong>。</li>
+</ul>
+</li>
+<li>学習曲線を見ると、
+<ul>
+<li>PPO は<strong>報酬のブレが大きい</strong>（急に悪化するステップがある）が、</li>
+<li>TROLL は<strong>滑らかに上昇</strong>し、<strong>安定して改善</strong>する。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) コード生成タスク</strong></p>
+<ul>
+<li><strong>TROLL は PPO や GRPO よりも高い pass@k を達成</strong>。</li>
+<li>特に、<strong>長いシーケンスや複雑な問題</strong>では、
+<ul>
+<li>PPO ベースの手法が<strong>学習の後半で頭打ち</strong>になるのに対し、</li>
+<li>TROLL は<strong>さらに性能を伸ばせる</strong>傾向があります。</li>
+</ul>
+</li>
+<li>サンプル効率の面でも、
+<ul>
+<li><strong>少ないステップ数で高い性能に到達</strong>するため、<strong>計算コストあたりの性能が良い</strong>と報告されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 安定性の比較</strong></p>
+<ul>
+<li>PPO や GRPO では、
+<ul>
+<li><strong>報酬が急激に悪化する「崩壊ステップ」</strong> が観測されることがあります。</li>
+<li>これは、クリッピングが<strong>ヒューリスティックな近似</strong>であるため、<strong>ときどき制約を破ってしまう</strong>ことが原因と考えられます。</li>
+</ul>
+</li>
+<li>TROLL では、
+<ul>
+<li><strong>KL 制約を厳密に満たす射影</strong>を行うため、</li>
+<li><strong>報酬の急激な悪化がほとんど見られず</strong>、<strong>学習が安定</strong>しています。</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\1_TROLL_Trust_Regions_Improve_Reinforcement_Learning\1783730239297.png" alt="1783730239297"></p>
+<h3 id="6-まとめ実験結果の要点">6. まとめ：実験結果の要点</h3>
+<ul>
+<li><strong>タスク</strong>：数学的推論・コード生成の両方で評価。</li>
+<li><strong>比較対象</strong>：PPO, GRPO など、PPO ベースの既存手法。</li>
+<li><strong>評価指標</strong>：成功率、報酬、サンプル効率、学習曲線、安定性。</li>
+<li><strong>結果</strong>：
+<ul>
+<li><strong>TROLL は PPO より早く収束し、最終性能も高い。</strong></li>
+<li><strong>サンプル効率が良く、少ないステップで高い性能に到達。</strong></li>
+<li><strong>学習が安定しており、報酬の急激な悪化や崩壊が少ない。</strong></li>
+</ul>
+</li>
+<li><strong>結論</strong>：<br>
+PPO のクリッピングを TROLL の信頼領域射影に置き換えることで、<strong>LLM の強化学習の安定性と性能が実証的に向上する</strong>ことが示されました。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>ここまで読んできた内容をまとめていきます。
+本論文の結論は、おおまかに言うと以下の3点に集約されます。</p>
+<h3 id="1-ppo-のクリッピングを信頼領域射影で置き換えることでllm-の強化学習が安定高性能になる">1. PPO のクリッピングを信頼領域射影で置き換えることで、LLM の強化学習が安定・高性能になる</h3>
+<ul>
+<li>PPO のクリッピング目的関数は、<strong>KL 制約を間接的に近似するヒューリスティック</strong>であり、LLM の強化学習において<strong>学習の不安定さや性能の限界</strong>をもたらしていました。</li>
+<li>TROLL は、<strong>離散トークン空間における微分可能な信頼領域射影</strong>を導入し、
+<ul>
+<li><strong>トークンレベルで厳密な KL 制約を満たす更新</strong>を実現しました。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li><strong>学習の安定性が向上</strong></li>
+<li><strong>収束速度が速くなる</strong></li>
+<li><strong>最終的な成功率・性能が向上</strong>
+することが、数学的推論タスクやコード生成タスクで実証されました。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-既存の-ppo-改良手法grpo-なども更新メカニズムそのものは依然としてヒューリスティックだった">2. 既存の PPO 改良手法（GRPO など）も、更新メカニズムそのものは依然としてヒューリスティックだった</h3>
+<ul>
+<li>GRPO, Dr.GRPO, GSPO, REINFORCE++ など、<strong>アドバンテージ推定や報酬処理を改善する手法</strong>は提案されてきましたが、
+<ul>
+<li><strong>ポリシー更新そのものは PPO のクリッピングに依存</strong>したままでした。</li>
+</ul>
+</li>
+<li>TROLL は、<strong>更新メカニズムそのものを信頼領域最適化で置き換える</strong>ことで、
+<ul>
+<li>「<strong>アドバンテージは賢くなったが、更新は相変わらずヒューリスティック</strong>」という構造的な課題を解決しました。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-今後の展望llm-の強化学習における信頼領域ベースの手法の一般化">3. 今後の展望：LLM の強化学習における信頼領域ベースの手法の一般化</h3>
+<ul>
+<li>TROLL は、<strong>PPO のクリッピングを直接置き換える形で設計</strong>されており、
+<ul>
+<li><strong>既存の PPO ベースの実装に比較的簡単に組み込める</strong>という実用上の利点があります。</li>
+</ul>
+</li>
+<li>今後は、
+<ul>
+<li><strong>より大規模なモデル</strong></li>
+<li><strong>多様なタスク（対話、要約、翻訳など）</strong>
+への適用や、</li>
+<li><strong>他の信頼領域ベースの手法との組み合わせ</strong>
+が期待されます。</li>
+</ul>
+</li>
+<li>結論として、<strong>信頼領域最適化を LLM の強化学習に導入することは、理論的にも実証的にも有効であり、今後の標準的なアプローチになり得る</strong>と位置づけています。</li>
+</ul>
+<h3 id="まとめ">まとめ</h3>
+<ul>
+<li><strong>TROLL は、PPO のクリッピングを離散トークン空間における信頼領域射影で置き換えることで、LLM の強化学習をより安定かつ高性能にした。</strong></li>
+<li><strong>既存の PPO 改良手法が抱えていた「更新そのものがヒューリスティック」という課題を、理論的に一貫した信頼領域最適化で解決した。</strong></li>
+<li><strong>今後の LLM の強化学習において、信頼領域ベースの手法が重要な役割を果たすことが示唆された。</strong></li>
+</ul>
+<p>学習を評価する関数を微分できる形に等価変換した、結果としてLLMの強化学習を安定化させることが出来た。
+何より良かったのが、更新の理屈を理論で裏付けできたことでした。
+尚、本論文はgithubが存在しています。そちらも是非参考下さい。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/R7_fpfTa2ms?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
