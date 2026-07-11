@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日は論文読んでいこうシリーズ(!?)です。
+著者が取り組んでいる協調型マルチエージェント強化学習（MARL）の精度に影響する手法として見つけた論文について。</p>
+<p>本日は、MARLの手法として国際学会NeurIPS 2022（Neural Information Processing Systems） に採択された論文である Multi-Agent Reinforcement Learning is a Sequence Modeling Problem について説明していきます。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="概要">概要</h2>
+<p>Multi-Agent Transformer（MAT）は、<strong>協調型マルチエージェント強化学習（MARL）を「系列モデリング（sequence modeling）問題」として定式化する</strong>ためのニューラルネットワークアーキテクチャです<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<h3 id="1-目的">1. 目的</h3>
+<ul>
+<li>GPT や BERT のような大規模系列モデル（SM）は、自然言語処理や単一エージェント強化学習で高い汎化性能を示しています。</li>
+<li>MAT は、<strong>「複数エージェントの意思決定も系列モデルで扱えないか？」</strong> という問いから生まれました。</li>
+<li>具体的には、<strong>各エージェントの観測系列を入力として、最適な行動系列を出力する</strong>ように設計されています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+<h3 id="2-アーキテクチャの概要">2. アーキテクチャの概要</h3>
+<p>MAT は <strong>エンコーダ・デコーダ型のTransformer</strong> です。</p>
+<ul>
+<li><strong>エンコーダ</strong>：<br>
+各エージェントの観測（observation）を入力として、エージェント間の相互作用や環境の状態を Transformer の自己注意（self-attention）で表現します。</li>
+<li><strong>デコーダ</strong>：<br>
+その表現をもとに、<strong>エージェントの行動を順次（系列として）生成</strong>します。<br>
+これにより、MARL の「どのエージェントがいつ・何をするか」という問題を、<strong>系列生成問題</strong>として扱うことができます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+<h3 id="3-理論的な裏付けmulti-agent-advantage-decomposition-theorem">3. 理論的な裏付け：multi-agent advantage decomposition theorem</h3>
+<p>MAT の中心にあるのは、<strong>multi-agent advantage decomposition theorem</strong> という理論的結果です<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<ul>
+<li>これは、<strong>共同行動のアドバンテージ（advantage）を、エージェントごとに順番に分解できる</strong>ことを示す定理です。</li>
+<li>この定理を利用することで、
+<ul>
+<li>「全エージェントの同時最適化」という高次元の問題を、</li>
+<li><strong>「エージェントを順番に最適化する系列決定問題」</strong> に変換できます。</li>
+</ul>
+</li>
+<li>その結果、
+<ul>
+<li>エージェント数に対して<strong>線形時間計算量</strong>でスケールし、</li>
+<li><strong>性能が単調に改善する（monotonic improvement）</strong> という保証が得られます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-学習方式と特徴">4. 学習方式と特徴</h3>
+<ul>
+<li><strong>オンライン・オンポリシー学習</strong>：<br>
+Decision Transformer などがオフラインデータを使うのに対し、MAT は <strong>環境とのオンライン試行錯誤（on-policy）</strong> で学習します<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+<li><strong>スケーラビリティ</strong>：<br>
+エージェント数に対して線形オーダーで計算量が増えるため、多数エージェント環境でも扱いやすい設計です。</li>
+<li><strong>汎化性能</strong>：<br>
+StarCraftII、Multi-Agent MuJoCo、Google Research Football などのベンチマークで、MAPPO や HAPPO といった既存のMARL手法を上回る性能が報告されています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+<h2 id="解決したい課題">解決したい課題</h2>
+<p>MAT（Multi-Agent Transformer）が主に解決しようとしている課題は、<strong>「協調型マルチエージェント強化学習（MARL）を、スケーラブルかつ汎化性能の高い形で扱うこと」</strong> です。もう少し分解すると、以下のような点が挙げられます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<h3 id="1-エージェント数が増えると計算表現が大変になる問題">1. 「エージェント数が増えると計算・表現が大変になる」問題</h3>
+<ul>
+<li>マルチエージェント環境では、エージェント数が増えると
+<ul>
+<li>行動空間が指数的に大きくなる、</li>
+<li>エージェント間の相互作用が複雑になる、
+といった問題があります。</li>
+</ul>
+</li>
+<li>既存の多くのMARL手法は、エージェント数に対して<strong>計算量や表現力が非線形に増大</strong>しやすく、大規模環境でのスケーラビリティが課題でした。</li>
+<li>MAT は、<strong>multi-agent advantage decomposition theorem</strong> を利用して、
+<ul>
+<li>共同行動の最適化を「エージェントを順番に決める系列決定問題」に変換し、</li>
+<li>エージェント数に対して<strong>線形時間計算量</strong>でスケールするように設計されています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-大規模系列モデルの力をmarlに活かせていない問題">2. 「大規模系列モデルの力をMARLに活かせていない」問題</h3>
+<ul>
+<li>GPT や BERT などの大規模系列モデル（SM）は、自然言語処理や単一エージェントRLで高い汎化性能を示していましたが、
+<ul>
+<li><strong>マルチエージェントの意思決定には、そのままでは適用しづらい</strong>、</li>
+<li>MARL と SM の間に「橋渡し」が足りない、
+という状況がありました。</li>
+</ul>
+</li>
+<li>MAT は、
+<ul>
+<li>MARL を**「観測系列 → 行動系列」の系列モデリング問題**として定式化し、</li>
+<li>Transformer のエンコーダ・デコーダ構造で直接扱うことで、</li>
+<li><strong>系列モデルの表現力を MARL に持ち込む</strong>ことを目指しています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-性能保証のあるスケーラブルなオンポリシーmarlの不足">3. 「性能保証のある、スケーラブルなオンポリシーMARL」の不足</h3>
+<ul>
+<li>既存のオンポリシー型MARL（例：MAPPO, HAPPO）は実用上強力ですが、
+<ul>
+<li>エージェント数が増えたときの理論的保証やスケーラビリティには限界がありました。</li>
+</ul>
+</li>
+<li>MAT は、
+<ul>
+<li>オンライン・オンポリシー学習で訓練しつつ、</li>
+<li>上記の分解定理により<strong>単調性能改善（monotonic improvement）の保証</strong>を持ち、</li>
+<li>多数エージェント環境でも扱いやすい設計になっています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="解決方法">解決方法</h2>
+<p>MAT（Multi-Agent Transformer）が「スケーラブルで汎化性能の高いMARL」を実現するために取った具体的な方法は、主に以下の4点に集約されます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<h3 id="前提">前提</h3>
+<p>ここから読み進める上で、MATの前提について説明させて頂きます。</p>
+<p>MATは、</p>
+<ul>
+<li><strong>「エージェントごとに独立したポリシーネットワークを持つ」のではなく、</strong></li>
+<li><strong>「全エージェントをまとめて扱う単一のTransformerモデル（エンコーダ・デコーダ）」として設計されています</strong><a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+<p>もう少し正確に言うと：</p>
+<p><strong>1. モデルは「全体で1つ」</strong></p>
+<ul>
+<li>MAT は、<strong>1つのエンコーダ・デコーダ型Transformer</strong>で、
+<ul>
+<li>入力：<strong>全エージェントの観測系列</strong></li>
+<li>出力：<strong>全エージェントの行動系列</strong>
+を一度に扱います<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>つまり、<strong>「エージェントごとに別々のニューラルネットを用意する」のではなく、「1つの大きなモデルが全エージェントの意思決定を同時に行う」</strong> という構造です。</li>
+</ul>
+<p><strong>2. ただし「1体のエージェント」というより「1つの中央頭脳」</strong></p>
+<ul>
+<li>通常の「単一エージェントRL」では、環境に対して<strong>1つの行動</strong>を出力します。</li>
+<li>MAT は、<strong>1つのモデルが複数のエージェントの行動を同時に出力する</strong>ので、
+<ul>
+<li>「1体のエージェント」というより、</li>
+<li><strong>「中央の頭脳（centralized brain）が、複数の身体（エージェント）を制御する」</strong> イメージに近いです。</li>
+</ul>
+</li>
+<li>その中央頭脳が Transformer であり、自己注意（self-attention）を通じて、
+<ul>
+<li>どのエージェントがどのタイミングで何をすべきかを<strong>一括で計算</strong>します。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. エージェントごとの独立性は「系列内の順序」で表現</strong></p>
+<ul>
+<li>MAT は、<strong>multi-agent advantage decomposition theorem</strong> に基づき、
+<ul>
+<li>共同行動の最適化を「エージェントを順番に決める系列決定問題」に変換します<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>つまり、
+<ul>
+<li>モデルは1つですが、</li>
+<li>デコーダが<strong>エージェントの順序に従って行動を1つずつ生成</strong>することで、</li>
+<li>各エージェントの意思決定を<strong>系列内の位置</strong>として表現しています。</li>
+</ul>
+</li>
+<li>この意味で、「エージェントごとにモデルを持つ」のではなく、
+<ul>
+<li><strong>「1つのモデルが、系列の中にエージェントごとの意思決定を埋め込む」</strong> という設計になっています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-marlを系列モデリング問題として定式化する">1. MARLを「系列モデリング問題」として定式化する</h3>
+<ul>
+<li>通常のMARLでは、各時刻に<strong>全エージェントの行動を同時に決める</strong>問題として扱います。</li>
+<li>MAT はこれを、
+<ul>
+<li><strong>入力</strong>：各エージェントの観測系列（observation sequence）</li>
+<li><strong>出力</strong>：各エージェントの行動系列（action sequence）
+という「<strong>系列 → 系列</strong>」の写像問題として再定義します<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li>GPT や BERT などで成功している<strong>Transformer系モデルの枠組み</strong>をそのままMARLに適用できるようになります。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>時間ステップで、エンコーダはエージェントの観測情報を入力として受け取る</li>
+<li>潜在表現の系列情報に変換してデコーダに渡す</li>
+<li>デコーダは各エージェントの最適化行動を逐次的かつ、自己回帰的に生成していく。</li>
+</ol>
+<p>この時、エージェントは自身より前の行動のみにアクセスできるように、アテンションがマスクされています。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\12_Multi-Agent_Transformer\1783750523040.png" alt="1783750523040"></p>
+<h3 id="2-エンコーダデコーダ型transformerでエージェント間相互作用をモデル化">2. エンコーダ・デコーダ型Transformerでエージェント間相互作用をモデル化</h3>
+<p>MAT は <strong>エンコーダ・デコーダ構造のTransformer</strong> を用います<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<ul>
+<li><strong>エンコーダ</strong>：
+<ul>
+<li>各エージェントの観測（および必要に応じて過去の行動・報酬など）を入力とし、</li>
+<li>Transformer の自己注意（self-attention）で<strong>エージェント間の依存関係や環境状態</strong>を表現します。</li>
+</ul>
+</li>
+<li><strong>デコーダ</strong>：
+<ul>
+<li>エンコーダの表現をもとに、<strong>エージェントの行動を順次（系列として）生成</strong>します。</li>
+<li>このとき、<strong>エージェントの順序</strong>を決めて、あるエージェントの行動を決める際に、すでに決まった他のエージェントの行動も参照できるようにします。</li>
+</ul>
+</li>
+</ul>
+<p>これにより、</p>
+<ul>
+<li>エージェント間の協調・競合を<strong>系列モデルとして自然に表現</strong>し、</li>
+<li>Transformer の強力な表現力を MARL に直接持ち込むことができます。</li>
+</ul>
+<h3 id="3-multi-agent-advantage-decomposition-theorem-による順次最適化">3. multi-agent advantage decomposition theorem による「順次最適化」</h3>
+<p>MAT の最も特徴的な点は、<strong>multi-agent advantage decomposition theorem</strong> を利用していることです<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<ul>
+<li>この定理は、
+<ul>
+<li><strong>共同行動のアドバンテージ（advantage）を、エージェントごとに順番に分解できる</strong>ことを示します。</li>
+</ul>
+</li>
+<li>MAT はこれを用いて、
+<ul>
+<li>「全エージェントの同時最適化」という高次元問題を、</li>
+<li>**「エージェントを順番に最適化する系列決定問題」**に変換します。</li>
+</ul>
+</li>
+<li>具体的には、
+<ul>
+<li>あるエージェントの行動を決めるとき、<strong>それ以前に決まったエージェントの行動を固定</strong>し、</li>
+<li>その条件のもとで<strong>自分の行動だけを最適化</strong>する、という形で順次更新します。</li>
+</ul>
+</li>
+</ul>
+<p>この仕組みにより、</p>
+<ul>
+<li>エージェント数に対して<strong>線形時間計算量</strong>でスケールし、</li>
+<li>理論的に<strong>単調性能改善（monotonic performance improvement）</strong> が保証されます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+<h3 id="4-オンポリシーオンライン学習で訓練">4. オンポリシー・オンライン学習で訓練</h3>
+<ul>
+<li>Decision Transformer など一部の系列RLは<strong>オフライン学習</strong>（事前に集めたデータのみで学習）ですが、</li>
+<li>MAT は <strong>オンポリシー・オンライン学習</strong> で訓練されます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。
+<ul>
+<li>環境とインタラクションしながら、</li>
+<li>得られた軌跡（trajectory）を使ってポリシーを更新します。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li>実際のマルチエージェント環境での<strong>探索と協調の学習</strong>を直接行い、</li>
+<li>環境変化やエージェント数の変動にも柔軟に対応できるようになっています。</li>
+</ul>
+</li>
+</ul>
+<h2 id="効果">効果</h2>
+<p>MAT（Multi-Agent Transformer）の効果は、主に <strong>「性能」「スケーラビリティ」「汎化性能」</strong> の3つの観点で現れます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<h3 id="1-既存marl手法に対する性能の向上">1. 既存MARL手法に対する性能の向上</h3>
+<ul>
+<li>MAT は、StarCraftII、Multi-Agent MuJoCo、Google Research Football などの代表的ベンチマークで、
+<ul>
+<li><strong>MAPPO</strong> や <strong>HAPPO</strong> といった既存のオンポリシー型MARL手法を<strong>上回る性能</strong>を示しています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>特に、
+<ul>
+<li>複雑な協調タスク（例：StarCraftIIのユニット協調、MuJoCoの多関節ロボット協調制御）において、</li>
+<li>Transformer の表現力を活かした<strong>長期的な依存関係の学習</strong>により、高い報酬を達成しています。</li>
+</ul>
+</li>
+</ul>
+<p>以下は現論文に掲載されていた結果です。
+変動環境の中で手を使ってドアを開けるオペレーションでしょうか？
+MATを従来手法であるMAPPOやHAPPOと比較していますが、取得報酬の安定性や収束性で大きく改善していることが確認出来ます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\12_Multi-Agent_Transformer\1783751132222.png" alt="1783751132222"></p>
+<h3 id="2-エージェント数に対するスケーラビリティ">2. エージェント数に対するスケーラビリティ</h3>
+<ul>
+<li>MAT は、<strong>multi-agent advantage decomposition theorem</strong> を用いて、
+<ul>
+<li>共同行動の最適化を「エージェントを順番に決める系列決定問題」に変換しています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li>エージェント数に対して<strong>線形時間計算量</strong>でスケールし、</li>
+<li>多数エージェント環境でも計算負荷を抑えつつ学習が可能になります。</li>
+</ul>
+</li>
+<li>既存の多くのMARL手法では、エージェント数が増えると計算量や表現の複雑さが急増しがちですが、MATはその点で<strong>スケーラブルな設計</strong>になっています。</li>
+</ul>
+<h3 id="3-汎化性能とfew-shot学習能力">3. 汎化性能とfew-shot学習能力</h3>
+<ul>
+<li>MAT は、MARLを<strong>系列モデリング問題</strong>として扱うことで、
+<ul>
+<li>Transformer の<strong>汎化能力</strong>を MARL に持ち込んでいます<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>実験的には、
+<ul>
+<li>学習時に見たことのないエージェント数やタスク設定に対しても、</li>
+<li><strong>few-shot（少数の試行）で適応できる</strong>ことが報告されています。</li>
+</ul>
+</li>
+<li>これは、系列モデルとして「観測系列 → 行動系列」という汎用的な写像を学習しているため、
+<ul>
+<li>環境やエージェント構成が変わっても、ある程度<strong>構造を再利用できる</strong>ためと考えられます。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-理論的な保証単調性能改善">4. 理論的な保証（単調性能改善）</h3>
+<ul>
+<li>MAT は、上記の分解定理に基づく更新則により、
+<ul>
+<li><strong>単調性能改善（monotonic performance improvement）</strong> が理論的に保証されています<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</li>
+</ul>
+</li>
+<li>これは、
+<ul>
+<li>学習の進行に伴って性能が必ず悪化しない（少なくとも改善または維持される）ことを意味し、</li>
+<li>実用上も<strong>安定した学習曲線</strong>が期待できます。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>MAT（Multi-Agent Transformer）は、MARLを「系列モデリング問題」として扱う**Transformerベースの手法です<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+<ul>
+<li>
+<p><strong>目的</strong>：<br>
+GPT/BERTのような大規模系列モデルの力をMARLに持ち込み、<strong>観測系列から行動系列を直接生成</strong>することで、高い汎化性能とスケーラビリティを実現すること<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>アーキテクチャ</strong>：<br>
+1つの<strong>エンコーダ・デコーダ型Transformer</strong>で、全エージェントの観測を入力し、全エージェントの行動を系列として出力する中央集権型モデル<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>理論的裏付け</strong>：<br>
+<strong>multi-agent advantage decomposition theorem</strong>により、共同行動のアドバンテージをエージェントごとに順次分解し、<strong>エージェントを順番に最適化する系列決定問題</strong>に変換。これによりエージェント数に対して<strong>線形時間計算量</strong>と<strong>単調性能改善の保証</strong>を得る<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>学習方式</strong>：<br>
+Decision Transformerとは異なり、<strong>オンポリシー・オンライン学習</strong>で環境と直接インタラクションしながら訓練<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>効果</strong>：<br>
+StarCraftII、Multi-Agent MuJoCo、Google Research FootballなどでMAPPO/HAPPOを上回る性能を示し、<strong>スケーラブルで汎化性能が高く、理論的保証を持つMARLフレームワーク</strong>として評価されている<a href="https://arxiv.org/abs/2205.14953">arXiv</a>。</p>
+</li>
+</ul>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/R7_fpfTa2ms?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+            
+        </body>
+        </html>
