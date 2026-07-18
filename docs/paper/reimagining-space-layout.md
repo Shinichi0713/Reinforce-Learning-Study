@@ -152,5 +152,120 @@ Episode 4: Total reward = 20.0
 > 画像以外にも、位置やセンサー値、グリッドマップなどの「数値ベースの状態表現」を使うことで、より高精度かつ効率的に学習できる可能性が高いです。**
 
 
+## 採択論文一覧
 
+「ここ２年」を 2025〜2026 年の主要国際会議（ICLR, NeurIPS, ICML）と解釈し、強化学習（Reinforcement Learning）関連の採択論文タイトルを会議ごとに整理しました。
+
+---
+
+## ICLR 2025（2025年開催）
+
+ICLR 2025 の公式ページから、強化学習関連の代表的なタイトルを一部抜粋します。
+
+- **Training Language Models to Self-Correct Via Reinforcement Learning**  
+  （大規模言語モデルを強化学習で自己修正させる手法）  
+  [ICLR 2025 Papers](https://iclr.cc/virtual/2025/papers.html)
+
+※ICLR 2025 のRL関連タイトルは、公式ページ全体から「Reinforcement Learning」をキーワードに抽出する必要がありますが、ここでは代表例のみを挙げています。  
+詳細な一覧は上記公式ページの検索機能で「reinforcement learning」などで絞り込むと確認できます。
+
+---
+
+## NeurIPS 2025（2025年開催）
+
+NeurIPS 2025 の公式採択論文リストから、強化学習（Reinforcement Learning）関連のタイトルを抜粋します[NeurIPS 2025 Papers](https://neurips.cc/virtual/2025/papers.html)。
+
+- Flow-Based Policy for Online Reinforcement Learning
+- Beyond Scalar Rewards: An Axiomatic Framework for Lexicographic MDPs
+- Tru-POMDP: Task Planning Under Uncertainty via Tree of Hypotheses and Open-Ended POMDPs
+- Cognitive Predictive Processing: A Human-inspired Framework for Adaptive Exploration in Open-World Reinforcement Learning
+- Trust Region Reward Optimization and Proximal Inverse Reward Optimization Algorithm
+- Afterburner: Reinforcement Learning Facilitates Self-Improving Code Efficiency Optimization
+- Pessimistic Data Integration for Policy Evaluation
+- CHPO: Constrained Hybrid-action Policy Optimization for Reinforcement Learning
+- UFO-RL: Uncertainty-Focused Optimization for Efficient Reinforcement Learning Data Selection
+- Empirical Study on Robustness and Resilience in Cooperative Multi-Agent Reinforcement Learning
+- Computational Hardness of Reinforcement Learning with Partial q^pi-Realizability
+- Sample-Efficient Tabular Self-Play for Offline Robust Reinforcement Learning
+- Reward-Aware Proto-Representations in Reinforcement Learning
+- Explainably Safe Reinforcement Learning
+- FairDICE: Fairness-Driven Offline Multi-Objective Reinforcement Learning
+- Uncertainty-Based Smooth Policy Regularisation for Reinforcement Learning with Few Demonstrations
+- Optimal Single-Policy Sample Complexity and Transient Coverage for Average-Reward Offline RL
+- REINFORCEMENT LEARNING FOR INDIVIDUAL OPTIMAL POLICY FROM HETEROGENEOUS DATA
+- Meta-World+: An Improved, Standardized, RL Benchmark
+- Reasoning Gym: Reasoning Environments for Reinforcement Learning with Verifiable Rewards
+- COGNAC: Cooperative Graph-based Networked Agent Challenges for Multi-Agent Reinforcement Learning
+- Risk-Averse Total-Reward Reinforcement Learning
+- Uncertainty-Aware Multi-Objective Reinforcement Learning-Guided Diffusion Models for 3D De Novo Molecular Design
+
+---
+
+## ICML 2025（2025年開催）
+
+ICML 2025 の「Reinforcement Learning」セクションに掲載されているポスター論文タイトルは以下の通りです[ICML 2025 Papers (Reinforcement Learning section)](https://github.com/DmitryRyumin/ICML-2025-Papers/blob/main/sections/2025/main/reinforcement-learning.md)。
+
+- Controlling Underestimation Bias in Constrained Reinforcement Learning for Safe Exploration
+- Cross-Environment Cooperation Enables Zero-Shot Multi-Agent Coordination
+- Network Sparsity Unlocks the Scaling Potential of Deep Reinforcement Learning
+- Temporal Difference Flows
+
+---
+
+## ICLR 2026（2026年開催）
+
+ICLR 2026 の公式採択論文リストから、強化学習関連のタイトルを抜粋します[ICLR 2026 Papers](https://iclr.cc/virtual/2026/papers.html)。
+
+- Escaping Policy Contraction: Contraction-Aware PPO (CaPPO) for Stable Language Model Fine-Tuning
+- Scalable Offline Model-Based RL with Action Chunks
+- Quagmires in SFT-RL Post-Training: When High SFT Scores Mislead and What to Use Instead
+- TROLL: Trust Regions Improve Reinforcement Learning for Large Language Models
+- WebArbiter: A Generative Reasoning Process Reward Model for Web Agents
+- Multi-Bellman operator for convergence of Q-learning with linear function approximation
+- Information Theoretic Guarantees For Policy Alignment In Large Language Models
+- JustRL: Scaling a 1.5B LLM with a Simple RL Recipe
+- Learning to summarize user information for personalized reinforcement learning from human feedback
+- From REINFORCE to Dr. GRPO: A Unified Perspective on LLM Post-Training
+- BFM-Zero: A Promptable Behavioral Foundation Model for Humanoid Control Using Unsupervised Reinforcement Learning
+- Is the evidence in 'Language Models Learn to Mislead Humans via RLHF' valid?
+- DR-SAC: Distributionally Robust Soft Actor-Critic for Reinforcement Learning under Uncertainty
+- OPPO: Accelerating PPO-based RLHF via Pipeline Overlap
+- LongRLVR: Long-Context Reinforcement Learning Requires Verifiable Context Rewards
+- EXPO: Stable Reinforcement Learning with Expressive Policies
+- What Matters for Batch Online Reinforcement Learning in Robotics?
+- DEAS: DEtached value learning with Action Sequence for Scalable Offline RL
+- MIRACLE: Model-free Imitation and Reinforcement Learning for Adaptive Cut-Selection
+- SPIRAL: Self-Play on Zero-Sum Games Incentivizes Reasoning via Multi-Agent Multi-Turn Reinforcement Learning
+- Stronger-MAS: Multi-Agent Reinforcement Learning for Collaborative LLMs
+- Policy Likelihood-based Query Sampling and Critic-Exploited Reset for Efficient Preference-based Reinforcement Learning
+- Effect of Parallel Environments and Rollout Steps in PPO
+- Breaking Barriers: Do Reinforcement Post Training Gains Transfer To Unseen Domains?
+- Who Matters Matters: Agent-Specific Conservative Offline MARL
+- SafeMPO: Constrained Reinforcement Learning with Probabilistic Incremental Improvement
+- Direct Reward Fine-Tuning on Poses for Single Image to 3D Human in the Wild
+- Learning to Maximize Rewards via Reaching Goals
+- KL-Regularized Reinforcement Learning for Generative Modelling is Designed to Mode Collapse
+- MolEditRL: Structure-Preserving Molecular Editing via Discrete Diffusion and Reinforcement Learning
+- Learning Nonlinear Causal Reductions to Explain Reinforcement Learning Policies
+- Rewarding Doubt: A Reinforcement Learning Approach to Calibrated Confidence Expression of Large Language Models
+- Language Agents for Hypothesis-driven Clinical Decision Making with Reinforcement Learning
+- Unsupervised Learning of Efficient Exploration: Pre-training Adaptive Policies via Self-Imposed Goals
+- Occupancy Reward Shaping: Improving Credit Assignment for Offline Goal-Conditioned Reinforcement Learning
+- Critique-RL: Training Language Models For Critiquing Through Two-Stage Reinforcement Learning
+- AgentGym-RL: An Open-Source Framework to Train LLM Agents for Long-Horizon Decision Making via Multi-Turn RL
+- BAPO: Stabilizing Off-Policy Reinforcement Learning for LLMs via Balanced Policy Optimization with Adaptive Clipping
+- Scaling Goal-conditioned Reinforcement Learning with Multistep Quasimetric Distances
+- ExGRPO: Learning to Reason from Experience
+- Using Graph Neural Networks in Reinforcement Learning: A Practical Guide
+- Causally Robust Reward Learning from Reason-Augmented Preference Feedback
+- Slow-Fast Policy Optimization: Reposition-Before-Update for LLM Reasoning
+- Diffusion Fine-Tuning via Reparameterized Policy Gradient of the Soft Q-Function
+
+---
+
+## 補足
+
+- 上記は「強化学習」を明示的に扱う論文タイトルを中心に抜粋したものです。  
+- 実際には、各会議の公式ページ（ICLR, NeurIPS, ICML）で「reinforcement learning」や「RL」で検索すると、さらに多くの関連論文タイトルを確認できます。
+- もし特定のサブトピック（例：オフラインRL、マルチエージェントRL、RLHF など）に絞ったタイトル一覧が必要でしたら、その旨お知らせいただければ、該当分野に特化したリストも作成いたします。
 
