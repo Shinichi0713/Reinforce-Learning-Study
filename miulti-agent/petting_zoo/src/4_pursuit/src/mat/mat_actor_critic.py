@@ -22,240 +22,137 @@ NOTE: 実行環境にネットワークがなくPyTorchをインストールで�
       ご自身の環境で最終確認してください。
 """
 
-from __future__ import annotations
+import numpy as np
+from collections import defaultdict
 
-import torch
-import torch.nn as nn
-from torch.distributions import Categorical
+import numpy as np
 
 
-class MATObsEncoder(nn.Module):
-    """
-    元コード MAPPO_TransformerActor の空間Transformer部分を流用。
-    1エージェント分の局所観測 (obs_range^2 * in_channels + num_agents*5 次元) を
-    d_model 次元の要約ベクトルに変換する。
-    """
-
-    def __init__(self, obs_range=7, in_channels=4, d_model=64, nhead=4,
-                 num_layers=2, num_agents=8):
-        super().__init__()
-        self.obs_range = obs_range
-        self.num_tokens = obs_range * obs_range          # 7x7 = 49
-        self.spatial_dim = obs_range * obs_range * in_channels  # 196
+class RolloutBuffer:
+    def __init__(self, buffer_size: int, num_agents: int, obs_dim: int,
+                 gamma: float = 0.99, gae_lambda: float = 0.95):
+        self.buffer_size = buffer_size
         self.num_agents = num_agents
+        self.obs_dim = obs_dim
+        self.gamma = gamma
+        self.gae_lambda = gae_lambda
+        self.reset()
 
-        # 中心マス(自分の位置)のフラットインデックスを明示的に計算 (obs_range=7 -> 24)
-        c = obs_range // 2
-        self.center_idx = c * obs_range + c
+    def reset(self):
+        self.obs = np.zeros((self.buffer_size, self.num_agents, self.obs_dim), dtype=np.float32)
+        self.actions = np.zeros((self.buffer_size, self.num_agents), dtype=np.int64)
+        self.log_probs = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+        self.values = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+        self.rewards = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+        self.dones = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
 
-        self.embedding = nn.Linear(in_channels, d_model)
-        self.pos_embedding = nn.Parameter(torch.randn(1, self.num_tokens, d_model))
+        self.advantages = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+        self.returns = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
 
-        self.action_history_embed = nn.Sequential(
-            nn.Linear(num_agents * 5, d_model),
-            nn.GELU(),
-        )
+        self.ptr = 0
 
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=d_model * 2,
-            activation="gelu", batch_first=True,
-        )
-        self.spatial_transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
-
-    def forward(self, obs: torch.Tensor) -> torch.Tensor:
+    def add(self, obs: np.ndarray, actions: np.ndarray, log_probs: np.ndarray,
+            values: np.ndarray, rewards: np.ndarray, dones: np.ndarray):
         """
-        obs: (B, spatial_dim + num_agents*5)  1エージェント分のフラット観測
-        Returns: (B, d_model)  自分の位置に対応する要約特徴
+        1タイムステップ分(8エージェント同時決定)のデータを追加する。
+
+        obs:       (num_agents, obs_dim)
+        actions:   (num_agents,)
+        log_probs: (num_agents,)
+        values:    (num_agents,)
+        rewards:   (num_agents,)
+        dones:     (num_agents,)
         """
-        B = obs.shape[0]
-        spatial_obs = obs[:, :self.spatial_dim]
-        action_history = obs[:, self.spatial_dim:]
+        if self.ptr >= self.buffer_size:
+            raise RuntimeError("バッファが満杯です。reset() してから追加してください。")
 
-        x = spatial_obs.view(B, self.num_tokens, -1)
-        x = self.embedding(x) + self.pos_embedding
+        idx = self.ptr
+        self.obs[idx] = obs
+        self.actions[idx] = actions
+        self.log_probs[idx] = log_probs
+        self.values[idx] = values
+        self.rewards[idx] = rewards
+        self.dones[idx] = dones
+        self.ptr += 1
 
-        act_emb = self.action_history_embed(action_history).unsqueeze(1)
-        x = x + act_emb
+    def is_full(self) -> bool:
+        return self.ptr >= self.buffer_size
 
-        features = self.spatial_transformer(x)
-        my_feature = features[:, self.center_idx, :]
-        return my_feature
-
-
-class MATEncoder(nn.Module):
-    """
-    8体分の要約特徴を1つの系列とみなし、エージェント間で自己注意させる。
-    元コードの MAPPO_TransformerCritic が「392トークンを1つのシーケンスとして
-    自己注意」させていたのと同じ発想だが、こちらは各エージェント単位(8トークン)で
-    行い、各エージェント自身の文脈化された表現からValueを直接算出する。
-    """
-
-    def __init__(self, num_agents=8, d_model=64, nhead=4, num_layers=2):
-        super().__init__()
-        self.num_agents = num_agents
-        self.agent_pos_embedding = nn.Parameter(torch.randn(1, num_agents, d_model))
-
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=d_model * 2,
-            activation="gelu", batch_first=True,
-        )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
-
-        self.value_head = nn.Sequential(
-            nn.Linear(d_model, 128),
-            nn.GELU(),
-            nn.Linear(128, 1),
-        )
-
-    def forward(self, agent_feats: torch.Tensor):
+    def compute_returns_and_advantages(self, last_values: np.ndarray, last_dones: np.ndarray):
         """
-        agent_feats: (B, num_agents, d_model)  MATObsEncoder の出力を8体分束ねたもの
-        Returns:
-            enc_out: (B, num_agents, d_model)  相互に文脈化されたエージェント表現
-            values:  (B, num_agents)           各エージェントの価値推定
+        GAE (Generalized Advantage Estimation) で advantages / returns を計算する。
+
+        last_values: (num_agents,) バッファ末尾の次の状態でのValue推定
+                     (ロールアウトが打ち切られた場合のブートストラップ用)
+        last_dones:  (num_agents,) バッファ末尾の次の状態がエピソード終了直後かどうか
         """
-        x = agent_feats + self.agent_pos_embedding
-        enc_out = self.transformer(x)
-        values = self.value_head(enc_out).squeeze(-1)
-        return enc_out, values
+        last_gae = np.zeros(self.num_agents, dtype=np.float32)
+        n = self.ptr
 
+        for step in reversed(range(n)):
+            if step == n - 1:
+                next_non_terminal = 1.0 - last_dones
+                next_values = last_values
+            else:
+                next_non_terminal = 1.0 - self.dones[step + 1]
+                next_values = self.values[step + 1]
 
-class MATDecoder(nn.Module):
-    """
-    エージェント0->7の順に、直前エージェントの実際の行動を条件として
-    次のエージェントの行動分布を自己回帰的に予測する。
-    """
+            delta = self.rewards[step] + self.gamma * next_values * next_non_terminal - self.values[step]
+            last_gae = delta + self.gamma * self.gae_lambda * next_non_terminal * last_gae
+            self.advantages[step] = last_gae
 
-    def __init__(self, num_agents=8, action_dim=5, d_model=64, nhead=4, num_layers=2):
-        super().__init__()
-        self.num_agents = num_agents
-        self.action_dim = action_dim
-        self.START = action_dim  # 開始トークンのID (0..action_dim-1が実際の行動)
+        self.returns[:n] = self.advantages[:n] + self.values[:n]
 
-        self.action_embedding = nn.Embedding(action_dim + 1, d_model)
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_agents, d_model))
-
-        decoder_layer = nn.TransformerDecoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=d_model * 2,
-            activation="gelu", batch_first=True,
-        )
-        self.transformer_decoder = nn.TransformerDecoder(decoder_layer, num_layers=num_layers)
-        self.action_head = nn.Linear(d_model, action_dim)
-
-        # 自分より後のエージェントの行動を参照しないための因果マスク
-        causal_mask = torch.triu(
-            torch.full((num_agents, num_agents), float("-inf")), diagonal=1
-        )
-        self.register_buffer("causal_mask", causal_mask)
-
-    def forward(self, enc_out: torch.Tensor, shifted_actions: torch.Tensor) -> torch.Tensor:
+    def get_batches(self, batch_size: int | None = None, shuffle: bool = True):
         """
-        教師強制(teacher forcing)による学習時のフォワード。
-
-        enc_out: (B, num_agents, d_model)          MATEncoder の出力
-        shifted_actions: (B, num_agents) long       [START, a_0, a_1, ..., a_6] のように
-                                                     実際の行動系列を1つ右にシフトしたもの
-        Returns:
-            logits: (B, num_agents, action_dim)     各エージェント位置の行動ロジット
+        学習用のミニバッチを順に生成するジェネレータ。
+        1エポック分(バッファ全体を1回ずつ使い切る)のミニバッチを生成する。
+        エポックを複数回まわしたい場合は、学習ループ側でこのメソッドを
+        エポック数だけ繰り返し呼び出してください(呼ぶたびに再シャッフルされます)。
         """
-        tgt = self.action_embedding(shifted_actions) + self.pos_embedding
-        dec_out = self.transformer_decoder(tgt=tgt, memory=enc_out, tgt_mask=self.causal_mask)
-        logits = self.action_head(dec_out)
-        return logits
+        n = self.ptr
+        indices = np.arange(n)
+        if shuffle:
+            np.random.shuffle(indices)
 
-    @torch.no_grad()
-    def autoregressive_decode(self, enc_out: torch.Tensor, greedy: bool = False):
-        """
-        ロールアウト収集時: エージェント0から7まで実際に1体ずつサンプルしながら生成する。
+        if batch_size is None:
+            batch_size = n
 
-        enc_out: (B, num_agents, d_model)
-        Returns:
-            actions:   (B, num_agents) long
-            log_probs: (B, num_agents)
-        """
-        B = enc_out.shape[0]
-        device = enc_out.device
-
-        current_input = torch.full((B, self.num_agents), self.START, dtype=torch.long, device=device)
-        actions = torch.zeros((B, self.num_agents), dtype=torch.long, device=device)
-        log_probs = torch.zeros((B, self.num_agents), device=device)
-
-        for i in range(self.num_agents):
-            tgt = self.action_embedding(current_input) + self.pos_embedding
-            dec_out = self.transformer_decoder(tgt=tgt, memory=enc_out, tgt_mask=self.causal_mask)
-            logits_i = self.action_head(dec_out[:, i, :])
-            dist_i = Categorical(logits=logits_i)
-
-            a_i = torch.argmax(logits_i, dim=-1) if greedy else dist_i.sample()
-
-            actions[:, i] = a_i
-            log_probs[:, i] = dist_i.log_prob(a_i)
-
-            if i + 1 < self.num_agents:
-                current_input[:, i + 1] = a_i
-
-        return actions, log_probs
+        for start in range(0, n, batch_size):
+            batch_idx = indices[start:start + batch_size]
+            yield {
+                "obs": self.obs[batch_idx],
+                "actions": self.actions[batch_idx],
+                "log_probs": self.log_probs[batch_idx],
+                "advantages": self.advantages[batch_idx],
+                "rewards": self.returns[batch_idx],  # Critic の教師信号として returns を使う
+            }
 
 
-class MATActorCritic(nn.Module):
-    """MATObsEncoder + MATEncoder + MATDecoder をまとめたトップレベルモジュール。"""
+if __name__ == "__main__":
+    # 簡易動作確認 (NumPyのみ、ダミーデータでGAE計算とミニバッチ生成をテスト)
+    rng = np.random.default_rng(0)
+    T, N, D = 20, 8, 236
 
-    def __init__(self, obs_range=7, in_channels=4, d_model=64, nhead=4,
-                 spatial_layers=2, enc_layers=2, dec_layers=2,
-                 act_dim=5, num_agents=8):
-        super().__init__()
-        self.num_agents = num_agents
-        self.action_dim = act_dim
-        self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5
+    buf = RolloutBuffer(buffer_size=T, num_agents=N, obs_dim=D, gamma=0.99, gae_lambda=0.95)
 
-        self.obs_encoder = MATObsEncoder(obs_range, in_channels, d_model, nhead,
-                                          spatial_layers, num_agents)
-        self.encoder = MATEncoder(num_agents, d_model, nhead, enc_layers)
-        self.decoder = MATDecoder(num_agents, act_dim, d_model, nhead, dec_layers)
+    for t in range(T):
+        obs = rng.normal(size=(N, D)).astype(np.float32)
+        actions = rng.integers(0, 5, size=(N,))
+        log_probs = rng.normal(size=(N,)).astype(np.float32)
+        values = rng.normal(size=(N,)).astype(np.float32)
+        rewards = rng.normal(size=(N,)).astype(np.float32)
+        dones = np.zeros(N, dtype=np.float32)
+        buf.add(obs, actions, log_probs, values, rewards, dones)
 
-    def encode(self, joint_obs: torch.Tensor):
-        """joint_obs: (B, num_agents, obs_dim) -> enc_out, values"""
-        B, N, D = joint_obs.shape
-        flat_obs = joint_obs.reshape(B * N, D)
-        agent_feats = self.obs_encoder(flat_obs).view(B, N, -1)
-        enc_out, values = self.encoder(agent_feats)
-        return enc_out, values
+    last_values = rng.normal(size=(N,)).astype(np.float32)
+    last_dones = np.zeros(N, dtype=np.float32)
+    buf.compute_returns_and_advantages(last_values, last_dones)
 
-    def forward_train(self, joint_obs: torch.Tensor, joint_actions: torch.Tensor):
-        """
-        学習(PPO update)時: 教師強制でログ確率・エントロピー・価値を一括計算する。
-
-        joint_obs:     (B, num_agents, obs_dim)
-        joint_actions: (B, num_agents) long  ロールアウト時に実際に取った行動
-        Returns:
-            log_probs: (B, num_agents)
-            entropy:   (B, num_agents)
-            values:    (B, num_agents)
-        """
-        enc_out, values = self.encode(joint_obs)
-
-        B = joint_obs.shape[0]
-        start_col = torch.full((B, 1), self.decoder.START, dtype=torch.long, device=joint_obs.device)
-        shifted_actions = torch.cat([start_col, joint_actions[:, :-1]], dim=1)
-
-        logits = self.decoder(enc_out, shifted_actions)
-        dist = Categorical(logits=logits)
-
-        log_probs = dist.log_prob(joint_actions)
-        entropy = dist.entropy()
-        return log_probs, entropy, values
-
-    @torch.no_grad()
-    def act(self, joint_obs: torch.Tensor, greedy: bool = False):
-        """
-        ロールアウト収集時: エージェント0->7の順に自己回帰的に行動をサンプルする。
-
-        joint_obs: (B, num_agents, obs_dim)
-        Returns:
-            actions:   (B, num_agents) long
-            log_probs: (B, num_agents)
-            values:    (B, num_agents)
-        """
-        enc_out, values = self.encode(joint_obs)
-        actions, log_probs = self.decoder.autoregressive_decode(enc_out, greedy=greedy)
-        return actions, log_probs, values
+    print(f"advantages shape: {buf.advantages.shape}, returns shape: {buf.returns.shape}")
+    n_batches = 0
+    for mb in buf.get_batches(batch_size=8, shuffle=True):
+        n_batches += 1
+        assert mb["obs"].shape[1:] == (N, D)
+    print(f"生成されたミニバッチ数: {n_batches} (T={T}, batch_size=8 -> ceil(20/8)=3 のはず)")
+    print("OK: RolloutBuffer の基本動作を確認しました。")
