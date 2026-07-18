@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>ここ最近の強化学習関係の論文で引用数が多かったものが気になったので調べてみました。
+結果ICLR 2025で採択された論文のLLMによる自己修正に関する論文が多いとのことでした。
+著者は内容について知らず。
+気になりましたので論文を読んでみました。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>大規模言語モデル（LLM）が自分自身の誤りを自己修正（self-correction）できるようにするための強化学習（RL）フレームワークScoreについて</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="概要">概要</h2>
+<p>論文「Training Language Models to Self-Correct via Reinforcement Learning」は、<strong>大規模言語モデル（LLM）が自分自身の誤りを自己修正（self-correction）できるようにするための強化学習（RL）フレームワーク</strong>を提案した研究です<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<h3 id="1-背景と問題意識">1. 背景と問題意識</h3>
+<ul>
+<li>現在の LLM は、一見すると「自己修正」ができそうに見えるものの、実際には <strong>既存の自己修正手法はほとんど効果がない</strong>ことが繰り返し示されています。</li>
+<li>既存の自己修正学習手法は、多くの場合
+<ul>
+<li>複数のモデル（例：より高性能なモデルによる監督）</li>
+<li>追加の教師信号（外部フィードバックなど）<br>
+に依存しており、<strong>単一の LLM だけで、自律的に自己修正を学習する方法が不足</strong>していました。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-提案手法scoreself-correction-via-reinforcement">2. 提案手法：SCoRe（Self-Correction via Reinforcement）</h3>
+<p>著者らは、<strong>SCoRe</strong> という <strong>マルチターン・オンライン強化学習（multi-turn online RL）フレームワーク</strong>を提案しています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p>主な特徴は以下の通りです。</p>
+<ul>
+<li><strong>完全に自己生成データのみで学習</strong>
+<ul>
+<li>外部のより高性能なモデルや追加の人間フィードバックに頼らず、<br>
+モデル自身が生成した「修正トレース（correction traces）」を用いて学習します。</li>
+</ul>
+</li>
+<li><strong>マルチターン RL</strong>
+<ul>
+<li>1回の応答生成だけでなく、複数ステップにわたる「修正プロセス」を強化学習で最適化します。</li>
+</ul>
+</li>
+<li><strong>分布整合性と安定化のための正則化</strong>
+<ul>
+<li>モデルが「報酬を稼ぐためだけの応答」に偏る（behavior collapse）のを防ぎ、<br>
+実際のタスク分布に近い自己修正行動を学習するよう、適切な正則化を導入しています。</li>
+</ul>
+</li>
+<li><strong>報酬設計</strong>
+<ul>
+<li>自己修正が成功した場合に報酬ボーナスを与え、<br>
+修正前後の改善を RL の報酬として学習させます。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-実験と結果">3. 実験と結果</h3>
+<p>Gemini 1.0 Pro および Gemini 1.5 Flash をベースモデルとして実験を行い、以下の結果が報告されています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<ul>
+<li><strong>MATH（数学推論）ベンチマーク</strong>
+<ul>
+<li>ベースモデルの自己修正性能に対し、<strong>15.6% の性能向上</strong>を達成。</li>
+</ul>
+</li>
+<li><strong>HumanEval（コード生成）ベンチマーク</strong>
+<ul>
+<li>ベースモデルの自己修正性能に対し、<strong>9.1% の性能向上</strong>を達成。</li>
+</ul>
+</li>
+<li>これらは、<strong>既存の自己修正手法を上回る state-of-the-art の結果</strong>と報告されています。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\2_Training_Language_Models_to_Self-Correct_via_Reinforcement_Learning\1784339856499.png" alt="1784339856499"></p>
+<h2 id="自己修正とは">自己修正とは</h2>
+<p>この論文でいう「自己修正（self-correction）」は、<strong>大規模言語モデル（LLM）が自分の出力を一度生成した後、その内容を確認し、誤りがあれば自分自身で修正するプロセス</strong>を指します<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p>具体的には、以下のような流れを想定しています。</p>
+<ol>
+<li>
+<p><strong>初期回答の生成</strong></p>
+<ul>
+<li>モデルはまず、与えられた問題（例：数学問題、プログラミング問題）に対して、通常通り回答を生成します。</li>
+</ul>
+</li>
+<li>
+<p><strong>自己チェック（self-check）</strong></p>
+<ul>
+<li>生成した回答に対して、モデル自身が「正しいかどうか」「誤りがないか」を確認します。</li>
+<li>このとき、<strong>外部の正解ラベルや別の高性能モデルには頼らず</strong>、モデル自身の判断能力を用います。</li>
+</ul>
+</li>
+<li>
+<p><strong>修正ステップ（correction step）</strong></p>
+<ul>
+<li>誤りや不十分な点を検出した場合、モデルは<strong>2回目以降の生成で回答を修正</strong>します。</li>
+<li>たとえば、数学問題であれば「計算の見直し」や「別の解法の試行」、<br>
+コード生成であれば「バグの修正」や「より効率的な実装への書き換え」などを行います。</li>
+</ul>
+</li>
+<li>
+<p><strong>マルチターンの修正プロセス</strong></p>
+<ul>
+<li>この論文の提案手法 SCoRe では、<strong>複数ターンにわたる修正プロセス</strong>を強化学習で最適化します。</li>
+<li>つまり、「1回目の回答 → 自己チェック → 2回目の修正回答 → …」という<strong>複数ステップの修正トレース</strong>を、モデル自身が生成し、それを学習データとして使います。</li>
+</ul>
+</li>
+</ol>
+<h3 id="どのようなタスクで使われるか">どのようなタスクで使われるか</h3>
+<p>論文では主に以下のようなタスクで自己修正が評価されています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<ul>
+<li><strong>数学推論（MATH ベンチマーク）</strong>
+<ul>
+<li>一度解いた問題の答えが間違っていないか、あるいは解法に抜けがないかを確認し、必要に応じて再計算・再推論する。</li>
+</ul>
+</li>
+<li><strong>コード生成（HumanEval ベンチマーク）</strong>
+<ul>
+<li>生成したコードが仕様を満たしているか、バグがないかをチェックし、修正版のコードを生成する。</li>
+</ul>
+</li>
+</ul>
+<h3 id="既存の自己修正との違い">既存の自己修正との違い</h3>
+<p>論文のアブストラクトでは、既存の自己修正手法は</p>
+<ul>
+<li>複数のモデル（例：より高性能なモデルによる監督）</li>
+<li>追加の教師信号（人間のフィードバックなど）</li>
+</ul>
+<p>に依存しているのに対し、この論文の「自己修正」は</p>
+<ul>
+<li><strong>単一の LLM だけで</strong></li>
+<li><strong>完全に自己生成したデータのみ</strong>を使って</li>
+<li><strong>強化学習で自己修正能力を向上させる</strong></li>
+</ul>
+<p>という点が特徴的です<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p>要するに、この論文における「自己修正」とは、</p>
+<blockquote>
+<p>「モデルが自分の出力を一度出してから、それを自分で見直し、必要なら自分で書き直す」<br>
+という<strong>マルチターンの自己改善プロセス</strong></p>
+</blockquote>
+<p>を指しており、それを強化学習で訓練することで、外部の助けなしに自己修正能力を高める、というのが核心です。</p>
+<h2 id="この論文が解決しようとした課題">この論文が解決しようとした課題</h2>
+<p>読めば読むほどという感じですが、本論文の価値は思ったことをひたすら書き上げるというLLMの行動型を変えることになる、ということにあるのではと思いました。</p>
+<p>本論文が解決しようと取り組んだ課題は、以下のように整理できます<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<h3 id="1-中核的な課題llm-の自己修正能力がほとんど機能していない">1. 中核的な課題：LLM の自己修正能力が「ほとんど機能していない」</h3>
+<ul>
+<li>現在の大規模言語モデル（LLM）は、一見すると「自分の誤りを修正できそう」に見えるものの、<br>
+実際には <strong>既存の自己修正（self-correction）手法はほとんど効果がない</strong>ことが繰り返し示されています。</li>
+<li>つまり、<strong>「LLM が自分で自分の誤りを直す」という能力が、現状では十分に発揮されていない</strong>というのが、この論文が取り組む根本的な課題です。</li>
+</ul>
+<h3 id="2-既存手法の限界この論文が指摘する問題点">2. 既存手法の限界（この論文が指摘する問題点）</h3>
+<p>論文では、既存の自己修正学習手法には次のような問題があると指摘しています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<ol>
+<li>
+<p><strong>外部のより高性能なモデルに依存する</strong></p>
+<ul>
+<li>多くの自己修正手法は、
+<ul>
+<li>より高性能な LLM による監督</li>
+<li>別のモデルによるフィードバック<br>
+に頼っており、<strong>単一の LLM だけで自律的に自己修正を学習する方法が不足</strong>しています。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>追加の教師信号（人間のフィードバックなど）が必要</strong></p>
+<ul>
+<li>自己修正を訓練するために、
+<ul>
+<li>人間による修正例</li>
+<li>外部の報酬モデル<br>
+などを必要とする手法が多く、<strong>自己生成データだけで学習する枠組みが弱い</strong>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>分布のミスマッチと行動の崩壊（behavior collapse）</strong></p>
+<ul>
+<li>単純な教師あり微調整（SFT）や報酬最大化だけでは、
+<ul>
+<li>モデルが「報酬を稼ぐためだけの応答」に偏る</li>
+<li>実際のタスク分布から外れた挙動になる<br>
+といった問題が起きやすく、<strong>安定した自己修正行動を学習しにくい</strong>。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-この論文が目指す解決">3. この論文が目指す解決</h3>
+<p>そこでこの論文は、次のような条件を満たす自己修正学習フレームワークを目指しています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<ul>
+<li><strong>単一の LLM だけで</strong>自己修正を学習できること</li>
+<li><strong>外部の高性能モデルや追加の教師信号に頼らず</strong>、<strong>完全に自己生成データのみ</strong>で学習できること</li>
+<li><strong>分布のミスマッチや行動の崩壊を防ぎつつ</strong>、自己修正能力を安定して向上させること</li>
+</ul>
+<p>この目的を達成するために、著者らは <strong>SCoRe（Self-Correction via Reinforcement）</strong> という<br>
+<strong>マルチターン・オンライン強化学習フレームワーク</strong>を提案しています。</p>
+<h2 id="関連研究">関連研究</h2>
+<p>論文「Training Language Models to Self-Correct via Reinforcement Learning」の関連研究（Related Work）では、主に以下のような論文と、それぞれが抱える課題が挙げられています<a href="https://arxiv.org/pdf/2409.12917.pdf">arXiv</a>。</p>
+<h3 id="1-自己修正self-correctionの限界を指摘する研究">1. 自己修正（Self-Correction）の限界を指摘する研究</h3>
+<p><strong>(1) Huang et al. (2023) / Kamoi et al. (2024) など</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>現代の LLM において、<strong>外部フィードバックなしの「自己修正（intrinsic self-correction）」はほとんど効果がなく、むしろ性能を低下させることがある</strong>。</li>
+<li>つまり、「モデルが自分で自分の誤りを直そうとすると、かえって悪化する」という現象が報告されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) Kim et al. (2023) / Shinn et al. (2023) など</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>自己修正の際に<strong>正解データ（ground-truth）を使用</strong>しており、<br>
+一般的な「正解ラベルがない」設定では適用が難しい。</li>
+<li>実運用では正解ラベルが手に入らないことが多いため、<strong>現実的な自己修正手法としての汎用性が低い</strong>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) Madaan et al. (2023) – Self-Refine</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>初回の回答に<strong>意図的に弱いプロンプト</strong>を使うことで、改善幅を過大評価している。</li>
+<li>実際には、初回から十分に強いプロンプトを使うと、<strong>自己修正による改善がほとんど見られない</strong>ことが多い。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) Olausson et al. (2023)</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>コードの自己修正において、<strong>テストケースなどの部分的なフィードバックがあっても修正が困難</strong>である。</li>
+<li>つまり、「どこが間違っているか」はある程度分かっていても、<strong>実際に正しいコードに修正する能力が不足</strong>している。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-外部モデル外部教師信号に依存する手法">2. 外部モデル・外部教師信号に依存する手法</h3>
+<p><strong>(5) Saunders et al. (2022) / Qu et al. (2024) / Ye et al. (2023) など</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>自己修正の学習に、<strong>人間やより強力なモデル（Teacher）のデモンストレーション</strong>に依存している。</li>
+<li>これにより、<strong>自己生成データのみで学習する枠組みが弱く、スケーラビリティや汎用性に限界</strong>がある。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-sft教師あり微調整ベースの自己修正の限界">3. SFT（教師あり微調整）ベースの自己修正の限界</h3>
+<p><strong>(6) Zelikman et al. (2022)</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>オフラインでモデルが生成したデータに対して SFT を行うと、
+<ul>
+<li><strong>データ収集時と学習後の「分布の不一致（distribution mismatch）」</strong></li>
+<li><strong>修正を行わなくなる「振る舞いの崩壊（behavior collapse）」</strong><br>
+が起きる。</li>
+</ul>
+</li>
+<li>結果として、**自己修正能力が実質的に改善しない（Δ(t1, t2) が小さい）**ことが示されています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-別モデルを用いた修正モデルの設計">4. 別モデルを用いた修正モデルの設計</h3>
+<p><strong>(7) Havrilla et al. (2024b) – GLoRE</strong></p>
+<ul>
+<li><strong>指摘されている課題</strong>
+<ul>
+<li>修正のために<strong>別個のモデル（修正専用モデル）</strong> が必要であり、<br>
+推論時のシステム設計が複雑になる。</li>
+<li>単一の LLM だけで自己修正を完結させるという観点からは、<strong>アーキテクチャ上の負担が大きい</strong>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="提案手法">提案手法</h2>
+<p>そしてこの論文の提案手法についてです。
+その名も<strong>SCoRe（Self-Correction via Reinforcement）</strong> と呼ばれる、<strong>マルチターン・オンライン強化学習フレームワーク</strong>です<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p>以下、その中身を段階的に整理します。</p>
+<h3 id="1-全体像何を目指しているか">1. 全体像：何を目指しているか</h3>
+<ul>
+<li><strong>目的</strong>
+<ul>
+<li>単一の LLM が、<strong>外部の高性能モデルや追加の教師信号に頼らず</strong>、<br>
+<strong>自分自身で生成したデータだけを使って</strong>、自己修正能力を高めること。</li>
+</ul>
+</li>
+<li><strong>課題への対応</strong>
+<ul>
+<li>既存の自己修正手法は
+<ul>
+<li>外部モデルや正解ラベルに依存</li>
+<li>SFT（教師あり微調整）による分布の不一致・行動の崩壊<br>
+といった問題を抱えていました。</li>
+</ul>
+</li>
+<li>SCoRe は、<strong>オンライン強化学習（RL）でこれらの問題を緩和</strong>します。</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\2_Training_Language_Models_to_Self-Correct_via_Reinforcement_Learning\1784342579070.png" alt="1784342579070"></p>
+<h3 id="2-学習プロセスの概要">2. 学習プロセスの概要</h3>
+<p>SCoRe は、おおまかに次のような流れで学習します<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p><strong>(1) 自己生成データによる「修正トレース」の収集</strong></p>
+<ul>
+<li>モデルは、与えられた問題（例：数学問題、コード問題）に対して、<br>
+<strong>複数ターンにわたる「修正プロセス」</strong> を自分で生成します。</li>
+<li>たとえば：
+<ul>
+<li>1ターン目：初期回答を生成</li>
+<li>2ターン目：その回答をチェックし、誤りがあれば修正版を生成</li>
+<li>3ターン目：さらに改善案を生成 …</li>
+</ul>
+</li>
+<li>この一連の「初期回答 → 修正 → 再修正 …」の流れを、<strong>修正トレース（correction trace）</strong> と呼びます。</li>
+</ul>
+<p><strong>(2) 報酬設計：自己修正の成功を評価</strong></p>
+<ul>
+<li>修正トレースの各ステップに対して、<strong>自己修正が成功したかどうか</strong>を評価し、報酬を与えます。</li>
+<li>具体的には：
+<ul>
+<li>数学問題：最終的な答えが正しいか</li>
+<li>コード問題：テストケースを通過するか</li>
+</ul>
+</li>
+<li>この報酬を最大化するように、<strong>ポリシー（LLM）を強化学習で更新</strong>します。</li>
+</ul>
+<p><strong>(3) オンライン RL によるポリシー更新</strong></p>
+<ul>
+<li>SCoRe は<strong>オンライン RL</strong> であり、
+<ul>
+<li>モデルがデータを生成</li>
+<li>そのデータに対して即座に報酬を計算</li>
+<li>ポリシーを更新<br>
+というサイクルを繰り返します。</li>
+</ul>
+</li>
+<li>これにより、<strong>オフライン SFT で起きる「分布の不一致」や「行動の崩壊」を軽減</strong>します。</li>
+</ul>
+<h3 id="3-設計上の工夫既存手法との違い">3. 設計上の工夫（既存手法との違い）</h3>
+<p>論文では、SCoRe が既存手法と比べて特に重視している点として、以下のような工夫が挙げられています<a href="https://arxiv.org/pdf/2409.12917.pdf">arXiv</a>。</p>
+<p><strong>(1) 自己生成データのみでの学習</strong></p>
+<ul>
+<li>外部の高性能モデルや人間のフィードバックに頼らず、<br>
+<strong>モデル自身が生成した修正トレースだけで学習</strong>します。</li>
+<li>これにより、<strong>単一の LLM が自律的に自己修正能力を高められる</strong>ようになります。</li>
+</ul>
+<p><strong>(2) マルチターン RL による「修正プロセス」の最適化</strong></p>
+<ul>
+<li>1回の応答だけでなく、<strong>複数ターンにわたる修正プロセス全体</strong>を RL で最適化します。</li>
+<li>これにより、
+<ul>
+<li>「どこで誤りに気づくか」</li>
+<li>「どのように修正するか」<br>
+といった<strong>修正戦略そのもの</strong>を学習できます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 正則化による分布整合性と行動の崩壊の防止</strong></p>
+<ul>
+<li>単純に報酬を最大化するだけだと、
+<ul>
+<li>モデルが「報酬を稼ぐためだけの応答」に偏る</li>
+<li>実際のタスク分布から外れた挙動になる（behavior collapse）<br>
+といった問題が起きます。</li>
+</ul>
+</li>
+<li>SCoRe では、<strong>適切な正則化</strong>を導入し、
+<ul>
+<li>モデルが<strong>自分の生成分布に近い修正行動</strong>を取るように誘導</li>
+<li>修正を行わなくなる（＝自己修正能力が失われる）ことを防ぐ<br>
+といった工夫がなされています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 報酬ボーナスによる「真の自己修正」の促進</strong></p>
+<ul>
+<li>単に「正しい答えを出す」だけでなく、<br>
+<strong>「誤りを検出し、修正して正解にたどり着く」</strong> というプロセスに対して報酬ボーナスを与えます。</li>
+<li>これにより、<strong>「自己修正そのもの」を学習対象</strong>にすることができます。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\2_Training_Language_Models_to_Self-Correct_via_Reinforcement_Learning\1784342629359.png" alt="1784342629359"></p>
+<h3 id="4-まとめ">4. まとめ</h3>
+<p>提案手法 SCoRe は、</p>
+<ul>
+<li><strong>単一の LLM が</strong></li>
+<li><strong>自分で生成したマルチターンの修正トレースに対して</strong></li>
+<li><strong>オンライン強化学習を行い</strong></li>
+<li><strong>適切な正則化と報酬設計によって、自己修正能力を安定して向上させる</strong></li>
+</ul>
+<p>という枠組みです。</p>
+<p>これにより、</p>
+<ul>
+<li>外部モデルや追加教師信号への依存を減らし</li>
+<li>オフライン SFT の分布不一致・行動崩壊を避け</li>
+<li>数学推論（MATH）やコード生成（HumanEval）で、既存手法を上回る自己修正性能を達成</li>
+</ul>
+<p>していると報告されています<a href="https://arxiv.org/abs/2409.12917">arXiv</a>。</p>
+<p>もし、SCoRe の具体的なアルゴリズム（例えば、どのような RL アルゴリズムを使っているか、報酬関数の詳細など）についても知りたい場合は、その点に絞ってさらに詳しくご説明いたします。</p>
+<h2 id="実験">実験</h2>
+<p>お待ちかねの実験結果です。</p>
+<p>論文「Training Language Models to Self-Correct via Reinforcement Learning」では、提案手法 <strong>SCoRe</strong> を、<strong>数学推論（MATH）</strong> と <strong>コード生成（HumanEval, MBPP など）</strong> のタスクで評価しています<a href="https://arxiv.org/pdf/2409.12917.pdf">arXiv</a>。</p>
+<p>以下、実験の設定と主な結果を整理します。</p>
+<h3 id="1-実験の全体設定">1. 実験の全体設定</h3>
+<p><strong>ベースモデル</strong></p>
+<ul>
+<li><strong>数学推論（MATH）</strong>
+<ul>
+<li>ベースモデル：<strong>Gemini 1.5 Flash</strong></li>
+</ul>
+</li>
+<li><strong>コード生成（HumanEval, MBPP, MBPP-R）</strong>
+<ul>
+<li>ベースモデル：<strong>Gemini 1.0 Pro</strong></li>
+</ul>
+</li>
+</ul>
+<p><strong>タスク・ベンチマーク</strong></p>
+<ul>
+<li><strong>MATH500</strong>（数学推論ベンチマーク）</li>
+<li><strong>HumanEval</strong>（Python コード生成）</li>
+<li><strong>MBPP</strong>（Python プログラミング問題）</li>
+<li><strong>MBPP-R</strong>（MBPP のリファクタリング版）</li>
+</ul>
+<p><strong>比較手法</strong>
+SCoRe は以下のようなベースラインと比較されています<a href="https://arxiv.org/pdf/2409.12917.pdf">arXiv</a>。</p>
+<ul>
+<li><strong>ベースモデル単体</strong>（自己修正なし）</li>
+<li><strong>Self-Refine</strong>（プロンプトベースの自己修正手法）</li>
+<li><strong>SFT ベースの自己修正手法</strong>
+<ul>
+<li>STaR（Zelikman et al., 2022）</li>
+<li>Pair-SFT（Welleck et al., 2023）</li>
+</ul>
+</li>
+<li>その他、関連する SFT ベースの自己修正手法</li>
+</ul>
+<h3 id="2-評価指標accuracyt1-accuracyt2-δt1-t2">2. 評価指標：Accuracy@t1, Accuracy@t2, Δ(t1, t2)</h3>
+<p>論文では、自己修正の効果を以下の指標で評価しています。</p>
+<ul>
+<li><strong>Accuracy@t1</strong>：1回目の回答（初期回答）の正解率</li>
+<li><strong>Accuracy@t2</strong>：2回目の回答（修正後）の正解率</li>
+<li><strong>Δ(t1, t2)</strong>：t1 から t2 への<strong>純粋な改善量</strong>（= Accuracy@t2 − Accuracy@t1）</li>
+</ul>
+<p>この Δ(t1, t2) が大きいほど、「自己修正によってどれだけ性能が上がったか」を表します。</p>
+<h3 id="3-主な実験結果">3. 主な実験結果</h3>
+<p><strong>(1) MATH（数学推論）での結果</strong></p>
+<ul>
+<li><strong>ベースモデル（Gemini 1.5 Flash）</strong>
+<ul>
+<li>自己修正なしの性能を基準とし、SCoRe 適用後の結果は：
+<ul>
+<li><strong>Accuracy@t2 = 64.4%</strong></li>
+<li><strong>Δ(t1, t2) = +4.4%</strong>（= 修正による純粋な改善）</li>
+<li>ベースモデルに対する<strong>相対改善率：15.6%</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>これは、既存の SFT ベース手法（STaR, Pair-SFT）や Self-Refine よりも<strong>有意に高い自己修正性能</strong>を示しています。</li>
+</ul>
+<p><strong>(2) HumanEval（コード生成）での結果</strong></p>
+<ul>
+<li><strong>ベースモデル（Gemini 1.0 Pro）</strong>
+<ul>
+<li>SCoRe 適用後の結果は：
+<ul>
+<li><strong>Accuracy@t2 = 64.6%</strong></li>
+<li><strong>Δ(t1, t2) = +12.2%</strong>（修正による純粋な改善）</li>
+<li>ベースモデルに対する<strong>相対改善率：9.1%</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>こちらも、SFT ベースの自己修正手法よりも<strong>高い改善幅</strong>を達成しています。</li>
+</ul>
+<p><strong>(3) MBPP / MBPP-R での結果</strong></p>
+<ul>
+<li>MBPP および MBPP-R でも、SCoRe は
+<ul>
+<li>ベースモデル単体</li>
+<li>SFT ベースの自己修正手法<br>
+を上回る性能を示しています（具体的な数値は論文内の表に記載）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-既存手法との比較と分析">4. 既存手法との比較と分析</h3>
+<p>論文では、既存手法（特に SFT ベースの自己修正）について、以下のような問題が指摘されています<a href="https://arxiv.org/pdf/2409.12917.pdf">arXiv</a>。</p>
+<ul>
+<li><strong>SFT ベース手法（STaR, Pair-SFT など）</strong>
+<ul>
+<li>オフラインデータに対して SFT を行うため、
+<ul>
+<li><strong>分布の不一致（distribution shift）</strong></li>
+<li><strong>行動の崩壊（behavior collapse）</strong>（＝モデルが修正を行わなくなる）<br>
+が起きやすく、<strong>Δ(t1, t2) が小さくなる</strong>傾向がある。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Self-Refine</strong>
+<ul>
+<li>プロンプトベースの自己修正であり、
+<ul>
+<li>初回回答を意図的に弱くする設定が多い</li>
+<li>実際の運用では改善幅が限定的<br>
+といった問題がある。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>これに対し、<strong>SCoRe</strong> は</p>
+<ul>
+<li><strong>オンライン強化学習</strong>により、
+<ul>
+<li>モデル自身の生成分布に近いデータで学習</li>
+<li>修正行動そのものを報酬で学習</li>
+</ul>
+</li>
+<li><strong>正則化と報酬設計</strong>により、
+<ul>
+<li>分布の不一致を緩和</li>
+<li>行動の崩壊を防ぐ</li>
+</ul>
+</li>
+</ul>
+<p>といった工夫により、<strong>Δ(t1, t2) を大きく改善</strong>できたと報告されています。</p>
+<h2 id="総括">総括</h2>
+<p><strong>総括：本論文の要点</strong></p>
+<ul>
+<li>
+<p><strong>問題意識</strong></p>
+<ul>
+<li>現在の LLM は「自己修正（self-correction）」がほとんど機能しておらず、<br>
+既存手法は外部モデルや追加教師信号に依存し、分布不一致・行動崩壊を起こしがち。</li>
+</ul>
+</li>
+<li>
+<p><strong>提案手法：SCoRe</strong></p>
+<ul>
+<li><strong>単一の LLM が、自己生成データだけで、マルチターン・オンライン強化学習</strong>により自己修正能力を高めるフレームワーク。</li>
+<li>外部モデルや正解ラベルに頼らず、報酬設計と正則化で「真の自己修正」を学習。</li>
+</ul>
+</li>
+<li>
+<p><strong>実験結果</strong></p>
+<ul>
+<li>Gemini 1.5 Flash（MATH）・Gemini 1.0 Pro（コード）をベースに、MATH500・HumanEval などで評価。</li>
+<li>MATH：Accuracy@t2 = 64.4%、Δ(t1, t2) = +4.4%、相対改善 15.6%。</li>
+<li>HumanEval：Accuracy@t2 = 64.6%、Δ(t1, t2) = +12.2%、相対改善 9.1%。</li>
+<li>既存の SFT ベース自己修正や Self-Refine を上回る、安定した自己修正性能を達成。</li>
+</ul>
+</li>
+<li>
+<p><strong>意義</strong></p>
+<ul>
+<li>外部依存を減らしつつ、LLM が自律的に自己修正能力を高められる RL ベースのメタ戦略を提示した点が重要。</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://arxiv.org/abs/2409.12917">arXiv</a></p>
+<p>ということでなかなか見ごたえある論文でした。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/R7_fpfTa2ms?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
