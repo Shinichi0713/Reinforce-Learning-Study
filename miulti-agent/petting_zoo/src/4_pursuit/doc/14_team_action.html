@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日はPursuitのチーム連携のトライアルを扱います。
+敵をチームで捕獲する動作は出来てきましたが、効率が良くないなあと思うことがありました。このため、より効率よく敵を追い詰めていく強化学習にしていきたいとトライアルを続けています。
+前回のPursuitはモデルをMATに替えたけどあんまり大きく改善しないという結果でした。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>今回は報酬系の改善によりチーム連携の効率を改善する</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="課題">課題</h2>
+<p>現在の動作を確認すると敵を捕まえる時にチームでまとわりつくような動作は出来るようになりましたが、</p>
+<ol>
+<li>過剰に集まって動作する傾向がある。特に一度集まると仕事をしていないのに同じ個所をうろうろするようなケースが出ている</li>
+<li>チームで集まることを重視して、敵を積極的に追いかけない。特に視界の敵を捕まえつくした後、同じ場所にとどまってうろうろすることを目にします</li>
+</ol>
+<p>という課題があります。
+人数の一番効率が良い動作は見た感じ4人ですし、8人を4人チームで2チームに分けた行動をとる。</p>
+<p>集まることよりはチームみんなで敵を求めていくような動作が望ましいです。</p>
+<h2 id="対応策">対応策</h2>
+<p>ということで対応策を考えていきます。</p>
+<p>過剰な密集の抑制・積極的な追跡・複数チームへの分散を解決するために、強化学習（MARL）の観点から5つの対応策を行っていきます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\14_team_action\1784427026584.png" alt="1784427026584"></p>
+<h3 id="1-飽和報酬saturating-rewardの導入による過密の抑制">1. 「飽和報酬（Saturating Reward）」の導入による過密の抑制</h3>
+<p>現状の報酬設計では、味方が近くにいるほどプラス（またはペナルティがない）状態であるため、5人目以降が群がっても損をしません。これを「4人で報酬の席は満席」という設計に変更します。</p>
+<ul>
+<li>
+<p><strong>対策:</strong>
+獲物の周囲2マス以内にいる味方の総数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> をカウントし、チーム共通報酬（またはシェイピング報酬）に以下のような制限をかけます。</p>
+</li>
+<li>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>≤</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">N \le 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>: 通常通り人数に応じて報酬を増加（または維持）</p>
+</li>
+<li>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>≥</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">N \ge 5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>: <strong>5人目以降の参入に対して、チーム全体またはそのエージェントに強いペナルティを科す</strong>、もしくは<strong>その獲物周辺のエリア報酬を完全にゼロ（またはマイナス）にする</strong>。</p>
+</li>
+<li>
+<p><strong>期待される効果:</strong>
+4人が既に群がっている場所に近づくと損をするため、5人目以降のエージェントは「別の獲物を探す」か「別のルートを開拓する」行動を選ぶようになります。</p>
+</li>
+</ul>
+<h3 id="2-探索追跡報酬のウェイト引き上げと静止ペナルティ">2. 「探索・追跡報酬」のウェイト引き上げと「静止ペナルティ」</h3>
+<p>「敵を積極的に追いかけない」「同じ場所をうろうろする」問題は、敵との距離を縮めるリスクやコストに対して、その場に留まって味方とマージンを稼ぐ報酬（<code>coop_reward_scale</code>など）が強すぎるために発生します。</p>
+<ul>
+<li><strong>対策:</strong></li>
+<li><strong>敵への接近報酬の強化:</strong> <code>distance_reward_scale</code> を復活・強化し、「敵との距離（マンハッタン距離）が前ステップより縮まった」ことに対する報酬の割合を増やします。</li>
+<li><strong>うろうろ（無駄な動き）の厳罰化:</strong> 現状の <code>wasted_move</code>（衝突）だけでなく、「敵が見えているのに距離が縮まらず、かつ味方と密集しているだけ（仕事をしていない状態）」が数ステップ続いた場合にマイナス報酬（怠惰ペナルティ）を与えます。</li>
+<li><strong>敵未発見時の巡回インセンティブ:</strong> 視野（7x7）に敵が映っていない場合、同じ場所にとどまるとマイナス（ステップペナルティ <code>-0.01</code> など）を与え、常に動き回るように促します。</li>
+</ul>
+<h3 id="3-観測空間observationへの混雑度の明示">3. 観測空間（Observation）への「混雑度」の明示</h3>
+<p>エージェントが「4人集まれば十分、5人目は不要」と判断するためには、「今、その獲物に何人群がっているか」というメタ情報が観測空間から読み取れなければなりません。現在の7x7の局所視界だけでは、視界外の味方の状況が分からず過密を避けられないケースがあります。</p>
+<ul>
+<li>
+<p><strong>対策:</strong>
+エージェントの観測ベクトル（<code>get_obs</code> 内）に、以下のグローバル（または少し広い範囲の）特徴量を数次元追加します。</p>
+</li>
+<li>
+<p>「自分の視界内にいる最も近い敵の周囲に、現在何人の味方がいるか（0〜8の整数値）」</p>
+</li>
+<li>
+<p>「現在のマップ全体の生存敵数と、それらにアプローチしている味方の分布（簡易的なマクロ情報）」</p>
+</li>
+<li>
+<p><strong>期待される効果:</strong>
+ニューラルネットワークが「敵の周囲人数 = 4」という入力を受け取った際に、「これ以上近づくとペナルティ（出力価値が下がる）」というロジック（方策）を学習しやすくなります。</p>
+</li>
+</ul>
+<h3 id="4-2チーム分散ロールの多様化を促すエージェントidの活用と排他報酬">4. 2チーム分散（ロールの多様化）を促す「エージェントIDの活用」と「排他報酬」</h3>
+<p>8人が自然と4人ずつの2チームに分かれるようにするには、エージェント間に「役割の多様性（ロール・ディバーシティ）」を持たせる必要があります。</p>
+<ul>
+<li><strong>対策:</strong></li>
+<li><strong>排他（専有）報酬の導入:</strong> あるエージェントが特定の獲物に「一番乗り」または「包囲の主要メンバー（4人以内）」として登録されたら、その獲物IDに対する報酬権が得られます。別のチーム（5人目以降）が横槍を入れようとしても、その獲物からは報酬が得られない（＝別の獲物を狙った方が得）という「ターゲットの専有」をシミュレートします。</li>
+<li><strong>エージェントIDに応じた初期配置やペアリング:</strong> エージェント0〜3と4〜7で、ネットワークの重みを共有しつつも（Parameter Sharing）、入力されるエージェントID（現在もレイヤーで渡していますが）をフックにして、「自分はグループAだから別の獲物を狙う傾向がある」というマクロな行動分離を促します。</li>
+</ul>
+<h3 id="5-モデルをmoeに変更">5. モデルをMoEに変更</h3>
+<p>今回モデルにMoEを導入しようと思います。
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/07/23/043000">MAT（Multi-Agent Transformer）</a>をMoE化することで、マルチエージェント強化学習（MARL）が抱える、いくつかの課題に対して改善効果が期待できます。</p>
+<p>具体的には、以下のような課題の解決に直結します。</p>
+<p><strong>1. 「協調のコンフリクト（役割のバッティング）」の解消</strong></p>
+<ul>
+<li><strong>抱えていた課題:</strong> 通常の単一ネットワーク（FFN）では、すべての状況・すべての役割の知識を同じパラメータ内に無理やり詰め込む必要があります。そのため、「自分がターゲットを追いかけるべき状況」と「味方に道を譲って回り込むべき状況」の境界線が曖昧になり、エージェント同士が同じ場所に密集するような無駄（コンフリクト）が生じがちでした。</li>
+<li><strong>MoEによる効果:</strong> 「突撃担当のエキスパート」「包囲・カバー担当のエキスパート」のように、<strong>状況に応じた思考回路の物理的な分離</strong>が起こります。ルーターがコンテキストに応じて最適なエキスパートへ処理を振り分けるため、高度でコンフリクトのない洗練された役割分担（フォーメーション）が創発しやすくなります。</li>
+</ul>
+<p><strong>2. 環境の動的な変化に伴う「破滅的忘却（Catastrophic Forgetting）」の抑制</strong></p>
+<ul>
+<li><strong>抱えていた課題:</strong> 強化学習のプロセスでは、学習が進むにつれて「エージェントの行動パターン」や「ターゲットの逃げ方」が大きく変化します。単一の共有ネットワークだと、新しい戦略（例：後半の高度な包囲網）を学習した際に、前半で身につけた基礎的なスキル（例：効率的な接近アルゴリズム）のパラメータが上書きされ、モデルの性能がガタつく（学習の不安定化）という課題がありました。</li>
+<li><strong>MoEによる効果:</strong> 異なる戦略やスキルが別々のエキスパートに分散して記憶されます。新しい状況に直面しても、対応する特定のエキスパートだけが更新され、他のエキスパートに蓄積された既存の知識（基礎スキル）が破壊されずに守られます。結果として、学習曲線が非常に安定します。</li>
+</ul>
+<p><strong>3. エージェント数やタスク複雑化に対する「計算コストの爆発」の回避</strong></p>
+<ul>
+<li><strong>抱えていた課題:</strong> 複雑な協調を覚えさせるためにモデル全体のキャパシティ（表現力）を上げようとすると、通常は <code>d_model</code> を大きくしたり層を深くしたりするしかなく、これは計算量（FLOPs）の爆発を意味しました。特にリアルタイム性が求められるロボット制御やゲーム環境では、推論速度の低下は致命的です。</li>
+<li><strong>MoEによる効果:</strong> 今回採用した <strong>Top-1 Gating</strong> により、モデルが持つ「知識の容量（総パラメータ数）」を数倍にスケールアップさせつつも、<strong>実際に計算を行うパラメータ数は通常のMATとほぼ同等</strong>に据え置くことができます。「表現力は超巨大モデル並み、計算軽さは軽量モデル並み」という理想的なトレードオフを実現し、複雑なマルチエージェント環境へのスケールを可能にします。</li>
+</ul>
+<p><strong>4. Non-stationarity（非定常性問題）の緩和</strong></p>
+<ul>
+<li><strong>抱えていた課題:</strong> 「自分が学習している間に、味方も同時に学習して行動を変えてしまう」ため、エージェントから見ると環境の遷移ルールが常に変化し続けるように感じる、MARL最大の難所です。</li>
+<li><strong>MoEによる効果:</strong> 前段の <strong>Gated Attention</strong> が味方の行動履歴から不要なノイズ（スパイク）を取り除き、クリーンになった特徴量を <strong>MoE</strong> が受け取ります。MoEは「味方がAの戦略をとっている状態」と「Bの戦略をとっている状態」を異なるエキスパートで柔軟に処理できるため、味方の行動変化（非定常性）に対して極めてタフ（堅牢）なモデルになります。</li>
+</ul>
+<p>MoE化によってMATは「状況の変化に強く、味方との役割分担が可能で、それでいて動作が非常に軽量なAIチーム」へと進化することが期待できます。</p>
+<h2 id="実装">実装</h2>
+<p>実装コードは以下レポジトリに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat</a></p>
+<p>今回改修のキーポイントを説明していきます。</p>
+<h3 id="1-全体報酬と個体報酬のブレンド比率の制御">1. 「全体報酬」と「個体報酬」のブレンド比率の制御</h3>
+<p>協調タスクで陥りやすいのが、全員が同じチーム報酬を受け取ることで誰が貢献したか分からなくなる「信用割り当て問題（Credit Assignment Problem）」と、自分の利益だけを追求してチームが崩壊する「利己的行動問題」のジレンマです。</p>
+<p>ラッパ側でこの比率を柔軟に調整できるように設計するのが定石です。</p>
+<ul>
+<li><strong>グローバル報酬（Global Reward）:</strong> 「ターゲットを包囲した」「ゲームに勝利した」など、チーム全体の最終目的。</li>
+<li><strong>ローカル報酬（Local Reward）:</strong> 「自分がターゲットに近づいた」「自分が適切な包囲網の1点（ポジション）を占拠した」など、個体ごとのミッション。</li>
+</ul>
+<pre><code class="language-python"><span class="hljs-comment"># 実装イメージ</span>
+reward = (self.alpha * global_reward) + ((<span class="hljs-number">1</span> - self.alpha) * local_rewards[agent_id])
+
+</code></pre>
+<blockquote>
+<p>💡 <strong>Key Point:</strong>
+学習初期は <code>alpha</code> を小さくして個体報酬（ターゲットへ接近する形）を優先して歩き方を覚えさせ、学習が進むにつれて <code>alpha</code> を大きく（全体報酬メインに）シームレスに移行できる（アニールする）仕組みをラッパに仕込んでおくと、MoEの専門家（Expert）の役割分担が綺麗に創発しやすくなります。</p>
+</blockquote>
+<h3 id="2-報酬のクリッピングとスケーリング">2. 報酬のクリッピングとスケーリング</h3>
+<p>トランスフォーマーやMoE（特に今回実装した Gated Attention 構成）は、入力や勾配の急激な変化に対して敏感です。特定のステップで1個体だけが莫大な報酬（例：捕獲成功で <code>+40</code>）を得て、他が <code>0</code> や <code>-1</code> だと、価値評価ネットワーク（Critic）の予測誤差（TD誤差）が跳ね上がり、トランスフォーマーの注意重みやMoEのゲートロジットが局所解に吹き飛ぶ原因になります。</p>
+<ul>
+<li><strong>密な報酬（Dense Reward）の最大値を制限:</strong> 距離に基づく報酬などは、必ず <code>[-1, 1]</code> や <code>[-0.1, 0.1]</code> の範囲に収まるように正規化・クリッピングします。</li>
+<li><strong>スパースな報酬（Sparse Reward）の段階化:</strong> 「捕獲成功 ＝ 突発的な大規模報酬」にするのではなく、「包囲網の完成度（ターゲットの周囲の埋まり具合）」に応じて段階的にステップ報酬を付与します。</li>
+</ul>
+<h3 id="3-時間的連続性を保証するポテンシャル報酬potential-based-shaping">3. 「時間的連続性」を保証するポテンシャル報酬（Potential-based Shaping）</h3>
+<p>「ターゲットに近づいたらプラス」という単純な設計にすると、エージェントが「ターゲットの周りを前後に往復して、接近報酬を何度も貪り食う（Reward Looping）」というバグ（報酬ハッキング）が発生しがちです。</p>
+<p>これを防ぐために、Andrew Ng 氏らが提唱した「ポテンシャルベースの報酬整形」をラッパ内に実装します。</p>
+<ul>
+<li>状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> におけるターゲットとの距離（ポテンシャル）を <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Phi(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> としたとき、ステップ報酬を次のように計算します。</li>
+</ul>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo separator="true">,</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo>=</mo><mi>γ</mi><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo>−</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">R(s, a, s&#x27;) = \gamma \Phi(s&#x27;) - \Phi(s)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0519em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0519em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></span></p>
+<p>（※ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span> は割引率、単純化する場合は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo>−</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Phi(s&#x27;) - \Phi(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> でも機能します）</p>
+<pre><code class="language-python"><span class="hljs-comment"># ラッパ内での実装例</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, actions</span>):
+    <span class="hljs-comment"># 前のステップのポテンシャル（距離の逆数など）</span>
+    old_potential = self._compute_potential(self.env)
+    
+    obs, reward, done, info = self.env.step(actions)
+    
+    <span class="hljs-comment"># 現在のステップのポテンシャル</span>
+    new_potential = self._compute_potential(self.env)
+    
+    <span class="hljs-comment"># 往復行動をしても相殺されて理論上ハッキングが起きない報酬</span>
+    shaping_reward = new_potential - old_potential
+    <span class="hljs-keyword">return</span> obs, reward + shaping_reward, done, info
+
+</code></pre>
+<h3 id="4-アクション履歴action-historyの報酬への反映とペナルティ">4. アクション履歴（Action History）の報酬への反映とペナルティ</h3>
+<p>今回実装した <code>MATObsEncoder</code> には、環境の観測だけでなく <code>action_history</code>（過去の味方の行動）が入力として融合される設計になっています。
+この構造を活かすため、ラッパ側で「行動の無駄打ちや衝突」に対するマイナス評価を綺麗にフィードバックする必要があります。</p>
+<ul>
+<li><strong>衝突ペナルティ（Collision Penalty）:</strong> 味方同士が同じマスに侵入しようとした場合、あるいは壁に衝突した場合、個体および周囲の味方に微小なペナルティ（例：<code>-0.1</code>）を与えます。</li>
+<li><strong>エネルギー消費ペナルティ（Efficiency Penalty）:</strong> 何も動かない、あるいは無意味にパスを出し続けるような定常状態を防ぐため、毎ステップ一律で微小なタイムペナルティ（例：<code>-0.01</code>）を科します。</li>
+</ul>
+<h3 id="まとめmoemat-を活かすためのラッパの役割">まとめ：MoE×MAT を活かすためのラッパの役割</h3>
+<p>MoEを搭載したMATモデルは、<strong>「状況の劇的な変化」や「役割のコンフリクト（衝突）」を検出して専門家を切り替える能力</strong>を持っています。</p>
+<p>環境ラッパの実装では、単にゲームの勝敗を返すだけでなく、<strong>「今、チームの連携がどれくらい緊密か」「各個体がどれだけ合理的に動いているか」が、小さな勾配（なだらかな報酬変化）としてモデルに伝わるようにポテンシャルベースでコーディングすること</strong>が、成功への最大のキーポイントになります。</p>
+<h2 id="学習">学習</h2>
+<p>今回学習の結果について説明します。</p>
+<h3 id="学習経過">学習経過</h3>
+<p>まずは例の如くエピソードごとの報酬とエントロピの推移について確認していきます。
+オレンジ線が今回、青線は前回です。
+今回の方は学習とともに学んでいるという様子が確認出来ます。
+但しエントロピは下がらない。探索をやっているから、と考えます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\14_team_action\1784426199790.png" alt="1784426199790"></p>
+<h3 id="実際の動作">実際の動作</h3>
+<p>では実際に学習を行ったエージェントの動作について確認を行っていきます。
+4人で塊になるはある程度という感じでしょうか。
+但し、捕まえてからのうろうろは無くなったようです。
+未だ50エピソードですからね。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\14_team_action\pursuit_mat_fixed (2).gif">
+<h2 id="結果">結果</h2>
+<p>今回取り組みと結果をまとめます。</p>
+<h3 id="1-今回の取り組みテーマと対応策">1. 今回の取り組み（テーマと対応策）</h3>
+<p><strong>テーマ</strong></p>
+<blockquote>
+<p>報酬系の改善により、チーム連携の効率を改善する</p>
+</blockquote>
+<p><strong>背景・課題</strong></p>
+<ul>
+<li>MAT（Multi-Agent Transformer）に変更しても、性能が大きく改善しなかった。</li>
+<li>現状の動作では、
+<ol>
+<li>過剰に集まって同じ場所をうろうろする</li>
+<li>敵を積極的に追いかけず、視界の敵を捕まえつくした後も同じ場所にとどまる<br>
+という問題があった。</li>
+</ol>
+</li>
+</ul>
+<p><strong>対応策（5つ）</strong></p>
+<ol>
+<li>
+<p><strong>飽和報酬（Saturating Reward）の導入</strong></p>
+<ul>
+<li>獲物の周囲2マス以内の味方数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> に応じて、
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>≤</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">N \le 4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>：通常の報酬</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>≥</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">N \ge 5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>：5人目以降はペナルティ、またはその獲物周辺の報酬をゼロ/マイナス</li>
+</ul>
+</li>
+<li>4人で「席が満席」とし、5人目以降は別の獲物を探すよう促す。</li>
+</ul>
+</li>
+<li>
+<p><strong>探索・追跡報酬の強化と静止ペナルティ</strong></p>
+<ul>
+<li>敵への接近報酬（<code>distance_reward_scale</code>）を強化。</li>
+<li>敵が見えているのに距離が縮まらず、かつ味方と密集しているだけの状態が続くと「怠惰ペナルティ」。</li>
+<li>敵未発見時は、同じ場所にとどまるとステップペナルティを与え、巡回を促す。</li>
+</ul>
+</li>
+<li>
+<p><strong>観測空間への「混雑度」の明示</strong></p>
+<ul>
+<li>観測ベクトルに「最も近い敵の周囲にいる味方の数」「マップ全体の敵数と味方の分布」などのグローバル情報を追加。</li>
+<li>エージェントが「今この獲物には何人いるか」を判断しやすくする。</li>
+</ul>
+</li>
+<li>
+<p><strong>2チーム分散（ロール多様化）を促す報酬設計</strong></p>
+<ul>
+<li>特定の獲物に対する「排他（専有）報酬」を導入し、4人以内の主要メンバーだけが報酬を得られるようにする。</li>
+<li>エージェントIDを活用し、グループA（0–3）とグループB（4–7）でターゲットを分離する傾向を促s。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAT を MoE（Mixture of Experts）化</strong></p>
+<ul>
+<li>MAT に MoE を組み込み、
+<ul>
+<li>役割のバッティングを解消</li>
+<li>破滅的忘却の抑制</li>
+<li>計算コストの抑制</li>
+<li>Non-stationarity（味方の行動変化）への耐性<br>
+を高める。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-得られた結果まとめ">2. 得られた結果（まとめ）</h3>
+<p><strong>改善点</strong></p>
+<ul>
+<li>報酬設計の見直し（飽和報酬・探索報酬・静止ペナルティ）により、
+<ul>
+<li>過剰な密集の抑制</li>
+<li>敵への積極的な追跡</li>
+<li>捕獲後のうろうろの減少<br>
+が確認された。</li>
+</ul>
+</li>
+<li>MoE×MAT の導入により、
+<ul>
+<li>役割分担の創発</li>
+<li>学習の安定化<br>
+が期待できる構造になった。</li>
+</ul>
+</li>
+</ul>
+<p><strong>残課題・今後の展望</strong></p>
+<ul>
+<li>50エピソード時点ではまだ「4人で塊になる」傾向が残っており、
+<ul>
+<li>2チーム（4人×2）への自然な分散</li>
+<li>ターゲットの専有・分離<br>
+は完全には達成されていない。</li>
+</ul>
+</li>
+<li>今後は、
+<ul>
+<li>報酬のクリッピング・スケーリング</li>
+<li>ポテンシャルベースの報酬整形</li>
+<li>衝突・エネルギー消費ペナルティ<br>
+をさらに調整し、MoE の専門家が「役割分担」をより明確に学習できるようにする。</li>
+</ul>
+</li>
+</ul>
+<p><strong>総括</strong></p>
+<ul>
+<li>今回の「報酬系の改善＋MoE×MAT」の組み合わせにより、
+<ul>
+<li>チーム連携の効率</li>
+<li>学習の安定性<br>
+の両面で改善の兆候が見られた。</li>
+</ul>
+</li>
+<li>特に「捕獲後のうろうろ」が減ったことは、報酬設計の方向性が正しいことを示している。</li>
+<li>今後は学習エピソード数を増やし、2チーム分散や役割分担がより明確に現れるかを見極めることが次のステップとなる。</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/LU11IdCl8jc?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+
+        </body>
+        </html>

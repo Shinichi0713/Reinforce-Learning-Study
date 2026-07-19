@@ -87,7 +87,7 @@ def train(
             joint_obs = joint_obs_flat.reshape(num_agents, obs_dim)
 
             # MATで8体分の行動を自己回帰的に一括デコード (サンプリング, 学習モード)
-            actions, log_probs, values = mat_ppo.get_action(joint_obs, greedy=True)
+            actions, log_probs, values = mat_ppo.get_action(joint_obs, greedy=False)
             # print(actions)
 
             step_rewards = np.zeros(num_agents, dtype=np.float32)
