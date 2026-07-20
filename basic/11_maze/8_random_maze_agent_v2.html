@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x4e8b;&#x8c61;&#x306e;&#x6574;&#x7406;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/07/26/043000">前回エージェントをエピソードの度にランダムに構造が変化</a>するようにしてエージェントが迷路を脱出できなくなりました。
+このことを受けて対応していこうと思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>ランダムに構造変化する迷路だとエージェントが迷路脱出できなくなった原因に対応する</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="事象の整理">事象の整理</h2>
+<h3 id="学習環境とエージェントの状態">学習環境とエージェントの状態</h3>
+<p>前回試行の整理をしていこうと思います。</p>
+<ol>
+<li>agentの状態</li>
+</ol>
+<p>迷路の画像を、ViTを模したTransformerに与えて、DDQNにより学習して迷路脱出を目指します。
+静的構造の迷路の場合はすぐに解けるようになったが、ランダムになると解けなくなりました。
+また、位置エンコーディングは従来の学習型をやめ、2Dの <code>2D Sin-Cos</code> を用いることとしました。
+これは、エージェントに対して5×5の固定のマス目を用意して、「最初から5x5のチェス盤を用意してあげる（ここが隣同士だよ、と教えてあげる）」ということになるわけです。
+結果、毎回構造する構造ではなく、固定のマス目から場所を考えることになります。</p>
+<ol start="2">
+<li>迷路の状態</li>
+</ol>
+<p>エピソードごとにランダムに構造変化させます。
+具体的には迷路を構成するスタート地点(というかエージェント位置)、ゴール地点、壁の位置をエピソードごとにランダムに変化させています。</p>
+<p>報酬は停滞や意味のないと思われる行動にペナルティを導入しています。</p>
+<h3 id="学習の経過">学習の経過</h3>
+<p>学習の推移は、エピソードごとに報酬がかなり大きく変動していました。
+初めだけならあり得ますが、終始変動が大きい状態でした。</p>
+<p>また、動画においては同じ行動を繰り返し(左右を行き来する)、ごくまれにゴールに向かっていくという動作が確認出来ました。</p>
+<h2 id="気になった点">気になった点</h2>
+<p>前回学習が終わった後のエージェントの動作が気になっていました。
+同じ行動を繰り返す、ということは状況によって行き来することが報酬を守るために良いと考えている。これはゴールまでの行き方が分からないから行き来を繰り返した方が報酬の減少を抑えらえられる(停滞にペナルティを与えていたので)と考えていることになります。
+こんな状態になるという原因はゴールがどこか認識できなかったか、認識したけど、どうやって行けばよいか理解できていないということになります。</p>
+<p>そして、この原因となりえるのは<strong>探索不足</strong>です。具体的には学習時点で選択していた <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy が良くなかったと考えました。
+学習段階の探索手法として <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy を採用すること自体は、Q学習やDQN（Deep Q Network）における標準的なアプローチであり、<strong>決して間違いではありません</strong>。</p>
+<h3 id="1-確率分布が一様ランダムかグラデーションかの違い">1. 確率分布が「一様（ランダム）」か「グラデーション」かの違い</h3>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy と Softmax（ボルツマン分布）の最大の違いは、<strong>「次点の行動（惜しい行動）」をどう扱うか</strong>です。</p>
+<ul>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy のまずさ</strong>:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span> の確率でランダムに行動を選ぶ際、<strong>「今にもゴールできそうな筋の良い行動」も「壁に激突するだけの完全に無駄な行動」も、すべて全く同じ等確率</strong>で選ばれてしまいます。Q値が <code>0.9</code> の行動（ほぼ正解）と <code>-100</code> の行動（大失敗）が、探索時には同等に扱われるため、特に状態空間が広いタスクや死にゲー要素のある環境では、非効率な探索（壁にぶつかり続けるなど）を繰り返して学習が進みにくくなります。</li>
+<li><strong>Softmax の利点</strong>:
+Q値の高さに応じて滑らかに確率が割り振られるため、「一番良さそうな行動」の次に「二番目に良さそうな行動」が選ばれやすくなります。絶望的な行動を選ぶ確率を自動的に低く抑えられるため、無駄のないスマートな探索になります。</li>
+</ul>
+<h3 id="2-デモ動画評価時における挙動の不自然さ">2. デモ動画（評価時）における挙動の「不自然さ」</h3>
+<p>今回、動画作成のコードを Softmax に修正した背景にも関わりますが、評価時やデモプレイ時の挙動に問題が出ます。</p>
+<ul>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy のまずさ</strong>:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy で動くエージェントは、基本的にはQ値が最大（Max）のものを愚直に選び続けます。もし動画撮影時に少しだけ探索率（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\varepsilon &gt; 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">ε</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>）を残していると、「さっきまで天才的な動きをしていたのに、突然1歩だけ真逆の壁に突っ込む」といった極端で不自然な挙動（完全ランダムステップ）が混ざります。</li>
+<li><strong>Softmax の利点</strong>:
+温度パラメータ（<code>temperature</code>）を調整することで、「基本的には正解ルートを進むが、時折、次点の間違えにくそうなルートも試す」といった、<strong>人間が迷いながら歩いているような自然な揺らぎ</strong>を持ったデモ動画を作成できます。</li>
+</ul>
+<h3 id="3-方策ポリシーの滑らかな収束と局所解の回避">3. 方策（ポリシー）の滑らかな収束と局所解の回避</h3>
+<p>Transformer等のシーケンスモデルや、より複雑な価値ベースの学習において、ポリシーの「硬さ」が壁になることがあります。</p>
+<ul>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy のまずさ</strong>:
+<code>argmax</code>（最大値の選択）による決定論的な行動選択は、Q値のわずかな高低で行動が 0 か 1 かで激しく切り替わります（不連続性）。これにより、学習の初期〜中期にたまたま高い報酬を得た特定のルート（局所最適解）に固執しやすくなり、そこから抜け出すための探索が「完全ランダム」しかないため、効率的なルートの再発見が難しくなります。</li>
+<li><strong>Softmax の利点</strong>:
+確率的に行動が選択されるため、ポリシーが滑らか（連続的）になり、勾配法ベースの最適化や、のちに軌跡（履歴）を学習するアルゴリズムにとって、より情報量の多い（エントロピーの高い）質の良いデータが得られやすくなります。</li>
+</ul>
+<h2 id="対応策">対応策</h2>
+<p>強化学習時のエージェントの行動選択を <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy から 確率分布に基づいた行動選択に替えます。
+また、行動の度に小刻みに良い行動だったか、悪い行動だったかを教えられるようにしていこうと思います。具体的にはゴールからの最短距離（<code>dist_map</code>）をベースに進捗報酬（<code>progress_reward</code>）や逆行ペナルティ（<code>regress_penalty</code>）を計算して、ゴールに近づいたら報酬、遠のいたらペナルティを分かるようにします。</p>
+<p>これによる期待効果は以下の点です。</p>
+<h3 id="1-意味のある失敗を探索">1. 「意味のある失敗」を探索</h3>
+<p>従来の <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy は、探索（ランダム行動）を選択した際、すべての行動を <strong>等確率（一様ランダム）</strong> で選びます。</p>
+<ul>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy の問題点:</strong> あと一歩でゴールできるという状況でも、ランダムが引かれると「わざわざ元来た道を大逆走する」「目の前の壁に激突する」といった、明らかに筋の悪い行動を同じ確率で選んでしまいます。</li>
+<li><strong>Softmax（確率分布）の強み:</strong> Q値が少しでも学習されてくると、「一番マシな道（1位）」だけでなく「次にマシそうな道（2位）」の確率も高くなります。逆に、行き止まりや壁（最下位）を選ぶ確率は急激に低くなります。</li>
+</ul>
+<p>つまり、<strong>「全く無意味な大悪手」を完全に排除しつつ、「正解かもしれない選択肢」の範囲内だけで賢く迷う（探索する）</strong> ことができるようになったため、無駄な足踏みや逆走が激減しました。</p>
+<h3 id="2-transformerと進捗報酬距離マップの相乗効果">2. Transformerと進捗報酬（距離マップ）の相乗効果</h3>
+<p>環境はにゴールからの最短距離（<code>dist_map</code>）をベースに進捗報酬（<code>progress_reward</code>）や逆行ペナルティ（<code>regress_penalty</code>）を計算させることとします。
+Transformerは全マスの位置関係（大域的な依存関係）を捉えるのが得意なため、「こっちの方向が進捗が良さそうだ」という大まかな傾向（Q値の微小な差）を比較的早い段階からQ値に出力し始めます。</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy では、その「かすかなQ値の差」があっても、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span> の確率でそれを無視して完全ランダムに動いてしまい、せっかくのTransformerの気付きが破壊されていました。</li>
+<li>Softmax では、その「かすかなQ値の差（＝こっちの方が良さそうという確率の傾き）」を綺麗に反映して動けるため、Transformerが学習した「方向性のセンス」を殺さずに探索を進められたのです。</li>
+</ul>
+<h3 id="3-滑らかな自信度の調整温度パラメータの恩恵">3. 滑らかな「自信度」の調整（温度パラメータの恩恵）</h3>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi></mrow><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ε</span></span></span></span>-greedy の探索は「やるか、やらないか」の 0 か 100 かですが、Softmax はQ値の差の開き具合によって、エージェント自身が行動の選択比率を滑らかにコントロールできます。</p>
+<ul>
+<li><strong>Q値に差がないとき（未学習のエリア）:</strong> 自然と完全ランダムに近い確率分布になり、手探りで探索します。</li>
+<li><strong>Q値に明確な差があるとき（学習が進んだエリア）:</strong> 温度（<code>temperature</code>）がまだ高くても、Q値の差が大きければ「ほぼ正解の行動」をしっかり選べるようになります。</li>
+</ul>
+<p>この柔軟性により、未開拓のルートでは大胆に探し、すでに知っているルートでは無駄な脱線をせずにスムーズにゴールへ向かうという、メリハリのある効率的なデータ収集（経験再生バッファへの蓄積）が可能になりました。</p>
+<h2 id="実装">実装</h2>
+<h3 id="コード">コード</h3>
+<p>実装コードは以下レポジトリを参考下さい。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src</a></p>
+<h3 id="実装のキーポイント">実装のキーポイント</h3>
+<p>今回の強化学習の行動選択を確率分布（Softmaxなど）へ変更し、<code>dist_map</code> をベースにした高頻度な報酬シェイピング（Dense Reward）を導入する際のキーポイントは、以下の3点です。</p>
+<h3 id="1-確率選択の温度temperatureの動的コントロール">1. 確率選択の「温度（Temperature）」の動的コントロール</h3>
+<p>Softmaxによる行動選択では、Q値の差を確率に変換する際のスケール調整（温度パラメータ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span>）が成否を分けます。</p>
+<ul>
+<li><strong>初期は「高く」、終盤は「低く」:</strong>
+学習初期は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> を大きく設定し、Q値のわずかな偏りに囚われず一変通りに広く探索させます。学習が進むにつれて <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> を徐々に小さく（アニール）していき、最終的には最もQ値の高い行動を確実に選ぶ（決定論的な動き）ように絞り込みます。</li>
+<li><strong>Q値のスケール変化への配慮:</strong>
+学習が進むとQ値の絶対値が大きくなるため、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi></mrow><annotation encoding="application/x-tex">\tau</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span></span> が固定のままだと、確率分布が勝手に鋭くなって探索が早期終了してしまう点に注意が必要です。</li>
+</ul>
+<h3 id="2-進捗報酬による局所最適なループ正のフィードバック駅の完全防御">2. 進捗報酬による「局所最適なループ（正のフィードバック駅）」の完全防御</h3>
+<p>最短距離の変化をそのまま報酬に加算する場合、「同じ2マスの間を往復し続けるだけで、無限に報酬を稼げてしまうバグ」が最も発生しやすい罠です。</p>
+<ul>
+<li><strong>ポテンシャル関数の設計（必須）:</strong>
+「近づいたときにもらえるプラス」と「遠ざかったときにもらうマイナス」の絶対値を完全に同じ（対照的）にする必要があります。</li>
+<li>例：<code>progress_reward = +0.2</code>, <code>regress_penalty = -0.2</code></li>
+</ul>
+<p>もし遠ざかるペナルティが軽かったり（例：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>0.15</mn></mrow><annotation encoding="application/x-tex">-0.15</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.15</span></span></span></span>）、壁衝突で元のマスに留まった際にペナルティが発生しなかったりすると、エージェントは「ゴールを目指すより、特定の安全地帯で往復・足踏みして小銭を稼ぐほうが効率が良い」と学習し、ゴールに向かわなくなります。</p>
+<p>そこで、ゴールを起点に距離のマップを持つようにして、エージェントの位置が近づいたか、遠のいたかをぱっと分かるようなマップ化を行いました。</p>
+<p>レポジトリの実装コードを以下のように使ってください。</p>
+<pre><code class="language-python">env = MazeEnv(rows=<span class="hljs-number">5</span>, cols=<span class="hljs-number">5</span>)
+
+<span class="hljs-comment"># エピソードをリセットして距離マップを生成</span>
+state = env.reset(maze_change=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 距離マップを表示</span>
+env.print_distance_map()
+</code></pre>
+<p>するとこんな距離マップが得らることが分かります。[G]がゴール、[W]は壁、数値がゴールまでの距離です。
+これを用いるとマップと現在位置を確認するだけで良い行動だったか、悪い行動だったかパット分かるようになります。</p>
+<pre><code>--- Goal Distance Map ---
+  4    3    2    1   [G] 
+  5    4   [W]   2    1  
+  6    5    6   [W]   2  
+  7    6    7   [W]   3  
+  8   [W]  [W]   5    4  
+-------------------------
+</code></pre>
+<h3 id="3-本質的な報酬ゴール報酬との主客逆転の防止">3. 本質的な報酬（ゴール報酬）との主客逆転の防止</h3>
+<p>小刻みな報酬（進捗）が手厚すぎると、エージェントは「早くゴールすること」よりも「道中でいかに効率よく進捗報酬を回収するか」に執着し始めます。</p>
+<ul>
+<li><strong>スケールのバランス:</strong>
+道中で得られる進捗報酬の累計（例：スタートからゴールまで最短で進んだ場合の合計プラス値）が、最終的な <code>goal_reward</code>（10.0など）よりも<strong>十分に小さくなるよう設計</strong>します。</li>
+<li><strong>ステップペナルティとの併用:</strong>
+常に <code>step_penalty</code>（負の値）を与え続けることで、「寄り道して進捗報酬を往復回収する時間は損である」という時間的圧力を担保し、最短ルートへのインセンティブを維持します。</li>
+</ul>
+<h2 id="学習結果">学習結果</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>学習の推移は以下のように得られます。
+前回(うまくいかなかった方)と今回を比較しています。
+結果、報酬の変動はあるものの高い状態をある程度は維持できるようになっているようです。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\8_random_maze_agent_v2\1784504371273.png" alt="1784504371273"></p>
+<p>因みに、やはり難しい迷路と簡単な迷路では挙動は違っているはずです。。。
+じわじわと良くなっていくとは言え、Transformerでも難しいものに感じている可能性があります。</p>
+<h3 id="エージェントの動作">エージェントの動作</h3>
+<p>学習後のエージェントの動作は以下のようになりました。
+最後のやつが苦し気でしたが、なんとかゴール出来ました。
+ゴールは変わっても何とか行けるようにはなったようです。未だ無駄な動作が多いですが。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\8_random_maze_agent_v2\agent_maze_solve.gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\8_random_maze_agent_v2\agent_maze_solve (1).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\8_random_maze_agent_v2\agent_maze_solve (3).gif">
+<h2 id="総括">総括</h2>
+<p>今回の改善で最も良かった点を一言でまとめると、</p>
+<p><strong>「探索を“無意味なランダム”から“意味のある迷い”に変え、かつ Transformer が捉えた“ゴール方向の感覚”を壊さずに、高頻度の進捗報酬で細かく教え続けたこと」</strong></p>
+<p>です。</p>
+<p>もう少し分解すると、以下の3点が良かったかと思います。</p>
+<h3 id="1-ε-greedy--softmax-による賢い探索への変更">1. ε-greedy → Softmax による「賢い探索」への変更</h3>
+<ul>
+<li>ε-greedy は「良い行動」も「悪い行動」も等確率で選ぶため、学習が進んでも“無意味な逆走”や“壁突き”が頻発していました。</li>
+<li>Softmax（ボルツマン分布）に替えたことで、
+<ul>
+<li>Q値が高い行動ほど選ばれやすく</li>
+<li>Q値が低い行動は自動的に確率が下がる<br>
+という**“意味のある迷い”**が可能になりました。</li>
+</ul>
+</li>
+<li>これにより、Transformer が「こっちの方がゴールに近そう」という方向感覚を学習しても、それを“完全ランダム”で壊さずに済み、効率的な探索ができました。</li>
+</ul>
+<h3 id="2-dist_map-ベースの進捗報酬逆行ペナルティによる高頻度なフィードバック">2. dist_map ベースの進捗報酬・逆行ペナルティによる「高頻度なフィードバック」</h3>
+<ul>
+<li>ゴールからの最短距離（<code>dist_map</code>）を用いて、
+<ul>
+<li>ゴールに近づいたら <code>progress_reward</code>（正）</li>
+<li>遠ざかったら <code>regress_penalty</code>（負）<br>
+を毎ステップ与えるようにしたことで、<strong>“今の行動が良いか悪いか”をすぐに教えられる</strong>ようになりました。</li>
+</ul>
+</li>
+<li>特に、
+<ul>
+<li>進捗報酬と逆行ペナルティの絶対値を同じにし</li>
+<li>壁衝突や停滞にも適切なペナルティを設定<br>
+することで、「同じ2マスを往復して小銭を稼ぐ」ような局所最適なループを防ぎ、<strong>ゴールに向かうインセンティブ</strong>を維持できました。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-transformer-の方向感覚と-softmax進捗報酬の相乗効果">3. Transformer の“方向感覚”と Softmax・進捗報酬の相乗効果</h3>
+<ul>
+<li>Transformer は全マスの位置関係（大域的な依存関係）を捉えるのが得意で、比較的早い段階から「こっちの方がゴールに近そう」という方向感覚を Q値に反映し始めます。</li>
+<li>ε-greedy では、その“かすかなQ値の差”を無視して完全ランダムに動いてしまう場面が多く、Transformer の気付きが活かされませんでした。</li>
+<li>Softmax では、<strong>Q値のわずかな差を確率の傾きとして反映</strong>できるため、Transformer が学習した“方向感覚”を壊さずに探索できました。</li>
+<li>さらに、進捗報酬で**“その方向感覚が正しいかどうか”を細かくフィードバック**できるため、Transformer はより早く・正確に「ゴールへの良いルート」を学習できました。</li>
+</ul>
+<h3 id="まとめ">まとめ</h3>
+<p>今回の改善で最も良かったのは、</p>
+<ul>
+<li><strong>探索を“無意味なランダム”から“意味のある迷い”に変えたこと（Softmax）</strong></li>
+<li><strong>毎ステップ“ゴールに近づいたか・遠ざかったか”を教え続けたこと（dist_map ベースの進捗報酬）</strong></li>
+<li><strong>Transformer の“方向感覚”を壊さずに、それを活かして学習を加速させたこと</strong></li>
+</ul>
+<p>の3点です。</p>
+<p>これにより、エージェントは「同じ行動を繰り返して報酬を守る」ような停滞状態から脱却し、<strong>実際にゴールに到達できるポリシー</strong>を学習できました。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/LU11IdCl8jc?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
