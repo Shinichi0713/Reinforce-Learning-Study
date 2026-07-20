@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x624b;&#x6cd5;&#x4e00;&#x89a7;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日より進めている<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/01/043000">Pursuitのチーム連携の学習</a>において、現状使っている手法を少し方向を変えてみようかと考え始めています。
+見た感じ、エージェントの動作時に他のエージェントの動作などの情報を踏まえて行動することが出来ればより良いチーム連携ができそうだが、現在のMAPPOでは個人のエージェントはあくまで独立です。</p>
+<p>ということで<strong>集中学習・分散実行（CTDE）</strong> で仲間同士のコミュニケーションを行うことを前提とした手法がないか調べてみました。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="手法一覧">手法一覧</h2>
+<p>まずはCTDEでMAPPOの後続手法にどんなものがあるかについて調べてみました。(MAPPOは、PPOをマルチエージェント環境に拡張した CTDE の代表的な手法です。)
+その後続として、サンプル効率・通信効率・協調の安定性を高めるための「分散学習に強い」MAPPO系手法がいくつか提案されています。代表的なものを整理します。</p>
+<h3 id="1-marpomulti-agent-reflective-policy-optimization">1. MARPO（Multi-Agent Reflective Policy Optimization）</h3>
+<ul>
+<li>
+<p><strong>位置づけ</strong><br>
+MAPPOのサンプル非効率を改善するための <strong>on-policy MARL 手法</strong> で、RPO（Reflective Policy Optimization）をマルチエージェントに拡張したもの<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219/44180">AAAI</a>。</p>
+</li>
+<li>
+<p><strong>分散学習・協調の特徴</strong></p>
+<ul>
+<li>CTDE を採用（学習時は中央化された critic を使う）。</li>
+<li><strong>Reflection メカニズム</strong>：<br>
+現在の状態だけでなく、その後の軌跡（trajectory）も利用して更新するため、<strong>将来の協調結果を踏まえた学習</strong>が可能になり、サンプル効率が向上。</li>
+<li><strong>Asymmetric clipping</strong>：<br>
+KL ダイバージェンスに基づくクリップ範囲の動的調整により、マルチエージェント特有の非定常性に強い安定した学習を実現。</li>
+<li>SMAC-Hard や GRF などで MAPPO より早く高い勝率に到達することを報告<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219/44180">AAAI</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>分散学習との関係</strong><br>
+学習は CTDE で集中化されていますが、<strong>サンプル効率が高いため、実運用時の分散実行でも少ないデータで良い性能が出る</strong>という意味で「分散学習に強い」と解釈できます。</p>
+</li>
+</ul>
+<h3 id="2-mappo-pismappo-with-prior-intent-sharing">2. MAPPO-PIS（MAPPO with Prior Intent Sharing）</h3>
+<ul>
+<li>
+<p><strong>位置づけ</strong><br>
+連結自動運転車（CAV）の合流・協調意思決定向けに提案された MAPPO 拡張<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>分散学習・協調の特徴</strong></p>
+<ul>
+<li>ベースは CTDE 型の MAPPO。</li>
+<li><strong>Prior Intent Sharing（意図共有）</strong>：
+<ul>
+<li>IGM（Intention Generator Module）で各車両が <strong>将来の走行軌道（意図）</strong> を生成し、それを他車両と共有。</li>
+<li>これにより、単純な観測だけでなく「相手がどう動くつもりか」を明示的に扱える。</li>
+</ul>
+</li>
+<li><strong>Safety Enhanced Module（SEM）</strong>：
+<ul>
+<li>合流レーンかどうか、合流端までの距離、時間車頭間隔などから <strong>優先度</strong> を計算。</li>
+<li>衝突リスクが検出された場合、意図修正器で安全な行動に修正。</li>
+</ul>
+</li>
+<li>カリキュラム学習により、簡単なシナリオから複雑なシナリオへ段階的に学習。</li>
+</ul>
+</li>
+<li>
+<p><strong>分散学習との関係</strong><br>
+学習は CTDE ですが、<strong>実行時に「意図」を明示的に共有する分散協調</strong>を前提としている点が特徴です。<br>
+つまり、各エージェントは自分の将来の意図を他エージェントに伝え、それに基づいて協調する「分散実行時の情報共有戦略」を学習の一部として組み込んでいます。</p>
+</li>
+</ul>
+<h3 id="3-icp-mappocooperative-positioning-with-mappo">3. ICP-MAPPO（Cooperative Positioning with MAPPO）</h3>
+<ul>
+<li>
+<p><strong>位置づけ</strong><br>
+協調位置推定（Cooperative Positioning）のための <strong>動的通信グラフを扱う MAPPO 系手法</strong><a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</p>
+</li>
+<li>
+<p><strong>分散学習・通信の特徴</strong></p>
+<ul>
+<li>CTDE を採用しつつ、<strong>dynamic decentralized execution</strong> を導入。</li>
+<li>各エージェントの行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">a_{i,t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> に、他エージェントとの <strong>通信リンクの有無（0/1）</strong> を含める。</li>
+<li>これにより、時刻ごとに通信グラフ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">G_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を動的に変更し、<strong>必要な近傍だけと通信</strong>するように学習。</li>
+<li>シミュレーションでは、全結合グラフと比べて最大 60% の通信リンク削減を達成しつつ、位置推定精度を維持<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>分散学習との関係</strong><br>
+通信リンクの有無を <strong>RL の行動として学習</strong>するため、</p>
+<ul>
+<li>どのエージェントと通信すべきか</li>
+<li>どのタイミングでリンクを切るか<br>
+を自律的に決める <strong>分散・通信効率重視の MARL</strong> と言えます。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-その他の分散-marl-との関係mappo-以外の系統">4. その他の分散 MARL との関係（MAPPO 以外の系統）</h3>
+<p>MAPPO 以外にも、分散 MARL の代表的な系統があります。</p>
+<ul>
+<li>
+<p><strong>Decentralized MARL（完全分散）</strong></p>
+<ul>
+<li>中央 critic を使わず、各エージェントが <strong>局所情報と限定的な通信</strong> だけで学習・実行する枠組み<a href="https://www.emergentmind.com/topics/decentralized-multi-agent-reinforcement-learning-marl-framework">Emergent Mind</a>。</li>
+<li>例：
+<ul>
+<li><strong>Consensus-based critics</strong>：近傍エージェントと価値推定を共有し、<strong>合意形成</strong>しながら学習する手法<a href="https://www.emergentmind.com/topics/decentralized-multi-agent-reinforcement-learning-marl-framework">Emergent Mind</a>。</li>
+<li><strong>Fully decentralized MARL</strong>：ネットワーク上のエージェントが関数近似を用いて協調する理論的枠組み<a href="https://proceedings.mlr.press/v80/zhang18n/zhang18n.pdf">PMLR</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>IPPO（Independent PPO）</strong></p>
+<ul>
+<li>各エージェントが独立に PPO で学習する単純な分散手法<a href="https://marllib.readthedocs.io/en/latest/algorithm/ppo_family.html">MARLlib</a>。</li>
+<li>MAPPO と比べると非定常性に弱いが、<strong>完全分散で実装が簡単</strong>という利点があります。</li>
+</ul>
+</li>
+</ul>
+<h3 id="手法の傾向">手法の傾向</h3>
+<ul>
+<li>
+<p><strong>MAPPO の後続で「分散学習」に強い系譜</strong>としては、</p>
+<ul>
+<li><strong>MARPO</strong>：サンプル効率を高め、少ないデータで分散実行でも高性能を出す。</li>
+<li><strong>MAPPO-PIS</strong>：将来の意図を明示的に共有する分散協調を前提とした CTDE。</li>
+<li><strong>ICP-MAPPO</strong>：通信リンクの有無を行動として学習し、動的通信グラフで分散実行を最適化。<br>
+が代表的です。</li>
+</ul>
+</li>
+<li>
+<p>これらは基本的に <strong>CTDE（集中学習・分散実行）</strong> をベースにしつつ、</p>
+<ul>
+<li>サンプル効率</li>
+<li>通信効率</li>
+<li>意図共有<br>
+といった観点で「分散実行時の協調」を強化している点が共通しています。</li>
+</ul>
+</li>
+</ul>
+<h2 id="コミュニケーションを前提とした手法">コミュニケーションを前提とした手法</h2>
+<p>その中から各エージェントの意思や行動を情報として共有することを前提とした手法について調べていきます。
+先述の手法の中では<strong>MAPPO-PIS</strong> と <strong>ICP-MAPPO</strong> が、<strong>各エージェントの意思・行動情報を共有することを前提に設計された手法</strong>に該当します。</p>
+<h3 id="1-mappo-pis将来の意図意思を明示的に共有">1. MAPPO-PIS：将来の「意図（意思）」を明示的に共有</h3>
+<ul>
+<li>
+<p><strong>設計の前提</strong><br>
+連結自動運転車（CAV）の合流・協調意思決定向けに提案された MAPPO 拡張で、<strong>将来の走行意図を他エージェントと共有する</strong>ことを前提に設計されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>意図共有の仕組み</strong></p>
+<ul>
+<li><strong>IGM（Intention Generator Module）</strong><br>
+各エージェントが、複数ステップ先までの <strong>走行予定軌道（意図）</strong> を生成し、それを他エージェントに共有します。</li>
+<li><strong>SEM（Safety Enhanced Module）</strong><br>
+共有された意図に基づき、優先度（合流レーンかどうか、合流端までの距離、時間車頭間隔など）を計算し、衝突リスクがあれば <strong>意図を修正</strong> して安全な行動に誘導します。</li>
+</ul>
+</li>
+<li>
+<p><strong>特徴</strong><br>
+単に「観測」や「行動」を共有するだけでなく、<strong>「将来どう動くつもりか（意図）」を明示的に共有し、それを基に協調する</strong>という設計になっています。</p>
+</li>
+</ul>
+<h3 id="2-icp-mappo通信リンクの有無を行動として扱い情報共有を学習">2. ICP-MAPPO：通信リンクの有無を「行動」として扱い、情報共有を学習</h3>
+<ul>
+<li>
+<p><strong>設計の前提</strong><br>
+協調位置推定（Cooperative Positioning）のための MAPPO 系手法で、<strong>どのエージェントと通信するか（＝情報を共有するか）を RL の行動として学習</strong>する枠組みです<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</p>
+</li>
+<li>
+<p><strong>情報共有の仕組み</strong></p>
+<ul>
+<li>各エージェントの行動 (a_{i,t}) に、他エージェントとの <strong>通信リンクの有無（0/1）</strong> を含めます。</li>
+<li>リンクが有効（1）の場合のみ、その近傍エージェントの観測・信念情報を自分の信念更新に統合します。</li>
+<li>これにより、<strong>どのエージェントと情報を共有すべきか</strong>を動的に学習し、通信グラフ (G_t) を最適化します。</li>
+</ul>
+</li>
+<li>
+<p><strong>特徴</strong><br>
+「誰と情報を共有するか」を <strong>行動として最適化</strong> しているため、<strong>情報共有の構造そのものを学習対象にした分散 MARL</strong> と言えます。</p>
+</li>
+</ul>
+<h3 id="3-marpo情報共有は明示的ではないが協調の質を高める">3. MARPO：情報共有は明示的ではないが、協調の質を高める</h3>
+<ul>
+<li>
+<p><strong>MARPO</strong> は、主に <strong>サンプル効率と安定性</strong> を改善するための手法で、</p>
+<ul>
+<li>Reflection メカニズム（将来の軌跡を利用）</li>
+<li>Asymmetric clipping（KL に基づく動的クリップ）<br>
+により、協調の質を高めます<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219/44180">AAAI</a>。</li>
+</ul>
+</li>
+<li>
+<p>ただし、<strong>明示的な意図共有や通信リンクの設計</strong>は行わず、<br>
+CTDE の枠組みの中で <strong>中央 critic が各エージェントの情報を集約</strong>する形になっています。</p>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\16_Successor_methods_to_MAPPO\1784547357108.png" alt="1784547357108"></p>
+<h2 id="比較">比較</h2>
+<p>3種類の手法を実装難易度、協調学習の質、意思共有を前提とした手法か、引用数の4軸で評価してみました。</p>
+<table>
+<thead>
+<tr>
+<th>手法</th>
+<th>実装難易度</th>
+<th>協調学習の質</th>
+<th>意思共有を前提</th>
+<th>引用数（おおよそ）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MARPO</strong></td>
+<td>★★☆（中）</td>
+<td>★★★（高）</td>
+<td>×（CTDE 内で暗黙的に協調）</td>
+<td>まだ少ない（2026 AAAI 論文）<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219">AAAI</a></td>
+</tr>
+<tr>
+<td><strong>MAPPO-PIS</strong></td>
+<td>★★★（高）</td>
+<td>★★★（高）</td>
+<td>◎（将来の意図を明示共有）</td>
+<td>20+ 程度<a href="https://arxiv.org/abs/2408.06656">arXiv</a><a href="https://dl.acm.org/doi/10.1007/978-3-031-91813-1_16">ACM</a></td>
+</tr>
+<tr>
+<td><strong>ICP-MAPPO</strong></td>
+<td>★★★（高）</td>
+<td>★★☆（中〜高）</td>
+<td>○（通信リンクの有無を行動として共有）</td>
+<td>まだ少ない（2024 Fusion 論文）<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-marpo">1. MARPO</h3>
+<ul>
+<li>
+<p><strong>実装難易度</strong>：中</p>
+<ul>
+<li>ベースは MAPPO（PPO ベース）で、
+<ul>
+<li>Reflection メカニズム（将来軌跡を利用）</li>
+<li>Asymmetric clipping（KL に基づく動的クリップ）<br>
+を追加する形です<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219">AAAI</a>。</li>
+</ul>
+</li>
+<li>MAPPO 実装があるなら、その拡張として比較的素直に追加できますが、軌跡レベルの更新ロジックがやや複雑です。</li>
+</ul>
+</li>
+<li>
+<p><strong>協調学習の質</strong>：高</p>
+<ul>
+<li>SMAC-Hard や GRF で MAPPO より早く高い勝率に到達し、<strong>サンプル効率と安定性が高い</strong>と報告されています<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219">AAAI</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>意思共有を前提</strong>：×</p>
+<ul>
+<li>CTDE の枠組みで、中央 critic が各エージェントの情報を集約しますが、<strong>明示的な意図共有や通信リンク設計は行いません</strong>。</li>
+<li>協調は「中央 critic が全体を俯瞰して学習」という形で達成されます。</li>
+</ul>
+</li>
+<li>
+<p><strong>引用数</strong>：まだ少ない</p>
+<ul>
+<li>2026 AAAI 論文で、比較的新しいため引用はまだ限定的です<a href="https://ojs.aaai.org/index.php/AAAI/article/view/40219">AAAI</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-mappo-pis">2. MAPPO-PIS</h3>
+<ul>
+<li>
+<p><strong>実装難易度</strong>：高</p>
+<ul>
+<li>MAPPO に加えて、
+<ul>
+<li>IGM（Intention Generator Module）：将来の走行軌道を生成・共有</li>
+<li>SEM（Safety Enhanced Module）：優先度計算と意図修正</li>
+<li>カリキュラム学習<br>
+を組み込む必要があり、<strong>モジュール数・ロジックが増える</strong>ため実装負荷は高めです<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>協調学習の質</strong>：高</p>
+<ul>
+<li>CAV の合流シナリオで、安全性・効率・システム全体性能が既存手法を上回ると報告されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+<li>将来の意図を共有することで、<strong>長期的な協調が安定</strong>します。</li>
+</ul>
+</li>
+<li>
+<p><strong>意思共有を前提</strong>：◎（明示的）</p>
+<ul>
+<li>各エージェントが <strong>将来の走行意図（軌道）を明示的に共有</strong>し、それに基づいて協調・安全確保を行う設計です<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+<li>「観測」だけでなく「意図」を共有する点が特徴です。</li>
+</ul>
+</li>
+<li>
+<p><strong>引用数</strong>：20+ 程度</p>
+<ul>
+<li>arXiv 版で 20 件以上の引用が報告されており、MARPO・ICP-MAPPO よりは多く引用されています<a href="https://arxiv.org/abs/2408.06656">arXiv</a><a href="https://dl.acm.org/doi/10.1007/978-3-031-91813-1_16">ACM</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-icp-mappo">3. ICP-MAPPO</h3>
+<ul>
+<li>
+<p><strong>実装難易度</strong>：高</p>
+<ul>
+<li>MAPPO に加え、
+<ul>
+<li>通信リンクの有無（0/1）を行動として扱う</li>
+<li>動的通信グラフ (G_t) の管理</li>
+<li>近傍の観測・信念を統合する LSTM ベースの信念更新<br>
+を実装する必要があり、<strong>通信グラフと RL の統合が複雑</strong>です<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>協調学習の質</strong>：中〜高</p>
+<ul>
+<li>協調位置推定タスクで、全結合グラフと比べて最大 60% の通信リンク削減を達成しつつ、精度を維持できると報告されています<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</li>
+<li>ただし、タスクが位置推定に特化しているため、一般的な協調ゲーム（SMAC など）での評価は限定的です。</li>
+</ul>
+</li>
+<li>
+<p><strong>意思共有を前提</strong>：○（通信リンクとして）</p>
+<ul>
+<li>「誰と情報を共有するか」を <strong>行動として最適化</strong> するため、<strong>情報共有の構造そのものを学習対象</strong>にしています<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</li>
+<li>明示的な「意図」共有ではありませんが、<strong>通信リンクを通じた情報共有</strong>を前提とした設計です。</li>
+</ul>
+</li>
+<li>
+<p><strong>引用数</strong>：まだ少ない</p>
+<ul>
+<li>2024 Fusion 論文で、引用はまだ限定的です<a href="https://rings.winslab.lids.mit.edu/wp-content/uploads/2025/02/CamBraNicWin-Fusion-07-2024%E2%80%94Cooperative-Positioning-with-Multi-Agent-Reinforcement-Learning.pdf">MIT</a>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総合的な傾向">総合的な傾向</h2>
+<p>上記を踏まえてMAPPOの代替手法として扱うかは第一がMAPPO-PISかというように判断しました。
+より詳細な情報を調べていきたいと思います。</p>
+<ul>
+<li>
+<p><strong>実装難易度</strong>：<br>
+MARPO ＜ MAPPO-PIS ≒ ICP-MAPPO<br>
+（MARPO は MAPPO の拡張として比較的素直、PIS と ICP は追加モジュールが多く複雑）</p>
+</li>
+<li>
+<p><strong>協調学習の質</strong>：<br>
+MARPO ≈ MAPPO-PIS ＞ ICP-MAPPO<br>
+（MARPO と PIS は汎用タスクで高評価、ICP は位置推定特化で高精度だがタスクが限定）</p>
+</li>
+<li>
+<p><strong>意思共有を前提とした設計</strong>：<br>
+MAPPO-PIS（◎） ＞ ICP-MAPPO（○） ＞ MARPO（×）<br>
+（PIS は「意図」を明示共有、ICP は「通信リンク」を通じた情報共有、MARPO は中央 critic による暗黙的協調）</p>
+</li>
+<li>
+<p><strong>引用数（現時点）</strong>：<br>
+MAPPO-PIS ＞ MARPO ≈ ICP-MAPPO<br>
+（PIS は CAV 分野で注目されており引用が多く、MARPO・ICP は比較的新しい）</p>
+</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/LU11IdCl8jc?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
