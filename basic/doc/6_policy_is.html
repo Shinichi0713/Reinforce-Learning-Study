@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x65b9;&#x7b56;&#x3068;&#x306f;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日は強化学習で著者が説明をすっ飛ばした強化学習の概念に関するものです。</p>
+<p>強化学習を行う上でエージェントは定義された環境の中で行動を選択・実行します。
+この行動の良し悪しに対して、報酬で評価を行い、エージェントは行動と報酬をセットで学習することで、よりよい行動を学んでいきます。</p>
+<p>この <strong>定義された環境の中で行動を選択・実行</strong> という中で機能するのが方策モデルです。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>方策モデルとは何かについて説明してみた</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="方策とは">方策とは</h2>
+<p>強化学習における<strong>方策モデル（policy model）</strong> とは、<strong>エージェントが「ある状態でどの行動を選ぶべきか」を直接決める関数（またはその近似モデル）</strong> のことです。</p>
+<p>もう少し詳しく説明します。</p>
+<h3 id="1-方策ポリシーとは">1. 方策（ポリシー）とは</h3>
+<p>強化学習では、エージェントが環境と相互作用しながら報酬を最大化するように行動を学習します。</p>
+<ul>
+<li><strong>状態（state）</strong>：エージェントが置かれている状況（例：ゲームの盤面、ロボットの姿勢）</li>
+<li><strong>行動（action）</strong>：エージェントが取りうる選択肢（例：上下左右に動く、アクセルを踏む）</li>
+</ul>
+<p><strong>方策（policy）</strong> とは、<br>
+「状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> が与えられたときに、どの行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> をどれくらいの確率で選ぶか」を表すルールです。<br>
+数学的には、確率分布 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> \pi(a|s) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> として書かれることが多いです。</p>
+<h3 id="2-方策モデルとは">2. 方策モデルとは</h3>
+<p><strong>方策モデル</strong>は、この方策 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> \pi(a|s) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を<strong>近似するためのモデル</strong>です。</p>
+<ul>
+<li>ニューラルネットワークや線形関数など、パラメータを持つ関数</li>
+<li>入力：状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span></li>
+<li>出力：行動の確率分布（あるいは、決定的な行動そのもの）</li>
+</ul>
+<p>例：</p>
+<ul>
+<li>状態を画像として入力し、各行動（「上」「下」「左」「右」）の選択確率を出力するニューラルネット</li>
+<li>ロボットのセンサー値を入力し、各関節の目標角度を出力する関数</li>
+</ul>
+<h3 id="3-価値関数モデルとの違い">3. 価値関数モデルとの違い</h3>
+<p>強化学習には、もう一つ重要な概念として<strong>価値関数（value function）</strong> があります。</p>
+<ul>
+<li>
+<p><strong>価値関数モデル</strong>：<br>
+「状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> で行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> を取ったとき、将来どれくらいの報酬が期待できるか」を推定するモデル<br>
+→ 行動の「良さ」を評価する役割</p>
+</li>
+<li>
+<p><strong>方策モデル</strong>：<br>
+「状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> でどの行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> を選ぶべきか」を直接決めるモデル<br>
+→ 行動そのものを決める役割</p>
+</li>
+</ul>
+<p>多くのアルゴリズムでは、</p>
+<ul>
+<li>価値関数を学習して、その評価に基づいて方策を改善する（例：Q学習）</li>
+<li>方策モデルを直接学習して、報酬が高くなるようにパラメータを更新する（例：方策勾配法）</li>
+</ul>
+<p>という形で、両者を組み合わせて使います。</p>
+<h3 id="4-代表的な方策モデルの使い方">4. 代表的な方策モデルの使い方</h3>
+<ul>
+<li>
+<p><strong>方策勾配法（Policy Gradient）</strong><br>
+方策モデルのパラメータを、報酬が増える方向に直接更新します。</p>
+</li>
+<li>
+<p><strong>Actor-Critic（アクター・クリティック）</strong></p>
+<ul>
+<li><strong>Actor（方策モデル）</strong>：どの行動を取るかを決める</li>
+<li><strong>Critic（価値関数モデル）</strong>：その行動の良さを評価する<br>
+両方のモデルを同時に学習します。</li>
+</ul>
+</li>
+<li>
+<p><strong>決定論的方策（Deterministic Policy）</strong><br>
+状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> に対して一意の行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> を出力する方策モデル（例：DDPG）。</p>
+</li>
+</ul>
+<h2 id="方策モデルが必要となった理由">方策モデルが必要となった理由</h2>
+<p>方策モデルが「必要になってきた」背景は、ざっくり言うと <strong>「価値関数だけに頼る手法では、現実的な問題を解くのが難しくなってきたから」</strong> です。</p>
+<p>もう少し分解して、<strong>方策モデルがなかった段階での課題</strong>を整理します。</p>
+<h3 id="1-方策モデルがなかった時代の代表的な手法価値ベースの手法">1. 方策モデルがなかった時代の代表的な手法：価値ベースの手法</h3>
+<p>強化学習の初期からよく使われていたのは、主に以下のような<strong>価値関数ベースの手法</strong>でした。</p>
+<ul>
+<li><strong>Q学習（Q-learning）</strong></li>
+<li><strong>SARSA</strong></li>
+<li><strong>価値反復（Value Iteration）</strong></li>
+<li><strong>方策反復（Policy Iteration）</strong>（※厳密には方策も扱いますが、表形式が前提）</li>
+</ul>
+<p>これらは、<strong>状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex"> s </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> と行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> のペアに対する価値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q(s,a) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> を推定</strong>し、「その時点で最も価値の高い行動を選ぶ」という<strong>貪欲方策（greedy policy）</strong> に基づいて行動を決めます。</p>
+<h3 id="2-方策モデルがなかった段階での主な課題">2. 方策モデルがなかった段階での主な課題</h3>
+<p><strong>(1) 状態空間・行動空間が大きいと表形式では扱えない</strong></p>
+<ul>
+<li>初期の価値ベース手法は、<strong>状態と行動をすべてテーブル（表）で表現</strong>する前提でした。</li>
+<li>例：状態が <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mn>6</mn></msup></mrow><annotation encoding="application/x-tex"> 10^6 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">6</span></span></span></span></span></span></span></span></span></span></span> 通り、行動が <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn></mrow><annotation encoding="application/x-tex"> 10 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span></span></span></span> 通り → <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q(s,a) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> の表は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mn>7</mn></msup></mrow><annotation encoding="application/x-tex"> 10^7 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span></span></span></span></span></span></span></span></span> エントリ必要</li>
+<li>現実のタスク（画像入力、連続状態など）では、状態数はほぼ無限に近く、<strong>テーブルではメモリも計算量も爆発</strong>します。
+→ <strong>関数近似（ニューラルネットなど）で <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q(s,a) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> を近似</strong>する必要が出てきましたが、<br>
+それでも「どの行動をどれくらいの確率で選ぶか」を直接扱うのは難しく、多くの場合「最大価値の行動を選ぶ」だけになってしまいます。</li>
+</ul>
+<p><strong>(2) 連続な行動空間にうまく適用できない</strong></p>
+<ul>
+<li>Q学習などは、<strong>行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> を離散的に列挙</strong>する前提です。</li>
+<li>しかし、ロボット制御や自動運転などでは、<br>
+アクセル・ブレーキ・ステアリングなど<strong>行動が連続値</strong>です。</li>
+<li>連続行動を無理やり離散化すると：
+<ul>
+<li>分解能を細かくすると行動数が爆発</li>
+<li>分解能を粗くすると制御が不正確</li>
+</ul>
+</li>
+<li>価値関数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q(s,a) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> を「すべての連続行動 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex"> a </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> について評価して最大を探す」のは計算量的に現実的ではありません。
+→ <strong>方策モデルを使えば、「状態 → 連続行動」を直接出力</strong>できるので、この問題を回避できます。</li>
+</ul>
+<p><strong>(3) 探索と活用のバランスを柔軟に扱いにくい</strong></p>
+<ul>
+<li>Q学習などは、基本的に「価値が最大の行動を選ぶ（活用）」か、あるいは「ε-greedy でランダムに行動する（探索）」という<strong>単純な方策</strong>に頼ります。</li>
+<li>しかし、現実のタスクでは：
+<ul>
+<li>ある状態では大胆に探索したい</li>
+<li>別の状態では安全に活用したい</li>
+<li>行動の確率分布自体を学習したい</li>
+</ul>
+</li>
+<li>といった<strong>柔軟な方策</strong>が必要になることが多いです。</li>
+<li>価値関数だけでは「どの行動をどれくらいの確率で選ぶか」を<strong>直接制御する仕組みが弱い</strong>ため、探索戦略を細かく設計するのが難しい場面があります。</li>
+</ul>
+<p><strong>(4) 確率的方策・マルチモーダルな行動が必要なタスク</strong></p>
+<ul>
+<li>一部のタスクでは、<strong>同じ状態でも複数の良い行動があり得る</strong>（マルチモーダル）場合があります。
+<ul>
+<li>例：サッカーで「シュートする」か「パスする」か、どちらも状況によっては正解</li>
+</ul>
+</li>
+<li>Q学習のような「最大価値の行動だけを選ぶ」手法では、こうした<strong>確率的な方策やマルチモーダルな行動分布</strong>を自然に表現できません。</li>
+<li>方策モデルは、<strong>行動の確率分布 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> \pi(a|s) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> を直接出力</strong>できるので、こうしたタスクに適しています。</li>
+</ul>
+<p><strong>(5) 価値関数の近似誤差に敏感</strong></p>
+<ul>
+<li>深層Qネットワーク（DQN）などでは、<strong>価値関数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> Q(s,a) </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> をニューラルネットで近似</strong>します。</li>
+<li>しかし、価値関数の推定が少しずれると：
+<ul>
+<li>選ばれる行動が大きく変わる</li>
+<li>学習が不安定になる</li>
+</ul>
+</li>
+<li>方策モデルを使う手法（方策勾配、Actor-Critic）では、<strong>方策そのものを滑らかに更新</strong>できるため、価値関数の推定誤差の影響をある程度吸収しやすくなります。</li>
+</ul>
+<h3 id="3-方策モデルが解決するポイント対比">3. 方策モデルが解決するポイント（対比）</h3>
+<table>
+<thead>
+<tr>
+<th>課題（方策モデルなし）</th>
+<th>方策モデルがあるとどう変わるか</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状態・行動空間が大きくてテーブルが使えない</td>
+<td>ニューラルネットなどで<strong>方策を直接近似</strong>できる</td>
+</tr>
+<tr>
+<td>連続行動空間に適用しづらい</td>
+<td><strong>状態 → 連続行動</strong>を直接出力できる</td>
+</tr>
+<tr>
+<td>探索戦略を柔軟に設計しにくい</td>
+<td>方策分布そのものを学習し、<strong>探索と活用を同時に最適化</strong>できる</td>
+</tr>
+<tr>
+<td>マルチモーダルな行動を表現しにくい</td>
+<td><strong>確率的方策</strong>として複数の行動を同時に扱える</td>
+</tr>
+<tr>
+<td>価値関数の誤差に敏感</td>
+<td>方策を滑らかに更新することで<strong>安定性が向上</strong>する</td>
+</tr>
+</tbody>
+</table>
+<h2 id="設計思想">設計思想</h2>
+<p>方策を用いる方法（方策ベースの強化学習）の設計思想は、ざっくり言うと</p>
+<blockquote>
+<p><strong>「行動そのもの（方策）を直接最適化する」</strong></p>
+</blockquote>
+<p>という発想に基づいています。</p>
+<p>もう少し分解して、設計思想のポイントを整理します。</p>
+<h3 id="1-設計思想の核方策を最適化対象として扱う">1. 設計思想の核：方策を「最適化対象」として扱う</h3>
+<p><strong>(1) 価値ベース vs 方策ベースの違い</strong></p>
+<ul>
+<li>
+<p><strong>価値ベース（例：Q学習、DQN）</strong></p>
+<ul>
+<li>設計思想：<br>
+「状態と行動の価値 ( Q(s,a) ) を正確に推定し、その最大値を取る行動を選ぶ」<br>
+→ <strong>価値関数を正確に推定することが主目的</strong></li>
+<li>方策は、基本的に「価値が最大の行動を選ぶ」という<strong>後付けのルール</strong>です。</li>
+</ul>
+</li>
+<li>
+<p><strong>方策ベース（例：方策勾配法、Actor-Critic）</strong></p>
+<ul>
+<li>設計思想：<br>
+「方策 ( \pi(a|s) ) そのものをパラメータ化し、報酬が最大化されるように直接更新する」<br>
+→ <strong>方策そのものを最適化対象とする</strong></li>
+</ul>
+</li>
+</ul>
+<p>つまり、方策ベースの設計思想は、</p>
+<blockquote>
+<p>「価値の推定はあくまで補助であり、最終的な目的は『良い方策』を得ることだ。ならば、方策そのものを最適化しよう」</p>
+</blockquote>
+<p>という発想です。</p>
+<h3 id="2-設計思想の具体的な特徴">2. 設計思想の具体的な特徴</h3>
+<p><strong>(1) 方策を「関数」として扱う</strong></p>
+<ul>
+<li>方策モデル（ニューラルネットなど）で<br>
+<strong>状態 ( s ) → 行動の確率分布 ( \pi(a|s) )</strong> を表現します。</li>
+<li>設計思想：
+<ul>
+<li>「方策は、状態から行動への<strong>滑らかな関数</strong>として表現できるはずだ」</li>
+<li>「その関数のパラメータを、報酬に基づいて直接調整しよう」</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) 探索と活用を「方策分布」として統合</strong></p>
+<ul>
+<li>ε-greedy のような<strong>外付けの探索戦略</strong>ではなく、
+<ul>
+<li>方策分布 ( \pi(a|s) ) 自体が<strong>探索と活用の両方を含む</strong></li>
+<li>学習が進むにつれて、良い行動の確率が高まり、悪い行動の確率が下がる</li>
+</ul>
+</li>
+<li>設計思想：
+<ul>
+<li>「探索と活用は別々に設計するのではなく、<strong>方策分布の学習プロセスとして統合</strong>しよう」</li>
+</ul>
+</li>
+</ul>
+<p><strong>(3) 連続行動空間・高次元行動空間を自然に扱う</strong></p>
+<ul>
+<li>価値ベースでは、連続行動を扱うために
+<ul>
+<li>行動を離散化する</li>
+<li>あるいは、( Q(s,a) ) を最大化する ( a ) を数値最適化で求める</li>
+</ul>
+</li>
+<li>方策ベースでは、
+<ul>
+<li>方策モデルが<strong>連続行動を直接出力</strong>できる</li>
+<li>例：ロボット制御で「関節トルク」や「目標速度」を連続値として出力</li>
+</ul>
+</li>
+<li>設計思想：
+<ul>
+<li>「行動空間が連続・高次元であっても、<strong>方策を関数近似すれば直接扱える</strong>」</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 確率的方策・マルチモーダルな行動を許容</strong></p>
+<ul>
+<li>価値ベースでは、多くの場合「最大価値の行動」を選ぶため、
+<ul>
+<li>同じ状態で複数の良い行動がある場合（マルチモーダル）でも、<br>
+そのうち1つしか選ばれない</li>
+</ul>
+</li>
+<li>方策ベースでは、
+<ul>
+<li>方策分布 ( \pi(a|s) ) が<strong>複数の行動に確率を割り当てる</strong>ことができる</li>
+<li>状況に応じて、複数の「良い行動」を確率的に使い分けられる</li>
+</ul>
+</li>
+<li>設計思想：
+<ul>
+<li>「現実の意思決定はしばしば確率的・多様である。<br>
+方策分布としてそれを<strong>自然に表現</strong>しよう」</li>
+</ul>
+</li>
+</ul>
+<p><strong>(5) 価値関数は「補助的な批評家」として使う（Actor-Critic）</strong></p>
+<ul>
+<li>Actor-Critic では、
+<ul>
+<li><strong>Actor（方策モデル）</strong>：行動を決める</li>
+<li><strong>Critic（価値関数モデル）</strong>：その行動の良さを評価する</li>
+</ul>
+</li>
+<li>設計思想：
+<ul>
+<li>「価値関数は、方策を改善するための**ガイド（批評家）**として使おう」</li>
+<li>「主役はあくまで方策であり、価値関数はその改善を助ける脇役」</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-設計思想のまとめ">3. 設計思想のまとめ</h3>
+<p>方策を用いる方法の設計思想を一言でまとめると、</p>
+<blockquote>
+<p><strong>「方策そのものをパラメータ化し、報酬最大化の観点から直接最適化する」</strong></p>
+</blockquote>
+<p>という考え方です。</p>
+<p>その背景には、</p>
+<ul>
+<li>価値関数だけに頼ると、<br>
+状態・行動空間が大きいときや連続行動空間で扱いづらい</li>
+<li>探索戦略や確率的な行動選択を<strong>自然に統合したい</strong></li>
+<li>最終的に欲しいのは「良い方策」であり、<br>
+価値関数はそのための<strong>補助的なツール</strong>でよい</li>
+</ul>
+<p>という問題意識があります。</p>
+<p>この設計思想に基づいて、<br>
+方策勾配法や Actor-Critic といった現代の深層強化学習の主要な枠組みが発展してきました。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\doc\image\6_policy_is\1784550581981.png" alt="1784550581981"></p>
+<h2 id="現在の強化学習">現在の強化学習</h2>
+<p>ここまで方策モデルについて説明していきました。
+では方策モデルは現在の強化学習でどの程度使われているのでしょうか？</p>
+<p>その答えは、現在の強化学習では「方策モデルだけ」「価値モデルだけ」という純粋な一方が主流というより、<strong>両者を組み合わせた Actor-Critic（アクター・クリティック）系の手法が主流</strong>です。</p>
+<p>もう少し詳しく整理します。</p>
+<h3 id="1-現在の主流actor-critic方策価値のハイブリッド">1. 現在の主流：Actor-Critic（方策＋価値のハイブリッド）</h3>
+<p>2024年以降の強化学習の実用現場では、</p>
+<ul>
+<li><strong>Actor（方策モデル）</strong>：どの行動を取るかを決める</li>
+<li><strong>Critic（価値モデル）</strong>：その行動の良さを評価する</li>
+</ul>
+<p>という<strong>Actor-Critic アプローチ</strong>が標準的な位置づけになっています<a href="https://www.ai-souken.com/article/what-is-reinforcement-learning">AI総研</a>。</p>
+<p>代表的なアルゴリズムとしては：</p>
+<ul>
+<li><strong>PPO（Proximal Policy Optimization）</strong></li>
+<li><strong>A3C / A2C（Asynchronous Advantage Actor-Critic）</strong></li>
+<li><strong>SAC（Soft Actor-Critic）</strong></li>
+<li><strong>TD3（Twin Delayed DDPG）</strong></li>
+<li><strong>DDPG（Deep Deterministic Policy Gradient）</strong></li>
+</ul>
+<p>などが挙げられ、いずれも<strong>方策モデルと価値モデルの両方を使う</strong>設計になっています。</p>
+<h3 id="2-なぜどちらか一方ではなく両方が主流なのか">2. なぜ「どちらか一方」ではなく「両方」が主流なのか</h3>
+<p><strong>(1) 純粋な価値ベース（例：DQN）の限界</strong></p>
+<ul>
+<li>DQN のような<strong>純粋な価値ベース手法</strong>は、
+<ul>
+<li>離散行動空間のゲーム（Atari など）では非常に強力ですが、</li>
+<li>連続行動空間（ロボット制御など）にはそのままでは適用しづらい</li>
+<li>探索戦略や確率的方策を柔軟に設計しにくい</li>
+</ul>
+</li>
+<li>そのため、<strong>「価値関数だけ」に頼る手法は、汎用的な主流としては後退</strong>しています。</li>
+</ul>
+<p><strong>(2) 純粋な方策ベース（例：REINFORCE）の限界</strong></p>
+<ul>
+<li>REINFORCE のような<strong>純粋な方策勾配法</strong>は、
+<ul>
+<li>方策モデルだけを更新するため、学習が不安定でサンプル効率が悪い</li>
+<li>各行動の「相対的な良さ」を評価する仕組みが弱い</li>
+</ul>
+</li>
+<li>そのため、<strong>価値モデル（Critic）を導入して安定性と効率を上げる</strong>方向に進化しました。</li>
+</ul>
+<p><strong>(3) Actor-Critic のメリット</strong></p>
+<ul>
+<li>Actor（方策モデル）が「行動を決める」</li>
+<li>Critic（価値モデル）が「その行動の良さを評価する」</li>
+<li>これにより、
+<ul>
+<li>連続行動空間にも自然に適用できる</li>
+<li>探索と活用を方策分布として統合できる</li>
+<li>学習が比較的安定し、サンプル効率も高い</li>
+</ul>
+</li>
+</ul>
+<p>というバランスの良さから、<strong>実用アルゴリズムの多くが Actor-Critic 系</strong>になっています<a href="https://www.ai-souken.com/article/what-is-reinforcement-learning">AI総研</a>。</p>
+<h3 id="3-llm時代の新しい動きgrpo-など価値モデルを省く流れ">3. LLM時代の新しい動き：GRPO など「価値モデルを省く」流れ</h3>
+<p>一方で、<strong>大規模言語モデル（LLM）の推論強化</strong>の分野では、少し異なる流れも出てきています。</p>
+<ul>
+<li>
+<p><strong>GRPO（Group Relative Policy Optimization）</strong></p>
+<ul>
+<li>DeepSeek-R1 などで採用された手法</li>
+<li>PPO から<strong>価値関数（Critic）の学習を省き</strong>、<br>
+グループ内の相対評価だけで方策を更新する</li>
+<li>メモリ効率と学習安定性を両立させた新しい方策最適化手法と位置づけられています<a href="https://www.ai-souken.com/article/what-is-reinforcement-learning">AI総研</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>DAPO</strong> など、GRPO をさらに発展させた手法も提案されています。</p>
+</li>
+</ul>
+<p>これらは「価値モデルを省いた方策最適化」であり、<br>
+<strong>LLMの推論訓練という特定の文脈では、方策ベースの手法が再び注目されている</strong>と言えます。</p>
+<p>ただし、一般的な強化学習全体で見ると、<br>
+<strong>PPO をはじめとする Actor-Critic 系が依然として標準的な基盤</strong>であり、<br>
+GRPO のような手法はその上での「効率化・特殊化」の流れと捉えるのが適切です。</p>
+<h3 id="4-総括">4. 総括</h3>
+<ul>
+<li>
+<p><strong>現在の強化学習の主流</strong>：</p>
+<ul>
+<li>**Actor-Critic（方策モデル＋価値モデル）**が標準</li>
+<li>PPO、A3C、SAC、TD3 などが代表例<a href="https://www.ai-souken.com/article/what-is-reinforcement-learning">AI総研</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>純粋な価値ベース（DQN など）</strong>：</p>
+<ul>
+<li>特定のタスク（離散行動のゲームなど）では依然として重要ですが、<br>
+汎用的な主流としては後退。</li>
+</ul>
+</li>
+<li>
+<p><strong>純粋な方策ベース（REINFORCE など）</strong>：</p>
+<ul>
+<li>理論的には重要ですが、実用では Actor-Critic に進化。</li>
+</ul>
+</li>
+<li>
+<p><strong>LLMの推論強化（GRPO など）</strong>：</p>
+<ul>
+<li>価値モデルを省いた<strong>方策最適化</strong>が新しいトレンドとして台頭しているが、<br>
+強化学習全体としては、依然として Actor-Critic 系が基盤。</li>
+</ul>
+</li>
+</ul>
+<p>したがって、「方策モデル vs 価値モデル」という二者択一ではなく、
+<strong>「方策モデルと価値モデルを組み合わせた Actor-Critic が主流」</strong> と理解するのが、現在の強化学習の実情に近いです。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/LU11IdCl8jc?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
