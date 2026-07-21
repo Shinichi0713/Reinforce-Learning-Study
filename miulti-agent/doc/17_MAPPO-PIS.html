@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/04/043000">調査したチーム連携強化のためのMARLの手法</a>について本日は詳細を調べていこうと思います。</p>
+<p>調査対象となる手法の名前は<strong>MAPPO-PIS</strong>です。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="概要">概要</h2>
+<p>以下に、MAPPO-PIS 論文の概要を整理します。</p>
+<h3 id="論文情報">論文情報</h3>
+<ul>
+<li>
+<p><strong>タイトル</strong>：<br>
+<em>MAPPO-PIS: A Multi-Agent Proximal Policy Optimization Method with Prior Intent Sharing for CAVs' Cooperative Decision-Making</em><br>
+<a href="https://arxiv.org/abs/2408.06656">arXiv</a></p>
+</li>
+<li>
+<p><strong>著者</strong>：<br>
+Yicheng Guo, Jiaqi Liu, Rongjie Yu, Peng Hang, Jian Sun<br>
+<a href="https://arxiv.org/abs/2408.06656">arXiv</a></p>
+</li>
+<li>
+<p><strong>発表年</strong>：<br>
+2024年（arXiv 投稿日：2024年8月13日）<br>
+<a href="https://arxiv.org/abs/2408.06656">arXiv</a></p>
+</li>
+</ul>
+<p>尚、本論文はECCVでの採択論文です。
+ECCV は、コンピュータビジョン分野の トップ国際会議の一つ です。</p>
+<blockquote>
+<p><strong>ECCV</strong><br>
+分野：コンピュータビジョン（Computer Vision）<br>
+画像認識、物体検出、セマンティックセグメンテーション、3Dビジョン、映像理解、GAN、自己教師あり学習など、画像・動画を扱う AI 研究全般を対象とします。
+トップ会議としての位置づけ：<br>
+コンピュータビジョン分野で最も権威のある国際会議の一つで、CVPR（Conference on Computer Vision and Pattern Recognition）、ICCV（International Conference on Computer Vision）と並び、「三大ビジョン会議」と呼ばれることが多いです。</p>
+</blockquote>
+<h3 id="論文の目的">論文の目的</h3>
+<ul>
+<li>
+<p><strong>対象タスク</strong>：<br>
+連結自動運転車（Connected and Autonomous Vehicles, CAVs）の <strong>協調的意思決定</strong>、特に <strong>人間と自動運転車が混在する合流エリア</strong> での協調<a href="https://arxiv.org/abs/2408.06656">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>課題認識</strong>：</p>
+<ul>
+<li>合流エリアでは、車両同士の相互作用が複雑で、単純なルールベースや既存の MARL 手法では、
+<ul>
+<li>安全性（衝突回避）</li>
+<li>交通効率（流れの円滑化）<br>
+を同時に高水準で達成することが難しい。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>目的</strong>：</p>
+<ul>
+<li>CAV の協調意思決定問題を <strong>マルチエージェント強化学習（MARL）</strong> として定式化し、</li>
+<li><strong>将来の走行意図（Prior Intent）を共有する</strong> ことで、安全性と効率を両立する協調行動を学習する手法を提案すること<a href="https://arxiv.org/abs/2408.06656">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="手法の構成">手法の構成</h3>
+<p>MAPPO-PIS は、<strong>Multi-Agent Proximal Policy Optimization（MAPPO）</strong> をベースに、以下の2つの主要モジュールを統合した手法です<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+<p><strong>1. Intention Generator Module（IGM）</strong></p>
+<ul>
+<li>
+<p><strong>役割</strong>：<br>
+各エージェント（CAV）が、<strong>将来の走行軌道（意図）</strong> を生成し、それを他エージェントと共有するモジュール。</p>
+</li>
+<li>
+<p><strong>動作</strong>：</p>
+<ul>
+<li>各車両は、複数ステップ先までの <strong>予定軌道（trajectory）</strong> を生成。</li>
+<li>この軌道情報を <strong>V2V 通信</strong> を通じて近傍車両と共有し、「自分が今後どう動くつもりか」を明示的に伝える。</li>
+</ul>
+</li>
+<li>
+<p><strong>意義</strong>：<br>
+単なる観測情報だけでなく、<strong>将来の意図</strong> を共有することで、相手の動きを予測しやすくなり、長期的な協調が可能になる。</p>
+</li>
+</ul>
+<p><strong>2. Safety Enhanced Module（SEM）</strong></p>
+<ul>
+<li>
+<p><strong>役割</strong>：<br>
+共有された意図に基づき、<strong>安全性を確保するためのチェックと修正</strong> を行うモジュール。</p>
+</li>
+<li>
+<p><strong>構成</strong>：</p>
+<ul>
+<li><strong>優先度計算</strong>：<br>
+各車両について、
+<ul>
+<li>合流レーンにいるか（緊急性）</li>
+<li>合流端までの距離</li>
+<li>時間車頭間隔（time headway）<br>
+などから <strong>優先度スコア</strong> を計算<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li><strong>意図チェック・修正</strong>：
+<ul>
+<li>共有された意図に基づき、衝突リスクが検出された場合、</li>
+<li><strong>Intention Corrector</strong> によって、安全な行動に意図を修正し、その修正後の意図に従って行動を選択。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>意義</strong>：<br>
+意図共有により協調を促進しつつ、SEM で <strong>安全性を保証</strong> する二段構えの設計になっています。</p>
+</li>
+</ul>
+<p><strong>3. 学習フレームワーク</strong></p>
+<ul>
+<li>
+<p><strong>ベースアルゴリズム</strong>：<br>
+MAPPO（Multi-Agent PPO）を採用し、<strong>集中学習・分散実行（CTDE）</strong> の枠組みで学習<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>カリキュラム学習</strong>：</p>
+<ul>
+<li>簡単なシナリオ（例：車両数が少ない、速度が低い）から、</li>
+<li>複雑なシナリオ（車両数が多い、速度が高い、人間運転車が混在）へと段階的に学習させることで、<strong>学習効率と安定性を向上</strong><a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="実験結果の概要">実験結果の概要</h3>
+<ul>
+<li>
+<p><strong>評価環境</strong>：<br>
+人間運転車と CAV が混在する <strong>合流シナリオ</strong>（高速道路ランプ合流など）を対象としたシミュレーション環境<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+</li>
+<li>
+<p><strong>比較対象</strong>：<br>
+既存の協調意思決定手法や MARL ベースライン（MAPPO など）と比較。</p>
+</li>
+<li>
+<p><strong>主な結果</strong>：</p>
+<ul>
+<li><strong>安全性</strong>：<br>
+衝突率や危険な接近の発生頻度が減少し、既存手法より安全な挙動を示す。</li>
+<li><strong>効率</strong>：<br>
+平均速度やスループットが向上し、交通流の効率が改善。</li>
+<li><strong>システム全体性能</strong>：<br>
+安全性と効率の両面で、<strong>state-of-the-art ベースラインを上回る性能</strong>を達成したと報告されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="概要総括">概要総括</h3>
+<ul>
+<li>
+<p>MAPPO-PIS は、<strong>CAV の協調意思決定</strong>を MARL として扱い、</p>
+<ul>
+<li><strong>将来の走行意図を共有する IGM</strong></li>
+<li><strong>安全性を確保する SEM</strong><br>
+を MAPPO に統合した手法です。</li>
+</ul>
+</li>
+<li>
+<p>これにより、</p>
+<ul>
+<li>人間運転車が混在する複雑な合流環境でも、</li>
+<li>安全性と交通効率を両立する協調行動を学習できることが示されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p>実装コードは GitHub で公開されています：<br>
+<a href="https://github.com/CCCC1dhcgd/A-MAPPO-PIS">https://github.com/CCCC1dhcgd/A-MAPPO-PIS</a><br>
+<a href="https://arxiv.org/abs/2408.06656">arXiv</a></p>
+</li>
+</ul>
+<h2 id="研究背景">研究背景</h2>
+<p>MAPPO-PIS は、<strong>自動運転・CAV（Connected and Autonomous Vehicles）の協調意思決定</strong>という応用課題に対して、</p>
+<ul>
+<li>既存の <strong>MAPPO（Multi-Agent PPO）</strong></li>
+<li>自動車分野の <strong>意図共有（Intent Sharing）</strong> の標準</li>
+<li>交通流・人間運転車の挙動をモデル化する <strong>古典的交通モデル</strong><br>
+を組み合わせて設計されています。</li>
+</ul>
+<p>以下、影響を受けた主な論文・標準・モデルを、背景とともに整理します。</p>
+<h3 id="1-ベースとなった強化学習手法mappo-と-ppo">1. ベースとなった強化学習手法：MAPPO と PPO</h3>
+<ul>
+<li>
+<p><strong>MAPPO（Multi-Agent Proximal Policy Optimization）</strong></p>
+<ul>
+<li>MAPPO-PIS は、<strong>MAPPO</strong> をベースアルゴリズムとして採用しています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+<li>MAPPO は、単一エージェントの <strong>PPO（Proximal Policy Optimization）</strong><a href="https://arxiv.org/html/2408.06656v2">arXiv</a> をマルチエージェント環境に拡張したもので、
+<ul>
+<li><strong>集中学習・分散実行（CTDE）</strong> の枠組み</li>
+<li>安定した on-policy 学習<br>
+を特徴とします。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>背景</strong>：</p>
+<ul>
+<li>マルチエージェント環境では、各エージェントが独立に学習すると「相手のポリシーが変わる」ことで環境が非定常になり、学習が不安定になります。</li>
+<li>MAPPO は、中央 critic が全体の状態を把握することでこの非定常性を緩和し、<strong>協調的なポリシー学習を安定化</strong>する手法として広く使われています。</li>
+<li>MAPPO-PIS は、この <strong>MAPPO の安定性とスケーラビリティ</strong> を活かしつつ、CAV 特有の「意図共有」と「安全性」を追加した設計になっています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-cav-向けマルチエージェント強化学習marlの先行研究">2. CAV 向けマルチエージェント強化学習（MARL）の先行研究</h3>
+<ul>
+<li>
+<p><strong>CAV の協調意思決定を MARL で扱う研究</strong></p>
+<ul>
+<li>MAPPO-PIS の論文では、
+<ul>
+<li>Independent Q-Learning (IQL)</li>
+<li>MAACKTR</li>
+<li>MAA2C<br>
+などの <strong>既存 MARL 手法</strong> を引用し、CAV の協調意思決定に適用した研究を背景として挙げています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>背景</strong>：</p>
+<ul>
+<li>合流エリアや交差点など、<strong>複数車両が相互作用する交通場面</strong>では、
+<ul>
+<li>単純なルールベース</li>
+<li>単一エージェント RL<br>
+では、安全性と効率の両立が難しいことが知られていました。</li>
+</ul>
+</li>
+<li>そこで、<strong>マルチエージェント RL</strong> を用いて、車両同士の協調を学習する研究が増えてきました。</li>
+<li>MAPPO-PIS は、その中でも <strong>MAPPO をベースに、より高度な「意図共有」と「安全性モジュール」を追加</strong>することで、既存手法を上回る性能を目指しています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-意図共有intent-sharingの概念と-sae-標準">3. 意図共有（Intent Sharing）の概念と SAE 標準</h3>
+<ul>
+<li>
+<p><strong>SAE J3216：意図共有協調（Intent-Sharing Cooperation）</strong></p>
+<ul>
+<li>MAPPO-PIS の「Prior Intent Sharing」というアイデアは、
+<ul>
+<li><strong>SAE J3216</strong> で定義されている <strong>Intent-Sharing Cooperation</strong> の概念に基づいています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>背景</strong>：</p>
+<ul>
+<li>SAE J3216 は、自動運転車同士や自動運転車とインフラが、
+<ul>
+<li>「これからどう動くつもりか（意図）」<br>
+を明示的に共有し、協調するための標準的な考え方を示しています。</li>
+</ul>
+</li>
+<li>これに対し、従来の多くの研究は、
+<ul>
+<li>過去の行動履歴から相手の意図を <strong>推論（Intent Inferring）</strong> する<br>
+アプローチでした<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>MAPPO-PIS は、
+<ul>
+<li><strong>推論ではなく、明示的な意図共有（Intent Sharing）</strong><br>
+を採用することで、</li>
+<li>誤推論による事故リスク</li>
+<li>不確実性の増大<br>
+を減らし、より安全で効率的な協調を目指しています。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-人間運転車の挙動モデルidm-と-mobil">4. 人間運転車の挙動モデル：IDM と MOBIL</h3>
+<ul>
+<li>
+<p><strong>Intelligent Driver Model (IDM)</strong></p>
+<ul>
+<li>車間距離と速度に基づいて、車両の加速度を決める <strong>カーブィングモデル</strong><a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>MOBIL レーンチェンジモデル</strong></p>
+<ul>
+<li>レーンチェンジの意思決定を、自車と周囲車両の利得（加速度の改善など）に基づいて行うモデル<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>背景</strong>：</p>
+<ul>
+<li>MAPPO-PIS は、<strong>人間運転車（HV）と CAV が混在する環境</strong>を扱うため、
+<ul>
+<li>HV がどのように動くかを予測する必要があります。</li>
+</ul>
+</li>
+<li>そこで、交通工学分野で広く使われている <strong>IDM と MOBIL</strong> を組み合わせ、
+<ul>
+<li>HV の挙動をシミュレート</li>
+<li>SEM（Safety Enhanced Module）でのリスク評価<br>
+に利用しています。</li>
+</ul>
+</li>
+<li>これにより、<strong>CAV が HV の動きをある程度予測しつつ、安全な協調行動を学習</strong>できるようになっています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-その他の関連研究ルールベース最適化ベース">5. その他の関連研究（ルールベース・最適化ベース）</h3>
+<ul>
+<li>
+<p><strong>ルールベースの予約方式</strong></p>
+<ul>
+<li>交差点や合流部で、車両が「スロット」を予約するようなルールベースの方式<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>最適化ベースの MPC（Model Predictive Control）</strong></p>
+<ul>
+<li>モデル予測制御を用いて、短期的な将来の状態を最適化する手法<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>背景</strong>：</p>
+<ul>
+<li>これらは、<strong>安全性や効率を高めるための古典的なアプローチ</strong>として引用されています。</li>
+<li>しかし、
+<ul>
+<li>ルールベースは複雑な状況に弱い</li>
+<li>MPC は計算コストが高く、リアルタイム性に課題がある<br>
+といった限界があります。</li>
+</ul>
+</li>
+<li>MAPPO-PIS は、<strong>RL による柔軟な学習</strong>と、<strong>意図共有・安全性モジュール</strong>を組み合わせることで、
+<ul>
+<li>ルールベースや MPC の利点（安全性・最適性）</li>
+<li>RL の利点（適応性・スケーラビリティ）<br>
+を両立しようとしています。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>論文で解決したいシチュエーションとして車の合流が挙げられてます。
+突然飛び出したりするとメチャ危険ですし、お互いの意思疎通が必要になるわけです。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\17_MAPPO-PIS\1784582604379.png" alt="1784582604379"></p>
+<h2 id="提案手法">提案手法</h2>
+<p>MAPPO-PIS の提案手法は、<strong>「将来の走行意図を共有する」ことで、CAV（連結自動運転車）同士が安全かつ効率的に協調する</strong>ことを目指したマルチエージェント強化学習（MARL）手法です。</p>
+<p>全体の流れを簡略化すると、以下のようになります。</p>
+<ol>
+<li><strong>各車両が「将来どう動くつもりか（意図）」を生成・共有</strong>（IGM）</li>
+<li><strong>共有された意図をもとに、衝突リスクをチェックし、必要なら安全な行動に修正</strong>（SEM）</li>
+<li><strong>MAPPO でポリシーを学習</strong>（CTDE：集中学習・分散実行）</li>
+</ol>
+<p>以下、もう少し詳しく説明します。</p>
+<h3 id="1-全体のフレームワークmappo--意図共有">1. 全体のフレームワーク：MAPPO + 意図共有</h3>
+<ul>
+<li>
+<p><strong>ベースアルゴリズム</strong>：</p>
+<ul>
+<li><strong>MAPPO（Multi-Agent PPO）</strong> を採用し、
+<ul>
+<li>学習時：中央 critic が全体の状態を見て価値を評価（集中学習）</li>
+<li>実行時：各車両が自分のポリシーに基づいて独立に行動（分散実行）<br>
+という <strong>CTDE（Centralized Training, Decentralized Execution）</strong> の枠組みを使います<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>追加要素</strong>：</p>
+<ul>
+<li><strong>Intention Generator Module（IGM）</strong>：将来の走行軌道（意図）を生成・共有</li>
+<li><strong>Safety Enhanced Module（SEM）</strong>：安全性をチェックし、必要なら意図を修正<br>
+を MAPPO に統合しています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-intention-generator-moduleigm将来の意図を生成共有">2. Intention Generator Module（IGM）：将来の「意図」を生成・共有</h3>
+<p><strong>何をするモジュールか</strong></p>
+<ul>
+<li>各 CAV が、<strong>「今後数秒〜数十秒、自分がどう走るつもりか」という軌道（意図）</strong> を生成します。</li>
+<li>この軌道情報を <strong>V2V 通信</strong> で近傍の車両（CAV やインフラ）に <strong>明示的に共有</strong> します。</li>
+</ul>
+<p><strong>入力と出力</strong></p>
+<ul>
+<li><strong>入力</strong>：
+<ul>
+<li>自車の状態（位置、速度、加速度など）</li>
+<li>周囲の車両・環境情報（車線、合流端までの距離など）</li>
+</ul>
+</li>
+<li><strong>出力</strong>：
+<ul>
+<li>将来の <strong>走行軌道（trajectory）</strong>：
+<ul>
+<li>例：「次の 3 秒間はこの速度で直進し、その後右レーンに合流する」といった連続的な軌道</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>ポイント</strong></p>
+<ul>
+<li>単に「今の観測」を共有するのではなく、<strong>「将来の行動計画」を共有</strong>することで、
+<ul>
+<li>相手が自分の動きを予測しやすくなり、</li>
+<li>長期的な協調（例：合流時の順番調整）が可能になります。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-safety-enhanced-modulesem安全性を確保する二段構え">3. Safety Enhanced Module（SEM）：安全性を確保する二段構え</h3>
+<p>SEM は、<strong>共有された意図をもとに「安全かどうか」をチェックし、必要なら修正するモジュール</strong>です。主に2つの要素からなります。</p>
+<p><strong>(1) 優先度計算（Priority）</strong></p>
+<ul>
+<li>
+<p>各車両について、以下のような情報から <strong>優先度スコア</strong> を計算します<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>：</p>
+<ul>
+<li>合流レーンにいるかどうか（緊急性）</li>
+<li>合流端までの距離</li>
+<li>時間車頭間隔（time headway）</li>
+<li>など</li>
+</ul>
+</li>
+<li>
+<p><strong>意味</strong>：</p>
+<ul>
+<li>「どちらの車両が先に合流すべきか」を定量的に判断し、</li>
+<li>優先度の高い車両を優先して通すような協調を促します。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) 意図チェックと修正（Intention Corrector）</strong></p>
+<ul>
+<li>共有された意図（軌道）に基づき、<strong>衝突リスク</strong> を評価します。</li>
+<li>リスクが高い場合：
+<ul>
+<li><strong>Intention Corrector</strong> が、
+<ul>
+<li>速度を落とす</li>
+<li>合流タイミングを遅らせる</li>
+<li>車線変更をキャンセルする<br>
+など、<strong>安全な行動に意図を修正</strong>します。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>修正後の意図に従って、実際の行動（アクセル・ブレーキ・ステアリング）が決定されます。</li>
+</ul>
+<p><strong>背景モデル：IDM と MOBIL</strong></p>
+<ul>
+<li>
+<p>SEM では、<strong>人間運転車（HV）の挙動</strong> を予測するために、</p>
+<ul>
+<li><strong>Intelligent Driver Model (IDM)</strong>：車間距離と速度から加速度を決めるモデル</li>
+<li><strong>MOBIL レーンチェンジモデル</strong>：レーンチェンジの意思決定モデル<br>
+を利用しています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p>これにより、</p>
+<ul>
+<li>CAV は HV の動きをある程度予測しつつ、</li>
+<li>自車の意図を安全側に修正することができます。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-mappo-との統合と学習">4. MAPPO との統合と学習</h3>
+<p>論文読んで気づいたのですが、本手法はMAPPOから新規性があるかというと、明確な新規性ではない感じです。
+MAPPOを使って、安全運転のモジュールを統合した手法であるとみるとすんなり、&quot;そういうことか&quot;となります。</p>
+<p><strong>学習時の流れ（CTDE）</strong></p>
+<ol>
+<li>
+<p><strong>各エージェント（CAV）</strong>：</p>
+<ul>
+<li>観測（位置、速度、周囲車両など）と、共有された意図情報を入力として、</li>
+<li>IGM で将来軌道を生成し、SEM で安全性チェック・修正を行ったうえで、</li>
+<li>最終的な行動（アクセル・ブレーキ・ステアリング）を出力。</li>
+</ul>
+</li>
+<li>
+<p><strong>中央 critic</strong>：</p>
+<ul>
+<li>全車両の状態と共有された意図を入力として、</li>
+<li>全体の価値（安全性・効率など）を評価し、</li>
+<li>MAPPO の目的関数に基づいてポリシーを更新。</li>
+</ul>
+</li>
+<li>
+<p><strong>カリキュラム学習</strong>：</p>
+<ul>
+<li>簡単なシナリオ（車両数が少ない、速度が低い）から、</li>
+<li>複雑なシナリオ（車両数が多い、速度が高い、HV が混在）へと段階的に学習させることで、</li>
+<li>学習の安定性と効率を高めています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ol>
+<p><strong>実行時の流れ（分散実行）</strong></p>
+<ul>
+<li>学習済みのポリシーと IGM/SEM を使い、
+<ul>
+<li>各 CAV は <strong>自分の観測と共有された意図だけ</strong> を基に行動を決定します。</li>
+</ul>
+</li>
+<li>中央 critic は不要で、<strong>完全に分散実行</strong> が可能です。</li>
+</ul>
+<h3 id="5-提案手法の新規性">5. 提案手法の新規性</h3>
+<ul>
+<li>
+<p><strong>従来の MARL for CAV</strong>：</p>
+<ul>
+<li>観測や過去の行動から相手の意図を「推論」する（Intent Inferring）ことが多く、</li>
+<li>誤推論による事故リスクや不確実性が課題でした。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAPPO-PIS</strong>：</p>
+<ul>
+<li><strong>明示的な意図共有（Prior Intent Sharing）</strong> を導入し、
+<ul>
+<li>「自分がどう動くつもりか」を直接伝えることで、推論の不確実性を減らす。</li>
+</ul>
+</li>
+<li><strong>SEM による安全性チェック・修正</strong> を組み込み、
+<ul>
+<li>意図共有による協調を、安全側に制御する。</li>
+</ul>
+</li>
+<li><strong>MAPPO の安定した学習能力</strong> を活かしつつ、
+<ul>
+<li>CAV 特有の「意図共有」と「安全性」を統合した点が新しいです<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>論文で掲載されているシステム構成図です。
+IGMが出す走行予定経路をお互い共有しあい、MAPPOにより協調学習するということのようです。
+因みに、図、文字化け・・・？なんだ・・・。。。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\17_MAPPO-PIS\1784583373977.png" alt="1784583373977"></p>
+<h2 id="実験結果">実験結果</h2>
+<p>以下、MAPPO-PIS の <strong>実験の問題設定</strong> と <strong>実験結果</strong> を順に説明します。</p>
+<h3 id="1-問題設定シナリオ環境">1. 問題設定（シナリオ・環境）</h3>
+<p><strong>シナリオ：人間運転車と CAV が混在する合流エリア</strong></p>
+<ul>
+<li>
+<p><strong>対象</strong>：<br>
+高速道路の <strong>ランプ合流エリア</strong>（on-ramp から本線車線への合流）</p>
+<ul>
+<li>CAV（Connected and Autonomous Vehicles：連結自動運転車）</li>
+<li>HV（Human-driven Vehicles：人間運転車）<br>
+が混在する環境<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>交通モード（難易度）</strong>：<br>
+以下の4つのモードで評価されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+<ol>
+<li>
+<p><strong>Easy Mode（簡単）</strong></p>
+<ul>
+<li>CAV：1〜3台</li>
+<li>HV：1〜3台（同質：全車同じ挙動）</li>
+</ul>
+</li>
+<li>
+<p><strong>Hard Mode（難しい）</strong></p>
+<ul>
+<li>CAV：3〜6台</li>
+<li>HV：3〜6台（同質）</li>
+</ul>
+</li>
+<li>
+<p><strong>Easy Mode（異質 HV）</strong></p>
+<ul>
+<li>CAV：1〜3台</li>
+<li>HV：1〜3台（異質：Aggressive / Normal / Timid の3タイプ）</li>
+</ul>
+</li>
+<li>
+<p><strong>Hard Mode（異質 HV）</strong></p>
+<ul>
+<li>CAV：3〜6台</li>
+<li>HV：3〜6台（異質：Aggressive / Normal / Timid）</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>シミュレータ</strong>：</p>
+<ul>
+<li><strong>highway-env</strong> を用いて合流シナリオをシミュレート<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-比較手法ベースライン">2. 比較手法（ベースライン）</h3>
+<p>MAPPO-PIS は、以下の <strong>state-of-the-art MARL 手法</strong> と比較されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+<ol>
+<li>
+<p><strong>MAPPO</strong></p>
+<ul>
+<li>Multi-Agent PPO（本手法のベース）</li>
+<li>CTDE フレームワークで、中央 critic が全体を評価。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAACKTR</strong></p>
+<ul>
+<li>Multi-Agent Actor-Critic using Kronecker-Factored Trust Region</li>
+<li>信頼領域を用いた actor-critic 型 MARL。</li>
+</ul>
+</li>
+<li>
+<p><strong>MAA2C</strong></p>
+<ul>
+<li>Multi-Agent Advantage Actor-Critic</li>
+<li>Advantage を用いた actor-critic 型 MARL。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-評価指標">3. 評価指標</h3>
+<p>安全性と効率の両面から、以下の指標で評価されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+<ol>
+<li>
+<p><strong>Evaluation Reward（評価報酬）</strong></p>
+<ul>
+<li>学習済みポリシーを評価した際の <strong>累積報酬</strong>。</li>
+<li>報酬設計には、
+<ul>
+<li>安全（衝突回避）</li>
+<li>効率（速度維持、遅延回避）<br>
+などが含まれます。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Collision Rate（衝突率）</strong></p>
+<ul>
+<li>1エピソードあたりの <strong>衝突回数</strong> または衝突確率。</li>
+<li>低いほど安全。</li>
+</ul>
+</li>
+<li>
+<p><strong>Average Speed（平均速度）</strong></p>
+<ul>
+<li>車両の平均速度（m/s）。</li>
+<li>高いほど交通流がスムーズで効率的。</li>
+</ul>
+</li>
+<li>
+<p><strong>Post-Encroachment Time (PET)</strong></p>
+<ul>
+<li>合流時に、先行車と後続車が <strong>同じ空間を通過する時間差</strong>。</li>
+<li>値が大きいほど、<strong>安全マージンが大きい</strong>（衝突リスクが低い）ことを意味します。</li>
+</ul>
+</li>
+</ol>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\17_MAPPO-PIS\1784583924572.png" alt="1784583924572"></p>
+<h3 id="4-実験結果の要点">4. 実験結果の要点</h3>
+<p><strong>(1) Easy Mode（同質 HV）</strong></p>
+<ul>
+<li>
+<p><strong>Evaluation Reward</strong>：</p>
+<ul>
+<li>MAPPO-PIS：<strong>73.45</strong></li>
+<li>MAPPO：44.03</li>
+<li>MAA2C：36.27<br>
+→ MAPPO-PIS が <strong>最も高い報酬</strong> を達成<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>Collision Rate</strong>：</p>
+<ul>
+<li>MAPPO-PIS：<strong>0.00</strong>（衝突なし）</li>
+<li>MAPPO：0.03<br>
+→ MAPPO-PIS が <strong>最も安全</strong><a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>PET</strong>：</p>
+<ul>
+<li>MAPPO-PIS：<strong>1.6秒</strong>（高い安全マージン）<br>
+→ 他手法より大きな安全マージンを示す<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(2) Hard Mode（同質 HV）</strong></p>
+<ul>
+<li>
+<p><strong>Evaluation Reward</strong>：</p>
+<ul>
+<li>MAPPO-PIS：<strong>33.27</strong></li>
+<li>MAPPO：-36.58</li>
+<li>MAA2C：0.30<br>
+→ 難易度が上がっても、MAPPO-PIS は <strong>正の報酬を維持</strong> し、他手法を大きく上回る<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>
+<p><strong>Collision Rate</strong>：</p>
+<ul>
+<li>MAPPO-PIS：<strong>0.01</strong></li>
+<li>MAPPO：0.03<br>
+→ Hard Mode でも <strong>衝突率が低く、安全性が高い</strong><a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\17_MAPPO-PIS\1784584064254.png" alt="1784584064254"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\doc\image\17_MAPPO-PIS\1784584092468.png" alt="1784584092468"></p>
+<p><strong>(3) 異質 HV（Aggressive / Normal / Timid）を含む場合</strong></p>
+<ul>
+<li><strong>Easy / Hard Mode ともに</strong>、
+<ul>
+<li>MAPPO-PIS は <strong>最も高い評価報酬</strong> と <strong>低い衝突率</strong> を維持。</li>
+<li>Aggressive（攻撃的）な HV が混在しても、<strong>安全性と効率の両立</strong>が可能であることが示されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>(4) 平均速度（Average Speed）</strong></p>
+<ul>
+<li>MAPPO-PIS は、
+<ul>
+<li>他手法より <strong>高い平均速度</strong> を達成し、</li>
+<li>交通流の効率（スループット）が向上していることが報告されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-実験結果のまとめ">5. 実験結果のまとめ</h3>
+<ul>
+<li>
+<p><strong>安全性</strong>：</p>
+<ul>
+<li>Collision Rate と PET の両面で、MAPPO-PIS は <strong>最も安全な挙動</strong> を示しました。</li>
+<li>特に Hard Mode や異質 HV を含む場合でも、衝突率を低く抑えています。</li>
+</ul>
+</li>
+<li>
+<p><strong>効率</strong>：</p>
+<ul>
+<li>Evaluation Reward と Average Speed が、MAPPO, MAACKTR, MAA2C を上回り、</li>
+<li><strong>交通流の効率も高い</strong> ことが確認されています。</li>
+</ul>
+</li>
+<li>
+<p><strong>協調の質</strong>：</p>
+<ul>
+<li>意図共有（IGM）と安全性モジュール（SEM）を組み込むことで、</li>
+<li>単純な MAPPO よりも <strong>協調の質が向上</strong> し、</li>
+<li>複雑な合流シナリオでも安定して性能を発揮できることが示されました<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>論文読んでわかった点ですが。
+MAPPO-PIS では、<strong>「自分が今後、こうしていく」という行動予定（将来の軌道・意図）を生成するモジュール</strong>が必須です。</p>
+<h3 id="1-igmintention-generator-moduleの役割">1. IGM（Intention Generator Module）の役割</h3>
+<ul>
+<li>
+<p>MAPPO-PIS では、<strong>IGM</strong> が以下の役割を担います<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</p>
+<ul>
+<li>各エージェント（CAV）が、
+<ul>
+<li>現在の状態（位置・速度など）</li>
+<li>周囲の環境情報<br>
+を入力として、</li>
+<li><strong>将来の走行軌道（trajectory）</strong> を生成。</li>
+</ul>
+</li>
+<li>この軌道を <strong>「意図（Intent）」</strong> として他エージェントと共有。</li>
+</ul>
+</li>
+<li>
+<p>つまり、</p>
+<ul>
+<li>「今から数秒後、自分はここをこの速度で通るつもりだ」<br>
+という <strong>行動予定（計画）</strong> を明示的に生成・共有することが、MAPPO-PIS の核心部分です。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-なぜ行動予定の生成が必要か">2. なぜ「行動予定の生成」が必要か</h3>
+<ul>
+<li>MAPPO-PIS は、<strong>意図共有（Prior Intent Sharing）</strong> を前提に設計されています<a href="https://arxiv.org/html/2408.06656v2">arXiv</a>。</li>
+<li>意図共有を行うためには、
+<ul>
+<li>各エージェントが <strong>自分自身の将来の行動計画</strong> を持っている必要があります。</li>
+</ul>
+</li>
+<li>この計画がなければ、
+<ul>
+<li>相手に「自分がどう動くつもりか」を伝えられない</li>
+<li>SEM で安全性チェックや修正もできない<br>
+ため、MAPPO-PIS の枠組みは成立しません。</li>
+</ul>
+</li>
+</ul>
+<p>したがって、<strong>「今後、こうしていく」という行動予定の生成は、MAPPO-PIS を実現する上で不可欠</strong>です。</p>
+<h3 id="3-実装上のポイント">3. 実装上のポイント</h3>
+<ul>
+<li>
+<p>行動予定（意図）の生成は、</p>
+<ul>
+<li>単純なルールベース（例：一定速度で直進）</li>
+<li>あるいは、</li>
+<li>ニューラルネットワークによる予測（将来の状態を回帰するモデル）<br>
+など、<strong>どのような方法でも構いません</strong>。</li>
+</ul>
+</li>
+<li>
+<p>重要なのは、</p>
+<ul>
+<li><strong>将来の行動計画を明示的に表現し、共有できる形式</strong> にすることです。</li>
+</ul>
+</li>
+</ul>
+<p>うーん。。。うーん。。。
+数学的な美しさを応用したような手法を想定してました。。。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/LU11IdCl8jc?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
