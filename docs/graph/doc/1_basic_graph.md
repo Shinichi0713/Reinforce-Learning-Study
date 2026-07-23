@@ -138,7 +138,7 @@ GNN（グラフニューラルネットワーク）では：
 絵で記載すると以下のようになります。
 水色の部分がノード、ノード同士を接続する線が辺です。
 
-![1784753756406](image/1_basic_graph/1784753756406.png)
+<img src="image/1_basic_graph/1784753756406.png" width="500px" style="display: block; margin: 0 auto;">
 
 ## 向グラフと無向グラフ
 
@@ -163,8 +163,8 @@ __例__
 - 分子の結合（共有結合）  
   → 原子Aと原子Bが結合しているなら、その関係は対称。
 
+<img src="image/1_basic_graph/1784754145616.png" width="500px" style="display: block; margin: 0 auto;">
 
-![1784754145616](image/1_basic_graph/1784754145616.png)
 
 ### 2. 向グラフ（Directed Graph）
 
@@ -185,6 +185,10 @@ __例__
   → ページAからページBへのリンクがあっても、逆はないかもしれない。
 - タスクの依存関係  
   → 「タスクBはタスクAが終わらないと開始できない」といった順序関係。
+
+ぱっと見の無向グラフとの違いは辺に矢印があるかないかです。
+
+<img src="image/1_basic_graph/1784754291681.png" width="500px" style="display: block; margin: 0 auto;">
 
 ### 3. 両者の違いのまとめ
 
