@@ -508,5 +508,122 @@ __(3) アルゴリズム設計__
 
 つまり、**ループの有無がネットワークの性質や挙動を左右するため、サイクルという概念が不可欠**です。
 
+__例題:__
 
+
+サイクル検出が実務や研究でどのように役立つかイメージしやすいよう、以下の具体例を問題設定として扱います。
+
+> **【問題設定：物流・配送ルートの循環・拠点巡回チェック】**
+> あなたは広域の配送ネットワークを管理しています。拠点（ノード）同士が配送ルート（エッジ）で結ばれています。
+> ある商品・車両が**「スタートした拠点に再び戻ってくるような循環ルート（サイクル）」が存在するかどうかを特定し、その巡回ルートを現場のドライバーに分かりやすく提示したい**と考えています。
+
+__実装コード（Python）__
+
+無向グラフからシンプルなサイクル（基底サイクル）を自動検出し、見つかったサイクルのうち1つをハイライトして描画します。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# 1. 配送ネットワーク（グラフ）の構築
+G = nx.Graph()
+
+# 拠店（ノード）とルート（エッジ）の定義
+edges = [
+    ("Tokyo", "Saitama"),
+    ("Saitama", "Gunma"),
+    ("Gunma", "Tochigi"),
+    ("Tochigi", "Ibaraki"),
+    ("Ibaraki", "Saitama"),  # ここでサイクルが形成される (Saitama-Gunma-Tochigi-Ibaraki-Saitama)
+    ("Tokyo", "Chiba"),
+    ("Chiba", "Ibaraki"),  # ここでも別のサイクルが形成される
+    ("Tokyo", "Kanagawa"),  # サイクルに含まれない枝ルート
+]
+
+G.add_edges_from(edges)
+
+# 2. サイクル（閉路）の検出
+# nx.cycle_basis は無向グラフの基底サイクル（最小単位のサイクルの組）を返します
+cycles = nx.cycle_basis(G)
+
+print(f"検出されたサイクルの数: {len(cycles)}")
+for i, c in enumerate(cycles):
+    # 見やすさのために先頭のノードを末尾にも追加して表示 (例: A -> B -> C -> A)
+    cycle_path = c + [c[0]]
+    print(f"  サイクル {i + 1}: {' -> '.join(cycle_path)}")
+
+# 可視化対象とするサイクルを1つ選択（ここでは最初のサイクル）
+target_cycle = cycles[0] if cycles else []
+
+# サイクルに含まれるエッジ（辺）のペアリストを作成
+cycle_edges = []
+if target_cycle:
+    cycle_nodes_seq = target_cycle + [target_cycle[0]]
+    cycle_edges = list(zip(cycle_nodes_seq[:-1], cycle_nodes_seq[1:]))
+
+# 3. 可視化の設定
+plt.figure(figsize=(9, 7))
+
+# レイアウトの固定（表示の再現性を保つためにseedを設定）
+pos = nx.spring_layout(G, seed=15)
+
+# --- A. 背景となる全体のグラフを描画 ---
+# 通常のノード
+nx.draw_networkx_nodes(
+    G, pos, node_color="#E0E0E0", node_size=1200, edgecolors="gray"
+)
+# 通常のエッジ
+nx.draw_networkx_edges(
+    G, pos, edge_color="#B0B0B0", width=1.5, style="dashed"
+)
+# ノードラベル（拠点名）
+nx.draw_networkx_labels(
+    G, pos, font_size=10, font_family="sans-serif", font_weight="bold"
+)
+
+# --- B. 検出されたサイクルを強烈にハイライト ---
+if target_cycle:
+    # サイクルを構成するノードを強調（鮮やかなオレンジ）
+    nx.draw_networkx_nodes(
+        G,
+        pos,
+        nodelist=target_cycle,
+        node_color="#FF9800",
+        node_size=1400,
+        edgecolors="#E65100",
+        linewidths=2,
+    )
+
+    # サイクルを構成するエッジを強調（太い赤線）
+    nx.draw_networkx_edges(
+        G, pos, edgelist=cycle_edges, edge_color="#D32F2F", width=4.0
+    )
+
+# グラフタイトル・描画設定
+plt.title(
+    "Delivery Network: Cycle Detection Visualization",
+    fontsize=14,
+    pad=15,
+)
+plt.axis("off")
+plt.tight_layout()
+
+plt.show()
+
+```
+
+__可視化の工夫とポイント__
+
+* **非サイクルの枝要素との対比**:
+* サイクルに関係のないノードやエッジ（`Kanagawa` など）は**グレーの破線**にしてトーンを落としています。
+
+
+* **巡回ルートの際立たせ**:
+* サイクルを形成している拠点（`Saitama`, `Gunma`, `Tochigi`, `Ibaraki` など）を**オレンジ色の大きめノード**にし、エッジを**太い赤実線**で描画することで、一目で閉路と識別できるようにしています。
+
+
+* **有向グラフ（Directed Graph）の場合**:
+* 一方通行があるルート（`nx.DiGraph`）でサイクルを探す場合は、`nx.simple_cycles(G)` を使うと矢印の向きに沿った正確な閉路が検出できます。
+
+<img src="image/1_basic_graph/1784929831500.png" width="500px" style="display: block; margin: 0 auto;">
 
