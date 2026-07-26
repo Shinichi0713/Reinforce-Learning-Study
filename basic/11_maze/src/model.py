@@ -1,84 +1,79 @@
-import random
+import math
+import os
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from collections import deque
+from torch.distributions import Categorical
 
-# ユーザーが提示した TransformerQNetwork（Flatten方式）
-# もしこちらを試す場合は、エージェント側の _preprocess_state で
-# permute や reshape をせず、(Batch, 4, rows, cols) のテンソルをそのまま送る必要があります。
-class TransformerQNetworkV2(nn.Module):
-    def __init__(self, in_channels=4, grid_size=5, d_model=64, nhead=4, num_layers=2, action_dim=4, hidden_size=128):
-        super().__init__()
-        self.grid_size = grid_size
-        self.in_channels = in_channels
-
-        self.embedding = nn.Linear(in_channels, d_model)
-
-        # 可変な迷路サイズにも柔軟に対応できるよう、学習可能な位置エンコーディングにする
-        self.pos_embedding = nn.Parameter(torch.randn(1, grid_size * grid_size, d_model))
-        # CLS（エージェントの意思決定用）トークン
-        self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
-
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=d_model * 2,
-            activation="gelu", batch_first=True, norm_first=True
-        )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
-
-        # 出力は CLS トークンの d_model 分だけで受けるため、軽量かつ汎化性能が高い
-        self.mlp = nn.Sequential(
-            nn.Linear(d_model, hidden_size),
-            nn.GELU(),
-            nn.Linear(hidden_size, action_dim)
-        )
-
-        # 出力の初期化（Q値の初期のブレを抑える）
-        # with torch.no_grad():
-        #     self.mlp[-1].weight.fill_(0.0)
-        #     self.mlp[-1].bias.fill_(0.0)
-
-    def forward(self, x):
-        # x: (Batch, num_tokens, in_channels)
-        B = x.shape[0]
-
-        x = self.embedding(x)
-        x = x + self.pos_embedding  # 空間位置情報を付加
-
-        # CLS トークンをバッチサイズ分に拡張して先頭に結合
-        cls_tokens = self.cls_token.expand(B, -1, -1)
-        x = torch.cat((cls_tokens, x), dim=1)  # (Batch, 1 + num_tokens, d_model)
-
-        # Transformer で大域的な依存関係（ゴールへの経路など）を計算
-        x = self.transformer(x)
-
-        # 先頭の CLS トークンのみを抽出（全マスの状況を集約したベクトルになっている）
-        cls_out = x[:, 0]  # (Batch, d_model)
-
-        return self.mlp(cls_out)
+# TransformerEncoderLayer の fast path（融合カーネル）による形状バグを回避
+torch.backends.mha.set_fastpath_enabled(False)
 
 
-class ReplayBuffer:
-    def __init__(self, capacity):
-        self.buffer = deque(maxlen=capacity)
+# ================================================================
+# 1. 安全なモデルロード関数
+# ================================================================
+def load_model_safely(model, path, device="cpu"):
+    try:
+        checkpoint_state = torch.load(path, map_location=device)
+    except Exception as e:
+        print(f"Failed to load checkpoint: {e}")
+        return
 
-    def push(self, state, action, reward, next_state, done):
-        self.buffer.append((state, action, reward, next_state, done))
+    if isinstance(checkpoint_state, dict) and "state_dict" in checkpoint_state:
+        checkpoint_state = checkpoint_state["state_dict"]
 
-    def sample(self, batch_size):
-        batch = random.sample(self.buffer, batch_size)
-        state, action, reward, next_state, done = zip(*batch)
-        return state, action, reward, next_state, done
+    current_state = model.state_dict()
+    filtered_state = {}
+    skipped_keys = []
 
-    def __len__(self):
-        return len(self.buffer)
+    for name, param in checkpoint_state.items():
+        if name in current_state:
+            if param.shape == current_state[name].shape:
+                filtered_state[name] = param
+            else:
+                skipped_keys.append(f"{name} (Shape Mismatch: saved {tuple(param.shape)} vs model {tuple(current_state[name].shape)})")
+        else:
+            skipped_keys.append(f"{name} (Key Not Found in Model)")
 
+    model.load_state_dict(filtered_state, strict=False)
+    print(f"Successfully loaded {len(filtered_state)} / {len(current_state)} layers.")
+    if skipped_keys:
+        print("Skipped layers due to mismatch or missing:")
+        for key in skipped_keys:
+            print(f" - {key}")
 
-class TransformerDQNAgent:
+class PPORolloutBuffer:
+    def __init__(self):
+        self.states = []
+        self.actions = []
+        self.log_probs = []
+        self.rewards = []
+        self.dones = []
+        self.values = []
+
+    def push(self, state, action, log_prob, reward, done, value):
+        self.states.append(state)
+        self.actions.append(action)
+        self.log_probs.append(log_prob)
+        self.rewards.append(reward)
+        self.dones.append(done)
+        self.values.append(value)
+
+    def clear(self):
+        self.states.clear()
+        self.actions.clear()
+        self.log_probs.clear()
+        self.rewards.clear()
+        self.dones.clear()
+        self.values.clear()
+
+# ================================================================
+# 2. Transformer Actor-Critic Network (形状変換の完全防御)
+# ================================================================
+class TransformerActorCritic(nn.Module):
     def __init__(
         self,
-        env,  # MazeEnv インスタンス
         in_channels=4,
         grid_size=5,
         d_model=64,
@@ -86,196 +81,492 @@ class TransformerDQNAgent:
         num_layers=2,
         action_dim=4,
         hidden_size=128,
-        lr=1e-4,
+        wall_channel_idx=0,   # obs[0] = 壁マップ (1=壁, 0=通行可)
+    ):
+        super().__init__()
+        assert d_model % 2 == 0, "d_model は2次元位置エンコーディングのため偶数にしてください"
+
+        self.grid_size = grid_size
+        self.in_channels = in_channels
+        self.num_tokens = grid_size * grid_size
+        self.nhead = nhead
+        self.wall_channel_idx = wall_channel_idx
+        self.d_model = d_model
+
+        self.embedding = nn.Linear(in_channels, d_model)
+
+        # --- 2次元位置エンコーディング ---
+        # row / col それぞれ d_model/2 次元。concatして d_model 次元にする。
+        half_dim = d_model // 2
+        self.row_embedding = nn.Parameter(torch.randn(grid_size, half_dim) * 0.02)
+        self.col_embedding = nn.Parameter(torch.randn(grid_size, half_dim) * 0.02)
+
+        # CLSトークン用（グリッド外の特別な位置なので独立パラメータ）
+        self.cls_pos_embedding = nn.Parameter(torch.randn(1, 1, d_model) * 0.02)
+        self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
+
+        # 事前計算: 各セルindex -> (row_idx, col_idx) の対応をbufferとして保持
+        row_idx, col_idx = self._build_grid_indices(grid_size)
+        self.register_buffer("row_idx", row_idx, persistent=False)  # (N,)
+        self.register_buffer("col_idx", col_idx, persistent=False)  # (N,)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=nhead,
+            dim_feedforward=d_model * 2,
+            dropout=0.1,
+            activation="gelu",
+            batch_first=True,
+            norm_first=True,
+        )
+        self.transformer = nn.TransformerEncoder(
+            encoder_layer, num_layers=num_layers, enable_nested_tensor=False
+        )
+
+        self.actor_head = nn.Sequential(
+            nn.Linear(d_model, hidden_size),
+            nn.GELU(),
+            nn.Linear(hidden_size, action_dim)
+        )
+        self.critic_head = nn.Sequential(
+            nn.Linear(d_model, hidden_size),
+            nn.GELU(),
+            nn.Linear(hidden_size, 1)
+        )
+
+        # 隣接ペア（上下左右）を事前計算し、モデルのbufferとして登録
+        idx_i, idx_j = self._build_neighbor_indices(grid_size)
+        self.register_buffer("neighbor_i", idx_i, persistent=False)
+        self.register_buffer("neighbor_j", idx_j, persistent=False)
+
+    @staticmethod
+    def _build_grid_indices(grid_size):
+        """トークン順(row-major: i = r*W + c)に対応する row_idx, col_idx を返す"""
+        H = W = grid_size
+        rows, cols = [], []
+        for r in range(H):
+            for c in range(W):
+                rows.append(r)
+                cols.append(c)
+        return torch.tensor(rows, dtype=torch.long), torch.tensor(cols, dtype=torch.long)
+
+    @staticmethod
+    def _build_neighbor_indices(grid_size):
+        H = W = grid_size
+        pairs_i, pairs_j = [], []
+        for r in range(H):
+            for c in range(W):
+                i = r * W + c
+                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < H and 0 <= nc < W:
+                        pairs_i.append(i)
+                        pairs_j.append(nr * W + nc)
+        return torch.tensor(pairs_i, dtype=torch.long), torch.tensor(pairs_j, dtype=torch.long)
+
+    def _build_2d_pos_embedding(self):
+        """
+        row_embedding[row_idx] と col_embedding[col_idx] をconcatして
+        (1, N, d_model) の位置エンコーディングを作る
+        """
+        row_pe = self.row_embedding[self.row_idx]  # (N, half_dim)
+        col_pe = self.col_embedding[self.col_idx]  # (N, half_dim)
+        pos = torch.cat([row_pe, col_pe], dim=-1)  # (N, d_model)
+        return pos.unsqueeze(0)  # (1, N, d_model)
+
+    def _build_attn_mask(self, wall_map, B, device):
+        H = W = self.grid_size
+        N = self.num_tokens
+        wall_flat = wall_map.reshape(B, N)
+
+        adjacency = torch.zeros(B, N, N, dtype=torch.bool, device=device)
+
+        not_wall_i = (wall_flat[:, self.neighbor_i] == 0)
+        not_wall_j = (wall_flat[:, self.neighbor_j] == 0)
+        connected = not_wall_i & not_wall_j
+
+        batch_idx = torch.arange(B, device=device).unsqueeze(1).expand(-1, self.neighbor_i.shape[0])
+        adjacency[batch_idx, self.neighbor_i.expand(B, -1), self.neighbor_j.expand(B, -1)] = connected
+
+        diag_idx = torch.arange(N, device=device)
+        adjacency[:, diag_idx, diag_idx] = True
+
+        full_adj = torch.zeros(B, N + 1, N + 1, dtype=torch.bool, device=device)
+        full_adj[:, 1:, 1:] = adjacency
+        full_adj[:, 0, :] = True
+        full_adj[:, :, 0] = True
+
+        attn_mask = ~full_adj
+        attn_mask = attn_mask.repeat_interleave(self.nhead, dim=0)
+        return attn_mask
+
+    def forward(self, x):
+        if x.dim() == 3:
+            x = x.unsqueeze(0)
+
+        assert x.dim() == 4, f"Expected 4D (B,C,H,W) input, got {tuple(x.shape)}"
+        B, C, H, W = x.shape
+
+        wall_map = x[:, self.wall_channel_idx, :, :]  # (B, H, W)  ※permute前に取得
+
+        x = x.permute(0, 2, 3, 1).contiguous().reshape(B, H * W, C)  # (B, 25, 4)
+
+        x = self.embedding(x)  # (B, 25, d_model)
+
+        # --- 2次元位置エンコーディングの加算 ---
+        pos_embedding = self._build_2d_pos_embedding()  # (1, 25, d_model)
+        x = x + pos_embedding
+
+        cls_tokens = self.cls_token.expand(B, -1, -1) + self.cls_pos_embedding
+        x = torch.cat((cls_tokens, x), dim=1)  # (B, 26, d_model)
+
+        attn_mask = self._build_attn_mask(wall_map, B, x.device)
+        x = self.transformer(x, mask=attn_mask)
+
+        cls_out = x[:, 0]
+        logits = self.actor_head(cls_out)
+        value = self.critic_head(cls_out)
+
+        return logits, value.squeeze(-1)
+
+
+# ================================================================
+# 3. PPO Agent
+# ================================================================
+def _init_weights(m):
+    """直交初期化（Orthogonal Initialization）の基本関数"""
+    if isinstance(m, (nn.Linear, nn.Conv2d)):
+        nn.init.orthogonal_(m.weight, gain=math.sqrt(2))
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0.0)
+
+
+class TransformerPPOAgent:
+
+    def __init__(
+        self,
+        env,
+        in_channels=4,
+        grid_size=5,
+        d_model=64,
+        nhead=4,
+        num_layers=2,
+        action_dim=4,
+        hidden_size=128,
+        lr=3e-4,
         gamma=0.99,
-        epsilon_start=1.0,
-        epsilon_end=0.1,
-        epsilon_decay=0.999,
-        buffer_capacity=10000,
+        gae_lambda=0.95,
+        clip_eps=0.2,
+        ppo_epochs=10,
         batch_size=32,
-        target_update_interval=1000,
-        device="cuda" if torch.cuda.is_available() else "cpu"
+        entropy_coef=0.01,
+        value_loss_coef=0.5,
+        max_grad_norm=0.5,
+        path_save="transformer_ppo.pth",
+        device="cuda" if torch.cuda.is_available() else "cpu",
     ):
         self.env = env
-        self.action_dim = action_dim
         self.gamma = gamma
+        self.gae_lambda = gae_lambda
+        self.clip_eps = clip_eps
+        self.ppo_epochs = ppo_epochs
         self.batch_size = batch_size
-        self.target_update_interval = target_update_interval
+        self.entropy_coef = entropy_coef
+        self.value_loss_coef = value_loss_coef
+        self.max_grad_norm = max_grad_norm
+        self.path_save = path_save
         self.device = device
 
-        # Qネットワーク（オンライン）
-        self.q_online = TransformerQNetworkV2(
+        # ネットワークの初期化
+        self.policy = TransformerActorCritic(
             in_channels=in_channels,
             grid_size=grid_size,
             d_model=d_model,
             nhead=nhead,
             num_layers=num_layers,
             action_dim=action_dim,
-            hidden_size=hidden_size
-        ).to(device)
+            hidden_size=hidden_size,
+        )
+        self.load_model(path_save)
+        self.policy.to(device)
 
-        # ターゲットネットワーク
-        self.q_target = TransformerQNetworkV2(
-            in_channels=in_channels,
-            grid_size=grid_size,
-            d_model=d_model,
-            nhead=nhead,
-            num_layers=num_layers,
-            action_dim=action_dim,
-            hidden_size=hidden_size
-        ).to(device)
-        self.q_target.load_state_dict(self.q_online.state_dict())
-        self.q_target.eval()
+        # -------------------------------------------------------------
+        # 【コツ1】直交初期化と出力層ゲインの調整
+        # -------------------------------------------------------------
+        self.policy.apply(_init_weights)
+        self._apply_head_gain_initialization()
 
-        self.optimizer = optim.Adam(self.q_online.parameters(), lr=lr)
-        self.buffer = ReplayBuffer(capacity=buffer_capacity)
+        if os.path.exists(self.path_save):
+            self.load_model(self.path_save)
+            print("Successfully loaded model.")
 
-        self.step_count = 0
+        self.optimizer = optim.Adam(self.policy.parameters(), lr=lr, eps=1e-5)
+        self.buffer = PPORolloutBuffer()
 
-        self.temperature = epsilon_start      # 初期温度（例: 1.0）
-        self.temperature_end = epsilon_end    # 最小温度（例: 0.01）
-        self.temperature_decay = epsilon_decay # 減衰率（例: 0.999）
+    def _apply_head_gain_initialization(self):
+        """Actorヘッド（0.01）とCriticヘッド（1.0）のゲインを個別に調整"""
+        # ネットワーク構造に合わせてヘッド属性名を取得（一般的な命名に対応）
+        actor_head = getattr(
+            self.policy, "actor", getattr(self.policy, "action_head", None)
+        )
+        critic_head = getattr(
+            self.policy, "critic", getattr(self.policy, "value_head", None)
+        )
+
+        if actor_head is not None:
+            last_layer = (
+                actor_head[-1]
+                if isinstance(actor_head, nn.Sequential)
+                else actor_head
+            )
+            if hasattr(last_layer, "weight"):
+                nn.init.orthogonal_(last_layer.weight, gain=0.01)
+
+        if critic_head is not None:
+            last_layer = (
+                critic_head[-1]
+                if isinstance(critic_head, nn.Sequential)
+                else critic_head
+            )
+            if hasattr(last_layer, "weight"):
+                nn.init.orthogonal_(last_layer.weight, gain=1.0)
 
     def _preprocess_state(self, state_img):
-        """
-        MazeEnv.get_image_observation() の出力 (4, rows, cols) を
-        TransformerQNetwork の入力形式 (1, num_tokens, in_channels) に変換
-        """
-        # state_img: (4, rows, cols) の numpy 配列
         if isinstance(state_img, np.ndarray):
             state_img = torch.from_numpy(state_img).float()
-        # (4, rows, cols) -> (rows*cols, 4) -> (1, num_tokens, in_channels)
-        state_img = state_img.permute(1, 2, 0)  # (rows, cols, 4)
-        state_img = state_img.reshape(-1, self.q_online.in_channels)  # (num_tokens, in_channels)
-        state_img = state_img.unsqueeze(0)  # (1, num_tokens, in_channels)
-        return state_img
+        # バッチ次元（Dim 0）がない場合は追加
+        if state_img.dim() == 3:
+            state_img = state_img.unsqueeze(0)
+        return state_img.to(self.device)
 
     def select_action(self, state_img):
-        """
-        Q値のSoftmax確率分布に基づいて行動を選択（ボルツマン探索）
-        state_img: MazeEnv.get_image_observation() の出力
-        """
-        self.q_online.eval()
+        self.policy.eval()
         with torch.no_grad():
-            state_tensor = self._preprocess_state(state_img).to(self.device)
-            q_values = self.q_online(state_tensor)  # (1, action_dim)
-            
-            # Q値を現在の温度でスケール（温度が低いほど最大値が強調される）
-            scaled_q = q_values / max(self.temperature, 1e-8)
-            
-            # 確率分布に変換
-            probs = torch.softmax(scaled_q, dim=1)  # (1, action_dim)
-            
-            # 確率分布から行動をサンプリング
-            action = torch.multinomial(probs, num_samples=1).item()
-            
-        self.q_online.train()
-        return action
+            state_tensor = self._preprocess_state(state_img)
+            logits, value = self.policy(state_tensor)
 
-    def store_experience(self, state_img, action, reward, next_state_img, done):
-        """
-        経験をバッファに保存
-        """
-        self.buffer.push(state_img, action, reward, next_state_img, done)
+            # ナンバー・オーバーフロー保護
+            logits = torch.clamp(logits, min=-20.0, max=20.0)
+            dist = Categorical(logits=logits)
 
-    def update(self):
-        """
-        経験再生バッファからミニバッチをサンプリングし、Qネットワークを更新（DDQN 風）
-        """
-        if len(self.buffer) < self.batch_size:
-            return
+            action = dist.sample()
+            log_prob = dist.log_prob(action)
 
-        # バッファからサンプリング
-        states, actions, rewards, next_states, dones = self.buffer.sample(self.batch_size)
+        return action.item(), log_prob.item(), value.squeeze().item()
 
-        # テンソルに変換
-        states = torch.cat([self._preprocess_state(s) for s in states], dim=0).to(self.device)
-        next_states = torch.cat([self._preprocess_state(s) for s in next_states], dim=0).to(self.device)
-        actions = torch.tensor(actions, dtype=torch.long).to(self.device)
-        rewards = torch.tensor(rewards, dtype=torch.float).to(self.device)
-        dones = torch.tensor(dones, dtype=torch.float).to(self.device)
+    def update(self, next_state_img, done):
+        self.policy.train()
 
-        # 現在の Q 値
-        current_q = self.q_online(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-
-        # ターゲット Q 値（DDQN 方式）
+        # Bootstrap用の次状態価値の取得
         with torch.no_grad():
-            # オンライン側で次状態の最適行動を選択
-            next_q_online = self.q_online(next_states)
-            best_actions = next_q_online.argmax(dim=1)
+            next_state_tensor = self._preprocess_state(next_state_img)
+            _, next_value = self.policy(next_state_tensor)
+            next_value = next_value.squeeze().item() if not done else 0.0
 
-            # ターゲット側でその行動の Q 値を評価
-            next_q_target = self.q_target(next_states)
-            max_next_q = next_q_target.gather(1, best_actions.unsqueeze(1)).squeeze(1)
+        rewards = self.buffer.rewards
+        dones = self.buffer.dones
+        values = self.buffer.values + [next_value]
 
-            target_q = rewards + self.gamma * max_next_q * (1 - dones)
+        # -------------------------------------------------------------
+        # GAE (Generalized Advantage Estimation) の過去遡及計算
+        # -------------------------------------------------------------
+        advantages = []
+        gae = 0.0
+        for t in reversed(range(len(rewards))):
+            non_terminal = 1.0 - float(dones[t])
+            delta = (
+                rewards[t]
+                + self.gamma * values[t + 1] * non_terminal
+                - values[t]
+            )
+            gae = delta + self.gamma * self.gae_lambda * non_terminal * gae
+            advantages.insert(0, gae)
 
-        # 損失計算と更新
-        loss = nn.MSELoss()(current_q, target_q)
+        returns = [adv + val for adv, val in zip(advantages, values[:-1])]
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        # テンソルへの変換
+        states_tensor = torch.cat(
+            [self._preprocess_state(s) for s in self.buffer.states], dim=0
+        )
+        actions_tensor = torch.tensor(
+            self.buffer.actions, dtype=torch.long
+        ).to(self.device)
+        old_log_probs_tensor = torch.tensor(
+            self.buffer.log_probs, dtype=torch.float
+        ).to(self.device)
+        old_values_tensor = torch.tensor(
+            self.buffer.values, dtype=torch.float
+        ).to(self.device)
+        advantages_tensor = torch.tensor(
+            advantages, dtype=torch.float
+        ).to(self.device)
+        returns_tensor = torch.tensor(returns, dtype=torch.float).to(
+            self.device
+        )
 
-        # εの減衰
-        self.temperature = max(self.temperature_end, self.temperature * self.temperature_decay)
+        # -------------------------------------------------------------
+        # 【コツ2-2】アドバンテージ標準化（Advantage Normalization）
+        # -------------------------------------------------------------
+        if len(advantages_tensor) > 1:
+            adv_std = advantages_tensor.std()
+            if not torch.isnan(adv_std) and adv_std > 1e-8:
+                advantages_tensor = (
+                    advantages_tensor - advantages_tensor.mean()
+                ) / (adv_std + 1e-8)
+            else:
+                advantages_tensor = (
+                    advantages_tensor - advantages_tensor.mean()
+                )
+        else:
+            advantages_tensor = advantages_tensor - advantages_tensor.mean()
 
-        # ターゲットネットワークの更新
-        self.step_count += 1
-        if self.step_count % self.target_update_interval == 0:
-            self.q_target.load_state_dict(self.q_online.state_dict())
+        dataset_size = len(self.buffer.states)
 
-    def train(self, num_episodes=1000, max_steps_per_episode=1000, maze_change=True, path=None):
-        """
-        学習ループ
-        - maze_change=True: 各エピソードで迷路を再生成
-        """
+        # PPOエポックループ
+        for _ in range(self.ppo_epochs):
+            indices = np.arange(dataset_size)
+            np.random.shuffle(indices)
+
+            for start in range(0, dataset_size, self.batch_size):
+                end = start + self.batch_size
+                batch_idx = indices[start:end]
+
+                b_states = states_tensor[batch_idx]
+                b_actions = actions_tensor[batch_idx]
+                b_old_log_probs = old_log_probs_tensor[batch_idx]
+                b_old_values = old_values_tensor[batch_idx]
+                b_advantages = advantages_tensor[batch_idx]
+                b_returns = returns_tensor[batch_idx]
+
+                logits, new_values = self.policy(b_states)
+                new_values = new_values.squeeze(-1)
+
+                # Logits の数値的安定化
+                logits = torch.clamp(logits, min=-20.0, max=20.0)
+                dist = Categorical(logits=logits)
+
+                new_log_probs = dist.log_prob(b_actions)
+                entropy = dist.entropy().mean()
+
+                # Ratio と Clipped Surrogate Loss の計算
+                log_ratio = new_log_probs - b_old_log_probs
+                log_ratio = torch.clamp(log_ratio, min=-20.0, max=20.0)
+                ratios = torch.exp(log_ratio)
+
+                surr1 = ratios * b_advantages
+                surr2 = (
+                    torch.clamp(
+                        ratios, 1.0 - self.clip_eps, 1.0 + self.clip_eps
+                    )
+                    * b_advantages
+                )
+                policy_loss = -torch.min(surr1, surr2).mean()
+
+                # -------------------------------------------------------------
+                # 【コツ1-1】Value Function（Critic）のクリッピング Loss
+                # -------------------------------------------------------------
+                v_clipped = b_old_values + torch.clamp(
+                    new_values - b_old_values, -self.clip_eps, self.clip_eps
+                )
+                v_loss_unclipped = (new_values - b_returns) ** 2
+                v_loss_clipped = (v_clipped - b_returns) ** 2
+                value_loss = 0.5 * torch.max(
+                    v_loss_unclipped, v_loss_clipped
+                ).mean()
+
+                # トータル Loss
+                loss = (
+                    policy_loss
+                    + self.value_loss_coef * value_loss
+                    - self.entropy_coef * entropy
+                )
+
+                # 数値異常のガード
+                if torch.isnan(loss) or torch.isinf(loss):
+                    print(
+                        "Warning: Loss is NaN/Inf, skipping backward pass."
+                    )
+                    self.optimizer.zero_grad()
+                    continue
+
+                self.optimizer.zero_grad()
+                loss.backward()
+
+                # -------------------------------------------------------------
+                # 【コツ3-2】勾配クリッピング
+                # -------------------------------------------------------------
+                nn.utils.clip_grad_norm_(
+                    self.policy.parameters(), max_norm=self.max_grad_norm
+                )
+                self.optimizer.step()
+
+        self.buffer.clear()
+
+    def train(
+        self,
+        num_episodes=1000,
+        max_steps_per_episode=100,
+        update_horizon=512,
+        maze_change=True,
+        path=None,
+    ):
+        save_path = path if path is not None else self.path_save
         episode_rewards = []
 
         for episode in range(num_episodes):
-            # 迷路をリセット（必要に応じて再生成）
             state_pos = self.env.reset(maze_change=maze_change)
             state_img = self.env.get_image_observation()
             episode_reward = 0
 
             for step in range(max_steps_per_episode):
-                action = self.select_action(state_img)
-                next_state_pos, reward, done = self.env.step(action)
+                action, log_prob, value = self.select_action(state_img)
+
+                # step の戻り値形式（3要素/5要素）の柔軟な受け取り
+                step_result = self.env.step(action)
+                if len(step_result) == 5:
+                    next_state_pos, reward, terminated, truncated, _ = (
+                        step_result
+                    )
+                    done = terminated or truncated
+                else:
+                    next_state_pos, reward, done = step_result[:3]
+
                 next_state_img = self.env.get_image_observation()
 
-                self.store_experience(state_img, action, reward, next_state_img, done)
-                self.update()
+                self.buffer.push(
+                    state_img, action, log_prob, reward, done, value
+                )
 
                 state_pos = next_state_pos
                 state_img = next_state_img
                 episode_reward += reward
+
+                if len(self.buffer.states) >= update_horizon or done:
+                    self.update(next_state_img, done=done)
 
                 if done:
                     break
 
             episode_rewards.append(episode_reward)
 
-            # ログ出力（任意）
             if episode % 10 == 0:
-                print(f"Episode {episode}, Reward: {episode_reward:.2f}, Temp: {self.temperature:.3f}")
-            if episode % 50 == 0:
-                print("save model")
-                path_save = path if path else "maze_agent.pth"
-                self.save_model(path_save)
+                print(f"Episode {episode}, Reward: {episode_reward:.2f}")
+            if episode % 100 == 0 and episode > 0:
+                print(f"Episode {episode}, save model to {save_path}")
+                self.save_model(save_path)
+
         print("Training finished.")
         return episode_rewards
 
     def save_model(self, path):
-        """
-        モデルを保存
-        """
-        self.q_online.cpu()
-        torch.save(self.q_online.state_dict(), path)
-        self.q_online.to(self.device)
+        self.policy.cpu()
+        torch.save(self.policy.state_dict(), path)
+        self.policy.to(self.device)
 
     def load_model(self, path):
-        """
-        モデルを読み込み
-        """
-        self.q_online.load_state_dict(torch.load(path))
-        self.q_online.to(self.device)
+        if hasattr(self, "load_model_safely"):
+            self.load_model_safely(self.policy, path, device=self.device)
+        else:
+            self.policy.load_state_dict(
+                torch.load(path, map_location=self.device)
+            )
