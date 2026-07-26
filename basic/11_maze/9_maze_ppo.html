@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x73fe;&#x72b6;&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回ようやく動的迷路を解ける強化学習が出来てきました。
+しかし、安定して最短経路でスタートからゴールまで移動するわけではなく、ふらふらすることがありました。
+今回は、エージェントをもう少し迷わずゴールに向かってくれるようにしていきたいと思います。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="現状課題">現状課題</h2>
+<p>agentが迷路はゴールを目指して移動することはできるが、最短経路ではなく、同じ個所をうろうろすることがある。
+この課題に対して、DDQNのどこに問題があるのかを4つの観点から考察します。</p>
+<h3 id="1-q値の過大評価overestimationと平坦化">1. Q値の「過大評価（Overestimation）」と「平坦化」</h3>
+<p>DDQNはDQNの過大評価を軽減するように設計されていますが、<strong>迷路のような離散的なグリッド環境では依然として特定の状態のQ値を過大評価しやすい</strong>特性があります。</p>
+<ul>
+<li><strong>徘徊ループの形成</strong>:
+一度たまたま高いQ値が割り振られてしまった状態（マスの組み合わせ）があると、その周辺のQ値も引っ張られて高くなります。その結果、エージェントから見ると「ゴールに向かうステップ」と「その周辺を往復するステップ」の<strong>Q値の差（Q-value margin）が極めて小さく</strong>なってしまいます。</li>
+<li><strong>過大評価による局所解</strong>:
+「ゴールに届く経路」であれば、それが遠回りであっても報酬（プラス）が得られるため、Q値が更新されます。一度その遠回り経路のQ値が十分に高くなってしまうと、DDQNのベルマン更新では「より短い未探索の直進ルート」を試す動機が生まれにくくなります。</li>
+</ul>
+<h3 id="2-割引率-gammaガンマと遅延報酬の伝播速度の遅さ">2. 割引率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>（ガンマ）と「遅延報酬」の伝播速度の遅さ</h3>
+<p>DDQN（Q学習）における価値の伝播は、<strong>1ステップずつしか後方へ遡りません（1-step TD学習）</strong> 。</p>
+<ul>
+<li><strong>長い経路での勾配拡散</strong>:
+ゴールで＋1.0の報酬を得た場合、その価値は <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>×</mo><mi>Q</mi><mo stretchy="false">(</mo><msup><mi>s</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\gamma \times Q(s&#x27;)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> として1マス手前、さらにその手前へと順番に伝播します。迷路のようにステップ数が長くなると、スタート付近のQ値に差がつくまでに膨大なリプレイバッファのサンプリング（試行回数）が必要です。</li>
+<li><strong>PPO（GAE）との比較</strong>:
+PPOなどで用いられる GAE（Generalized Advantage Estimation）や <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>-step 収益は、複数ステップ先の報酬をまとめて価値評価に反映させます。DDQNの1-step更新では「ゴールまでの最短性」をスタート地点まで正しく書き換えるのに非常に時間がかかり、結果として途中で寄り道するQ値の揺らぎ（ノイズ）を相殺しきれません。</li>
+</ul>
+<h3 id="3-epsilon-greedy-探索の非効率性迷いの増幅">3. <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy 探索の非効率性（「迷い」の増幅）</h3>
+<p>DDQNの探索は、一定確率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span> でランダムな行動をとる <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy 法に頼っています。</p>
+<ul>
+<li><strong>無意味な方策の揺らぎ</strong>:
+学習がかなり進んだ段階でも、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span> の確率で突発的にランダムな行動（壁にぶつかる、後ろに戻るなど）をとります。</li>
+<li><strong>状態空間の非効率な探索</strong>:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy は「どの行動がどれくらい有望か」という確率（確信度）を持たず、全行動を均等な確率で選びます。そのため、「あと1歩でゴール」という場面でも突然逆走し、リプレイバッファに「寄り道した軌跡」が大量に蓄積され、それがさらにQ値を歪めるという悪循環に陥ります。</li>
+</ul>
+<h3 id="4-ステップペナルティ報酬設計に対するq値の鈍感さ">4. ステップペナルティ（報酬設計）に対するQ値の鈍感さ</h3>
+<p>最短経路を学習させるために「1ステップごとに -0.01 のマイナス報酬（ステップペナルティ）」を与えるのが一般的ですが、DDQNはこの微小な差を学習するのが苦手です。</p>
+<ul>
+<li><strong>Q値のスケール埋没</strong>:
+ゴールの報酬が +1.0 だとすると、20ステップで到達したときの価値（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>γ</mi><mn>20</mn></msup><mo>×</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">\gamma^{20} \times 1.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.0</span></span></span></span>）と、24ステップで到達したときの価値（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>γ</mi><mn>24</mn></msup><mo>×</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">\gamma^{24} \times 1.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">24</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1.0</span></span></span></span>）の差は非常に僅かです。</li>
+<li><strong>Argmax による不連続な行動選択</strong>:
+DDQNは <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>arg</mi><mo>⁡</mo><msub><mrow><mi>max</mi><mo>⁡</mo></mrow><mi>a</mi></msub><mi>Q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\arg\max_a Q(s, a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">max</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">Q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> で行動を選択するため、Q値に <code>0.001</code> でも誤差やノイズがあると、一瞬で「最短ではない行動」を最適解として選んでしまいます。確率的にスムーズに行動を選ぶPPO（Policy Gradient）に比べ、DDQNはQ値のわずかな数値ノイズに対して過敏に誤った行動を選び、うろうろする原因になります。</li>
+</ul>
+<h3 id="一言でいう課題">一言でいう課題</h3>
+<p>エージェントがうろうろするのは、エージェントが「怠けている」のではなく、<strong>DDQNのQ値関数上で「最短ルート」と「遠回りルート」のQ値の差が十分に開いていない（ノイズに埋もれている）</strong> ことが原因です。</p>
+<p>1-step TD学習による伝播の遅さと、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>arg</mi><mo>⁡</mo><mi>max</mi><mo>⁡</mo></mrow><annotation encoding="application/x-tex">\arg\max</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mop">ar<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">max</span></span></span></span> による急激な行動選択の切り替えが組み合わさることで、DDQNは迷路のような幾何学的・決定論的な最短経路問題において「同じ場所を往復するローカルループ」から抜け出しにくくなります。</p>
+<h2 id="対応策">対応策</h2>
+<p>一部内容は前回も言った内容と重複しますが、アルゴリズムをPPOに変更します。
+PPOがうろうろする課題に対して解決案となるのではと考える理由について考察します。</p>
+<h3 id="1-gaeマルチステップ評価による遠い未来の報酬のダイレクトな書き換え">1. GAE（マルチステップ評価）による「遠い未来の報酬」のダイレクトな書き換え</h3>
+<p>DDQNが1ステップずつしかQ値を伝播できないのに対し、PPOでは <strong>GAE（Generalized Advantage Estimation）</strong> を使用します。</p>
+<ul>
+<li><strong>メカニズム</strong>:
+GAEは1ステップだけでなく、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> ステップ先（あるいはエピソード終了まで）の実際の報酬と価値予測を指数関数的に重ね合わせてアドバンテージ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">A(s, a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">A</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> を計算します。</li>
+<li><strong>徘徊課題の解決</strong>:
+「うろうろして20ステップかかった軌跡」と「最短で5ステップでゴールした軌跡」が得られた場合、GAEは<strong>ゴール時の大きなプラス報酬を過去のすべての行動へ即座にバックプロパゲーション</strong>します。
+その結果、「無駄な寄り道をした行動」には相対的に低い（またはマイナスの）アドバンテージが割り当てられ、「最短で進んだ行動」の選択確率がダイレクトかつ急激に強化されます。</li>
+</ul>
+<h3 id="2-確率的方策policy-gradientによるスムーズな最適化">2. 確率的方策（Policy Gradient）による「スムーズな最適化」</h3>
+<p>DDQNは <code>argmax</code> による不連続な行動選択を行うため、Q値の僅かな誤差で行動が激しく振れて徘徊が発生します。</p>
+<ul>
+<li><strong>メカニズム</strong>:
+PPOは状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> における各行動の選択確率（Softmax分布）を直接出力・更新します。</li>
+<li><strong>徘徊課題の解決</strong>:
+「まっすぐ進む確率 70%」「戻る確率 10%」のように連続的な確率として表現されるため、価値関数の推定値に多少のノイズがあっても行動選択が極端に崩れません。学習が進むにつれて「最短ルート上の行動」の確率が自然に 99% 近くまで高まるため、決定論的で滑らかな最短移動が実現します。</li>
+</ul>
+<h3 id="3-エントロピー正則化entropy-lossによる目的を持った探索">3. エントロピー正則化（Entropy Loss）による「目的を持った探索」</h3>
+<p>DDQNの <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy は「完全なランダム行動」に依存するため、ゴール付近でも確率的に無意味な逆走を行ってしまいます。</p>
+<ul>
+<li><strong>メカニズム</strong>:
+PPOの損失関数にはエントロピー項（<code>entropy_coef * entropy</code>）が組み込まれており、「方策が確信を持てていない状態（未知のエリア）」では自律的に探索を広げ、「十分に学習した状態」では自然と探索率（エントロピー）が下がります。</li>
+<li><strong>徘徊課題の解決</strong>:
+ゴールまでの最短ルートを一度見つけると、その経路上のエントロピーが急速に低下して無駄なランダム行動をとらなくなります。結果として、DDQNのように「学習が進んだのに急に逆走する」という現象が起きなくなります。</li>
+</ul>
+<h3 id="4-clipped-surrogate-objective-による決定的な方策の崩壊防止">4. Clipped Surrogate Objective による「決定的な方策の崩壊防止」</h3>
+<p>DDQNでは、リプレイバッファからのサンプリングや大きなQ値の更新によって、一度学習した「正しい最短ルート」を突然忘れて徘徊し出す（Overwriting / Catastrophic Forgetting）問題が頻繁に起こります。</p>
+<ul>
+<li><strong>メカニズム</strong>:
+PPOは新旧の方策の比率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mrow></mrow><mi>s</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><msub><mi>θ</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mrow></mrow><mi>s</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">r_t(\theta) = \frac{\pi_\theta(a\vert{}s)}{\pi_{\theta_{old}}(a\vert{}s)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.6357em;vertical-align:-0.6257em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3488em;margin-left:-0.0359em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3448em;margin-left:-0.0278em;margin-right:0.1em;"><span class="pstrut" style="height:2.6944em;"></span><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3496em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.401em;"><span></span></span></span></span></span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">a</span><span class="mord mtight">∣</span><span class="mord mtight"></span><span class="mord mathnormal mtight">s</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3488em;margin-left:-0.0359em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1512em;"><span></span></span></span></span></span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">a</span><span class="mord mtight">∣</span><span class="mord mtight"></span><span class="mord mathnormal mtight">s</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.6257em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span> を一定の範囲（例: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>±</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">1 \pm 0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.2</span></span></span></span>）にクリップします。</li>
+<li><strong>徘徊課題の解決</strong>:
+1回のパラメータ更新で方策が急激に変わりすぎることを構造的に阻止するため、<strong>一度獲得した「最短ルートを通る能力」を破壊されずに保持したまま、より効率的な挙動へと安全に微調整</strong>され続けます。</li>
+</ul>
+<h3 id="よいと思っている理由まとめ">よいと思っている理由まとめ</h3>
+<table>
+<thead>
+<tr>
+<th>課題（うろうろする原因）</th>
+<th>DDQNでの限界</th>
+<th>PPOによる解決アプローチ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>遅延報酬の伝播</strong></td>
+<td>1-step TD学習のため、ゴールからの価値伝播に膨大な試行が必要</td>
+<td><strong>GAE</strong> により、マルチステップ先のゴール報酬を即座に過去の行動へ反映</td>
+</tr>
+<tr>
+<td><strong>ノイズへの過敏性</strong></td>
+<td><code>argmax</code> の不連続性により、微小なQ値のズレで寄り道を選ぶ</td>
+<td><strong>確率的方策</strong> により、確信度に応じた滑らかな行動確率の修正が可能</td>
+</tr>
+<tr>
+<td><strong>非効率な探索</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy による無差別なランダム行動でループが発生</td>
+<td><strong>エントロピー正則化</strong> により、未学習部分のみを効率よく探索</td>
+</tr>
+<tr>
+<td><strong>学習の不安定性</strong></td>
+<td>パラメータ更新で最短ルートの記憶が突然破壊されやすい</td>
+<td><strong>Clip機構</strong> により、確実な改善のみを安全に積み重ねる</td>
+</tr>
+</tbody>
+</table>
+<p><code>argmax</code> の件は前回も言及していて、修正済みですが・・・。</p>
+<p>今回は、Transformer のような表現力の高すぎるバックボーンを組み合わせる場合、<strong>PPOの持つ「GAEによる速い価値伝播」</strong> と <strong>「Clip機構による安全ガード」</strong> が機能することで、エージェントが迷路の最短経路を取得しやすくなるかと期待しています。</p>
+<h2 id="実装のキーポイント">実装のキーポイント</h2>
+<p>PPOは「論文の数式通りにコードを書くだけだと、なぜか全く学習が進まない・不安定になる」という<strong>実装上の細かなトリック（Implementation Details）への依存度が非常に高い</strong>アルゴリズムとして知られています。</p>
+<p>コツとなる点についてまとめていきます。</p>
+<ol>
+<li><strong>損失関数とクリッピング</strong></li>
+<li><strong>データの扱い方・正規化</strong></li>
+<li><strong>ネットワーク構造・初期化</strong></li>
+</ol>
+<h3 id="1-損失関数とクリッピング">1. 損失関数とクリッピング</h3>
+<p><strong>1-1. Value Function（Critic）のクリッピング</strong></p>
+<p><code>ppo_clip</code> パラメータ（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>≈</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\epsilon \approx 0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4831em;"></span><span class="mord mathnormal">ϵ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.2</span></span></span></span>）はActorだけでなく、<strong>Criticの価値関数（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>V</mi><mi>ϕ</mi></msup></mrow><annotation encoding="application/x-tex">V^\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">ϕ</span></span></span></span></span></span></span></span></span></span></span>）にも適用する</strong>のが標準的です。更新によって価値関数が急激に変化するのを防ぎます。</p>
+<pre><code class="language-python"><span class="hljs-comment"># Value Loss Clipping</span>
+v_clipped = v_old + torch.clamp(v_pred - v_old, -clip_eps, clip_eps)
+v_loss_unclipped = (v_pred - returns) ** <span class="hljs-number">2</span>
+v_loss_clipped = (v_clipped - returns) ** <span class="hljs-number">2</span>
+v_loss = <span class="hljs-number">0.5</span> * torch.<span class="hljs-built_in">max</span>(v_loss_unclipped, v_loss_clipped).mean()
+
+</code></pre>
+<p><strong>1-2. エントロピーボーナスによる探索促進</strong></p>
+<p>学習初期にポリシーが局所最適解に陥って決定的になりすぎるのを防ぐため、損失関数に<strong>エントロピー項</strong>を加算します。</p>
+<ul>
+<li>係数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span> （<code>entropy_coef</code>）は <code>0.01</code> 〜 <code>0.001</code> 程度から調整します。</li>
+<li><strong>コツ:</strong> エントロピー項は「引き算」します（全体の Loss を最小化するため、エントロピーを最大化＝Lossをマイナスにする）。</li>
+</ul>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mtext>Loss</mtext><mtext>total</mtext></msub><mo>=</mo><msup><mi>L</mi><mtext>CLIP</mtext></msup><mo>−</mo><msub><mi>c</mi><mn>1</mn></msub><mo>⋅</mo><msup><mi>L</mi><mtext>VF</mtext></msup><mo>+</mo><msub><mi>c</mi><mn>2</mn></msub><mo>⋅</mo><mi>S</mi><mo stretchy="false">[</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\text{Loss}_{\text{total}} = L^{\text{CLIP}} - c_1 \cdot L^{\text{VF}} + c_2 \cdot S[\pi_\theta]
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord text"><span class="mord">Loss</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">total</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9747em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">CLIP</span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5945em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9747em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">VF</span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5945em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mopen">[</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span></span></p>
+<h3 id="2-データの扱い方とgaegeneralized-advantage-estimation">2. データの扱い方とGAE（Generalized Advantage Estimation）</h3>
+<p><strong>2-1. GAEの実装は「後ろから遡る」</strong></p>
+<p>Advantage（行動価値の優位性）の計算には <strong>GAE(<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo separator="true">,</mo><mi>λ</mi></mrow><annotation encoding="application/x-tex">\gamma, \lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">λ</span></span></span></span>)</strong> を使います。現在から将来へ向かって計算するのではなく、<strong>エピソードの終端（末尾）から過去へ向かって遡りながら計算</strong>するとシンプルかつ高速に実装できます。</p>
+<pre><code class="language-python">advantages = torch.zeros_like(rewards)
+last_gae_lam = <span class="hljs-number">0</span>
+
+<span class="hljs-comment"># バッチの最後から逆順に計算</span>
+<span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(rewards))):
+    <span class="hljs-keyword">if</span> t == <span class="hljs-built_in">len</span>(rewards) - <span class="hljs-number">1</span>:
+        next_non_terminal = <span class="hljs-number">1.0</span> - dones[t]
+        next_value = last_value
+    <span class="hljs-keyword">else</span>:
+        next_non_terminal = <span class="hljs-number">1.0</span> - dones[t + <span class="hljs-number">1</span>]
+        next_value = values[t + <span class="hljs-number">1</span>]
+
+    <span class="hljs-comment"># TD Error: delta = r + gamma * V(s&#x27;) - V(s)</span>
+    delta = rewards[t] + gamma * next_value * next_non_terminal - values[t]
+    <span class="hljs-comment"># GAE: A_t = delta_t + (gamma * lambda) * A_{t+1}</span>
+    last_gae_lam = (
+        delta + gamma * gae_lambda * next_non_terminal * last_gae_lam
+    )
+    advantages[t] = last_gae_lam
+
+returns = advantages + values
+
+</code></pre>
+<p><strong>2-2. Advantageの標準化（Normalization）</strong></p>
+<p>Mini-batchごとにAdvantageの平均を0、標準偏差を1に正規化（<code>adv = (adv - adv.mean()) / (adv.std() + 1e-8)</code>）します。これにより、勾配のスケールが安定し、学習率の設定が容易になります。</p>
+<h3 id="3-ネットワークハイパーパラメータの調整">3. ネットワーク・ハイパーパラメータの調整</h3>
+<p><strong>3-1. 直交初期化（Orthogonal Initialization）</strong></p>
+<p>全結合層（Linear）や畳み込み層（Conv）の重み初期化には、デフォルトのHe/Xavier初期化ではなく<strong>直交初期化</strong>を用い、バイアスは0で初期化します。さらに<strong>最終出力層のゲイン（gain）を小さく設定する</strong>のが決定的なコツです。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">init_weights</span>(<span class="hljs-params">m</span>):
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(m, (nn.Linear, nn.Conv2d)):
+        nn.init.orthogonal_(m.weight, gain=np.sqrt(<span class="hljs-number">2</span>))
+        <span class="hljs-keyword">if</span> m.bias <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            nn.init.constant_(m.bias, <span class="hljs-number">0.0</span>)
+
+
+<span class="hljs-comment"># 重みの初期化適用</span>
+model.apply(init_weights)
+
+<span class="hljs-comment"># 【重要】Actorの最終層（Policy Head）のゲインは 0.01 にする</span>
+<span class="hljs-comment"># これにより、学習初期の行動確率がほぼ均等（ランダム探索）になる</span>
+nn.init.orthogonal_(actor_final_layer.weight, gain=<span class="hljs-number">0.01</span>)
+
+<span class="hljs-comment"># 【重要】Criticの最終層（Value Head）のゲインは 1.0 にする</span>
+nn.init.orthogonal_(critic_final_layer.weight, gain=<span class="hljs-number">1.0</span>)
+
+</code></pre>
+<p><strong>3-2. 勾配ノルムのクリッピング（Gradient Clipping）</strong></p>
+<p>Actor/Criticのパラメータ更新時、勾配の爆発を防ぐために <code>torch.nn.utils.clip_grad_norm_</code> を適用します。</p>
+<ul>
+<li><code>max_norm</code> は <code>0.5</code> が一般的です。</li>
+</ul>
+<p><strong>3-3. 試す際の推奨ハイパーパラメータ</strong></p>
+<p>迷路や簡単な2D環境・離散行動空間でのスタートラインとして使いやすい設定値です。</p>
+<ul>
+<li><strong><code>learning_rate</code></strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2.5</mn><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2.5 \times 10^{-4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2.5</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span></span></span></span> （Adamオプティマイザ。必要に応じてアニーリングで徐々に下げる）</li>
+<li><strong><code>gamma</code> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>)</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.99</mn></mrow><annotation encoding="application/x-tex">0.99</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.99</span></span></span></span></li>
+<li><strong><code>gae_lambda</code> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">λ</span></span></span></span>)</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.95</mn></mrow><annotation encoding="application/x-tex">0.95</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.95</span></span></span></span></li>
+<li><strong><code>ppo_clip</code> (<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>)</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.2</mn></mrow><annotation encoding="application/x-tex">0.2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0.2</span></span></span></span></li>
+<li><strong><code>epochs</code> (1バッチあたりの再学習回数)</strong>: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 〜 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn></mrow><annotation encoding="application/x-tex">10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span></span></span></span></li>
+<li>**<code>batch_size</code> / <code>minibatch_size**</code>: データ全体（例: 2048ステップ）を取得後、32〜64程度の小バッチに分割して更新</li>
+</ul>
+<h3 id="4-デバッグとデバッグ用ログ">4. デバッグとデバッグ用ログ</h3>
+<p>あくまで実装する上でのコツという感じの内容ですが。</p>
+<p>PPOの学習がうまくいかないときは、以下の指標をTensorBoardで可視化するのが近道です。</p>
+<ul>
+<li>**<code>Policy Loss</code> と <code>Value Loss**</code>: 一方に偏って破綻していないか</li>
+<li><strong><code>KL Divergence</code></strong>: 旧ポリシーと新ポリシーの離れ具合（急上昇している場合は学習率やエポック数が大きすぎる）</li>
+<li><strong><code>Clip Fraction</code></strong>: どのくらいの割合で比率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">r_t(\theta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span></span></span></span> が <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>ϵ</mi><mo separator="true">,</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1-\epsilon, 1+\epsilon]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ϵ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϵ</span><span class="mclose">]</span></span></span></span> 外に弾かれてクリップされたか（20%前後が理想）</li>
+<li><strong><code>Entropy</code></strong>: 滑らかに減少しつつ、0に貼り付いていないか</li>
+</ul>
+<h2 id="学習と結果">学習と結果</h2>
+<p>実装コードは以下に保管しています。
+迷路コードと、モデル&amp;エージェントが保管されています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src</a></p>
+<h3 id="学習の推移">学習の推移</h3>
+<p>学習の報酬の推移を示します。
+うーん。。。
+前回と大差を感じません。。。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\9_maze_ppo\1785029524793.png" alt="1785029524793"></p>
+<h3 id="動作">動作</h3>
+<p>残念ながら、前回と同様でした。
+うろうろは治りません。
+壁と最短経路をふさがれる時にエージェントがうろうろ始めています。
+agentにはゴールが見えてないの・・・と思ってしまう結果でした。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\9_maze_ppo\agent_maze_solve.gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\9_maze_ppo\agent_maze_solve (1).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\9_maze_ppo\agent_maze_solve (3).gif">
+<h2 id="結論">結論</h2>
+<h3 id="1-現状の到達点">1. 現状の到達点</h3>
+<ul>
+<li><strong>動的迷路を解ける強化学習</strong>は、前回（DDQN）・今回（PPO）ともに<strong>一応成立</strong>している。</li>
+<li>エージェントはゴールを目指して移動することはできるが、<strong>最短経路で安定してゴールに到達する挙動には至っていない</strong>。</li>
+<li>PPOに切り替えても、<strong>「うろうろ」「寄り道」「ループ」</strong> といった挙動は依然として残っている。</li>
+</ul>
+<h3 id="2-ddqn--ppo-に切り替えた意図と期待">2. DDQN → PPO に切り替えた意図と期待</h3>
+<p>ユーザー様は、DDQNの以下の課題をPPOで補えると考えていました。</p>
+<ul>
+<li><strong>1-step TD学習による遅延報酬の伝播の遅さ</strong><br>
+→ PPO + GAE で、マルチステップ先の報酬を即座に過去の行動へ反映できるはず。</li>
+<li><strong><code>argmax</code> による不連続な行動選択とノイズへの過敏性</strong><br>
+→ 確率的方策（Policy Gradient）により、行動確率を滑らかに最適化できるはず。</li>
+<li><strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span>-greedy による非効率な探索</strong><br>
+→ エントロピー正則化により、未学習部分だけを効率よく探索できるはず。</li>
+<li><strong>学習の不安定性・突然の性能崩壊</strong><br>
+→ Clipped Surrogate Objective により、安全に改善を積み重ねられるはず。</li>
+</ul>
+<p>理論的には、<strong>PPOは「最短経路の安定した獲得」に有利な性質を多く持つ</strong>ため、切り替え自体はまずくないと思っています。</p>
+<h3 id="3-結果と残った課題">3. 結果と残った課題</h3>
+<ul>
+<li>**報酬推移（学習曲線）**は前回と大差なく、PPO特有の急激な改善は見られていない。</li>
+<li><strong>実際のエージェント挙動</strong>も、前回と同様に「壁や最短経路がふさがれると、うろうろし始める」という問題が残っている。</li>
+<li>つまり、<strong>アルゴリズムをDDQNからPPOに切り替えただけでは、「最短経路を安定して通る」というレベルには到達していない</strong>。</li>
+</ul>
+<h3 id="4-所感">4. 所感</h3>
+<ul>
+<li><strong>アルゴリズムの切り替え（DDQN → PPO）は方向性としては正しい</strong>が、実装・ハイパーパラメータ・報酬設計・ネットワーク構造・環境側の設計など、<strong>他の要因がボトルネックになっている可能性が高い</strong>。</li>
+<li>特に、PPOは「実装の細部（損失のクリップ、GAEの正規化、初期化、勾配クリップなど）」に強く依存するアルゴリズムであり、<br>
+これらが適切に設定されていないと、理論的な利点を活かしきれない。</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/_u42eRv3Yxg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
