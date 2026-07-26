@@ -1,0 +1,112 @@
+#PPO
+
+Episode 0, Reward: -37.85
+Episode 10, Reward: 11.75
+Episode 20, Reward: 2.50
+Episode 30, Reward: -1.55
+Episode 40, Reward: -10.25
+Episode 50, Reward: 10.70
+Episode 60, Reward: -10.00
+Episode 70, Reward: -1.95
+Episode 80, Reward: -35.10
+Episode 90, Reward: -32.55
+Episode 100, Reward: -31.50
+Episode 100, save model to transformer_ppo.pth
+Episode 110, Reward: 10.25
+Episode 120, Reward: 1.65
+Episode 130, Reward: 1.05
+Episode 140, Reward: 3.60
+Episode 150, Reward: -38.10
+Episode 160, Reward: 2.50
+Episode 170, Reward: 10.40
+Episode 180, Reward: 2.50
+Episode 190, Reward: 8.35
+Episode 200, Reward: -37.65
+Episode 200, save model to transformer_ppo.pth
+Episode 210, Reward: 0.40
+Episode 220, Reward: -5.80
+Episode 230, Reward: -37.85
+Episode 240, Reward: 1.85
+Episode 250, Reward: 4.60
+Episode 260, Reward: 10.10
+Episode 270, Reward: -37.05
+Episode 280, Reward: 8.75
+Episode 290, Reward: 6.70
+Episode 300, Reward: 10.80
+Episode 300, save model to transformer_ppo.pth
+Episode 310, Reward: -3.65
+Episode 320, Reward: 8.65
+Episode 330, Reward: 7.60
+Episode 340, Reward: 8.05
+Episode 350, Reward: 9.30
+Episode 360, Reward: 7.05
+Episode 370, Reward: 2.95
+Episode 380, Reward: 9.55
+Episode 390, Reward: -6.85
+Episode 400, Reward: 10.80
+Episode 400, save model to transformer_ppo.pth
+Episode 410, Reward: 9.05
+Episode 420, Reward: -28.00
+Episode 430, Reward: 10.50
+Episode 440, Reward: -3.10
+Episode 450, Reward: -34.05
+Episode 460, Reward: -30.85
+Episode 470, Reward: 5.65
+Episode 480, Reward: -40.00
+Episode 490, Reward: 10.50
+Episode 500, Reward: -3.05
+Episode 500, save model to transformer_ppo.pth
+Episode 510, Reward: 8.75
+Episode 520, Reward: 11.80
+Episode 530, Reward: -30.90
+Episode 540, Reward: 10.35
+Episode 550, Reward: 4.80
+Episode 560, Reward: 10.40
+Episode 570, Reward: -15.35
+Episode 580, Reward: -12.80
+Episode 590, Reward: 10.05
+Episode 600, Reward: 12.60
+Episode 600, save model to transformer_ppo.pth
+Episode 610, Reward: -0.30
+Episode 620, Reward: -33.00
+Episode 630, Reward: 10.25
+Episode 640, Reward: 9.45
+Episode 650, Reward: 9.15
+Episode 660, Reward: -40.00
+Episode 670, Reward: -24.30
+Episode 680, Reward: 9.35
+Episode 690, Reward: -2.30
+Episode 700, Reward: -31.25
+Episode 700, save model to transformer_ppo.pth
+Episode 710, Reward: 9.05
+Episode 720, Reward: 10.05
+Episode 730, Reward: 9.70
+Episode 740, Reward: 11.30
+Episode 750, Reward: -8.10
+Episode 760, Reward: -18.55
+Episode 770, Reward: 11.80
+Episode 780, Reward: 3.25
+Episode 790, Reward: -0.85
+Episode 800, Reward: -8.80
+Episode 800, save model to transformer_ppo.pth
+Episode 810, Reward: 7.90
+Episode 820, Reward: 5.30
+Episode 830, Reward: 10.75
+Episode 840, Reward: -6.65
+Episode 850, Reward: 9.30
+Episode 860, Reward: -6.65
+Episode 870, Reward: -3.90
+Episode 880, Reward: 6.80
+Episode 890, Reward: -3.50
+Episode 900, Reward: 10.80
+Episode 900, save model to transformer_ppo.pth
+Episode 910, Reward: -0.25
+Episode 920, Reward: 5.20
+Episode 930, Reward: -0.60
+Episode 940, Reward: 0.80
+Episode 950, Reward: 2.05
+Episode 960, Reward: -0.90
+Episode 970, Reward: 9.45
+Episode 980, Reward: -10.85
+Episode 990, Reward: 6.90
+

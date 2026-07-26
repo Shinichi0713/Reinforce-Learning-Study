@@ -106,5 +106,189 @@ PPOは新旧の方策の比率 $r_t(\theta) = \frac{\pi_\theta(a\vert{}s)}{\pi_{
 
 今回は、Transformer のような表現力の高すぎるバックボーンを組み合わせる場合、**PPOの持つ「GAEによる速い価値伝播」** と **「Clip機構による安全ガード」** が機能することで、エージェントが迷路の最短経路を取得しやすくなるかと期待しています。
 
+## 実装のキーポイント
 
+PPOは「論文の数式通りにコードを書くだけだと、なぜか全く学習が進まない・不安定になる」という**実装上の細かなトリック（Implementation Details）への依存度が非常に高い**アルゴリズムとして知られています。
+
+コツとなる点についてまとめていきます。
+
+1. **損失関数とクリッピング**
+2. **データの扱い方・正規化**
+3. **ネットワーク構造・初期化**
+
+### 1. 損失関数とクリッピング
+
+__1-1. Value Function（Critic）のクリッピング__
+
+`ppo_clip` パラメータ（$\epsilon \approx 0.2$）はActorだけでなく、**Criticの価値関数（$V^\phi$）にも適用する**のが標準的です。更新によって価値関数が急激に変化するのを防ぎます。
+
+```python
+# Value Loss Clipping
+v_clipped = v_old + torch.clamp(v_pred - v_old, -clip_eps, clip_eps)
+v_loss_unclipped = (v_pred - returns) ** 2
+v_loss_clipped = (v_clipped - returns) ** 2
+v_loss = 0.5 * torch.max(v_loss_unclipped, v_loss_clipped).mean()
+
+```
+
+__1-2. エントロピーボーナスによる探索促進__
+
+学習初期にポリシーが局所最適解に陥って決定的になりすぎるのを防ぐため、損失関数に**エントロピー項**を加算します。
+
+* 係数 $\beta$ （`entropy_coef`）は `0.01` 〜 `0.001` 程度から調整します。
+* **コツ:** エントロピー項は「引き算」します（全体の Loss を最小化するため、エントロピーを最大化＝Lossをマイナスにする）。
+
+$$\text{Loss}_{\text{total}} = L^{\text{CLIP}} - c_1 \cdot L^{\text{VF}} + c_2 \cdot S[\pi_\theta]$$
+
+### 2. データの扱い方とGAE（Generalized Advantage Estimation）
+
+__2-1. GAEの実装は「後ろから遡る」__
+
+Advantage（行動価値の優位性）の計算には **GAE($\gamma, \lambda$)** を使います。現在から将来へ向かって計算するのではなく、**エピソードの終端（末尾）から過去へ向かって遡りながら計算**するとシンプルかつ高速に実装できます。
+
+```python
+advantages = torch.zeros_like(rewards)
+last_gae_lam = 0
+
+# バッチの最後から逆順に計算
+for t in reversed(range(len(rewards))):
+    if t == len(rewards) - 1:
+        next_non_terminal = 1.0 - dones[t]
+        next_value = last_value
+    else:
+        next_non_terminal = 1.0 - dones[t + 1]
+        next_value = values[t + 1]
+
+    # TD Error: delta = r + gamma * V(s') - V(s)
+    delta = rewards[t] + gamma * next_value * next_non_terminal - values[t]
+    # GAE: A_t = delta_t + (gamma * lambda) * A_{t+1}
+    last_gae_lam = (
+        delta + gamma * gae_lambda * next_non_terminal * last_gae_lam
+    )
+    advantages[t] = last_gae_lam
+
+returns = advantages + values
+
+```
+
+__2-2. Advantageの標準化（Normalization）__
+
+Mini-batchごとにAdvantageの平均を0、標準偏差を1に正規化（`adv = (adv - adv.mean()) / (adv.std() + 1e-8)`）します。これにより、勾配のスケールが安定し、学習率の設定が容易になります。
+
+### 3. ネットワーク・ハイパーパラメータの調整
+
+__3-1. 直交初期化（Orthogonal Initialization）__
+
+全結合層（Linear）や畳み込み層（Conv）の重み初期化には、デフォルトのHe/Xavier初期化ではなく**直交初期化**を用い、バイアスは0で初期化します。さらに**最終出力層のゲイン（gain）を小さく設定する**のが決定的なコツです。
+
+```python
+def init_weights(m):
+    if isinstance(m, (nn.Linear, nn.Conv2d)):
+        nn.init.orthogonal_(m.weight, gain=np.sqrt(2))
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0.0)
+
+
+# 重みの初期化適用
+model.apply(init_weights)
+
+# 【重要】Actorの最終層（Policy Head）のゲインは 0.01 にする
+# これにより、学習初期の行動確率がほぼ均等（ランダム探索）になる
+nn.init.orthogonal_(actor_final_layer.weight, gain=0.01)
+
+# 【重要】Criticの最終層（Value Head）のゲインは 1.0 にする
+nn.init.orthogonal_(critic_final_layer.weight, gain=1.0)
+
+```
+
+__3-2. 勾配ノルムのクリッピング（Gradient Clipping）__
+
+Actor/Criticのパラメータ更新時、勾配の爆発を防ぐために `torch.nn.utils.clip_grad_norm_` を適用します。
+
+* `max_norm` は `0.5` が一般的です。
+
+__3-3. 試す際の推奨ハイパーパラメータ__
+
+迷路や簡単な2D環境・離散行動空間でのスタートラインとして使いやすい設定値です。
+
+* **`learning_rate`**: $2.5 \times 10^{-4}$ （Adamオプティマイザ。必要に応じてアニーリングで徐々に下げる）
+* **`gamma` ($\gamma$)**: $0.99$
+* **`gae_lambda` ($\lambda$)**: $0.95$
+* **`ppo_clip` ($\epsilon$)**: $0.2$
+* **`epochs` (1バッチあたりの再学習回数)**: $4$ 〜 $10$
+* **`batch_size` / `minibatch_size**`: データ全体（例: 2048ステップ）を取得後、32〜64程度の小バッチに分割して更新
+
+### 4. デバッグとデバッグ用ログ
+あくまで実装する上でのコツという感じの内容ですが。
+
+PPOの学習がうまくいかないときは、以下の指標をTensorBoardで可視化するのが近道です。
+
+* **`Policy Loss` と `Value Loss**`: 一方に偏って破綻していないか
+* **`KL Divergence`**: 旧ポリシーと新ポリシーの離れ具合（急上昇している場合は学習率やエポック数が大きすぎる）
+* **`Clip Fraction`**: どのくらいの割合で比率 $r_t(\theta)$ が $[1-\epsilon, 1+\epsilon]$ 外に弾かれてクリップされたか（20%前後が理想）
+* **`Entropy`**: 滑らかに減少しつつ、0に貼り付いていないか
+
+## 学習と結果
+
+実装コードは以下に保管しています。
+迷路コードと、モデル&エージェントが保管されています。
+
+https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src
+
+### 学習の推移
+
+学習の報酬の推移を示します。
+うーん。。。
+前回と大差を感じません。。。
+
+![1785029524793](image/9_maze_ppo/1785029524793.png)
+
+### 動作
+
+残念ながら、前回と同様でした。
+うろうろは治りません。
+壁と最短経路をふさがれる時にエージェントがうろうろ始めています。
+agentにはゴールが見えてないの・・・と思ってしまう結果でした。
+
+<img src="image/9_maze_ppo/agent_maze_solve.gif">
+
+<img src="image/9_maze_ppo/agent_maze_solve (1).gif">
+
+<img src="image/9_maze_ppo/agent_maze_solve (3).gif">
+
+## 結論
+
+
+### 1. 現状の到達点
+
+- **動的迷路を解ける強化学習**は、前回（DDQN）・今回（PPO）ともに**一応成立**している。
+- エージェントはゴールを目指して移動することはできるが、**最短経路で安定してゴールに到達する挙動には至っていない**。
+- PPOに切り替えても、**「うろうろ」「寄り道」「ループ」** といった挙動は依然として残っている。
+
+### 2. DDQN → PPO に切り替えた意図と期待
+
+ユーザー様は、DDQNの以下の課題をPPOで補えると考えていました。
+
+- **1-step TD学習による遅延報酬の伝播の遅さ**  
+  → PPO + GAE で、マルチステップ先の報酬を即座に過去の行動へ反映できるはず。
+- **`argmax` による不連続な行動選択とノイズへの過敏性**  
+  → 確率的方策（Policy Gradient）により、行動確率を滑らかに最適化できるはず。
+- **$\epsilon$-greedy による非効率な探索**  
+  → エントロピー正則化により、未学習部分だけを効率よく探索できるはず。
+- **学習の不安定性・突然の性能崩壊**  
+  → Clipped Surrogate Objective により、安全に改善を積み重ねられるはず。
+
+理論的には、**PPOは「最短経路の安定した獲得」に有利な性質を多く持つ**ため、切り替え自体はまずくないと思っています。
+
+### 3. 結果と残った課題
+
+- **報酬推移（学習曲線）**は前回と大差なく、PPO特有の急激な改善は見られていない。
+- **実際のエージェント挙動**も、前回と同様に「壁や最短経路がふさがれると、うろうろし始める」という問題が残っている。
+- つまり、**アルゴリズムをDDQNからPPOに切り替えただけでは、「最短経路を安定して通る」というレベルには到達していない**。
+
+### 4. 所感
+
+- **アルゴリズムの切り替え（DDQN → PPO）は方向性としては正しい**が、実装・ハイパーパラメータ・報酬設計・ネットワーク構造・環境側の設計など、**他の要因がボトルネックになっている可能性が高い**。
+- 特に、PPOは「実装の細部（損失のクリップ、GAEの正規化、初期化、勾配クリップなど）」に強く依存するアルゴリズムであり、  
+  これらが適切に設定されていないと、理論的な利点を活かしきれない。
 
