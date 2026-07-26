@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/08/08/043000">前回作ったチームでの動作の改善</a>の取り組みの続きです。</p>
+<p>前回チーム4人での活動を促進するような報酬設計とモデルへのMoEの実装を行いました。
+もう少し動作の改善をしたいとみていると新たに改善すべきポイントが見えてきたため、今回対処していきます。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題">課題</h2>
+<p>これまでの変更を整理すると、大きく分けて「①モデル構造の改善」「②学習の連携メカニズムの改善」「③その改善を動かすための配線修正（バグ対応）」の3段階になっています。時系列で振り返ります。</p>
+<h3 id="a-デコード順序の固定という構造的な問題への対応ここが最大の変更">A. デコード順序の固定という構造的な問題への対応（ここが最大の変更）</h3>
+<p><strong>何が問題だったか</strong></p>
+<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/07/23/043000">MAT</a>は複数エージェントの行動を、Transformerのdecoderで「1体ずつ、前のエージェントの行動を見ながら」自己回帰的に決めます。前回までの実装では、この決定順序が<strong>常にエージェントindexの0→1→2→...→7の固定順</strong>でした。</p>
+<p><strong>なぜこれが「一角捕獲後に連携が崩れる」原因になるか</strong>:</p>
+<ul>
+<li>常に同じエージェントが「最初に決める側」、別のエージェントが「後から他人の行動を見て決める側」という<strong>固定された役割</strong>を学習してしまいます</li>
+<li>本来は「状況が切迫しているエージェント（次のターゲットに一番近いエージェントなど）が最初に判断し、それに他が連携する」のが理想ですが、固定順序だとindexの小さいエージェントの決定に他が引きずられるだけの、状況に対応しない構造になりがちです</li>
+<li>これは、捕獲直後のように「誰が次にどのターゲットへ動くべきか」という<strong>再配置が必要な瞬間</strong>に特に悪影響が出ます</li>
+</ul>
+<p>結果として切り替えが必要な状況が連続する今回の問題ではエージェント固定ということで、味方動作の理想像から離れた動きをしていたということになります。</p>
+<p><strong>変更点</strong></p>
+<ol>
+<li><strong>エージェントの実ID</strong>と<strong>デコードされる順番（スロット）</strong> を分離します。実装してきたコード内に<code>permute_along_agent_dim</code> / <code>unpermute_along_agent_dim</code> という関数を追加し、モデルに入力する直前に順序を並べ替え、モデルの出力を受け取った直後に元のエージェントID順へ戻す、という前処理・後処理の層を挟んでいきます。これにより優先度が高いエージェントを都度入れ替えるようにします。</li>
+<li><strong>順序の決め方を3パターン選べるようにしました</strong>（<code>order_mode</code>）
+<ul>
+<li><code>&quot;fixed&quot;</code>: 従来通りindex順（比較用）</li>
+<li><code>&quot;random&quot;</code>: 毎ステップランダムに順序を入れ替える。<strong>特定順序への役割の固定化を防ぐのが目的</strong>で、これがまず最初に試すべき対策です</li>
+<li><code>&quot;priority&quot;</code>: 「最寄りの未捕獲ターゲットまでの距離」が近いエージェントほど先に決定する。<strong>捕獲後の再配置に直接効くことを狙った、より踏み込んだ対策</strong>です</li>
+</ul>
+</li>
+</ol>
+<p><strong>なぜ2段階で用意したか</strong>: <code>random</code> はシンプルで副作用が少なく、まず「固定順序が本当に悪さをしていたか」を検証できます。効果が確認できたら、より狙いを絞った <code>priority</code> を試す、という段階的な検証ができるようにするためです。</p>
+<h3 id="b-aを動かすための配線修正">B. Aを動かすための配線修正</h3>
+<p>行動順を示す <code>order</code> という情報を今回導入することになります。
+<code>order</code> をモデルの入口から出口、そしてPPOの学習ステップまで一貫して流す必要があったため、以下を連鎖的に修正しました。</p>
+<table>
+<thead>
+<tr>
+<th>修正箇所</th>
+<th>変更内容</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MATActorCritic.encode/forward_train/act</code></td>
+<td><code>order</code> 引数を追加し、内部で並べ替え・逆並べ替えを実施</td>
+<td>Aの並べ替えを実際にモデル内部で行うため</td>
+</tr>
+<tr>
+<td><code>MAT_PPO.get_action</code></td>
+<td>戻り値に <code>order</code> を追加（3個→4個）</td>
+<td>rollout時に使った順序を、後で学習時に再現するため保存する必要があるため</td>
+</tr>
+<tr>
+<td><code>MAT_PPO.update</code></td>
+<td><code>batch[&quot;order&quot;]</code> を受け取り <code>forward_train</code> に渡す</td>
+<td><strong>rollout時とPPO更新時で順序が食い違うと、causal maskの意味と行動の対応がズレて学習が破綻するため</strong>。厳密な再現が必須</td>
+</tr>
+<tr>
+<td><code>RolloutBuffer</code></td>
+<td><code>self.order</code> 配列を追加し、<code>add()</code>/<code>get_batches()</code> で保存・取り出し</td>
+<td>同上の理由で、rollout収集時の順序を確実に記録するため</td>
+</tr>
+<tr>
+<td><code>train()</code> 内の <code>get_action</code> 呼び出し</td>
+<td><code>priority_scores</code> 未定義エラーの修正、戻り値アンパックを3個→4個に修正</td>
+<td><code>get_action</code> の戻り値が4個になったのに、呼び出し側の更新が追いついていなかったため修正する</td>
+</tr>
+<tr>
+<td><code>compute_priority_scores</code>（<code>PursuitWrapper</code> に追加）</td>
+<td><code>raw_env.evaders</code>（未捕獲の獲物）と <code>raw_env.agents</code>（pursuer）の座標から、各エージェントの最寄り未捕獲ターゲットまでの距離を計算</td>
+<td><code>order_mode=&quot;priority&quot;</code> を実際に機能させるために必要な、環境固有の情報取得ロジックが欠けていたため追加</td>
+</tr>
+</tbody>
+</table>
+<h3 id="abのまとめ">A+Bのまとめ</h3>
+<p>AとBで意図することをまとめるとこうなります。</p>
+<p><strong>「状況に応じて『誰が最初に意思決定をするか』を柔軟に変えられる仕組みを作り、その決定手順を学習時にも狂いなく完璧に再現できるようシステム全体のパイプラインを繋ぎ直した」</strong></p>
+<p>これにより、最初の獲物を捕獲した後の「次の目標へのスムーズな切り替えと役割の再配置」が飛躍的に向上することが期待できます。</p>
+<p>一角捕獲後に連携が崩れていた最大の原因である「固定順序による柔軟性の欠如」を解決するための、意図とアプローチの要約です。</p>
+<p><strong>1. 意図と狙い</strong></p>
+<p>先述しましたが、順を追って説明します。</p>
+<ul>
+<li><strong>固定順序の弊害を打破する:</strong>
+従来は常に <code>index 0 -&gt; 1 -&gt; ...</code> の固定順で行動を決めていたため、「最初に決める側」と「後から従う側」の役割が固定化し、状況の変化に対応しづらくなっていました。</li>
+<li><strong>「優先すべき者」が先に動けるチームにする:</strong>
+捕獲直後の再配置などの緊急時、本来は「次に狙う敵に最も近い者」が最初に判断を下し、他がそれに合わせて動くのが合理的です。状況に応じたダイナミックな行動決定ラインを可能にしました。</li>
+<li><strong>段階的な効果検証:</strong>
+まずは純粋にシャッフルする <code>random</code> で固定化の害を打ち消せるかを検証し、その上で戦略的に順番を決める <code>priority</code> へステップアップできる実験環境を整えました。</li>
+</ul>
+<p><strong>2. 修正の仕組み</strong></p>
+<ul>
+<li><strong>IDと行動順の切り離し（<code>permute</code> / <code>unpermute</code>）:</strong>
+エージェント本来のID（背番号）は変えずに、モデルに入力して行動を決定（デコード）する「順番」だけをステップごとに並べ替え、決定後には元のID順にサッと戻す仕組みを前処理・後処理に挟みました。</li>
+<li><strong>データフローの一貫性と厳密な再現（配線修正）:</strong>
+自己回帰モデル（Causal Mask）において「誰が誰の行動を見て決めたか」という関係性は絶対です。そのため、推論時（Rollout）に決めた行動順（<code>order</code>）をバッファに記憶し、学習時（PPO Update）にも<strong>全く同じ行動順を再現して勾配を流す</strong>ための配線を全レイヤー（<code>ActorCritic</code>, <code>PPO</code>, <code>RolloutBuffer</code>, <code>train</code>）に通しました。</li>
+</ul>
+<h3 id="c-moe構造の診断コード変更は保留中">C. MoE構造の診断（コード変更は保留中）</h3>
+<p><strong>指摘した課題</strong>: <code>MoELayer</code> にTop-1ゲーティングを使っているにもかかわらず、負荷分散損失（load-balancing loss）がない。</p>
+<p><strong>理由</strong>: Top-1 MoEは学習初期のわずかな偏りが自己強化され、「常に同じexpertだけが選ばれる」collapseが起きやすいことが知られています（Switch Transformerなどの先行研究で報告されている現象）。これが起きると、<code>num_experts=4</code> で確保したかった「状況に応じた振る舞いの専門化」（例えば「捕獲後の切り替え」のような頻度は低いが重要な状況に対応する専用のexpert）が機能しなくなります。</p>
+<p>AとBの変更がかなりボリューミーだったので、今回は実装を見送ります。</p>
+<h3 id="まとめ-全体の狙い">まとめ: 全体の狙い</h3>
+<p>一言でいうと、<strong>「なぜ捕獲後にチームが崩れるのか」という現象を、「MATのデコード順序が状況に関わらず固定されているため、特定エージェントが常に受動的な役割しか学習できていない」という仮説に絞り込み、それを検証・改善するための変更</strong>でした。</p>
+<ul>
+<li>まずは低リスクな <code>random</code> モードで「固定順序が原因かどうか」を確かめる</li>
+<li>効果が見えたら <code>priority</code> モードで「状況に応じた動的な優先順位付け」まで踏み込む</li>
+<li>そのために必要な配線（<code>order</code> をrolloutから学習まで一貫して保持する仕組み）を整備する</li>
+</ul>
+<p>という流れです。次のステップとしては、まず <code>random</code> モードで数百updateほど学習し、<code>fixed</code>（従来）との捕獲効率・エピソード報酬を比較してみることをお勧めします。そこで明確な改善が見られれば、Aの仮説が正しかったことの裏付けになりますし、改善が乏しければ①のMoE collapse問題や、報酬設計側（個別捕獲ボーナスの有無など）により重点を移す判断材料になります。</p>
+<h2 id="実装">実装</h2>
+<p>以下に実装コードを保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat</a></p>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>まずは報酬です。
+どうでしょう・・・。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\other\image\15_team_action2\1785044989990.png" alt="1785044989990"></p>
+<p>捕獲数の推移です。
+良いですね。
+但し、今回分、終盤崩れたのが気になりますが。。。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\other\image\15_team_action2\1785045036738.png" alt="1785045036738"></p>
+<p>エントロピ推移です。
+今回の方が下がったような気がします。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\other\image\15_team_action2\1785045070714.png" alt="1785045070714"></p>
+<h3 id="動作">動作</h3>
+<p>50エピソード段階でのエージェントの動作を可視化しました。
+これは・・・。
+なかなか良いですね。
+初めからエージェントが一貫した意思を持って動く様子が確認できるようになりました。
+端っこでやや動作をやめているように見えるエージェントがいるようですが、全体的に一貫した意思を持って敵を追っている様子が確認できるようになりました。</p>
+<img src="file:///d:\PycharmProjects\RL_research\other\image\15_team_action2\pursuit_mat_fixed.gif">
+<h2 id="総括">総括</h2>
+<p>以下に、ブログ記事「<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/08/043000">前回作ったチームでの動作の改善</a>」の内容を、<strong>「対応内容」と「その効果」</strong> に焦点を当てて整理してまとめます。</p>
+<h3 id="1-背景と全体の狙い">1. 背景と全体の狙い</h3>
+<ul>
+<li>チーム4人での追跡タスク（Pursuit）において、<strong>「一角捕獲後に連携が崩れる」</strong> という問題が残っていました。</li>
+<li>原因を分析した結果、<strong>MATのデコード順序が常に固定（エージェントindex順）であること</strong>が、柔軟な役割分担を阻害していると仮説を立てました。</li>
+<li>今回の取り組みは、この**「固定順序による柔軟性の欠如」**を解消し、状況に応じて「誰が最初に決めるか」を変えられるようにすることを主眼としています。</li>
+</ul>
+<h3 id="2-主な対応内容">2. 主な対応内容</h3>
+<p><strong>A. デコード順序の固定という構造的問題への対応</strong></p>
+<p><strong>問題点</strong></p>
+<ul>
+<li>MATは、複数エージェントの行動を「1体ずつ、前のエージェントの行動を見ながら」自己回帰的に決めます。</li>
+<li>従来は<strong>常にエージェントindex順（0→1→2→...）</strong> で決定していたため、
+<ul>
+<li>常に同じエージェントが「最初に決める側」</li>
+<li>他のエージェントが「後から従う側」
+という<strong>固定された役割</strong>を学習してしまい、捕獲後の再配置などの切り替え局面で連携が崩れやすくなっていました。</li>
+</ul>
+</li>
+</ul>
+<p><strong>対応</strong></p>
+<ol>
+<li>
+<p><strong>エージェントIDとデコード順序（スロット）を分離</strong></p>
+<ul>
+<li><code>permute_along_agent_dim</code> / <code>unpermute_along_agent_dim</code> を追加し、
+<ul>
+<li>モデル入力前に順序を並べ替え</li>
+<li>出力後に元のID順に戻す</li>
+</ul>
+</li>
+<li>これにより、優先度の高いエージェントを先にデコードできるようにしました。</li>
+</ul>
+</li>
+<li>
+<p><strong>順序決定モードを3種類用意</strong></p>
+<ul>
+<li><code>&quot;fixed&quot;</code>: 従来通りindex順（比較用）</li>
+<li><code>&quot;random&quot;</code>: 毎ステップランダムに順序を入れ替え、役割固定化を防ぐ</li>
+<li><code>&quot;priority&quot;</code>: 「最寄りの未捕獲ターゲットまでの距離」が近いエージェントほど先に決定し、捕獲後の再配置を促進</li>
+</ul>
+</li>
+</ol>
+<p><strong>狙い</strong></p>
+<ul>
+<li>まず <code>random</code> で「固定順序が本当に悪さをしていたか」を検証し、効果があれば <code>priority</code> でより戦略的な順序付けを行う、という段階的な改善方針です。</li>
+</ul>
+<p><strong>B. Aを動かすための配線修正（パイプライン整備）</strong></p>
+<p><strong>問題点</strong></p>
+<ul>
+<li>順序（<code>order</code>）をモデル・学習全体で一貫して扱う必要がありましたが、既存コードでは <code>order</code> が伝播していない箇所がありました。</li>
+<li>特に、<strong>rollout時とPPO更新時で順序が食い違うと、causal maskと行動の対応がズレて学習が破綻する</strong>ため、厳密な再現が必須でした。</li>
+</ul>
+<p><strong>対応箇所と内容</strong></p>
+<table>
+<thead>
+<tr>
+<th>修正箇所</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MATActorCritic.encode/forward_train/act</code></td>
+<td><code>order</code> 引数を追加し、内部で並べ替え・逆並べ替えを実施</td>
+</tr>
+<tr>
+<td><code>MAT_PPO.get_action</code></td>
+<td>戻り値に <code>order</code> を追加（3個→4個）</td>
+</tr>
+<tr>
+<td><code>MAT_PPO.update</code></td>
+<td><code>batch[&quot;order&quot;]</code> を受け取り <code>forward_train</code> に渡す</td>
+</tr>
+<tr>
+<td><code>RolloutBuffer</code></td>
+<td><code>self.order</code> 配列を追加し、<code>add()</code>/<code>get_batches()</code> で保存・取り出し</td>
+</tr>
+<tr>
+<td><code>train()</code> 内の <code>get_action</code> 呼び出し</td>
+<td><code>priority_scores</code> 未定義エラーの修正、戻り値アンパックを3個→4個に修正</td>
+</tr>
+<tr>
+<td><code>compute_priority_scores</code>（<code>PursuitWrapper</code> に追加）</td>
+<td>各エージェントの最寄り未捕獲ターゲットまでの距離を計算し、<code>priority</code> モード用の優先度スコアを生成</td>
+</tr>
+</tbody>
+</table>
+<p><strong>狙い</strong></p>
+<ul>
+<li>「状況に応じて誰が最初に意思決定をするか」を柔軟に変えられる仕組みを作り、その決定手順を<strong>rolloutから学習まで一貫して再現できるパイプライン</strong>を整備しました。</li>
+</ul>
+<p><strong>C. MoE構造の診断（今回は未実装）</strong></p>
+<p><strong>指摘した課題</strong></p>
+<ul>
+<li><code>MoELayer</code> にTop-1ゲーティングを使っているにもかかわらず、負荷分散損失（load-balancing loss）がない。</li>
+<li>Top-1 MoEは、学習初期のわずかな偏りが自己強化され、「常に同じexpertだけが選ばれる」collapseが起きやすいことが知られています。</li>
+</ul>
+<p><strong>対応</strong></p>
+<ul>
+<li>A・Bの変更が大きかったため、今回は実装を見送りました。</li>
+<li>将来的には、負荷分散損失を導入し、複数expertの専門化（例：捕獲後の切り替えなど）を維持することが課題として残っています。</li>
+</ul>
+<h3 id="3-学習の結果と効果">3. 学習の結果と効果</h3>
+<p><strong>学習推移の可視化</strong></p>
+<p>ブログ記事では、以下のグラフが示されています。</p>
+<ol>
+<li>
+<p><strong>報酬（reward_sum）の推移</strong></p>
+<ul>
+<li>改善後（今回）の方が、全体的に報酬が高く、安定している傾向が見られます。</li>
+<li>特に中盤以降で、従来よりも高い報酬を維持していることが確認できます。</li>
+</ul>
+</li>
+<li>
+<p><strong>捕獲数（captures）の推移</strong></p>
+<ul>
+<li>改善後は捕獲数が増加し、チームとしての追跡・捕獲能力が向上していることが分かります。</li>
+<li>ただし終盤でやや崩れが見られる点は、今後の改善余地として指摘されています。</li>
+</ul>
+</li>
+<li>
+<p><strong>エントロピーの推移</strong></p>
+<ul>
+<li>改善後の方がエントロピーがやや下がっており、方策がより集中している（＝安定した行動を学習している）傾向が見られます。</li>
+<li>これは、固定順序による「受動的な役割」の学習が減り、状況に応じたより合理的な行動を学習できている可能性を示唆します。</li>
+</ul>
+</li>
+</ol>
+<p><strong>動作の可視化（GIF）</strong></p>
+<ul>
+<li>50エピソード段階でのエージェントの動作を可視化したGIFでは、
+<ul>
+<li>エージェントが<strong>一貫した意思を持って動く様子</strong>が確認できます。</li>
+<li>初めから終わりまで、チームとしてまとまって敵を追い、捕獲する動きが安定して見られます。</li>
+<li>一部のエージェントが端でやや動きを止めているように見える箇所もありますが、全体としては<strong>連携が向上し、チームとしての一貫性が高まった</strong>ことが分かります。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-まとめ対応と効果の整理">4. まとめ：対応と効果の整理</h3>
+<table>
+<thead>
+<tr>
+<th>対応</th>
+<th>意図・狙い</th>
+<th>効果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>デコード順序の柔軟化（<code>permute/unpermute</code> + <code>order_mode</code>）</td>
+<td>固定順序による役割固定化を打破し、状況に応じた優先順位付けを可能にする</td>
+<td>報酬・捕獲数の向上、エントロピーの安定化、GIFでの一貫したチーム行動の確認</td>
+</tr>
+<tr>
+<td>パイプラインの配線修正（<code>order</code> の一貫保持）</td>
+<td>rolloutと学習で順序を厳密に再現し、causal maskと行動の対応を保つ</td>
+<td>学習の安定化と、順序変更が正しく反映される基盤の整備</td>
+</tr>
+<tr>
+<td>MoEの診断（負荷分散損失の未実装）</td>
+<td>Top-1 MoEのcollapseを防ぎ、複数expertの専門化を維持する</td>
+<td>今回は未実装だが、今後の改善候補として残っている</td>
+</tr>
+</tbody>
+</table>
+<p><strong>全体として</strong>、</p>
+<ul>
+<li>「一角捕獲後に連携が崩れる」という最大の課題に対して、<strong>デコード順序の固定を解消し、状況に応じた柔軟な役割分担を可能にした</strong>ことが、報酬・捕獲数の向上とGIFでの一貫したチーム行動として明確に現れています。</li>
+<li>今後は、MoEの負荷分散損失の導入や、終盤での安定性向上など、さらなる改善が期待されます。</li>
+</ul>
+<p>次回はMoEの負荷分散損失の導入を進めていきます。
+ここで成果となれば一旦ここまでの取り組みをまとめていきたいと思います。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/_u42eRv3Yxg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+            
+        </body>
+        </html>
