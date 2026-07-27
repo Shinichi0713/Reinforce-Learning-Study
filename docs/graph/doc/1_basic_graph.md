@@ -976,9 +976,10 @@ plt.show()
 
 __3. ポイントと解説__
 
-実行すると以下の絵が得られます。
+実行すると以下の画像が得られます。
 
-![1785099776547](image/1_basic_graph/1785099776547.png)
+<img src="image/1_basic_graph/1785099776547.png" width="500px" style="display: block; margin: 0 auto;">
+
 
 * **塗り分けのルール**
 * 隣接している（線で結ばれている）ノード同士は、絶対に異なる色（＝別々の時間帯）に塗り分けられます。
@@ -1176,6 +1177,8 @@ plt.show()
 
 __3. ポイントと解説__
 
+実行した結果は以下のようになります。
+
 ```
 確定した割り当てペア:
   - Alice  <--->  Task 1
@@ -1183,7 +1186,7 @@ __3. ポイントと解説__
   - Bob  <--->  Task 2
 ```
 
-![1785100329424](image/1_basic_graph/1785100329424.png)
+<img src="image/1_basic_graph/1785100329424.png" width="500px" style="display: block; margin: 0 auto;">
 
 * **二部グラフ（Bipartite Graph）**
 * ノード集合を2つの独立したグループ（この例では「エンジニア」と「タスク」）に分割でき、同じグループ内にはエッジが存在しないグラフです。
@@ -1280,6 +1283,207 @@ __アルゴリズムの例__
 - **応用**：交通・通信・資源配分など、ネットワーク上の流量最適化に広く使われる。
 
 「どれだけ多くのものを、ボトルネックを超えて送り出せるか」を数学的に扱うのがフロー理論です。
+
+__例題:__
+
+グラフ理論における**フロー（Flow）**、特に最大フロー問題（Maximum Flow Problem）は、ネットワーク上で「ある地点（ソース）から別の地点（シンク）へ、各経路の容量制限を守りながら単位時間あたりにどれだけの量（データ・物資・水など）を流せるか」を求める重要な問題です。
+
+代表的なアルゴリズムである **Ford-Fulkerson** や **Edmonds-Karp** などの考え方を体験できるよう、例題としてみます。
+
+__1. 例題の設定__
+
+* **問題設定：データセンター間のデータ転送ネットワーク**
+* **背景**: あるクラウドサービス事業者（またはネットワーク管理者）が、西日本のデータセンター（Source）から東日本のデータセンター（Sink）へ大量の大規模言語モデル（LLM）の学習データを転送しようとしています。
+* **ネットワーク構造**: 途中に複数の中継サーバ（中継ノード A, B, C, D）が存在し、各通信回線には帯域幅の制限（容量: Capacity）が設定されています。
+* **目的**: 回線の帯域制限を超えないように通信経路を分散させたとき、「全体で同時に最大何 Gbps のデータを送れるか（最大フロー）」を計算し、各回線ごとの帯域利用状況（フロー量 / 容量）を視覚的に表示します。
+
+__2. Pythonコード__
+
+NetworkX の `nx.maximum_flow` (Edmonds-Karp アルゴリズム等) を使用して最大フローを求め、エッジ上に `フロー量 / 容量` をラベル表示します。また、フローが流れている回線を太い青色でハイライトします。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# 1. 有向グラフ（DiGraph）の構築
+G = nx.DiGraph()
+
+# ノード定義
+# Source (S): 西日本データセンター
+# Sink (T)  : 東日本データセンター
+# A, B, C, D: 中継サーバ
+nodes = ["Source", "Node_A", "Node_B", "Node_C", "Node_D", "Sink"]
+G.add_nodes_from(nodes)
+
+# エッジ（通信回線）と容量（Capacity: Gbps）の追加
+# (送信元, 送信先, 容量)
+capacities = [
+    ("Source", "Node_A", 10),
+    ("Source", "Node_B", 8),
+    ("Node_A", "Node_B", 5),
+    ("Node_A", "Node_C", 7),
+    ("Node_B", "Node_D", 10),
+    ("Node_C", "Node_B", 4),
+    ("Node_C", "Sink", 8),
+    ("Node_D", "Node_C", 3),
+    ("Node_D", "Sink", 9),
+]
+
+for u, v, cap in capacities:
+    G.add_edge(u, v, capacity=cap)
+
+# 2. 最大フロー（Maximum Flow）の計算
+# Edmonds-Karp アルゴリズム等を用いて計算されます
+flow_value, flow_dict = nx.maximum_flow(G, "Source", "Sink")
+
+print(f"==========================================")
+print(f"最大フロー量 (Max Flow Value): {flow_value} Gbps")
+print(f"==========================================")
+print("各回線ごとの転送データ量 (フロー量 / 容量):")
+for u in flow_dict:
+    for v, flow in flow_dict[u].items():
+        if flow > 0:
+            cap = G[u][v]["capacity"]
+            print(f"  - {u} -> {v}: {flow} / {cap} Gbps")
+
+# 3. 可視化の準備
+plt.figure(figsize=(11, 7))
+
+# 階層的な配置にするためレイアウトを固定（左から右へ流れるイメージ）
+pos = {
+    "Source": (0, 1),
+    "Node_A": (1, 2),
+    "Node_B": (1, 0),
+    "Node_C": (2, 2),
+    "Node_D": (2, 0),
+    "Sink": (3, 1),
+}
+
+# エッジごとの描画属性を作成
+active_edges = []
+inactive_edges = []
+edge_labels = {}
+edge_widths = []
+
+for u, v, data in G.edges(data=True):
+    cap = data["capacity"]
+    flow = flow_dict[u][v]
+    edge_labels[(u, v)] = f"{flow}/{cap}"  # ラベル表示（フロー量/容量）
+
+    if flow > 0:
+        active_edges.append((u, v))
+    else:
+        inactive_edges.append((u, v))
+
+# 4. 描画処理
+# --- A. ノードの描画 ---
+# Source/Sink と 中継ノードで色を分ける
+node_colors = []
+for node in G.nodes():
+    if node == "Source":
+        node_colors.append("#4CAF50")  # スタート: 緑
+    elif node == "Sink":
+        node_colors.append("#E53935")  # ゴール: 赤
+    else:
+        node_colors.append("#2196F3")  # 中継: 青
+
+nx.draw_networkx_nodes(
+    G,
+    pos,
+    node_color=node_colors,
+    node_size=2500,
+    edgecolors="black",
+    linewidths=1.5,
+)
+nx.draw_networkx_labels(
+    G, pos, font_size=10, font_family="sans-serif", font_weight="bold"
+)
+
+# --- B. エッジ（回線）の描画 ---
+# フローが流れていない回線（グレーの破線）
+nx.draw_networkx_edges(
+    G,
+    pos,
+    edgelist=inactive_edges,
+    edge_color="#BDBDBD",
+    style="dashed",
+    width=1.5,
+    arrowsize=15,
+)
+
+# フローが流れている回線（太い青実線）
+# 実際に流れているフロー量に応じて線を少し太くします
+for u, v in active_edges:
+    flow = flow_dict[u][v]
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=[(u, v)],
+        edge_color="#1E88E5",
+        width=2.0 + (flow * 0.4),  # フロー量に応じた太さ
+        arrowsize=20,
+    )
+
+# --- C. エッジラベル（フロー量/容量）の描画 ---
+nx.draw_networkx_edge_labels(
+    G,
+    pos,
+    edge_labels=edge_labels,
+    font_color="#1A237E",
+    font_size=11,
+    font_weight="bold",
+    bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.8),
+)
+
+# 5. タイトルと表示
+plt.title(
+    f"Network Max Flow Visualization (Total Max Flow = {flow_value} Gbps)\n"
+    f"Label format on edges: [ Actual Flow / Capacity ]",
+    fontsize=13,
+    pad=15,
+)
+plt.axis("off")
+plt.tight_layout()
+
+# 表示
+plt.show()
+
+```
+
+__3. フロー概念のポイント__
+
+実行すると以下のような結果が得られます。
+
+```
+==========================================
+最大フロー量 (Max Flow Value): 17 Gbps
+==========================================
+各回線ごとの転送データ量 (フロー量 / 容量):
+  - Source -> Node_A: 9 / 10 Gbps
+  - Source -> Node_B: 8 / 8 Gbps
+  - Node_A -> Node_B: 2 / 5 Gbps
+  - Node_A -> Node_C: 7 / 7 Gbps
+  - Node_B -> Node_D: 10 / 10 Gbps
+  - Node_C -> Sink: 8 / 8 Gbps
+  - Node_D -> Node_C: 1 / 3 Gbps
+  - Node_D -> Sink: 9 / 9 Gbps
+```
+
+<img src="image/1_basic_graph/1785185851052.png" width="500px" style="display: block; margin: 0 auto;">
+
+
+* **容量制約（Capacity Constraint）**
+* エッジラベルの右側 `[ Flow / Capacity ]` の数字です。たとえば `Node_A -> Node_C` は容量が `7` ですが、実際に流れている量は `5` となり、容量の上限（`5 <= 7`）を守っていることが一目でわかります。
+
+
+* **フロー保存則（Conservation of Flow）**
+* 「Source（湧き出し口）」と「Sink（吸い込み口）」以外のすべての中継ノードにおいて、**流入する合計フロー量と流出する合計フロー量が等しくなる**というルールです。
+* 例：`Node_A` に着目すると、Source から `10` 入ってきて、`Node_B` へ `5`、`Node_C` へ `5` と合計 `10` 流出しており、バランスが保たれていることがわかります。
+
+
+* **ボトルネックと最大フロー（最大フロー・最小カット定理）**
+* ネットワーク全体として同時に流せる上限値（この例では **17 Gbps**）は、ボトルネックとなる回線の組み合わせ（最小カット）によって決まるという特性を可視化しています。
+
 
 ## 平面グラフ
 
