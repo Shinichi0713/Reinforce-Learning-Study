@@ -872,6 +872,123 @@ __(3) レジスタ割り当て（コンパイラ最適化）__
 
 つまり、**「同じグループに属せないものを、どれだけ少ないグループに分けられるか」を定量的に評価するために、彩色数が不可欠**です。
 
+__例題:__
+
+彩色数に関する例題を扱ってみます。
+
+彩色数を厳密に求める問題（Graph Coloring Problem）はNP困難な問題として知られているため、大規模なグラフでは近似アルゴリズム（ウェルチ・パウエル法などの貪欲法）がよく使われます。
+
+__例題の設定__
+
+* **問題設定：テスト日程の重複回避（タイムスロット割当）**
+* **背景**: ある大学で5つの講義（A, B, C, D, E）の定期試験を行います。いくつかの講義は受講学生が重複しているため、同じ時間帯（タイムスロット）に試験を実施することができません。
+* **条件（重複関係）**:
+* 講義 A は B, C, D と重複
+* 講義 B は A, C と重複
+* 講義 C は A, B, D と重複
+* 講義 D は A, C, E と重複
+* 講義 E は D と重複
+
+
+* **目的**: 受講生のバッティングを避けつつ、試験を実施する最小の時間帯数（＝彩色数）を求め、どの講義をどの時間帯（色）に割り振るかを可視化します。
+
+
+__2. Pythonコード__
+
+NetworkXの `greedy_color` を使用してノードの彩色を行い、必要となった色数（彩色数）を求めて描画します。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# 1. グラフの構築（講義間の重複関係）
+G = nx.Graph()
+
+# 講義ノードの追加
+courses = ["Course A", "Course B", "Course C", "Course D", "Course E"]
+G.add_nodes_from(courses)
+
+# 受講生が重複している講義間にエッジを張る
+conflicts = [
+    ("Course A", "Course B"),
+    ("Course A", "Course C"),
+    ("Course A", "Course D"),
+    ("Course B", "Course C"),
+    ("Course C", "Course D"),
+    ("Course D", "Course E"),
+]
+G.add_edges_from(conflicts)
+
+# 2. 貪欲法（Greedy Algorithm）による彩色と彩色数の算出
+# DSATUR戦略などを使用することで、適切な彩色を試みます
+coloring = nx.greedy_color(G, strategy="largest_first")
+
+# 使用された色の種類数（＝彩色数 \chi(G)）
+chromatic_number = max(coloring.values()) + 1
+
+print(f"算出された彩色数 (Chromatic Number): {chromatic_number}")
+print("各ノードの割り当て（色ID）:")
+for node, color_id in sorted(coloring.items()):
+    print(f"  - {node}: タイムスロット {color_id + 1}")
+
+# 3. 可視化の準備
+# カラーマップを設定（色IDを実際のHTMLカラーコードにマッピング）
+palette = ["#FF5722", "#4CAF50", "#2196F3", "#FFEB3B", "#9C27B0"]
+node_colors = [palette[coloring[node] % len(palette)] for node in G.nodes()]
+
+# 4. グラフの描画
+plt.figure(figsize=(9, 7))
+
+# レイアウトの計算
+pos = nx.spring_layout(G, seed=42)
+
+# エッジ（競合関係）の描画
+nx.draw_networkx_edges(G, pos, edge_color="gray", width=2, alpha=0.7)
+
+# ノード（講義）の描画（彩色結果に基づいた色をセット）
+nx.draw_networkx_nodes(
+    G,
+    pos,
+    node_color=node_colors,
+    node_size=2000,
+    edgecolors="black",
+    linewidths=1.5,
+)
+
+# ノードラベルの描画
+nx.draw_networkx_labels(
+    G, pos, font_size=11, font_family="sans-serif", font_weight="bold"
+)
+
+# タイトルと説明の描画
+plt.title(
+    f"Graph Coloring Example (Chromatic Number $\\chi(G)$ = {chromatic_number})",
+    fontsize=14,
+    pad=15,
+)
+plt.axis("off")
+plt.tight_layout()
+
+# 表示
+plt.show()
+
+```
+
+__3. ポイントと解説__
+
+実行すると以下の絵が得られます。
+
+![1785099776547](image/1_basic_graph/1785099776547.png)
+
+* **塗り分けのルール**
+* 隣接している（線で結ばれている）ノード同士は、絶対に異なる色（＝別々の時間帯）に塗り分けられます。
+* この例題のグラフ（Course A, B, C の部分が完全グラフ $K_3$ を形成している）では、最低でも **3色** 必要となるため、彩色数 $\chi(G) = 3$ となります。
+
+
+* **アルゴリズム（`nx.greedy_color`）**
+* NetworkX の `greedy_color` 関数は、度数（接続しているエッジの数）が大きいノードから優先的に色を割り当てる貪欲アルゴリズム（Welsh-Powell法に近いアプローチ）などを選択して手軽に試せます。
+* 厳密解を求める場合は、小規模グラフであれば全探索（バックトラック法）や混合整数計画法（MIP）を用いることも可能です。
+
 ## マッチング
 
 グラフ理論における**マッチング（matching）** は、**「どの辺も共通の頂点を持たないように選んだ辺の集合」** のことです。  
@@ -936,6 +1053,148 @@ __(3) ネットワーク設計__
 - **応用**：割り当て問題、資源配分、ネットワーク設計など。
 
 「誰と誰を組ませるか」をグラフ上で数学的に扱うのがマッチング、と考えると分かりやすいです。
+
+__例題:__
+
+マッチングの概念を理解するために例題を解いてみます。
+
+マッチングの概念を最も直感的に理解できる典型例が、**「二部グラフ（Bipartite Graph）におけるマッチング」**（割り当て問題・婚活問題など）です。
+
+今回も、実生活のイメージと結びつきやすい**具体例題**を設定し、NetworkXとMatplotlibを用いて最大マッチング（Maximum Matching）を求め、可視化するPythonコードを作成しました。
+
+__1. 例題の設定__
+
+* **問題設定：ジョブ割り当て問題（Job Assignment Problem）**
+* **背景**: あるIT開発チームに4人のエンジニア（Alice, Bob, Charlie, David）がおり、4つのプロジェクトタスク（Task 1, 2, 3, 4）があります。
+* **条件（スキル適性）**:
+* 各エンジニアは、自身のスキルに合った特定のタスクのみを担当できます（適性のあるペアのみエッジを張る）。
+* 1人のエンジニアが担当できるタスクは**最大1つ**まで。
+* 1つのタスクに割り当てられるエンジニアも**最大1人**まで。
+
+
+* **目的**: チーム全体として「同時に実行できる最大数のタスク割り当て（最大マッチング）」を求め、どのエンジニアがどのタスクを担当するかを可視化します。
+
+__2. Pythonコード__
+
+二部グラフの最大マッチングアルゴリズム（Hopcroft-Karp法など）を提供する `nx.bipartite.maximum_matching` を使用して計算・描画します。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# 1. 二部グラフの構築
+G = nx.Graph()
+
+# ノードの定義 (エンジニアグループ と タスクグループ)
+engineers = ["Alice", "Bob", "Charlie", "David"]
+tasks = ["Task 1", "Task 2", "Task 3", "Task 4"]
+
+# ノードを追加（bipartite属性を設定して左右のグループを区別）
+G.add_nodes_from(engineers, bipartite=0)
+G.add_nodes_from(tasks, bipartite=1)
+
+# 適性・割り当て可能な候補ペア（エッジ）を追加
+possible_edges = [
+    ("Alice", "Task 1"),
+    ("Alice", "Task 2"),
+    ("Bob", "Task 2"),
+    ("Bob", "Task 3"),
+    ("Charlie", "Task 1"),
+    ("Charlie", "Task 3"),
+    ("David", "Task 3"),
+]
+G.add_edges_from(possible_edges)
+
+# 2. 最大マッチング（Maximum Matching）の計算
+# Hopcroft-Karp アルゴリズムなどで最大数を求めます
+matching = nx.bipartite.maximum_matching(G, top_nodes=engineers)
+
+# マッチング結果から重複を除いたエッジペアを抽出
+matched_edges = [
+    (u, v) for u, v in matching.items() if u in engineers
+]  # 片方向のみ抽出
+num_matches = len(matched_edges)
+
+print(f"最大マッチング数 (Maximum Matching Size): {num_matches}")
+print("確定した割り当てペア:")
+for eng, task in matched_edges:
+    print(f"  - {eng}  <--->  {task}")
+
+# 3. 可視化の設定
+plt.figure(figsize=(10, 7))
+
+# 二部グラフ用の左右配置レイアウト（bipartite_layout）
+pos = nx.bipartite_layout(G, engineers)
+
+# --- A. 全体の描画（背景） ---
+# ノード描画（エンジニア: 水色, タスク: オレンジ）
+nx.draw_networkx_nodes(
+    G,
+    pos,
+    nodelist=engineers,
+    node_color="#4FC3F7",
+    node_size=2000,
+    edgecolors="black",
+)
+nx.draw_networkx_nodes(
+    G,
+    pos,
+    nodelist=tasks,
+    node_color="#FFB74D",
+    node_size=2000,
+    edgecolors="black",
+)
+
+# 候補エッジの描画（グレーの点線）
+nx.draw_networkx_edges(
+    G, pos, edgelist=possible_edges, edge_color="gray", style="dashed", width=1.5
+)
+
+# ラベル描画
+nx.draw_networkx_labels(
+    G, pos, font_size=11, font_family="sans-serif", font_weight="bold"
+)
+
+# --- B. マッチング成功ペア（エッジ）のハイライト ---
+nx.draw_networkx_edges(
+    G, pos, edgelist=matched_edges, edge_color="#E53935", width=4.0
+)
+
+# 4. タイトルと表示設定
+plt.title(
+    f"Bipartite Matching Example: Job Assignment (Max Matches = {num_matches})",
+    fontsize=14,
+    pad=15,
+)
+plt.axis("off")
+plt.tight_layout()
+
+# 表示
+plt.show()
+
+```
+
+__3. ポイントと解説__
+
+```
+確定した割り当てペア:
+  - Alice  <--->  Task 1
+  - David  <--->  Task 3
+  - Bob  <--->  Task 2
+```
+
+![1785100329424](image/1_basic_graph/1785100329424.png)
+
+* **二部グラフ（Bipartite Graph）**
+* ノード集合を2つの独立したグループ（この例では「エンジニア」と「タスク」）に分割でき、同じグループ内にはエッジが存在しないグラフです。
+
+
+* **マッチングの制約ルール**
+* 選択された赤線のエッジ同士は、**端点（ノード）を共有してはいけません**。これは「1人は1つのタスクしか掛け持ちできず、1つのタスクは1人にしか割り当てられない」という条件を自然に表現しています。
+
+
+* **完全マッチング（Perfect Matching）との違い**
+* この例では、Task 4 を担当できるエンジニアがおらず、エッジが存在しないため、全員・全タスクを埋める「完全マッチング」は不可能です。しかしアルゴリズムにより、同時に達成できる最大数である3つのペア（最大マッチング）が求められています。
 
 ## フロー
 
@@ -1050,7 +1309,12 @@ __例__
 
 ### 3. 平面グラフの性質：オイラーの公式
 
-連結な平面グラフには、次の**オイラーの公式**が成り立ちます。
+グラフ理論における**オイラーの公式（Euler's formula）** は、**「連結な平面グラフについて、頂点数・辺数・面数の間に成り立つ関係式」** です。  
+平面グラフを描いたときにできる「領域の数」も含めて数えることで、美しい関係が現れます。
+
+__1. オイラーの公式の内容__
+
+連結な平面グラフ $G$ について、次の式が成り立ちます。
 
 $$
 v - e + f = 2
@@ -1058,14 +1322,52 @@ $$
 
 - $v$：頂点数（vertices）
 - $e$：辺数（edges）
-- $f$：面の数（faces）  
-  （グラフによって分割される領域の数。外側の無限領域も1つと数える）
+- $f$：面数（faces）  
+  （グラフによって平面が分割される領域の数。**外側の無限領域も1つと数える**）
 
-__例：三角形（3頂点・3辺）__
+この式は、**頂点数から辺数を引き、面数を足すと常に 2 になる**ことを表します。
+
+__2. 具体例__
+
+__例1：三角形（3頂点・3辺）__
 - 頂点数 $v = 3$
 - 辺数 $e = 3$
-- 面数 $f = 2$（三角形の内側と外側）
+- 面数 $f = 2$（三角形の内側と外側の2つの領域）
 - $3 - 3 + 2 = 2$ → オイラーの公式を満たす。
+
+__例2：四角形（4頂点・4辺）__
+- 頂点数 $v = 4$
+- 辺数 $e = 4$
+- 面数 $f = 2$（四角形の内側と外側）
+- $4 - 4 + 2 = 2$
+
+__例3：木（ツリー）__
+- 木はサイクルを持たないので、**面が1つだけ**（外側の無限領域のみ）。
+- 頂点数 $v$、辺数 $e = v - 1$、面数 $f = 1$
+- $v - (v - 1) + 1 = 2$ → やはり成り立つ。
+
+__3. オイラーの公式が重要な理由__
+
+__(1) 平面グラフの性質の解析__
+- オイラーの公式から、平面グラフの**辺数の上限**などが導かれます。
+- 例：頂点数 $v \ge 3$ の連結単純平面グラフでは、$e \le 3v - 6$ が成り立つ。
+- これを用いて、$K_5$ や $K_{3,3}$ が平面グラフでないことを証明できます。
+
+__(2) 地図の彩色問題への応用__
+- 平面グラフの双対グラフを考えると、地図の国と国との隣接関係がグラフで表せます。
+- オイラーの公式を用いて、**四色定理**（平面グラフは4色で彩色可能）の証明の一部が構成されます。
+
+__(3) 多面体との関係__
+- 凸多面体は、その頂点と辺をグラフと見なすと平面グラフになります。
+- オイラーの公式は、もともと凸多面体の頂点・辺・面の数について発見されたものです。
+- 例：立方体（頂点8, 辺12, 面6） → $8 - 12 + 6 = 2$
+
+__4. ニューラルネットワークとの関連__
+
+直接的な応用は少ないですが、概念的には：
+
+- オイラーの公式は、**グラフのトポロジカルな性質（頂点・辺・面の関係）** を表します。
+- GNNなどで、グラフの構造的複雑さ（面の数やサイクルの多さ）がモデルの表現力に影響することがあり、その背景としてオイラーの公式的な考え方が間接的に関わることがあります。
 
 ### 4. 平面グラフが重要な理由
 
