@@ -242,5 +242,126 @@ __(4) コンピュータでの扱いやすさ__
   - 行列積で隣接ノードの情報を集約できる
 - これにより、**局所的な構造情報**をニューラルネットワークに取り込むことができます。
 
+__例題:__
+
+隣接行列（Adjacency Matrix）の概念を直感的に理解するための例題を作成しました。
+
+__SNSの「フォロー関係」を隣接行列で表現__
+
+ある小さなSNSコミュニティに、**Aさん、Bさん、Cさん、Dさん** の4人がいます。
+彼らのフォロー関係（誰が誰をフォローしているか）は以下のようになっています。
+
+* **Aさん**: BさんとCさんをフォローしている。
+* **Bさん**: Cさんのみをフォローしている。
+* **Cさん**: AさんとDさんをフォローしている。
+* **Dさん**: 誰もフォローしていない。
+
+1. このフォロー関係を表す**有向グラフの隣接行列 $M$**（$4 \times 4$ の行列）を作成してください。
+* 行・列の順序は **[A, B, C, D]** とします。
+* 「行 $i$ から 列 $j$ へのフォロー（矢印）」が存在する場合は `1`、存在しない場合は `0` としてください。
+
+
+2. **【発展問題】**
+作成した隣接行列 $M$ を2乗した行列 $M^2$（$M \times M$）を計算すると、$M^2$ の (A行, D列) の要素（行0・列3）の値はいくつになりますか？また、その数字は**グラフ理論的にどのような意味**を持つでしょうか？
+
+__1. 隣接行列 $M$ の解答__
+
+各人が「誰をフォローしているか」を行ごとにあてはめて作成します。
+
+$$M = \begin{pmatrix} 0 & 1 & 1 & 0 \\ 0 & 0 & 1 & 0 \\ 1 & 0 & 0 & 1 \\ 0 & 0 & 0 & 0 \end{pmatrix}$$
+
+* **1行目 (A)**: BとCをフォロー $\rightarrow$ `[0, 1, 1, 0]`
+* **2行目 (B)**: Cをフォロー $\rightarrow$ `[0, 0, 1, 0]`
+* **3行目 (C)**: AとDをフォロー $\rightarrow$ `[1, 0, 0, 1]`
+* **4行目 (D)**: 誰もフォローしていない $\rightarrow$ `[0, 0, 0, 0]`
+
+__2. 発展問題の解答と解説__
+
+行列の掛け算 $M^2 = M \times M$ を計算すると以下のようになります。
+
+$$M^2 = \begin{pmatrix} 1 & 0 & 1 & 1 \\ 1 & 0 & 0 & 1 \\ 0 & 1 & 1 & 0 \\ 0 & 0 & 0 & 0 \end{pmatrix}$$
+
+* **(A行, D列) の値**: **`1`**
+
+**【グラフ理論的な意味】**
+隣接行列を $k$ 乗した行列 $M^k$ の $(i, j)$ 要素は、「ノード $i$ からノード $j$ へ至る長さ $k$ のパス（経路）の総数」を表します。
+
+今回の場合、$M^2$ の (A, D) が `1` であることは、**「AからDへ 2ステップ（間接フォロー）で到達できるルートが1つ存在する」**（具体的には **A $\rightarrow$ C $\rightarrow$ D** のルート）ことを意味しています。
+
+__Pythonによる確認・可視化コード__
+
+この問題のグラフ構造と隣接行列の性質をPython（NumPy / NetworkX）で確認するコードです。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+# 1. 隣接行列の定義 (4x4)
+# A:0, B:1, C:2, D:3
+M = np.array(
+    [
+        [0, 1, 1, 0],  # A
+        [0, 0, 1, 0],  # B
+        [1, 0, 0, 1],  # C
+        [0, 0, 0, 0],  # D
+    ]
+)
+
+print("--- 隣接行列 M ---")
+print(M)
+
+# 2. 行列の2乗を計算 (長さ2のパスを検出)
+M_squared = np.linalg.matrix_power(M, 2)
+print("\n--- 隣接行列の2乗 M^2 ---")
+print(M_squared)
+print(
+    f"\nAからDへの長さ2のパスの数 (M^2[0, 3]): {M_squared[0, 3]}"
+)  # 1が表示される
+
+# 3. NetworkXで有向グラフ化して可視化
+labels = {0: "A", 1: "B", 2: "C", 3: "D"}
+G = nx.from_numpy_array(M, create_using=nx.DiGraph)
+G = nx.relabel_nodes(G, labels)
+
+plt.figure(figsize=(7, 6))
+pos = nx.spring_layout(G, seed=7)
+
+# ノードとエッジの描画
+nx.draw_networkx_nodes(
+    G, pos, node_color="#4CAF50", node_size=1600, edgecolors="black"
+)
+nx.draw_networkx_edges(
+    G, pos, edge_color="gray", width=2, arrowsize=20, connectionstyle="arc3,rad=0.1"
+)
+nx.draw_networkx_labels(
+    G, pos, font_size=12, font_color="white", font_weight="bold"
+)
+
+plt.title("SNS Follow Network (Directed Graph)", fontsize=14, pad=12)
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```
+
+__出力結果__
+
+```
+--- 隣接行列 M ---
+[[0 1 1 0]
+ [0 0 1 0]
+ [1 0 0 1]
+ [0 0 0 0]]
+
+--- 隣接行列の2乗 M^2 ---
+[[1 0 1 1]
+ [1 0 0 1]
+ [0 1 1 0]
+ [0 0 0 0]]
+```
+
+<img src="image/2_linear_graph/1785271993635.png" width="500px" style="display: block; margin: 0 auto;">
+
 
 
