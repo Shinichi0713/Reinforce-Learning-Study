@@ -385,4 +385,18 @@ __検証方法__
 https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat
 
 
+## 学習結果
+
+### 学習の経過
+
+学習の経過を前回と今回で報酬、エントロピで比較します。
+
+
+### 実際の動作
+
+注目のエージェントの動作についてです。
+
+
+## 総括
+
 
