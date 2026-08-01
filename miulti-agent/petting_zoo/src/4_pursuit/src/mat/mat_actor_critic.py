@@ -1,158 +1,198 @@
-"""
-Multi-Agent Transformer (MAT) 版の Actor-Critic 実装。
-既存の MAPPO_TransformerActor / MAPPO_TransformerCritic (元コード) を土台に、
-「エージェント間の自己回帰的デコード」を追加したもの。
-
-参考: Wen et al., "Multi-Agent Reinforcement Learning is a Sequence Modeling
-      Problem", NeurIPS 2022.
-
-設計方針:
-  1. MATObsEncoder  : 元コードの空間Transformerをそのまま流用し、
-                       1エージェント分の局所観測(236次元)をd_model次元に要約する。
-  2. MATEncoder      : 8体分の要約特徴を1つの系列とみなし、エージェント間で
-                       自己注意させて相互に文脈化する(元Criticの役割に相当)。
-                       各エージェント自身の文脈化表現から直接Valueを出す。
-  3. MATDecoder      : エージェント0->7の順に、直前エージェントの実際の行動を
-                       条件として次のエージェントの行動分布を自己回帰的に予測する。
-                       LLMの「1トークンずつ生成」と全く同じ構造(teacher forcing /
-                       autoregressive decoding)。
-
-NOTE: 実行環境にネットワークがなくPyTorchをインストールできないため、
-      このファイルは構文チェック(py_compile)のみ実施し、実行検証はしていません。
-      ご自身の環境で最終確認してください。
-"""
-
+import os
+import glob
 import numpy as np
-from collections import defaultdict
-
-import numpy as np
+import torch
 
 
-class RolloutBuffer:
-    def __init__(self, buffer_size: int, num_agents: int, obs_dim: int,
-                 gamma: float = 0.99, gae_lambda: float = 0.95):
-        self.buffer_size = buffer_size
-        self.num_agents = num_agents
-        self.obs_dim = obs_dim
-        self.gamma = gamma
-        self.gae_lambda = gae_lambda
-        self.reset()
+def train(
+    total_updates: int = 1000,
+    n_steps: int = 500,            # 1回のロールアウトで集めるステップ数(バッファサイズ)
+    epochs: int = 3,               # 1回のロールアウトあたりのPPOエポック数
+    batch_size: int = 128,         # ミニバッチサイズ(タイムステップ方向)
+    gamma: float = 0.99,
+    gae_lambda: float = 0.95,
+    lr: float = 1e-4,
+    clip_epsilon: float = 0.2,
+    value_coef: float = 0.5,
+    entropy_coef: float = 0.01,
+    checkpoint_every: int = 50,
+    checkpoint_dir: str = "checkpoints",
+    log_every: int = 1,
+    seed: int = 0,
+):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"device: {device}")
 
-    def reset(self):
-        self.obs = np.zeros((self.buffer_size, self.num_agents, self.obs_dim), dtype=np.float32)
-        self.actions = np.zeros((self.buffer_size, self.num_agents), dtype=np.int64)
-        self.log_probs = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
-        self.values = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
-        self.rewards = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
-        self.dones = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+    # torch.manual_seed(seed)
+    # np.random.seed(seed)
 
-        self.advantages = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
-        self.returns = np.zeros((self.buffer_size, self.num_agents), dtype=np.float32)
+    # --- 環境・エージェント・バッファの初期化 ---
+    wrapper = PursuitWrapper(max_cycles=n_steps)
+    num_agents = wrapper.num_agents
+    obs_dim = wrapper.obs_dim
+    action_dim = wrapper.action_dim
+    agent_order = wrapper.possible_agents  # デコーダの自己回帰順序と一致させる
 
-        self.ptr = 0
+    mat_ppo = MAT_PPO(
+        num_agents=num_agents, obs_dim=obs_dim, action_dim=action_dim,
+        lr=lr, gamma=gamma, gae_lambda=gae_lambda,
+        clip_epsilon=clip_epsilon, value_coef=value_coef, entropy_coef=entropy_coef,
+        order_mode="priority",   # 🌟 忘れずに指定
+        device=device,
+    )
 
-    def add(self, obs: np.ndarray, actions: np.ndarray, log_probs: np.ndarray,
-            values: np.ndarray, rewards: np.ndarray, dones: np.ndarray):
-        """
-        1タイムステップ分(8エージェント同時決定)のデータを追加する。
+    buffer = RolloutBuffer(n_steps, num_agents, obs_dim, gamma=gamma, gae_lambda=gae_lambda)
 
-        obs:       (num_agents, obs_dim)
-        actions:   (num_agents,)
-        log_probs: (num_agents,)
-        values:    (num_agents,)
-        rewards:   (num_agents,)
-        dones:     (num_agents,)
-        """
-        if self.ptr >= self.buffer_size:
-            raise RuntimeError("バッファが満杯です。reset() してから追加してください。")
+    # --- チェックポイントのロード処理 ---
+    start_update_idx = 1
+    if os.path.exists(checkpoint_dir):
+        # ディレクトリ内の mat_pursuit_update*.pt を検索
+        ckpt_files = glob.glob(os.path.join(checkpoint_dir, "mat_pursuit_update*.pt"))
+        if ckpt_files:
+            # ファイル名からupdateの数値を抽出して最新のものを特定
+            # 例: "checkpoints/mat_pursuit_update100.pt" -> 100
+            try:
+                ckpt_files.sort(key=lambda x: int(os.path.basename(x).split("update")[-1].split(".pt")[0]))
+                latest_ckpt = ckpt_files[-1]
 
-        idx = self.ptr
-        self.obs[idx] = obs
-        self.actions[idx] = actions
-        self.log_probs[idx] = log_probs
-        self.values[idx] = values
-        self.rewards[idx] = rewards
-        self.dones[idx] = dones
-        self.ptr += 1
+                # 保存時のupdate_idxを取得して再開位置を設定
+                saved_update_idx = int(os.path.basename(latest_ckpt).split("update")[-1].split(".pt")[0])
 
-    def is_full(self) -> bool:
-        return self.ptr >= self.buffer_size
+                # MAT_PPOのロード関数を呼び出し (引数は実装に合わせて調整してください)
+                mat_ppo.load_checkpoint(latest_ckpt)
 
-    def compute_returns_and_advantages(self, last_values: np.ndarray, last_dones: np.ndarray):
-        """
-        GAE (Generalized Advantage Estimation) で advantages / returns を計算する。
+                start_update_idx = saved_update_idx + 1
+                print(f"Loaded checkpoint from: {latest_ckpt} (Resuming from update {start_update_idx})")
+            except Exception as e:
+                print(f"Failed to load checkpoint: {e}. Starting from scratch.")
+        else:
+            print("No checkpoint found in directory. Starting from scratch.")
+    else:
+        print("Checkpoint directory does not exist. Starting from scratch.")
 
-        last_values: (num_agents,) バッファ末尾の次の状態でのValue推定
-                     (ロールアウトが打ち切られた場合のブートストラップ用)
-        last_dones:  (num_agents,) バッファ末尾の次の状態がエピソード終了直後かどうか
-        """
-        last_gae = np.zeros(self.num_agents, dtype=np.float32)
-        n = self.ptr
+    wrapper.reset()
 
-        for step in reversed(range(n)):
-            if step == n - 1:
-                next_non_terminal = 1.0 - last_dones
-                next_values = last_values
-            else:
-                next_non_terminal = 1.0 - self.dones[step + 1]
-                next_values = self.values[step + 1]
+    episode_reward = np.zeros(num_agents, dtype=np.float32)
+    episode_captures = 0
+    episode_count = 0
 
-            delta = self.rewards[step] + self.gamma * next_values * next_non_terminal - self.values[step]
-            last_gae = delta + self.gamma * self.gae_lambda * next_non_terminal * last_gae
-            self.advantages[step] = last_gae
+    # ロードされたインデックスからループを開始
+    for update_idx in range(start_update_idx, total_updates + 1):
+        buffer.reset()
 
-        self.returns[:n] = self.advantages[:n] + self.values[:n]
+        # =========================================================
+        # 1. ロールアウト収集
+        # =========================================================
+        for _step in range(n_steps):
+            joint_obs_flat = wrapper.get_global_state()
+            joint_obs = joint_obs_flat.reshape(num_agents, obs_dim)
 
-    def get_batches(self, batch_size: int | None = None, shuffle: bool = True):
-        """
-        学習用のミニバッチを順に生成するジェネレータ。
-        1エポック分(バッファ全体を1回ずつ使い切る)のミニバッチを生成する。
-        エポックを複数回まわしたい場合は、学習ループ側でこのメソッドを
-        エポック数だけ繰り返し呼び出してください(呼ぶたびに再シャッフルされます)。
-        """
-        n = self.ptr
-        indices = np.arange(n)
-        if shuffle:
-            np.random.shuffle(indices)
+            # MATで8体分の行動を自己回帰的に一括デコード (サンプリング, 学習モード)
+            priority_scores = wrapper.compute_priority_scores()
+            actions, log_probs, values, order = mat_ppo.get_action(joint_obs, priority_scores=priority_scores, greedy=False)
+            # print(actions)
 
-        if batch_size is None:
-            batch_size = n
+            step_rewards = np.zeros(num_agents, dtype=np.float32)
+            step_dones = np.zeros(num_agents, dtype=np.float32)
 
-        for start in range(0, n, batch_size):
-            batch_idx = indices[start:start + batch_size]
-            yield {
-                "obs": self.obs[batch_idx],
-                "actions": self.actions[batch_idx],
-                "log_probs": self.log_probs[batch_idx],
-                "advantages": self.advantages[batch_idx],
-                "rewards": self.returns[batch_idx],  # Critic の教師信号として returns を使う
-            }
+            for i, agent in enumerate(agent_order):
+                if agent not in wrapper.env.agents:
+                    step_dones[i] = 1.0
+                    continue
+                _, reward, terminated, truncated, _info, count_capture = wrapper.step(agent, int(actions[i]))
+                step_rewards[i] = reward
+                step_dones[i] = float(terminated or truncated)
+                episode_captures += count_capture
+            # rollout_buffer.push(obs=joint_obs, action=action, log_prob=log_prob,
+            #          value=value, order=order, reward=reward, done=done)
+            buffer.add(joint_obs, actions, log_probs, values, step_rewards, step_dones, order=order)
+            episode_reward += step_rewards
+
+            # エピソード終了判定 (Pursuitはチーム全員が同時に終了する)
+            if len(wrapper.env.agents) == 0:
+                episode_count += 1
+                if episode_count % log_every == 0:
+                    print(
+                        f"[episode {episode_count}] "
+                        f"reward_sum={episode_reward.sum():.2f} "
+                        f"mean_reward={episode_reward.mean():.3f} "
+                        f"captures={episode_captures}"
+                    )
+                wrapper.reset()
+                episode_reward = np.zeros(num_agents, dtype=np.float32)
+                episode_captures = 0
+
+        # =========================================================
+        # 2. GAE計算 (バッファ末尾の次状態をブートストラップに使用)
+        # =========================================================
+        joint_obs_flat = wrapper.get_global_state()
+        joint_obs = joint_obs_flat.reshape(num_agents, obs_dim)
+        # greedy=True: ブートストラップ用のValue推定なので行動のサンプリングは不要だが
+        # get_action の実装上、Valueは行動デコードと同時に得られるためこの呼び方でよい
+        _, _, last_values, order_last = mat_ppo.get_action(joint_obs, priority_scores=priority_scores, greedy=False)
+        last_dones = np.zeros(num_agents, dtype=np.float32)  # バッファ終端は通常「継続中」
+
+        buffer.compute_returns_and_advantages(last_values, last_dones)
+
+        # =========================================================
+        # 3. PPO更新: epochs回、シャッフルしたミニバッチで学習
+        # =========================================================
+        actor_losses, critic_losses, entropies = [], [], []
+        for _epoch in range(epochs):
+            for minibatch in buffer.get_batches(batch_size=batch_size, shuffle=False):
+                # epochs=1: 1回のミニバッチにつき1回の勾配更新
+                a_loss, c_loss, ent = mat_ppo.update(minibatch, epochs=1)
+                actor_losses.append(a_loss)
+                critic_losses.append(c_loss)
+                entropies.append(ent)
+
+        if update_idx % log_every == 0:
+            print(
+                f"update={update_idx}/{total_updates} "
+                f"actor_loss={np.mean(actor_losses):.4f} "
+                f"critic_loss={np.mean(critic_losses):.4f} "
+                f"entropy={np.mean(entropies):.4f}"
+            )
+
+        # =========================================================
+        # 4. チェックポイント保存
+        # =========================================================
+        if update_idx % checkpoint_every == 0:
+            os.makedirs(checkpoint_dir, exist_ok=True)
+            path = os.path.join(checkpoint_dir, f"mat_pursuit_update{update_idx}.pt")
+            mat_ppo.save_checkpoint(path, update_idx)
+            print(f"checkpoint saved: {path}")
+
+    return mat_ppo
 
 
 if __name__ == "__main__":
-    # 簡易動作確認 (NumPyのみ、ダミーデータでGAE計算とミニバッチ生成をテスト)
-    rng = np.random.default_rng(0)
-    T, N, D = 20, 8, 236
+    # 設定パラメータを直接変数にハードコード
+    TOTAL_UPDATES = 1000
+    N_STEPS = 500
+    EPOCHS = 3
+    BATCH_SIZE = 128
+    LR = 1e-4
+    GAMMA = 0.99
+    GAE_LAMBDA = 0.95
+    CLIP_EPSILON = 0.2
+    ENTROPY_COEF = 0.01
+    CHECKPOINT_EVERY = 50
+    CHECKPOINT_DIR = CHECKPOINT_DIR  # 前回の記述エラー（自己代入）も修正
+    SEED = 24
 
-    buf = RolloutBuffer(buffer_size=T, num_agents=N, obs_dim=D, gamma=0.99, gae_lambda=0.95)
-
-    for t in range(T):
-        obs = rng.normal(size=(N, D)).astype(np.float32)
-        actions = rng.integers(0, 5, size=(N,))
-        log_probs = rng.normal(size=(N,)).astype(np.float32)
-        values = rng.normal(size=(N,)).astype(np.float32)
-        rewards = rng.normal(size=(N,)).astype(np.float32)
-        dones = np.zeros(N, dtype=np.float32)
-        buf.add(obs, actions, log_probs, values, rewards, dones)
-
-    last_values = rng.normal(size=(N,)).astype(np.float32)
-    last_dones = np.zeros(N, dtype=np.float32)
-    buf.compute_returns_and_advantages(last_values, last_dones)
-
-    print(f"advantages shape: {buf.advantages.shape}, returns shape: {buf.returns.shape}")
-    n_batches = 0
-    for mb in buf.get_batches(batch_size=8, shuffle=True):
-        n_batches += 1
-        assert mb["obs"].shape[1:] == (N, D)
-    print(f"生成されたミニバッチ数: {n_batches} (T={T}, batch_size=8 -> ceil(20/8)=3 のはず)")
-    print("OK: RolloutBuffer の基本動作を確認しました。")
+    # 関数呼び出しにハードコードした変数を適用
+    train(
+        total_updates=TOTAL_UPDATES,
+        n_steps=N_STEPS,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        lr=LR,
+        gamma=GAMMA,
+        gae_lambda=GAE_LAMBDA,
+        clip_epsilon=CLIP_EPSILON,
+        entropy_coef=ENTROPY_COEF,
+        checkpoint_every=CHECKPOINT_EVERY,
+        checkpoint_dir=CHECKPOINT_DIR,
+        seed=SEED,
+    )
