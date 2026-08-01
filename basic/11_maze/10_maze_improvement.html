@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>agent&#x306e;&#x73fe;&#x72b6;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>毎週恒例になっている迷路をゴール問題です。
+前回はPPOアルゴリズムの見直しを行いました。結果はほぼ改善なし。
+ゴールは目指してくれるものの、うろうろ従ってしまっていました。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>今回は出来る限り最短経路を選んでくれるようにしていきたいと思います。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="agentの現状">agentの現状</h2>
+<p>ほぼ前回同様です。というか前回の総括に記載した内容です。
+強化学習したエージェントが最短ゴールを目指さずにうろうろしたくなってしまう。
+コードの内部を見直して勝率向上できないかトライしていきたいと思います。</p>
+<h2 id="コード内部の問題">コード内部の問題</h2>
+<p>2点課題となる点が見つかりました。</p>
+<h3 id="clsトークンのアテンション">CLSトークンのアテンション</h3>
+<p><strong>CLSトークンとは</strong></p>
+<p><code>TransformerActorCritic.forward</code>を見ると、迷路の25マス(5×5)それぞれが1つの「トークン」として扱われています。CLSトークンは、この<strong>25マスに加えて追加される、迷路上のどこにも対応しない「特別な26個目のトークン」</strong> です。</p>
+<pre><code class="language-python">cls_tokens = self.cls_token.expand(B, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>) + self.cls_pos_embedding
+x = torch.cat((cls_tokens, x), dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, 26, d_model)</span>
+</code></pre>
+<ul>
+<li><code>self.cls_token</code>：全バッチ共通の学習可能なベクトル（初期状態では「空っぽの器」)</li>
+<li><code>self.cls_pos_embedding</code>：CLS専用の位置エンコーディング（迷路の座標を持たないので、row/col埋め込みとは別に用意されている）</li>
+</ul>
+<p><strong>Transformer内でどう機能するか</strong></p>
+<pre><code class="language-python">x = self.transformer(x)  <span class="hljs-comment"># (B, 26, d_model)</span>
+cls_out = x[:, <span class="hljs-number">0</span>]         <span class="hljs-comment"># 先頭(index 0)がCLSトークンの出力</span>
+</code></pre>
+<p>フルAttention（今回<code>use_wall_mask=False</code>にした後）では、CLSトークンは<strong>26個全てのトークン（25マス＋自分自身）とAttentionでやり取り</strong>します。各層を通るたびに、</p>
+<ul>
+<li>「壁マップ・スタート・ゴール・エージェント位置・ゴールまでの距離」という各マスの情報（<code>embedding</code>層で埋め込まれたもの）</li>
+<li>各マスの座標情報（2次元位置エンコーディング）</li>
+</ul>
+<p>を、Attentionの重み付けで<strong>選択的に集約</strong>していきます。イメージとしては、CLSトークンは「迷路全体を見渡して、今の状況を要約するレポーター」のような役割です。層を重ねるごとに、より抽象化された「現在の状況の要約」がCLSトークンに蓄積されていきます。</p>
+<p><strong>出力層での使われ方</strong></p>
+<pre><code class="language-python">logits = self.actor_head(cls_out)   <span class="hljs-comment"># 次にどの方向へ動くか（4行動の確率）</span>
+value = self.critic_head(cls_out)   <span class="hljs-comment"># 現在の状況がどれだけ「良い」か（価値関数）</span>
+</code></pre>
+<p>25マス個別の出力ではなく、<strong>CLSトークン1つの出力だけ</strong>を使って、方策(actor)と価値(critic)の両方を計算しています。つまり「盤面全体の情報を1つのベクトルに要約したもの」が、意思決定の唯一の根拠になっているわけです。</p>
+<p><strong>何が起きていたか</strong></p>
+<p>ということでTransformerの「CLSトークン」というのは、迷路全体の情報を1箇所に集めて、そこから「次にどっちに動くか」を決めるための特別なマスです。当時のコードでは、このCLSトークンが<strong>エージェントの現在地から見て隣接する上下左右のマスの情報しか、直接受け取れない</strong>ように設計されていました。</p>
+<p>さらにTransformerの層数(<code>num_layers=2</code>)が2層だったので、情報が伝わる範囲は「隣のマスの、そのまた隣のマス」までです。つまり実質<strong>現在地から2マス分先</strong>の情報しか、CLSトークンに届いていませんでした。</p>
+<p><strong>たとえ話</strong></p>
+<p>懐中電灯を持って、<strong>半径2マス分しか照らせない</strong>状態で5x5の迷路を歩いているようなものです。</p>
+<pre><code>. . . . .
+. . . . .
+. . A . G     ← Aがエージェント、Gがゴール
+. . . . .
+. . . . .
+</code></pre>
+<p>Aから見えるのは、Aを中心に半径2マス分だけ。3マス以上先にある壁や、迂回が必要な行き止まりは<strong>そもそも見えていません</strong>。</p>
+<ul>
+<li><strong>近いゴール</strong>（懐中電灯の範囲内）: 見える範囲だけで解決できるので、正しく避けられる</li>
+<li><strong>遠いゴール</strong>（懐中電灯の範囲外）: 3〜4マス先に「この先は壁で行き止まりだから、今のうちに左に迂回すべき」という情報があっても、それが<strong>見えないので判断のしようがない</strong></li>
+</ul>
+<p>これは学習量をいくら増やしても解決しません。エージェントに与えられている「視野」そのものが物理的に足りていなかったからです。</p>
+<p><strong>なぜ修正で直るのか</strong></p>
+<p>修正は2つのアプローチを組み合わせています。</p>
+<ol>
+<li><strong>懐中電灯の制限を外す</strong>（<code>use_wall_mask=False</code>）：Attentionのマスクを外し、迷路全体のどのマスの情報も自由に参照できるようにしました。</li>
+<li><strong>カーナビを渡す</strong>（距離マップのチャンネル追加）：さらに、各マスに「ここからゴールまで実際に何マス必要か（壁を考慮した最短距離）」という数値をあらかじめ計算して観測に含めました。これは懐中電灯の範囲に関係なく、どのマスからでも参照できます。</li>
+</ol>
+<p>この2つによって、エージェントは「3マス先が行き止まりだから今のうちに迂回する」といった、近視眼的なAttentionの受容野に縛られない判断ができるようになるはずです。</p>
+<h3 id="タイムアウト時にppo更新が発生されない">タイムアウト時にPPO更新が発生されない</h3>
+<p><strong>見つかった問題：タイムアウト時にPPO更新が発生せず</strong></p>
+<p>前回までの実装において<code>train()</code> のループの中身ですが。</p>
+<pre><code class="language-python"><span class="hljs-keyword">for</span> step <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_steps_per_episode):
+    ...
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(self.buffer.states) &gt;= update_horizon <span class="hljs-keyword">or</span> done:
+        self.update(next_state_img, done=done)
+    <span class="hljs-keyword">if</span> done:
+        <span class="hljs-keyword">break</span>
+</code></pre>
+<p><code>update_horizon=512</code>、<code>max_steps_per_episode=100</code> なので、<strong>ゴールに到達できず時間切れ（timeout）になったエピソードでは <code>done</code> が一度も <code>True</code> にならず、<code>update()</code> が呼ばれません</strong>。</p>
+<p>すると何が起きるか：</p>
+<ol>
+<li>timeoutしたエピソードの遷移データが <code>buffer</code> に残ったまま</li>
+<li>次の <code>for episode</code> ループで <code>env.reset(maze_change=True)</code> が呼ばれ、<strong>全く別の迷路・別のスタート地点</strong>で新しいエピソードが始まる</li>
+<li>その新しいエピソードのデータが、<strong>同じ buffer に連続して追記される</strong></li>
+<li><code>update()</code> が発火した時（<code>buffer.states</code> が512に達するか、たまたまどこかで <code>done=True</code> になった時）、GAE計算は buffer の中身を「1本の連続した軌跡」として時系列に遡って計算する</li>
+<li>しかし実際には<strong>timeoutの瞬間に迷路もエージェントの位置も完全に無関係なものへ切り替わっている</strong>のに、<code>dones[t]=False</code> のままなので、GAEはその境界を「終端ではない」として advantage を計算し、<strong>全く無関係な次エピソードの価値を、前エピソードの報酬計算にブートストラップしてしまいます</strong>。</li>
+</ol>
+<p>これは学習序盤（ゴール成功率が低くtimeoutが多発する時期）ほど深刻で、価値関数とAdvantageの推定を根本から破壊します。何度やってもダメなときはとことんダメ、というのはこの辺りが原因かなと考えました。</p>
+<h2 id="学習法改善">学習法改善</h2>
+<p>今回学習法に <strong>アニーリング</strong> という方法を取り入れようと思います。
+この手法の仕組み、期待される効果、および具体的な動作について解説します。</p>
+<h3 id="1-アニーリングannealingとは何か">1. アニーリング（Annealing）とは何か？</h3>
+<p><strong>アニーリング（焼鈍法 / Simulated Annealing に由来）</strong> とは、学習の進行に伴って<strong>特定の設定値（ハイパーパラメータ）を段階的または連続的に変化させていく手法</strong>のことです。</p>
+<p>金属工学において「金属を加熱してからゆっくり冷却することで結晶構造を安定させる（焼鈍）」というプロセスになぞらえて、強化学習や最適化の分野でも次のように利用されます。</p>
+<ul>
+<li><strong>学習初期（高温状態）:</strong> ハイパーパラメータを大きく設定し、モデルに多様な行動をとらせる（状態空間の探索）。</li>
+<li><strong>学習終盤（低温状態）:</strong> ハイパーパラメータを小さく絞り込み、最良の行動パターンに収束・定着させる（目的の活用）。</li>
+</ul>
+<h3 id="2-期待できる効果">2. 期待できる効果</h3>
+<p>エントロピー正則化は、PPOの損失関数において <strong>「方策（Policy）の確率分布が特定の1行動に偏りすぎるのを防ぐ（多様性を保つ）」</strong> 役割を果たします。これをアニーリングすることには、以下の3つの効果があります。</p>
+<p><strong>① 「探索（Exploration）」と「活用（Exploitation）」のトレーオフの最適化</strong></p>
+<ul>
+<li><strong>学習初期（高い <code>entropy_coef</code>）:</strong>
+エージェントはランダムに近い多様な行動を試みます。これにより、迷路全体を探索して遠くにあるゴールや抜け道を見つけやすくなり、<strong>「局所最適解（決定論的だが非効率な経路で満足してしまう状態）」に陥るリスクを大幅に軽減</strong>します。</li>
+<li><strong>学習終盤（低い <code>entropy_coef</code>）:</strong>
+ゴールまでの最短経路や効率的な歩行パターンが把握できたら、余計なランダム行動を排除します。最も確率の高い「最適な1手」を確実に選ぶように方策を鋭利化（Sharpening）させます。</li>
+</ul>
+<p><strong>② 迷路タスク特有の「手数のブレ」の低減</strong></p>
+<p>迷路問題のように、遠いゴールへ向けた長尺のシーケンス（数十手以上）を解く際、学習終盤まで探索（ランダム性）が強いままだと「あと1手でゴールなのに、確率的なゆらぎで壁に向かって失敗する」という事故が多発します。
+アニーlingによって終盤のエントロピーを下げることで、<strong>ゴール手前での無駄な不確定性をなくし、到達率（Success Rate）を安定</strong>させることができます。</p>
+<p><strong>③ 学習の収束速度と性能上限の向上</strong></p>
+<p>定数（固定値）で <code>entropy_coef</code> を運用する場合、以下のようなジレンマが生じます。</p>
+<ul>
+<li><strong>係数を大きく固定:</strong> 探索は十分だが、いつまでも行動が定まらず最適解に収束しない。</li>
+<li><strong>係数を小さく固定:</strong> 序盤から行動が固定化され、複雑な迷路でゴールを発見できず学習がストールする。</li>
+</ul>
+<p>アニーリングはこの両者の「イイトコ取り」を実現し、<strong>学習初期の探索能力と、最終的な収束性能の高さを両立</strong>させます。</p>
+<h2 id="実装コード">実装コード</h2>
+<p>以下レポジトリに保管しました。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src</a></p>
+<h2 id="学習結果">学習結果</h2>
+<h3 id="報酬の推移">報酬の推移</h3>
+<p>前回分と比較して並べてみました。
+今回アニーリングを入れたので難易度が高くなるとがたっとさがって、また安定するという様子が確認出来ます。
+全体的に今回の方が安定しているように見えます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\10_maze_improvement\1785585746393.png" alt="1785585746393"></p>
+<h3 id="動作">動作</h3>
+<p>学習したエージェントの動作を可視化しました。
+最短ではないこともあるかもしれませんが、前回に比べるとすっきりゴールを目指すようになりました。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\10_maze_improvement\agent_maze_solve (3).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\10_maze_improvement\agent_maze_solve (5).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\10_maze_improvement\agent_maze_solve (6).gif">
+<h2 id="総括">総括</h2>
+<p>以下に、今回の迷路タスクにおける改善内容と、そこから見えてきた「AIエージェントの学習にとって重要だったポイント」を簡潔にまとめます。</p>
+<h3 id="1-今回の主な改善内容">1. 今回の主な改善内容</h3>
+<p><strong>(1) CLSトークンのアテンション範囲の拡大（視野の拡大）</strong></p>
+<p><strong>問題点</strong></p>
+<ul>
+<li>TransformerのCLSトークン（迷路全体の情報を集約する特別トークン）が、<strong>エージェントの現在地から2マス先までしか見えていない</strong>状態でした。</li>
+<li>これはAttentionマスク（<code>use_wall_mask=True</code>）と層数（<code>num_layers=2</code>）の組み合わせにより、情報伝播が物理的に制限されていたためです。</li>
+<li>その結果、3マス以上先の壁やゴールの情報がCLSトークンに届かず、「近視眼的な判断」しかできませんでした。</li>
+</ul>
+<p><strong>対応</strong></p>
+<ul>
+<li>Attentionマスクを外し（<code>use_wall_mask=False</code>）、<strong>迷路全体のどのマスも自由に参照できる</strong>ようにしました。</li>
+<li>さらに、各マスに「ゴールまでの最短距離（壁を考慮）」を事前計算して観測に含め、<strong>距離情報を直接参照できるように</strong>しました。</li>
+</ul>
+<p><strong>効果</strong></p>
+<ul>
+<li>エージェントは「3マス先が行き止まりだから今のうちに迂回する」といった、<strong>長期的な経路判断</strong>が可能になりました。</li>
+<li>これにより、ゴールを目指す際の「うろうろ」が減り、より<strong>最短経路に近い、すっきりした動き</strong>が実現しました。</li>
+</ul>
+<p><strong>(2) タイムアウト時のPPO更新の不整合を解消</strong></p>
+<p><strong>問題点</strong></p>
+<ul>
+<li>タイムアウト（<code>max_steps_per_episode</code> に達してもゴールに到達しない）時に <code>done=False</code> のまま次のエピソードが始まり、<strong>異なる迷路・異なるエピソードのデータが同じバッファに混ざる</strong>状態でした。</li>
+<li>その結果、GAE計算が「1本の連続した軌跡」として扱ってしまい、<strong>全く無関係な次エピソードの価値を前エピソードの報酬計算にブートストラップ</strong>してしまう不整合が発生していました。</li>
+</ul>
+<p><strong>対応</strong></p>
+<ul>
+<li><code>train()</code> ループ内で、タイムアウト時にも <code>done=True</code> として扱い、<strong>エピソード境界を明確に区切る</strong>ようにしました。</li>
+<li>これにより、PPO更新時に「迷路が変わった瞬間」を正しく終端として扱い、<strong>価値関数とAdvantageの推定が破綻しない</strong>ようにしました。</li>
+</ul>
+<p><strong>効果</strong></p>
+<ul>
+<li>学習序盤（ゴール成功率が低くタイムアウトが多い時期）でも、<strong>価値推定が安定</strong>し、学習が破綻しにくくなりました。</li>
+<li>報酬の推移グラフでも、前回に比べて<strong>全体的に安定した学習曲線</strong>が得られています。</li>
+</ul>
+<p><strong>(3) エントロピー正則化係数のアニーリング導入</strong></p>
+<p><strong>問題点</strong></p>
+<ul>
+<li>エントロピー正則化係数（<code>entropy_coef</code>）を固定値にしていたため、
+<ul>
+<li>大きくしすぎると「いつまでも行動が定まらず収束しない」</li>
+<li>小さくしすぎると「序盤から探索不足でゴールを見つけられない」
+というジレンマがありました。</li>
+</ul>
+</li>
+</ul>
+<p><strong>対応</strong></p>
+<ul>
+<li>**アニーリング（焼鈍法）**を導入し、学習の進行に応じて <code>entropy_coef</code> を段階的に小さくしていきました。
+<ul>
+<li>学習初期：高いエントロピーで<strong>広く探索</strong>し、ゴールや抜け道を見つけやすくする</li>
+<li>学習終盤：低いエントロピーで<strong>最適な1手に集中</strong>し、ゴール直前の失敗を減らす</li>
+</ul>
+</li>
+</ul>
+<p><strong>効果</strong></p>
+<ul>
+<li>「探索（Exploration）」と「活用（Exploitation）」のバランスが最適化され、
+<ul>
+<li>迷路全体の探索能力を維持しつつ</li>
+<li>ゴール手前での無駄なランダム行動を減らし</li>
+<li><strong>到達率（Success Rate）と手数の安定性</strong>が向上しました。</li>
+</ul>
+</li>
+<li>報酬推移グラフでも、<strong>難易度が上がったタイミングで一時的に報酬が下がるが、その後安定して回復する</strong>という、アニーリング特有の挙動が確認されています。</li>
+</ul>
+<h2 id="2-結局aiエージェントの学習にとって重要だったこと">2. 結局、AIエージェントの学習にとって重要だったこと</h2>
+<p>今回の修正によりエージェントは前回より最短経路を通ってゴールを目指すようになりました。
+今回の修正を通じて見えてきた、AIエージェントの学習にとって重要なポイントは、以下の3つに集約できます。</p>
+<p><strong>① 「見える範囲」と「判断の根拠」を適切に設計すること</strong></p>
+<ul>
+<li>CLSトークンのAttention範囲が狭すぎると、<strong>エージェントは物理的に先の情報を見られず、近視眼的な行動しか学習できません</strong>。</li>
+<li>迷路全体の情報（壁・ゴール・距離）を<strong>適切にモデルに渡し、それを参照できる構造</strong>にすることが、<strong>長期的な計画性を持った行動</strong>を学習する上で不可欠でした。</li>
+</ul>
+<p><strong>② 学習データの「境界」と「時系列の整合性」を厳密に守ること</strong></p>
+<ul>
+<li>PPOのような自己回帰的・ブートストラップ型のアルゴリズムでは、<strong>エピソード境界の扱いが甘いと、価値推定が根本から破綻します</strong>。</li>
+<li>タイムアウト時にも <code>done=True</code> として明確に区切り、<strong>異なる迷路・異なるエピソードのデータが混ざらないようにする</strong>ことが、学習の安定性に直結しました。</li>
+</ul>
+<p><strong>③ 「探索」と「活用」のバランスを、学習の進行に応じて動的に調整すること</strong></p>
+<ul>
+<li>エントロピー正則化係数のアニーリングにより、
+<ul>
+<li>学習初期：広く探索してゴールや抜け道を見つける</li>
+<li>学習終盤：最適な1手に集中してゴールを確実に達成する
+という<strong>段階的な最適化</strong>が可能になりました。</li>
+</ul>
+</li>
+<li>これは、**単一の固定パラメータでは実現しにくい「探索と活用の両立」**を、時間軸で動的に調整する強力な手法です。</li>
+</ul>
+<h3 id="3-まとめ">3. まとめ</h3>
+<p>今回の迷路タスクの改善を通じて、</p>
+<ul>
+<li><strong>モデル構造（視野と情報の伝達）</strong></li>
+<li><strong>学習アルゴリズムの実装（エピソード境界と価値推定の整合性）</strong></li>
+<li><strong>学習戦略（探索と活用の動的バランス）</strong></li>
+</ul>
+<p>の3つが、AIエージェントの学習において<strong>いずれも欠かせない要素</strong>であることが改めて確認できました。</p>
+<p>特に、「うろうろする」から「すっきりゴールを目指す」への変化は、</p>
+<ul>
+<li><strong>視野の拡大（CLSトークンのAttention範囲）</strong></li>
+<li><strong>距離情報の直接参照（距離マップの導入）</strong></li>
+<li><strong>アニーリングによる探索と活用の最適化</strong>
+が組み合わさることで初めて実現した、<strong>構造的・戦略的な改善の成果</strong>と言えます。</li>
+</ul>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+            
+        </body>
+        </html>

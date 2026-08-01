@@ -43,6 +43,60 @@ def load_model_safely(model, path, device="cpu"):
         for key in skipped_keys:
             print(f" - {key}")
 
+
+# ================================================================
+# 1.5. 行動マスキング（壁・盤外に向かう行動を無効化する）
+# ================================================================
+def compute_valid_action_mask(x, wall_channel_idx=0, agent_channel_idx=3):
+    """
+    観測テンソル x: (B, C, H, W) から、現在位置で選択可能な行動(上下左右)の
+    マスクを計算する。有効 = 盤内 かつ 壁でない。
+
+    これがないと、方策は壁や盤外に向かう行動もロジット上は選び得るため、
+    遠いゴールに向かう長い正解シーケンスほど「1手でも間違えると失敗」の
+    確率が積み重なってしまう（近い迷路は解けるが遠い迷路は解けない、
+    という症状の主因になりやすい）。
+
+    戻り値: (B, 4) の bool テンソル (True=選択可能)
+    action定義は MazeEnv.step に合わせる: 0=上 1=下 2=左 3=右
+    """
+    B, C, H, W = x.shape
+    device = x.device
+    wall_map = x[:, wall_channel_idx]          # (B, H, W)
+    agent_map = x[:, agent_channel_idx]        # (B, H, W)
+    agent_flat = agent_map.reshape(B, -1).argmax(dim=1)  # (B,)
+    agent_r = agent_flat // W
+    agent_c = agent_flat % W
+
+    deltas = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    valid = torch.zeros(B, 4, dtype=torch.bool, device=device)
+    batch_idx = torch.arange(B, device=device)
+
+    for a, (dr, dc) in enumerate(deltas):
+        nr = agent_r + dr
+        nc = agent_c + dc
+        in_bounds = (nr >= 0) & (nr < H) & (nc >= 0) & (nc < W)
+        nr_clamped = nr.clamp(0, H - 1)
+        nc_clamped = nc.clamp(0, W - 1)
+        is_wall = wall_map[batch_idx, nr_clamped, nc_clamped] > 0.5
+        valid[:, a] = in_bounds & (~is_wall)
+
+    return valid
+
+
+def apply_action_mask(logits, valid_mask, mask_value=-1e9):
+    """
+    valid_mask=Falseの行動のロジットを非常に小さい値にして、実質選ばれなく
+    する。全行動が無効（迷路生成のバグ等で完全に孤立したマス）という
+    異常系のときは、NaN化を避けるためマスクをかけない（フォールバック）。
+    """
+    all_invalid = ~valid_mask.any(dim=1)
+    safe_mask = valid_mask.clone()
+    if all_invalid.any():
+        safe_mask[all_invalid] = True
+    return logits.masked_fill(~safe_mask, mask_value)
+
+
 class PPORolloutBuffer:
     def __init__(self):
         self.states = []
@@ -74,7 +128,7 @@ class PPORolloutBuffer:
 class TransformerActorCritic(nn.Module):
     def __init__(
         self,
-        in_channels=4,
+        in_channels=5,   # 変更: ch4=ゴールまでの正規化BFS距離 を追加（MazeEnv側の変更と対応）
         grid_size=5,
         d_model=64,
         nhead=4,
@@ -82,6 +136,7 @@ class TransformerActorCritic(nn.Module):
         action_dim=4,
         hidden_size=128,
         wall_channel_idx=0,   # obs[0] = 壁マップ (1=壁, 0=通行可)
+        use_wall_mask=False,  # 変更: 既定でOFF。理由は_build_attn_maskのdocstring参照
     ):
         super().__init__()
         assert d_model % 2 == 0, "d_model は2次元位置エンコーディングのため偶数にしてください"
@@ -92,6 +147,7 @@ class TransformerActorCritic(nn.Module):
         self.nhead = nhead
         self.wall_channel_idx = wall_channel_idx
         self.d_model = d_model
+        self.use_wall_mask = use_wall_mask
 
         self.embedding = nn.Linear(in_channels, d_model)
 
@@ -139,6 +195,8 @@ class TransformerActorCritic(nn.Module):
         self.register_buffer("neighbor_i", idx_i, persistent=False)
         self.register_buffer("neighbor_j", idx_j, persistent=False)
 
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
     @staticmethod
     def _build_grid_indices(grid_size):
         """トークン順(row-major: i = r*W + c)に対応する row_idx, col_idx を返す"""
@@ -174,27 +232,49 @@ class TransformerActorCritic(nn.Module):
         pos = torch.cat([row_pe, col_pe], dim=-1)  # (N, d_model)
         return pos.unsqueeze(0)  # (1, N, d_model)
 
-    def _build_attn_mask(self, wall_map, B, device):
+    def _build_attn_mask(self, wall_map, agent_pos_flat, B, device):
+        """
+        wall_map: (B, H, W)
+        agent_pos_flat: (B,) 各バッチの現在位置のフラットインデックス
+
+        【重要な制約・use_wall_mask=Falseにした理由】
+        このmaskはCLSトークンが「現在位置から1ホップ隣接するマスの情報」しか
+        直接受け取れない設計になっている（adjacencyは上下左右1マスのみ）。
+        num_layers=2の場合、CLSが集約できる情報は実質2ホップ分に限られ、
+        5x5迷路で必要になりうる距離（最大8マス程度）の経路情報を
+        表現できない。これが「数マス先の迂回が必要な壁を避けられない」
+        原因になっていたため、既定では使わない。
+
+        代わりにMazeEnv側でBFS距離マップをobs[4]として直接与えることで、
+        受容野に依存せず各セルがゴール方向の情報を持てるようにしている。
+
+        use_wall_mask=True にすると従来通りこのmaskを使う（アブレーション用）。
+        使う場合は num_layers を迷路の直径をカバーできる程度まで
+        増やすことを推奨（5x5なら num_layers=4〜6程度）。
+        """
         H = W = self.grid_size
         N = self.num_tokens
         wall_flat = wall_map.reshape(B, N)
 
         adjacency = torch.zeros(B, N, N, dtype=torch.bool, device=device)
-
         not_wall_i = (wall_flat[:, self.neighbor_i] == 0)
         not_wall_j = (wall_flat[:, self.neighbor_j] == 0)
         connected = not_wall_i & not_wall_j
-
         batch_idx = torch.arange(B, device=device).unsqueeze(1).expand(-1, self.neighbor_i.shape[0])
         adjacency[batch_idx, self.neighbor_i.expand(B, -1), self.neighbor_j.expand(B, -1)] = connected
-
         diag_idx = torch.arange(N, device=device)
         adjacency[:, diag_idx, diag_idx] = True
 
         full_adj = torch.zeros(B, N + 1, N + 1, dtype=torch.bool, device=device)
         full_adj[:, 1:, 1:] = adjacency
-        full_adj[:, 0, :] = True
-        full_adj[:, :, 0] = True
+
+        # CLS(index 0) は「現在位置のマスと同じ接続性」を持たせる
+        # -> 現在位置から到達可能なマスの情報だけを、CLSは直接受け取れる
+        batch_range = torch.arange(B, device=device)
+        cls_connectivity = adjacency[batch_range, agent_pos_flat]  # (B, N) 現在位置の行を流用
+        full_adj[:, 0, 1:] = cls_connectivity
+        full_adj[:, 1:, 0] = cls_connectivity
+        full_adj[:, 0, 0] = True
 
         attn_mask = ~full_adj
         attn_mask = attn_mask.repeat_interleave(self.nhead, dim=0)
@@ -208,7 +288,8 @@ class TransformerActorCritic(nn.Module):
         B, C, H, W = x.shape
 
         wall_map = x[:, self.wall_channel_idx, :, :]  # (B, H, W)  ※permute前に取得
-
+        agent_map = x[:, 3, :, :]  # (B, H, W) エージェント位置チャンネル
+        agent_pos_flat = agent_map.reshape(B, -1).argmax(dim=1)  # (B,)
         x = x.permute(0, 2, 3, 1).contiguous().reshape(B, H * W, C)  # (B, 25, 4)
 
         x = self.embedding(x)  # (B, 25, d_model)
@@ -220,8 +301,14 @@ class TransformerActorCritic(nn.Module):
         cls_tokens = self.cls_token.expand(B, -1, -1) + self.cls_pos_embedding
         x = torch.cat((cls_tokens, x), dim=1)  # (B, 26, d_model)
 
-        attn_mask = self._build_attn_mask(wall_map, B, x.device)
-        x = self.transformer(x, mask=attn_mask)
+        # 変更: 既定(use_wall_mask=False)ではフルの自己注意を使う。
+        # 壁を挟んだ受容野の制限をなくし、かつobs[4]の距離マップから
+        # グローバルな経路情報を各トークンが直接参照できるようにするため。
+        if self.use_wall_mask:
+            attn_mask = self._build_attn_mask(wall_map, agent_pos_flat, B, x.device)
+            x = self.transformer(x, mask=attn_mask)
+        else:
+            x = self.transformer(x)
 
         cls_out = x[:, 0]
         logits = self.actor_head(cls_out)
@@ -246,20 +333,22 @@ class TransformerPPOAgent:
     def __init__(
         self,
         env,
-        in_channels=4,
+        in_channels=5,   # 変更: MazeEnvの距離チャンネル追加に合わせる
         grid_size=5,
         d_model=64,
         nhead=4,
         num_layers=2,
         action_dim=4,
         hidden_size=128,
+        use_wall_mask=False,  # 追加: Trueにすると従来の壁トポロジーmaskを使う（非推奨・アブレーション用）
         lr=3e-4,
         gamma=0.99,
         gae_lambda=0.95,
         clip_eps=0.2,
         ppo_epochs=10,
         batch_size=32,
-        entropy_coef=0.01,
+        entropy_coef=0.03,
+        entropy_coef_final=None,  # 追加: 指定するとentropy_coefから線形に減衰させる（探索→活用）
         value_loss_coef=0.5,
         max_grad_norm=0.5,
         path_save="transformer_ppo.pth",
@@ -272,6 +361,12 @@ class TransformerPPOAgent:
         self.ppo_epochs = ppo_epochs
         self.batch_size = batch_size
         self.entropy_coef = entropy_coef
+        # 追加: アニーリング用に開始値・終了値を保持。entropy_coef_final未指定なら
+        # 従来通り定数（アニーリングなし）。
+        self.entropy_coef_start = entropy_coef
+        self.entropy_coef_final = (
+            entropy_coef_final if entropy_coef_final is not None else entropy_coef
+        )
         self.value_loss_coef = value_loss_coef
         self.max_grad_norm = max_grad_norm
         self.path_save = path_save
@@ -286,8 +381,8 @@ class TransformerPPOAgent:
             num_layers=num_layers,
             action_dim=action_dim,
             hidden_size=hidden_size,
+            use_wall_mask=use_wall_mask,
         )
-        self.load_model(path_save)
         self.policy.to(device)
 
         # -------------------------------------------------------------
@@ -296,6 +391,10 @@ class TransformerPPOAgent:
         self.policy.apply(_init_weights)
         self._apply_head_gain_initialization()
 
+        # 修正: 以前はここに来る前に無条件で self.load_model(path_save) を呼んでおり、
+        # チェックポイントファイルが存在しない初回実行時に torch.load が
+        # FileNotFoundError で落ちる可能性があった。os.path.exists 判定後の
+        # 1箇所にまとめる。
         if os.path.exists(self.path_save):
             self.load_model(self.path_save)
             print("Successfully loaded model.")
@@ -347,6 +446,11 @@ class TransformerPPOAgent:
 
             # ナンバー・オーバーフロー保護
             logits = torch.clamp(logits, min=-20.0, max=20.0)
+
+            # 追加: 壁・盤外に向かう行動をマスクしてから分布を作る
+            valid_mask = compute_valid_action_mask(state_tensor)
+            logits = apply_action_mask(logits, valid_mask)
+
             dist = Categorical(logits=logits)
 
             action = dist.sample()
@@ -443,6 +547,13 @@ class TransformerPPOAgent:
 
                 # Logits の数値的安定化
                 logits = torch.clamp(logits, min=-20.0, max=20.0)
+
+                # 追加: ロールアウト時（select_action）と同じマスクをここでも適用しないと、
+                # 保存済みold_log_probs（マスクあり）と学習時のlog_probs（マスクなし）が
+                # 食い違い、PPOのratio計算が歪む。
+                valid_mask = compute_valid_action_mask(b_states)
+                logits = apply_action_mask(logits, valid_mask)
+
                 dist = Categorical(logits=logits)
 
                 new_log_probs = dist.log_prob(b_actions)
@@ -509,14 +620,37 @@ class TransformerPPOAgent:
         update_horizon=512,
         maze_change=True,
         path=None,
+        log_interval=10,
+        use_curriculum=False,
+        curriculum_start_distance=3,   # 追加: 最初はこの距離までの迷路だけ出す
+        curriculum_success_threshold=0.7,  # 追加: 直近window内の成功率がこれを超えたら難易度UP
+        curriculum_window=20,
     ):
         save_path = path if path is not None else self.path_save
         episode_rewards = []
+        success_flags = []  # 直近のゴール到達可否を記録（診断用・カリキュラム判定用）
+
+        # 追加: カリキュラム学習用の現在の難易度上限（スタート-ゴール間距離）
+        current_max_distance = curriculum_start_distance if use_curriculum else None
 
         for episode in range(num_episodes):
-            state_pos = self.env.reset(maze_change=maze_change)
+            # 追加: エントロピー係数を線形にアニーリング（探索→活用へ）
+            progress = episode / max(1, num_episodes - 1)
+            self.entropy_coef = (
+                self.entropy_coef_start
+                + (self.entropy_coef_final - self.entropy_coef_start) * progress
+            )
+
+            if use_curriculum:
+                state_pos = self.env.reset(
+                    maze_change=maze_change, max_distance=current_max_distance
+                )
+            else:
+                state_pos = self.env.reset(maze_change=maze_change)
             state_img = self.env.get_image_observation()
             episode_reward = 0
+            episode_done = False
+            next_state_img = state_img  # timeoutでstepが1回も回らない異常系向けの保険
 
             for step in range(max_steps_per_episode):
                 action, log_prob, value = self.select_action(state_img)
@@ -540,17 +674,49 @@ class TransformerPPOAgent:
                 state_pos = next_state_pos
                 state_img = next_state_img
                 episode_reward += reward
+                episode_done = done
 
+                # horizon到達 or done(=ゴール到達)の場合はここで更新。
                 if len(self.buffer.states) >= update_horizon or done:
                     self.update(next_state_img, done=done)
 
                 if done:
                     break
 
-            episode_rewards.append(episode_reward)
+            # timeoutで終わったエピソードもここで必ずupdateし、bufferを毎エピソードで
+            # クリアする（迷路をまたいだGAE汚染を防ぐ）。
+            if len(self.buffer.states) > 0:
+                self.update(next_state_img, done=episode_done)
 
-            if episode % 10 == 0:
-                print(f"Episode {episode}, Reward: {episode_reward:.2f}")
+            episode_rewards.append(episode_reward)
+            success_flags.append(1 if episode_done else 0)
+
+            if episode % log_interval == 0:
+                window = success_flags[-log_interval:]
+                success_rate = sum(window) / len(window)
+                curriculum_info = (
+                    f", 難易度(max_distance)={current_max_distance}"
+                    if use_curriculum else ""
+                )
+                print(
+                    f"Episode {episode}, Reward: {episode_reward:.2f}, "
+                    f"直近{len(window)}エピソードのゴール到達率: {success_rate:.0%}, "
+                    f"entropy_coef={self.entropy_coef:.4f}{curriculum_info}"
+                )
+
+            # 追加: カリキュラムの難易度更新判定
+            if use_curriculum and len(success_flags) >= curriculum_window:
+                recent = success_flags[-curriculum_window:]
+                recent_success_rate = sum(recent) / len(recent)
+                if recent_success_rate >= curriculum_success_threshold:
+                    current_max_distance += 1
+                    print(
+                        f"[curriculum] 直近{curriculum_window}エピソードの成功率"
+                        f"{recent_success_rate:.0%} >= 閾値。"
+                        f"難易度を引き上げ: max_distance={current_max_distance}"
+                    )
+                    success_flags = []  # 難易度が変わったら成功率をリセットして再計測
+
             if episode % 100 == 0 and episode > 0:
                 print(f"Episode {episode}, save model to {save_path}")
                 self.save_model(save_path)
@@ -564,9 +730,10 @@ class TransformerPPOAgent:
         self.policy.to(self.device)
 
     def load_model(self, path):
-        if hasattr(self, "load_model_safely"):
-            self.load_model_safely(self.policy, path, device=self.device)
-        else:
-            self.policy.load_state_dict(
-                torch.load(path, map_location=self.device)
-            )
+        # 修正: self.load_model_safely は存在しないメソッド名だったため
+        # hasattr(self, "load_model_safely") は常にFalseとなり、
+        # 「形状不一致レイヤーをスキップする安全ロード」が一度も
+        # 使われていなかった。モジュール関数を直接呼ぶように修正。
+        # これにより、今回のようにモデル構造（in_channels等）を変更した後でも、
+        # 形状が一致するレイヤーだけを読み込んで継続学習できる。
+        load_model_safely(self.policy, path, device=self.device)

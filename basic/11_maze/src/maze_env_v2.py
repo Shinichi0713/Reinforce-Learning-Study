@@ -22,15 +22,18 @@ class MazeEnv:
         self.state = self.start
         self.done = False
         self.history = []
-        self.rows = rows
-        self.cols = cols
+        # 修正: maze_fileから読み込んだ場合、実際の迷路サイズと引数rows/colsが
+        # 食い違うことがあった（reset()での再生成時に不整合を起こす原因になる）ため、
+        # 実際に読み込んだ/生成したmazeのサイズを正として使う。
+        self.rows = len(self.maze)
+        self.cols = len(self.maze[0])
 
         # --- 変更点: 報酬パラメータを一箇所にまとめて調整しやすくする ---
         self.step_penalty = -0.05        # 通常移動の基本ペナルティ
         self.wall_penalty = -0.6         # 壁衝突（遠回りより重くする）
         self.progress_reward = 0.3       # ゴールに近づいた場合
         self.regress_penalty = -0.15     # ゴールから遠ざかった場合（壁衝突より軽く）
-        self.goal_reward = 10.0          # ゴール到達報酬（固定値でスケールを安定させる）
+        self.goal_reward = 20.0          # ゴール到達報酬（固定値でスケールを安定させる）
         self.stop_penalty = -0.4
 
     def _load_maze(self, file_path):
@@ -92,9 +95,16 @@ class MazeEnv:
                         queue.append((nx, ny))
         return dist
 
-    def reset(self, maze_change=True):
+    def reset(self, maze_change=True, min_distance=None, max_distance=None):
         if maze_change:
-            self.generate_random_maze()
+            # 修正: 以前は rows/cols を渡しておらず、コンストラクタでカスタムサイズを
+            # 指定していても reset のたびに既定値5x5に戻ってしまうバグがあった。
+            # 追加: min_distance/max_distance でスタート-ゴール間の距離を制約できるように
+            # した（カリキュラム学習: 最初は近い迷路だけ、徐々に遠い迷路も出す）。
+            self.generate_random_maze(
+                rows=self.rows, cols=self.cols,
+                min_distance=min_distance, max_distance=max_distance,
+            )
         # --- 変更点: max_goal_reward を迷路の長さに依存させず固定化 ---
         # (以前は length_min * 3.0 でエピソードごとにスケールが変動していた)
         self.state = self.start
@@ -103,6 +113,14 @@ class MazeEnv:
 
         # --- 追加: ゴールまでの距離マップをエピソード開始時に1回だけ計算 ---
         self.dist_map = self._bfs_distance_map(self.maze, self.goal)
+
+        # --- 追加: 正規化用に到達可能マスの最大距離を保持 ---
+        # （observationの距離チャンネルをTransformerに渡すために使う）
+        finite_dists = [d for row in self.dist_map for d in row if d is not None]
+        self._max_dist = max(finite_dists) if finite_dists else 1
+        if self._max_dist <= 0:
+            self._max_dist = 1
+
         return self.state
 
     def step(self, action):
@@ -130,12 +148,13 @@ class MazeEnv:
         else:
             step_reward = self.step_penalty
 
-        # 【追加】停止判定（壁衝突、あるいはその他の理由で座標が変わらなかった場合）
-        if next_state == self.state:
-            # すでに壁ペナルティが入っている場合は、停止ペナルティに上書きするか、累積させます。
-            # ここでは「動かなかったことへの一律のペナルティ」として上書き（または追加）します。
-            # シンプルに累積させる場合は `step_reward += self.stop_penalty` にしてください。
+        # 【修正】停止判定
+        # 従来は hit_wall=True でも常に stop_penalty(-0.4) に上書きされてしまい、
+        # wall_penalty(-0.6) が実質使われていなかった（壁の方が停止より軽く罰される逆転バグ）。
+        # 壁衝突と、それ以外の理由で座標が変わらなかったケースを区別する。
+        if next_state == self.state and not hit_wall:
             step_reward = self.stop_penalty
+        # hit_wall=True の場合は既に self.wall_penalty が設定済みなのでそのまま使う
 
         # 2. 距離マップ上で近づいたかの判定（実際に動いた場合のみ計算）
         if next_state != self.state:
@@ -170,9 +189,27 @@ class MazeEnv:
         print()
 
     def get_image_observation(self):
+        """
+        観測は5チャンネル構成:
+          ch0: 壁マップ (1=壁, 0=通行可)
+          ch1: スタート位置
+          ch2: ゴール位置
+          ch3: エージェントの現在位置
+          ch4: ゴールまでのBFS距離（正規化・近いほど値が大きい）
+               壁・到達不可能マスは0
+        ch4を追加した狙い:
+          Transformer側のattentionだけに経路探索を任せると、
+          層数×1ホップ分の受容野しかゴール方向の情報が伝わらず、
+          数マス先の迂回が必要な壁配置を学習しづらい。
+          BFS距離を直接与えることで、各セルが「ゴールに近づく方向」を
+          受容野に関係なく参照できるようにする。
+        """
         rows = len(self.maze)
         cols = len(self.maze[0])
-        obs = np.zeros((4, rows, cols), dtype=np.float32)
+        obs = np.zeros((5, rows, cols), dtype=np.float32)
+
+        dist_map = getattr(self, 'dist_map', None)
+        max_dist = getattr(self, '_max_dist', 1) or 1
 
         for i in range(rows):
             for j in range(cols):
@@ -185,6 +222,12 @@ class MazeEnv:
                     obs[2, i, j] = 1.0
                 elif cell == '.':
                     pass
+
+                if dist_map is not None:
+                    d = dist_map[i][j]
+                    if d is not None:
+                        obs[4, i, j] = (max_dist - d) / max_dist
+
         x, y = self.state
         obs[3, x, y] = 1.0
         return obs
@@ -260,8 +303,17 @@ class MazeEnv:
                         queue.append((nx, ny))
         return False
 
-    def generate_random_maze(self, rows=5, cols=5):
+    def generate_random_maze(self, rows=5, cols=5, min_distance=None, max_distance=None):
+        """
+        min_distance/max_distance: スタート-ゴール間の（壁を置く前の、障害物なしの）
+        最短距離をこの範囲に制約する。カリキュラム学習で「まず近い迷路だけ出す」
+        「徐々に遠い迷路も混ぜる」といった難易度調整に使う。
+        指定しない場合（既定）は従来通り制約なし。
+        """
+        max_attempts = 2000  # 距離制約がきつい場合の無限ループ防止
+        attempts = 0
         while True:
+            attempts += 1
             maze = [['.' for _ in range(cols)] for _ in range(rows)]
 
             while True:
@@ -276,6 +328,19 @@ class MazeEnv:
             path = self._find_shortest_path(maze, start, goal)
             if not path:
                 continue
+
+            distance = len(path) - 1
+            if min_distance is not None and distance < min_distance:
+                if attempts >= max_attempts:
+                    # 制約を満たすstart/goalが見つからない場合は制約を諦めて進める
+                    pass
+                else:
+                    continue
+            if max_distance is not None and distance > max_distance:
+                if attempts >= max_attempts:
+                    pass
+                else:
+                    continue
 
             self._add_walls_safely(maze, path, start, goal)
 
