@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>先日ICMLでポスター発表された論文の中からLLMの思考力向上のための長期思考を行う学習法のうち、従来課題を解決するという内容のものがありました。
+LLMの思考力向上を理解する良い論文だと感じたので、論文詳細を読んでみます。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>Reinforcement-aware Knowledge Distillation for LLM Reasoningについて読んでみる。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="概要">概要</h2>
+<p>ご質問の論文について、著者・採択学会・採択年・概要を整理すると以下の通りです。</p>
+<h3 id="基本情報">基本情報</h3>
+<ul>
+<li>
+<p><strong>タイトル</strong>：<br>
+<strong>Reinforcement-aware Knowledge Distillation for LLM Reasoning</strong></p>
+</li>
+<li>
+<p><strong>著者</strong>：<br>
+Zhaoyang Zhang, Shuli Jiang, Yantao Shen, Yuting Zhang, Dhananjay Ram, Shuo Yang, Zhuowen Tu, Wei Xia, Stefano Soatto<br>
+<a href="https://arxiv.org/html/2602.22495v2">arXiv</a></p>
+</li>
+<li>
+<p><strong>採択学会</strong>：<br>
+<strong>ICML 2026</strong>（International Conference on Machine Learning 2026）<br>
+<a href="https://icml.cc/virtual/2026/poster/66775">ICML 2026 Poster</a></p>
+</li>
+<li>
+<p><strong>採択年</strong>：<br>
+<strong>2026年</strong></p>
+</li>
+<li>
+<p><strong>発表形式</strong>：<br>
+ICML 2026 ポスター発表（Poster #4005, Hall A）<br>
+日時：2026年7月7日 18:30–20:15（PDT）<br>
+<a href="https://icml.cc/virtual/2026/poster/66775">ICML 2026 Poster</a></p>
+</li>
+</ul>
+<h3 id="論文の概要要約">論文の概要（要約）</h3>
+<p><strong>背景と問題意識</strong></p>
+<ul>
+<li>近年、<strong>強化学習（RL）によるポストトレーニング</strong>によって、長いチェイン・オブ・ソート（CoT）推論を行う大規模言語モデル（LLM）の性能が大きく向上しています。</li>
+<li>しかし、こうした大規模モデルは推論コストが高く、<strong>小型モデルへの蒸留（Knowledge Distillation）</strong> が必要になります。</li>
+<li>既存の蒸留手法は、主に<strong>教師あり微調整（SFT）</strong> を想定しており、
+<ul>
+<li>固定された教師モデルの出力トレースを使う</li>
+<li>教師–生徒間のKLダイバージェンスで正則化する<br>
+といった方法が一般的です。</li>
+</ul>
+</li>
+<li>しかし、<strong>RLと組み合わせると</strong>、
+<ul>
+<li>教師の分布と生徒のロールアウト分布がずれる（<strong>分布ミスマッチ</strong>）</li>
+<li>KL正則化が報酬最大化と競合する（<strong>目的関数の干渉</strong>）<br>
+といった問題が生じます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>提案手法：RL-aware Distillation (RLAD)</strong></p>
+<ul>
+<li>著者らは、<strong>RL-aware Distillation (RLAD)</strong> という新しい枠組みを提案しています。</li>
+<li>中核となるのは <strong>Trust Region Ratio Distillation (TRRD)</strong> という目的関数で、
+<ul>
+<li>従来の教師–生徒KL正則化を、<br>
+<strong>PPO/GRPO風の「重要度比（likelihood ratio）」目的関数</strong>に置き換えます。</li>
+<li>この重要度比は、<strong>教師モデルと古い生徒ポリシーの混合分布</strong>をアンカーとして定義されます。</li>
+</ul>
+</li>
+<li>これにより、
+<ul>
+<li>生徒は<strong>報酬最大化と教師の模倣を同時に考慮</strong>しつつ、</li>
+<li>「教師の模倣が報酬向上に寄与するときだけ模倣する」<br>
+という<strong>選択的模倣（selective imitation）</strong> が可能になります。</li>
+</ul>
+</li>
+</ul>
+<p><strong>主な貢献（論文で主張しているポイント）</strong></p>
+<ol>
+<li>
+<p><strong>RL-aware Distillation (RLAD)</strong> フレームワークの提案</p>
+<ul>
+<li>RLポストトレーニング中に教師ガイダンスを統合する枠組み。</li>
+</ul>
+</li>
+<li>
+<p><strong>Trust Region Ratio Distillation (TRRD)</strong> の導入</p>
+<ul>
+<li>KL正則化ではなく、<strong>クリップされた重要度比目的</strong>を用いることで、<br>
+探索・活用・模倣のバランスをとる。</li>
+</ul>
+</li>
+<li>
+<p><strong>TRRD の理論的・実証的分析</strong></p>
+<ul>
+<li>TRRD が「報酬条件付きの選択的模倣」を可能にすることを示す。</li>
+</ul>
+</li>
+<li>
+<p><strong>論理・数学推論ベンチマークでの実験</strong></p>
+<ul>
+<li>AIME24/25、K&amp;K Logistics などの長文・複雑な推論タスクで、RLAD が GRPO、KDRL、オフライン蒸留などを上回る性能を示す。</li>
+</ul>
+</li>
+</ol>
+<p><strong>実験結果のポイント</strong></p>
+<ul>
+<li>8Kコンテキスト長の設定で、
+<ul>
+<li>Qwen3‑0.6B の平均正解率を +18%（0.94 vs 0.76 under GRPO）改善</li>
+<li>Qwen3‑1.7B でも +4%（0.99 vs 0.95）改善<br>
+と報告されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</li>
+</ul>
+</li>
+<li>特に、<strong>難しいベンチマークや長い推論チェーン</strong>において、既存の蒸留手法よりも安定かつ高い性能を達成しています。</li>
+</ul>
+<h2 id="解決したかった課題">解決したかった課題</h2>
+<p>この論文が解決したかった課題は、一言で言うと、</p>
+<blockquote>
+<p><strong>「強化学習（RL）で賢くなった大きなLLMを、そのまま小さなモデルに“丸ごと教える”と、うまくいかない」</strong></p>
+</blockquote>
+<p>という問題です。</p>
+<p>もう少し分解すると、次の3つの課題に整理できます。</p>
+<h3 id="課題1rlで賢くなったllmは重くて使えない">課題1：RLで賢くなったLLMは重くて使えない</h3>
+<ul>
+<li>近年、<strong>強化学習（RL）によるポストトレーニング</strong>によって、長いチェイン・オブ・ソート（CoT）推論を行うLLMが大きく性能向上しました。</li>
+<li>しかし、こうしたモデルはパラメータ数が多く、<strong>推論コストが高い</strong>ため、実際のサービスやエッジデバイスでは使いづらいという問題があります。</li>
+<li>そこで、<strong>大きなモデル（教師）から小さなモデル（生徒）へ知識を移す「知識蒸留（KD）」</strong> が必要になります。</li>
+</ul>
+<p><strong>課題</strong>：</p>
+<ul>
+<li>既存の知識蒸留は、主に<strong>教師あり微調整（SFT）</strong> を想定しており、RLで訓練されたモデルをそのまま小さくするには不十分でした。</li>
+</ul>
+<h3 id="課題2rlと蒸留を組み合わせると分布がずれる">課題2：RLと蒸留を組み合わせると「分布がずれる」</h3>
+<p>既存の蒸留手法（特にKLベースの蒸留）を、<a href="https://yoshishinnze.hatenablog.com/entry/2026/03/15/000000">CoT</a>を行うためのRLと組み合わせると、次のような問題が起きます。</p>
+<ol>
+<li>
+<p><strong>分布ミスマッチ</strong></p>
+<ul>
+<li>教師モデルは「ある固定された分布」で生成した出力を教えますが、</li>
+<li>生徒モデルはRLの過程で<strong>自分なりのロールアウト（試行錯誤の軌跡）</strong> を生成します。</li>
+<li>その結果、「教師が教えている分布」と「生徒が実際に試している分布」が<strong>大きくずれてしまう</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>目的関数の干渉</strong></p>
+<ul>
+<li>RLの目的は「報酬を最大化する」ことです。</li>
+<li>一方、KL蒸留の目的は「教師に近づく」ことです。</li>
+<li>この2つが<strong>同じ学習ループの中で競合</strong>し、
+<ul>
+<li>報酬を上げる方向に進もうとすると教師から離れてしまう</li>
+<li>教師に近づこうとすると報酬が下がる<br>
+というジレンマが生じます。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>課題</strong>：</p>
+<ul>
+<li>「報酬を最大化したい」のに、「教師に近づけ」という制約が邪魔をして、<br>
+<strong>学習が不安定になったり、性能が頭打ちになったりする</strong>。</li>
+</ul>
+<h3 id="課題3教師の模倣がいつ役に立つかがわからない">課題3：教師の模倣が「いつ役に立つか」がわからない</h3>
+<ul>
+<li>教師モデルは賢いですが、<strong>常に正しいとは限りません</strong>。</li>
+<li>また、生徒モデルが今いる状態（ロールアウト）に対して、教師の出力が「報酬向上に本当に役立つか」は状況によって異なります。</li>
+</ul>
+<p><strong>課題</strong>：</p>
+<ul>
+<li>既存の蒸留は「<strong>常に教師に近づけ</strong>」という方針が多く、
+<ul>
+<li>教師が間違っているときも無理に近づいてしまう</li>
+<li>生徒が良い探索をしているのに、教師に引き戻されてしまう<br>
+といった問題がありました。</li>
+</ul>
+</li>
+<li>つまり、「<strong>教師の模倣が報酬向上に役立つときだけ模倣し、そうでないときは自由に探索する</strong>」という<br>
+<strong>選択的な模倣</strong>が必要でした。</li>
+</ul>
+<h3 id="この論文が目指した解決の方向性">この論文が目指した「解決の方向性」</h3>
+<p>この論文は、上記の課題に対して、</p>
+<blockquote>
+<p><strong>「RLのループの中に、教師の模倣を“賢く”組み込む」</strong></p>
+</blockquote>
+<p>というアプローチを提案しています。</p>
+<p>具体的には、</p>
+<ul>
+<li><strong>RL-aware Distillation (RLAD)</strong> という枠組みで、</li>
+<li><strong>Trust Region Ratio Distillation (TRRD)</strong> という目的関数を用い、</li>
+<li>「報酬を最大化する方向」と「教師に近づく方向」を<strong>同じ重要度比の枠組みで統合</strong>し、</li>
+<li><strong>教師の模倣が報酬向上に寄与するときだけ模倣する</strong>（選択的模倣）<br>
+ことを実現しました。</li>
+</ul>
+<p>その結果、</p>
+<ul>
+<li>分布ミスマッチが軽減され、</li>
+<li>目的関数の干渉が減り、</li>
+<li>小さなモデルでも、長い推論チェインや難しい数学・論理問題で<br>
+<strong>大きなモデルに近い性能を出せるようになった</strong>、と報告されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</li>
+</ul>
+<h2 id="tard">TARD</h2>
+<p><strong>Trust Region Ratio Distillation (TRRD)</strong> は、この論文で提案された <strong>RL-aware Distillation (RLAD)</strong> の中核となる目的関数です。</p>
+<p>一言で言うと、</p>
+<blockquote>
+<p><strong>「教師モデルと古い生徒ポリシーの“混合”を基準にして、<br>
+新しい生徒ポリシーがどれだけ報酬を上げる方向に動いたかを測りつつ、<br>
+教師の模倣が役に立つときだけ模倣する」</strong></p>
+</blockquote>
+<p>という仕組みです。</p>
+<p>もう少し分解して説明します。</p>
+<h3 id="trrd-が解決したい問題背景">TRRD が解決したい問題（背景）</h3>
+<p>従来の RL＋蒸留では、よく次のような方法が使われていました。</p>
+<ul>
+<li><strong>教師–生徒 KL 正則化</strong>
+<ul>
+<li>生徒の出力分布と教師の出力分布の KL ダイバージェンスを小さくする</li>
+<li>RL の報酬最大化と同時に、この KL を小さくする項を入れる</li>
+</ul>
+</li>
+</ul>
+<p>しかし、これには問題があります。</p>
+<ol>
+<li>
+<p><strong>分布ミスマッチ</strong></p>
+<ul>
+<li>教師は「固定された分布」で出力を教える</li>
+<li>生徒は RL のロールアウトで「自分なりの分布」を生成する</li>
+<li>その結果、「教師が教えている分布」と「生徒が実際に試している分布」がずれる</li>
+</ul>
+</li>
+<li>
+<p><strong>目的関数の干渉</strong></p>
+<ul>
+<li>KL 正則化は「教師に近づけ」という制約</li>
+<li>RL の目的は「報酬を最大化せよ」</li>
+<li>この2つが同じ学習ループの中で競合し、
+<ul>
+<li>報酬を上げる方向に進むと教師から離れる</li>
+<li>教師に近づこうとすると報酬が下がる<br>
+というジレンマが生じる</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>そこで、この論文は</p>
+<blockquote>
+<p><strong>「教師の模倣を、報酬最大化と同じ“重要度比”の枠組みで統合する」</strong></p>
+</blockquote>
+<p>という発想で TRRD を提案しています。</p>
+<h3 id="trrd-の直感的な仕組み">TRRD の直感的な仕組み</h3>
+<p>TRRD は、<strong>PPO / GRPO 風の「重要度比（likelihood ratio）」</strong> をベースにしています。</p>
+<ul>
+<li>通常の PPO / GRPO では、
+<ul>
+<li>古いポリシー π_old と新しいポリシー π_new の比<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>r</mi><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mtext>new</mtext></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><mtext>old</mtext></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">r = \frac{\pi_\text{new}(a|s)}{\pi_\text{old}(a|s)}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">old</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+を計算し、</li>
+<li>この r をクリップしながら、<strong>報酬（advantage）を最大化</strong>するように更新します。</li>
+</ul>
+</li>
+</ul>
+<p>TRRD では、この「比」を少し拡張します。</p>
+<ol>
+<li>
+<p><strong>教師と古い生徒の混合をアンカーにする</strong></p>
+<ul>
+<li>教師ポリシー π_teacher と古い生徒ポリシー π_old を混ぜた <strong>混合ポリシー <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mrow><mi>m</mi><mi>i</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex">π_{mix}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">mi</span><span class="mord mathnormal mtight">x</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></strong> を考えます。</li>
+<li>新しい生徒ポリシー <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mrow><mi>n</mi><mi>e</mi><mi>w</mi></mrow></msub></mrow><annotation encoding="application/x-tex">π_{new}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.02691em;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> との比<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>r</mi><mtext>TRRD</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mtext>new</mtext></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><mtext>mix</mtext></msub><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">r_\text{TRRD} = \frac{\pi_\text{new}(a|s)}{\pi_\text{mix}(a|s)}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">TRRD</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3175em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">mix</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord text mtight"><span class="mord mtight">new</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+を定義します。</li>
+</ul>
+</li>
+<li>
+<p><strong>この比をクリップして信頼領域を保つ</strong></p>
+<ul>
+<li>PPO と同様に、r_TRRD をある範囲（例：0.8〜1.2）にクリップし、<br>
+<strong>更新が大きくなりすぎないように制御</strong>します。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬と教師模倣を同じ枠組みで扱う</strong></p>
+<ul>
+<li>この <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>T</mi><mi>R</mi><mi>R</mi><mi>D</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{TRRD}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.00773em;">TRR</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">D</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を <a href="https://yoshishinnze.hatenablog.com/entry/2026/07/24/043000">advantage（報酬の良さ）</a>と掛け合わせて目的関数にします。</li>
+<li>これにより、
+<ul>
+<li><strong>報酬が高い行動</strong>を強めつつ、</li>
+<li><strong>教師の模倣が報酬向上に寄与するときだけ模倣する</strong><br>
+という「選択的模倣」が自然に実現されます。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="trrd-のポイントなぜ-kl-より良いのか">TRRD のポイント（なぜ KL より良いのか）</h3>
+<ol>
+<li>
+<p><strong>分布ミスマッチを軽減</strong></p>
+<ul>
+<li>アンカーが「教師＋古い生徒の混合」なので、生徒が実際に試している分布に近い基準で模倣を評価できます。</li>
+<li>これにより、「教師が教えている分布」と「生徒のロールアウト分布」のずれが小さくなります。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬最大化と模倣の統合</strong></p>
+<ul>
+<li>KL 正則化は「教師に近づけ」という<strong>独立した制約</strong>ですが、</li>
+<li>TRRD は「重要度比 × advantage」という<strong>同じ枠組み</strong>で扱います。</li>
+<li>その結果、
+<ul>
+<li>教師の模倣が報酬向上に寄与するとき → 模倣が強く推奨される</li>
+<li>教師の模倣が報酬向上に寄与しないとき → 模倣が弱く、自由な探索が許される<br>
+という<strong>選択的模倣</strong>が実現されます。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>信頼領域の維持</strong></p>
+<ul>
+<li>クリップされた重要度比により、<br>
+更新が大きくなりすぎず、<strong>学習の安定性</strong>が高まります。</li>
+</ul>
+</li>
+</ol>
+<h2 id="rlad">RLAD</h2>
+<p><strong>RL-aware Distillation (RLAD)</strong> は、この論文で提案された <strong>「強化学習（RL）ポストトレーニング中に、教師モデルの知識を賢く蒸留するための枠組み」</strong> です。</p>
+<p>一言で言うと、</p>
+<blockquote>
+<p><strong>「RL の学習ループの中に、教師の模倣を“報酬条件付き”で組み込むことで、<br>
+小さなモデルでも長い推論チェインをこなせるようにする」</strong></p>
+</blockquote>
+<p>という仕組みです。</p>
+<p>もう少し分解して説明します。</p>
+<h3 id="全体像rlad-はrl-の更新ループの中に教師模倣を組み込む枠組み">全体像：RLAD は「RL の更新ループの中に教師模倣を組み込む」枠組み</h3>
+<p>RLAD のポイントは、</p>
+<blockquote>
+<p><strong>「RL のポリシー更新そのものに、教師モデルの模倣を“報酬条件付き”で組み込む」</strong></p>
+</blockquote>
+<p>という点です。</p>
+<ul>
+<li>従来：
+<ul>
+<li>SFT →（オプションで KL 蒸留）→ RL</li>
+<li>あるいは RL の外で KL 正則化をかける</li>
+</ul>
+</li>
+<li>RLAD：
+<ul>
+<li><strong>RL の更新式そのものに、教師模倣を統合</strong></li>
+<li>教師の模倣が報酬向上に寄与するときだけ模倣する</li>
+</ul>
+</li>
+</ul>
+<h3 id="rlad-の学習ループステップごと">RLAD の学習ループ（ステップごと）</h3>
+<p><strong>1. 準備</strong></p>
+<ul>
+<li><strong>教師モデル</strong>：
+<ul>
+<li>大きな LLM（例：GPT‑4 クラス）</li>
+<li>長い推論チェインが得意で、高精度な推論ができる</li>
+</ul>
+</li>
+<li><strong>生徒モデル</strong>：
+<ul>
+<li>小さな LLM（例：Qwen3‑0.6B, 1.7B）</li>
+<li>すでに SFT 済みで、ある程度の推論能力はあるが、長い推論は苦手</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. ロールアウト生成（RL の試行）</strong></p>
+<ul>
+<li>生徒モデルが、問題（例：数学問題）に対して<br>
+<strong>チェイン・オブ・ソート（CoT）の推論軌跡</strong>を生成します。</li>
+<li>各ステップで、
+<ul>
+<li>現在の状態（これまでの推論文脈）</li>
+<li>次のトークン（行動）<br>
+を記録します。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 報酬と advantage の計算</strong></p>
+<ul>
+<li>推論の最後に、<strong>正解・不正解</strong>や、<br>
+途中の推論ステップの妥当性などから<strong>報酬</strong>を計算します。</li>
+<li>その報酬をもとに、各ステップの<strong>advantage（A）</strong> を計算します。
+<ul>
+<li>advantage は「その行動が平均よりどれだけ良いか」を表す指標です。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. TRRD（Trust Region Ratio Distillation）の計算</strong></p>
+<p>ここが RLAD の核心です。</p>
+<ol>
+<li>
+<p><strong>教師と古い生徒の混合ポリシー π_mix を定義</strong></p>
+<ul>
+<li>教師ポリシー π_teacher と、<br>
+前回の生徒ポリシー π_old を混ぜた分布 π_mix を作ります。</li>
+<li>例：π_mix = α・π_teacher + (1−α)・π_old</li>
+</ul>
+</li>
+<li>
+<p><strong>新しい生徒ポリシー π_new との重要度比 r_TRRD を計算</strong></p>
+<ul>
+<li>各ステップで、<br>
+[
+r_\text{TRRD} = \frac{\pi_\text{new}(a|s)}{\pi_\text{mix}(a|s)}
+]
+を計算します。</li>
+<li>これは「新しいポリシーが、混合ポリシーからどれだけ離れたか」を表す比です。</li>
+</ul>
+</li>
+<li>
+<p><strong>r_TRRD をクリップして信頼領域を保つ</strong></p>
+<ul>
+<li>PPO と同様に、r_TRRD をある範囲（例：0.8〜1.2）にクリップします。</li>
+<li>これにより、<strong>更新が大きくなりすぎず、学習が安定</strong>します。</li>
+</ul>
+</li>
+</ol>
+<p><strong>5. 目的関数で更新</strong></p>
+<ul>
+<li>RLAD の目的関数は、おおまかに次のような形です：
+[
+L_\text{RLAD} = \mathbb{E} \left[ \min\left( r_\text{TRRD} \cdot A, \ \text{clip}(r_\text{TRRD}, 1-\epsilon, 1+\epsilon) \cdot A \right) \right]
+]</li>
+<li>ここで、
+<ul>
+<li>r_TRRD：新しいポリシーと混合ポリシーの比</li>
+<li>A：advantage（報酬の良さ）</li>
+<li>clip：信頼領域を保つためのクリップ</li>
+</ul>
+</li>
+</ul>
+<p><strong>この式の意味</strong>：</p>
+<ul>
+<li><strong>r_TRRD × A</strong> が大きくなる方向に更新すると、
+<ul>
+<li>報酬が高い行動（A が大きい）を強めつつ、</li>
+<li>教師＋古い生徒の混合から「報酬向上に寄与する方向」にだけ動く</li>
+</ul>
+</li>
+<li>教師の模倣が報酬向上に寄与するときは、
+<ul>
+<li>r_TRRD が教師寄りになり、模倣が強く推奨される</li>
+</ul>
+</li>
+<li>教師の模倣が報酬向上に寄与しないときは、
+<ul>
+<li>r_TRRD が教師から離れ、生徒は自由に探索できる</li>
+</ul>
+</li>
+</ul>
+<h3 id="なぜこれが選択的模倣になるのか">なぜこれが「選択的模倣」になるのか</h3>
+<ul>
+<li>
+<p><strong>教師が正しいとき</strong></p>
+<ul>
+<li>教師の出力は報酬向上に寄与しやすい → advantage が大きい</li>
+<li>r_TRRD が教師寄りになり、<strong>強く模倣</strong>される</li>
+</ul>
+</li>
+<li>
+<p><strong>教師が間違っているとき</strong></p>
+<ul>
+<li>教師の出力は報酬向上に寄与しない → advantage が小さい or 負</li>
+<li>r_TRRD が教師寄りでも、<strong>advantage が小さいので模倣が弱く</strong>なる</li>
+<li>生徒は教師に引きずられず、<strong>報酬最大化を優先</strong>できる</li>
+</ul>
+</li>
+<li>
+<p><strong>生徒が良い探索をしているとき</strong></p>
+<ul>
+<li>生徒自身のロールアウトが報酬向上に寄与 → advantage が大きい</li>
+<li>r_TRRD が教師から離れていても、<strong>報酬最大化の方向に更新</strong>される</li>
+<li>教師に無理に引き戻されない</li>
+</ul>
+</li>
+</ul>
+<p>このように、<strong>「教師の模倣が報酬向上に役立つときだけ模倣する」</strong><br>
+という選択的模倣が自然に実現されます。</p>
+<h3 id="rlad-の利点従来手法との比較">RLAD の利点（従来手法との比較）</h3>
+<ol>
+<li>
+<p><strong>分布ミスマッチの軽減</strong></p>
+<ul>
+<li>アンカーが「教師＋古い生徒の混合」なので、<br>
+生徒の実際のロールアウト分布に近い基準で模倣を評価できる。</li>
+</ul>
+</li>
+<li>
+<p><strong>目的関数の干渉を減らす</strong></p>
+<ul>
+<li>KL 正則化は「教師に近づけ」という独立した制約でしたが、</li>
+<li>TRRD は「重要度比 × advantage」という<strong>同じ枠組み</strong>で扱うため、<br>
+報酬最大化と模倣が競合しにくい。</li>
+</ul>
+</li>
+<li>
+<p><strong>学習の安定性と収束速度の向上</strong></p>
+<ul>
+<li>クリップされた重要度比により、更新が大きくなりすぎず、<br>
+学習が安定します。</li>
+<li>論文では、GRPO や KDRL よりも<strong>速く収束し、高い精度</strong>を達成したと報告されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</li>
+</ul>
+</li>
+</ol>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\3_Reinforcement_aware_knowledge_distillation\1785535035371.png" alt="1785535035371"></p>
+<h2 id="実験">実験</h2>
+<p><strong>Reinforcement-aware Knowledge Distillation for LLM Reasoning</strong> の実験について、<strong>問題設定（タスク・モデル・比較手法）<strong>と</strong>効果（どの程度改善したか）</strong> を整理します。</p>
+<h3 id="問題設定実験の全体像">問題設定（実験の全体像）</h3>
+<p><strong>1. 目的</strong></p>
+<ul>
+<li>**大きな推論 LLM（教師）**から、<br>
+**小さな LLM（生徒）**へ、<br>
+<strong>RL ポストトレーニング中に知識を蒸留</strong>し、<br>
+<strong>長い推論チェインや難しい論理・数学問題</strong>で性能を上げること。</li>
+</ul>
+<p><strong>2. タスク（ベンチマーク）</strong>
+論文では、主に次のような<strong>論理・数学推論ベンチマーク</strong>を使用しています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</p>
+<ul>
+<li>
+<p><strong>AIME24 / AIME25</strong></p>
+<ul>
+<li>アメリカ数学コンテスト（AIME）の問題を用いた数学推論タスク</li>
+<li>長い推論チェインと高度な数学的思考が必要</li>
+</ul>
+</li>
+<li>
+<p><strong>K&amp;K Logistics</strong></p>
+<ul>
+<li>論理推論・計画問題を含むベンチマーク</li>
+<li>複数の制約を満たすような推論が必要</li>
+</ul>
+</li>
+<li>
+<p>その他、<strong>長いコンテキスト（8K tokens）</strong> を扱う設定で評価</p>
+</li>
+</ul>
+<p><strong>3. モデル（教師・生徒）</strong></p>
+<ul>
+<li>
+<p><strong>教師モデル</strong>：</p>
+<ul>
+<li>大きな LLM（具体的なモデル名は論文内で明示されていますが、ここでは一般化して「大きな推論 LLM」とします）</li>
+<li>RL ポストトレーニング済みで、長い CoT 推論が得意</li>
+</ul>
+</li>
+<li>
+<p><strong>生徒モデル</strong>：</p>
+<ul>
+<li><strong>Qwen3‑0.6B</strong>（約6億パラメータ）</li>
+<li><strong>Qwen3‑1.7B</strong>（約17億パラメータ）</li>
+<li>すでに SFT 済みで、ある程度の推論能力はあるが、<br>
+長い推論チェインや難しい問題は苦手</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. 比較手法（ベースライン）</strong></p>
+<p>RLAD と比較する手法として、次のようなベースラインが設定されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</p>
+<ol>
+<li>
+<p><strong>GRPO（Generalized Reinforce Policy Optimization）</strong></p>
+<ul>
+<li>標準的な RL ポストトレーニング手法</li>
+<li>教師模倣なしで、報酬最大化のみを行う</li>
+</ul>
+</li>
+<li>
+<p><strong>KDRL（KL-based Distillation + RL）</strong></p>
+<ul>
+<li>教師–生徒間の KL ダイバージェンスを正則化項として加えた RL</li>
+<li>従来の「KL 蒸留＋RL」の代表的な手法</li>
+</ul>
+</li>
+<li>
+<p><strong>オフライン蒸留（Offline Distillation）</strong></p>
+<ul>
+<li>教師モデルの出力トレースを固定し、<br>
+それに対して生徒を教師あり学習（SFT）する</li>
+<li>RL は行わない、純粋な知識蒸留</li>
+</ul>
+</li>
+<li>
+<p><strong>RLAD（提案手法）</strong></p>
+<ul>
+<li>RL-aware Distillation（TRRD を用いた RL＋蒸留）</li>
+</ul>
+</li>
+</ol>
+<h3 id="効果どの程度改善したか">効果（どの程度改善したか）</h3>
+<p><strong>1. 全体の性能向上</strong></p>
+<ul>
+<li>
+<p><strong>8K コンテキスト長の設定</strong>で、</p>
+<ul>
+<li><strong>Qwen3‑0.6B</strong>：
+<ul>
+<li>平均正解率が <strong>+18%</strong> 改善（0.94 vs 0.76 under GRPO）</li>
+</ul>
+</li>
+<li><strong>Qwen3‑1.7B</strong>：
+<ul>
+<li>平均正解率が <strong>+4%</strong> 改善（0.99 vs 0.95）<br>
+と報告されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>特に、<strong>難しい問題や長い推論チェイン</strong>において、<br>
+RLAD が他の手法を上回る傾向が強いとされています。</p>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\3_Reinforcement_aware_knowledge_distillation\1785535359930.png" alt="1785535359930"></p>
+<p><strong>2. 学習の安定性と収束速度</strong></p>
+<ul>
+<li>
+<p><strong>GRPO 単体</strong>や<strong>KDRL</strong>と比べて、</p>
+<ul>
+<li>学習曲線が<strong>より安定</strong></li>
+<li><strong>収束が速い</strong><br>
+ことが示されています。</li>
+</ul>
+</li>
+<li>
+<p>KL ベースの蒸留（KDRL）では、</p>
+<ul>
+<li>報酬最大化と KL 正則化のバランス調整が難しく、</li>
+<li>学習が不安定になったり、性能が頭打ちになるケースがありましたが、</li>
+<li>RLAD では TRRD によって<strong>目的関数の干渉が軽減</strong>され、<br>
+安定した学習が可能になったと報告されています。</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\3_Reinforcement_aware_knowledge_distillation\1785535380982.png" alt="1785535380982"></p>
+<p><strong>3. 分布ミスマッチの軽減効果</strong></p>
+<ul>
+<li>
+<p><strong>オフライン蒸留</strong>では、</p>
+<ul>
+<li>教師の固定トレースと生徒の実際のロールアウト分布がずれるため、</li>
+<li>長い推論チェインや難しい問題で性能が伸び悩む傾向がありました。</li>
+</ul>
+</li>
+<li>
+<p><strong>RLAD</strong>では、</p>
+<ul>
+<li>教師＋古い生徒の混合をアンカーにすることで、</li>
+<li>生徒の実際の分布に近い基準で模倣を評価できるため、</li>
+<li><strong>分布ミスマッチが軽減</strong>され、</li>
+<li>長い推論チェインでも性能が向上しやすくなっています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. 選択的模倣の効果</strong></p>
+<ul>
+<li><strong>教師が間違っているケース</strong>や、<br>
+<strong>生徒が良い探索をしているケース</strong>でも、
+<ul>
+<li>RLAD は教師に無理に引きずられず、</li>
+<li>報酬最大化を優先できるため、</li>
+<li><strong>誤った教師出力に引きずられるリスクが低い</strong>と報告されています。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>RLAD が <strong>RL の性能向上に寄与するポイント</strong>と、<strong>どのような場面で使えるか</strong>を簡潔にまとめると、次のようになります。</p>
+<h3 id="rlad-が-rl-の性能向上に寄与するポイント">RLAD が RL の性能向上に寄与するポイント</h3>
+<ol>
+<li>
+<p><strong>分布ミスマッチの軽減</strong></p>
+<ul>
+<li>従来の蒸留は「教師の固定トレース」を基準にしていましたが、<br>
+RLAD は<strong>教師＋古い生徒の混合分布</strong>をアンカーにすることで、<br>
+生徒が実際に試している分布に近い基準で模倣を評価します。</li>
+<li>これにより、<strong>教師の分布と生徒のロールアウト分布のずれ</strong>が小さくなり、<br>
+長い推論チェインでも安定して学習できます。</li>
+</ul>
+</li>
+<li>
+<p><strong>目的関数の干渉を減らす</strong></p>
+<ul>
+<li>KL ベースの蒸留では、「報酬最大化」と「教師に近づく」が競合し、<br>
+学習が不安定になったり性能が頭打ちになることがありました。</li>
+<li>RLAD は <strong>TRRD（重要度比）× advantage</strong> という<strong>同じ枠組み</strong>で扱うため、<br>
+<strong>報酬最大化と教師模倣が自然に統合</strong>され、干渉が軽減されます。</li>
+</ul>
+</li>
+<li>
+<p><strong>選択的模倣の実現</strong></p>
+<ul>
+<li>TRRD により、
+<ul>
+<li>教師の模倣が報酬向上に寄与するとき → 強く模倣</li>
+<li>教師の模倣が報酬向上に寄与しないとき → 自由に探索<br>
+という<strong>報酬条件付きの模倣</strong>が可能になります。</li>
+</ul>
+</li>
+<li>これにより、<strong>教師が間違っているときや、生徒が良い探索をしているときを壊さない</strong>ため、<br>
+学習が安定し、最終的な性能も向上します。</li>
+</ul>
+</li>
+<li>
+<p><strong>学習の安定性と収束速度の向上</strong></p>
+<ul>
+<li>クリップされた重要度比により、更新が大きくなりすぎず、<br>
+<strong>信頼領域を保ったまま学習</strong>できます。</li>
+<li>論文では、GRPO や KDRL よりも<strong>速く収束し、高い精度</strong>を達成したと報告されています<a href="https://arxiv.org/html/2602.22495v2">arXiv</a>。</li>
+</ul>
+</li>
+</ol>
+<h3 id="本手法が使える場面適用シーン">本手法が使える場面（適用シーン）</h3>
+<ol>
+<li>
+<p><strong>大きな推論 LLM を小さなモデルに蒸留したいとき</strong></p>
+<ul>
+<li>GPT‑4 クラスの大きなモデルで RL ポストトレーニングを行い、<br>
+その能力を Qwen3‑0.6B / 1.7B のような<strong>小型モデルに移したい</strong>場合。</li>
+<li>特に、<strong>長いチェイン・オブ・ソート推論</strong>や<strong>数学・論理問題</strong>で性能を維持したいときに有効です。</li>
+</ul>
+</li>
+<li>
+<p><strong>RL ポストトレーニング中に教師ガイダンスを入れたいとき</strong></p>
+<ul>
+<li>RL 単体では探索が広がりすぎる、あるいは収束が遅い場合に、<br>
+<strong>教師モデルの出力を“ガイド”として活用</strong>したいとき。</li>
+<li>RLAD は「教師の模倣が報酬向上に寄与するときだけ模倣する」ので、<br>
+教師が間違っていても学習を壊しにくいという利点があります。</li>
+</ul>
+</li>
+<li>
+<p><strong>オフライン蒸留や KL 蒸留＋RL がうまくいかないとき</strong></p>
+<ul>
+<li>オフライン蒸留では分布ミスマッチ、<br>
+KL 蒸留＋RL では目的関数の干渉が問題になるケースで、<br>
+<strong>RLAD はそれらの問題を同時に軽減</strong>します。</li>
+<li>特に、<strong>長いコンテキスト（8K tokens 以上）<strong>や</strong>難しいベンチマーク</strong>で<br>
+性能が伸び悩む場合に有効です。</li>
+</ul>
+</li>
+<li>
+<p><strong>実サービスやエッジデバイス向けに小型モデルを最適化したいとき</strong></p>
+<ul>
+<li>大きなモデルは推論コストが高く、実運用では小型モデルが必要な場面で、<br>
+<strong>大きなモデルの推論能力をできるだけ維持した小型モデル</strong>を作りたい場合。</li>
+<li>RLAD は、<strong>小さなモデルでも長い推論チェインをこなせるようにする</strong>ことを目指しており、<br>
+実運用でのコスト削減と性能維持の両立に役立ちます。</li>
+</ul>
+</li>
+</ol>
+<h3 id="まとめ">まとめ</h3>
+<ul>
+<li>
+<p><strong>性能向上に寄与する点</strong>：</p>
+<ul>
+<li>分布ミスマッチの軽減</li>
+<li>目的関数の干渉を減らす</li>
+<li>選択的模倣による安定した学習</li>
+<li>学習の安定性と収束速度の向上</li>
+</ul>
+</li>
+<li>
+<p><strong>使える場面</strong>：</p>
+<ul>
+<li>大きな推論 LLM から小型モデルへの蒸留</li>
+<li>RL ポストトレーニング中に教師ガイダンスを活用したいとき</li>
+<li>オフライン蒸留や KL 蒸留＋RL がうまくいかないケース</li>
+<li>実サービス・エッジデバイス向けに小型モデルを最適化したいとき</li>
+</ul>
+</li>
+</ul>
+<p>つまり、<strong>「RL で賢くなった大きな LLM を、小さなモデルにうまく移しつつ、長い推論チェインや難しい問題でも性能を維持したい」</strong> という場面で、RLAD は特に有効な手法と言えます。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
