@@ -25,7 +25,7 @@ class PursuitWrapper:
         self.action_dim = self.action_space.n
 
         # ハイブリッド報酬の重みパラメータ
-        self.distance_reward_scale = 0.005  # 0.01*0 から固定値にする場合は調整してください
+        self.distance_reward_scale = 0.001  # 0.01*0 から固定値にする場合は調整してください
         self.coop_reward_scale = 0.02          # 獲物の近くで味方と連携したときの報酬
         self.flanking_bonus_scale = 0.1       # 他に味方がいないルートから回り込んだときの報酬
         self.surround_reward = 50.0            # 3人以上で包囲網を形成したときの報酬
@@ -221,7 +221,7 @@ class PursuitWrapper:
         # 4人をベスト（ピーク）とし、離れるほどペナルティを与えるロジック
         coop_density_reward = 0.0
         discrepancy = abs(total_allies_around_closest_prey - 4)
-        
+
         if discrepancy == 0:
             coop_density_reward += self.optimal_coop_scale
         else:
@@ -275,7 +275,7 @@ class PursuitWrapper:
             spatial_part = obs[:self.spatial_dim]
             obs_grid = spatial_part.reshape(self.obs_range, self.obs_range, 4)
             ally_layer = obs_grid[:, :, 2]
-            
+
             # 自分を含めた視界内の合計人数（レイヤーで要素が0超の部分の合計 + 自分自身(1)）
             allies_in_view = np.sum(ally_layer > 0) + 1
 
@@ -305,7 +305,7 @@ class PursuitWrapper:
         # 1. 距離・回り込みベースの評価
         reward_distance = 0.0
         prev_dist = self.prev_min_distances.get(agent)
-        
+
         is_approaching = False
         if current_min_dist is not None and prev_dist is not None:
             change = prev_dist - current_min_dist
@@ -334,7 +334,7 @@ class PursuitWrapper:
 
         if current_cycle not in self._approach_registry:
             self._approach_registry[current_cycle] = {}
-        
+
         self._approach_registry[current_cycle][agent] = is_approaching
 
         if len(self._approach_registry[current_cycle]) >= len(self.env.agents):
@@ -375,3 +375,45 @@ class PursuitWrapper:
             except Exception:
                 pass
         return frame
+
+    def compute_priority_scores(self) -> np.ndarray:
+        """
+        各エージェント(possible_agents順)について、
+        最寄りの未捕獲prey(evader)までのマンハッタン距離を返す。
+        値が小さいほど「優先度が高い」＝MATデコード順で先に決定されるべき。
+
+        - 終了済みエージェント（env.agentsに存在しない）や
+          視界に関わらずグローバル座標で評価するため、
+          prey側もraw_env.evadersから直接位置を取得する。
+        - prey/pursuerどちらも取得に失敗した場合は大きな値(優先度最低)のままにする。
+        """
+        scores = np.full(self.num_agents, 1e6, dtype=np.float32)
+        raw_env = self.env.unwrapped
+
+        # 現在まだ捕獲されていないpreyの座標一覧を取得
+        try:
+            evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
+        except Exception:
+            # evadersが取得できない場合は全員優先度最低のまま返す
+            return scores
+
+        if not evader_positions:
+            # 全捕獲済み（あるいは取得不可）なら優先度最低のまま
+            return scores
+
+        for i, agent in enumerate(self.possible_agents):
+            if agent not in self.env.agents:
+                continue  # 既に終了済みのエージェントは優先度最低のまま
+
+            try:
+                agent_obj = next(a for a in raw_env.agents if a.name == agent)
+                ay, ax = agent_obj.state[1], agent_obj.state[0]
+            except Exception:
+                continue  # 座標取得失敗時は優先度最低のまま
+
+            scores[i] = min(
+                abs(ay - py) + abs(ax - px)
+                for py, px in evader_positions
+            )
+
+        return scores
