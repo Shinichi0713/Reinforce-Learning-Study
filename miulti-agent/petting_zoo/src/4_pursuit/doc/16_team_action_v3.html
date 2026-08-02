@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x76ee;&#x7684;&#x30fb;&#x7d4c;&#x7def;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回実施した<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/15/043000">チーム連携の仕組みの改善</a>の続きで、今回の結果が良ければ一旦、今回で区切りとしようと思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>Cross-Attentionゲートの改修を実施して、結果が改善するか確認</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="目的経緯">目的・経緯</h2>
+<p>このタスクは敵を味方が3人で周囲を囲んで、<strong>捕獲</strong>状態にすることが目的です。
+3人で囲むということもやりやすいタスクではなく、行けそうと踏んだ敵に対して味方が連携しながら捕獲を実施する必要があります。</p>
+<p>初めは捕獲することも出来ずバラバラに動いていました。
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/07/25/043000">この辺りの記事</a>で初めて捕獲できるようになりました。</p>
+<p>ですが、捕獲も安定せず、捕獲終わったと、味方がうろうろするようなことが多々ありました。</p>
+<p>そこでMARLの強化学習法を<a href="https://yoshishinnze.hatenablog.com/entry/2026/01/10/153824">MAPPO</a>から<a href="https://yoshishinnze.hatenablog.com/entry/2026/07/23/043000">MAT</a>に替えました。</p>
+<p>その後、MATの行動順序の見直し(固定エージェントでなくす)という修正で、敵から近いエージェントが攻撃対象を選択し、後続するエージェントが敵に近いエージェントの行動を見て行動を決めるという方法をとれるようにしました。</p>
+<h2 id="課題">課題</h2>
+<p>今回の対応する課題について説明します。</p>
+<h3 id="cross-attentionのゲートがクエリ自分自身だけから計算されている">Cross-Attentionのゲートが「クエリ（自分自身）」だけから計算されている</h3>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MoETransformerDecoderLayer</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, tgt, memory, tgt_mask=<span class="hljs-literal">None</span></span>):
+        ...
+        <span class="hljs-comment"># Cross Attention</span>
+        x = self.norm2(tgt)
+        attn_out2, _ = self.multihead_attn(query=x, key=memory, value=memory, attn_mask=<span class="hljs-literal">None</span>)
+</code></pre>
+<p><code>GatedMultiheadAttention</code> のゲートは <code>gate_proj(query)</code> として<strong>クエリ（＝自分自身のデコーダ隠れ状態）のみ</strong>から計算されます。これは自己注意（self-attention）では論文通りの妥当な設計ですが、<strong>Cross-Attention（他エージェント情報の参照）でも同じ実装を流用</strong>している点に注意が必要です。</p>
+<p>Cross-Attentionのゲートが「自分の現在の隠れ状態」だけに依存すると、<strong>「他のエージェント（memory側）が今何をしているか」を見る前に、どれだけその情報を取り入れるかが決まってしまう</strong>構造になります。学習初期にこのゲートが0付近に飽和すると、<strong>エージェント間の情報伝達（＝連携に必要なチャネル）がほぼ遮断されたまま学習が進む</strong>リスクがあります。</p>
+<p><strong>対策</strong>: 一度、学習済みモデルで <code>gate_scores</code>（特にCross-Attention層のもの）の分布を可視化し、0付近に張り付いていないか確認してください。もし飽和していたら、ゲートの入力に <code>memory</code> の統計量（例: <code>memory.mean(dim=1)</code>）も連結して計算するよう変更することを検討してください。</p>
+<pre><code class="language-python"><span class="hljs-comment"># Cross-Attention用にゲート計算をmemory情報も考慮する形に変更する案</span>
+self.gate_proj = nn.Linear(d_model * <span class="hljs-number">2</span>, d_model)  <span class="hljs-comment"># query + memory summary</span>
+...
+memory_summary = memory.mean(dim=<span class="hljs-number">1</span>, keepdim=<span class="hljs-literal">True</span>).expand(-<span class="hljs-number">1</span>, T, -<span class="hljs-number">1</span>)
+gate_scores = torch.sigmoid(self.gate_proj(torch.cat([query, memory_summary], dim=-<span class="hljs-number">1</span>)))
+</code></pre>
+<h3 id="チーム全体の同時クリッピングが遅れているエージェントの学習を妨げる可能性">チーム全体の同時クリッピングが、遅れているエージェントの学習を妨げる可能性</h3>
+<pre><code class="language-python">joint_new_log_prob = new_log_probs.<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>)
+joint_old_log_prob = old_log_probs.<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>)
+ratio = torch.exp(joint_new_log_prob - joint_old_log_prob)
+...
+surr1 = ratio * step_advantages
+surr2 = torch.clamp(ratio, <span class="hljs-number">1</span>-eps, <span class="hljs-number">1</span>+eps) * step_advantages
+actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean() - ...
+</code></pre>
+<p>これ自体はMAT論文の標準的な定式化（同時確率比率＋共有アドバンテージ）通りなので「バグ」というほどのものではないかもしれませんが、副作用として次のようなことが起こりえます。</p>
+<p>ある捕獲後の状況で、7体のエージェントはすでに最適に近い行動（比率≈1）を取っているが、1体だけが「次のターゲットへ切り替える」ために大きく方策を変える必要があるとします。この時、<strong>同時比率（積）はその1体の大きな変化によって容易にクリップ範囲外に出ます</strong>。クリップされると <code>surr2</code> が選ばれ、その勾配は比率に対して定数（勾配0）になるため、<strong>その1体を含む全エージェントの当該サンプルへの学習信号がまとめて弱まります</strong>。つまり「遅れているエージェントを個別に強く学習させたい」場面で、かえって学習が抑制されるという、集団最適化特有のジレンマが起きえます。</p>
+<p><strong>対策（研究的だが効果があり得る）</strong>:</p>
+<ul>
+<li><code>clip_epsilon</code> をやや大きめにする、あるいはエピソード後半でclip範囲を緩和するスケジューリングを試す</li>
+<li>可能であれば、アドバンテージだけでもエージェントごとの値（<code>(B, N)</code> のまま）を保持し、<code>step_advantages = advantages.mean(dim=-1)</code> で潰さずに、<code>(new_log_probs * advantages_per_agent).sum(-1)</code> のような<strong>個別重み付けの和</strong>に変更する（これは厳密なMATの定式化からは外れますが、実務上の改善として報告例があります）</li>
+</ul>
+<pre><code class="language-python"><span class="hljs-comment"># 個別アドバンテージを保持する代替実装例</span>
+per_agent_ratio = torch.exp(new_log_probs - old_log_probs)  <span class="hljs-comment"># (B, N)</span>
+surr1 = per_agent_ratio * advantages  <span class="hljs-comment"># advantagesは(B, N)のまま</span>
+surr2 = torch.clamp(per_agent_ratio, <span class="hljs-number">1</span>-eps, <span class="hljs-number">1</span>+eps) * advantages
+actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean(dim=-<span class="hljs-number">1</span>).mean() - entropy_coef * entropy.mean()
+</code></pre>
+<p>これにより、各エージェントが個別にクリップされるため、「1体だけ大きく更新が必要」という状況でも他のエージェントの学習が道連れで止まることがなくなります。MATの厳密な同時分布最適化ではなくなりますが、実用上はこちらの方が今回の症状には効きやすい可能性があります。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\16_team_action_v3\1785629123809.png" alt="1785629123809"></p>
+<h2 id="修正法">修正法</h2>
+<p>前節で説明した課題に対して行った修正法について説明します。</p>
+<h3 id="1-cross-attentionゲートがmemory情報を見ずに計算されている問題">1. Cross-Attentionゲートがmemory情報を見ずに計算されている問題</h3>
+<p><strong>変更方針</strong></p>
+<p><code>GatedMultiheadAttention</code> は現在、Self-Attention・Cross-Attention共用の実装で、ゲートは常に <code>query</code> だけから計算されています。Cross-Attentionでは「相手（memory側）の情報を見てから、どれだけ取り入れるか」を決められた方が自然なので、<strong>Cross-Attention専用のゲート付きAttentionクラス</strong>を新設し、<code>query</code> と <code>memory</code> の要約の両方からゲートを計算するようにします。既存の <code>GatedMultiheadAttention</code>（Self-Attention用）はそのまま残し、影響範囲を限定します。</p>
+<pre><code class="language-python"><span class="hljs-comment"># ==========================================</span>
+<span class="hljs-comment"># 1-A. 🌟 追加: Cross-Attention専用のGated Attention</span>
+<span class="hljs-comment">#      (ゲートを query と memory の両方から計算する)</span>
+<span class="hljs-comment"># ==========================================</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GatedCrossAttention</span>(nn.Module):
+    <span class="hljs-string">&quot;&quot;&quot;
+    Cross-Attention用。ゲートスコアを「クエリ自身」だけでなく
+    「参照先(memory)の要約情報」も考慮して計算する。
+    これにより、他エージェントの状況を見た上でどれだけ情報を取り込むかを
+    決定できるようにする。
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, nhead</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.d_model = d_model
+        self.nhead = nhead
+        self.head_dim = d_model // nhead
+        <span class="hljs-keyword">assert</span> self.head_dim * nhead == d_model, <span class="hljs-string">&quot;d_model must be divisible by nhead&quot;</span>
+
+        self.q_proj = nn.Linear(d_model, d_model)
+        self.k_proj = nn.Linear(d_model, d_model)
+        self.v_proj = nn.Linear(d_model, d_model)
+
+        <span class="hljs-comment"># 🌟 変更点: 入力を [query, memory_summary] の連結 (d_model*2) にする</span>
+        self.gate_proj = nn.Linear(d_model * <span class="hljs-number">2</span>, d_model)
+
+        self.out_proj = nn.Linear(d_model, d_model)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, query, key, value, attn_mask=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-comment"># query: (B, T, d_model)  key/value(=memory): (B, S, d_model)</span>
+        B, T, _ = query.shape
+        S = key.shape[<span class="hljs-number">1</span>]
+
+        q = self.q_proj(query).view(B, T, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        k = self.k_proj(key).view(B, S, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        v = self.v_proj(value).view(B, S, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 🌟 変更点: memoryの要約(平均)をqueryと連結してゲートを計算</span>
+        <span class="hljs-comment"># memory側の「全体的な状況」(例: 他エージェントの平均的な移動意図)を</span>
+        <span class="hljs-comment"># ゲート判断に反映させる</span>
+        memory_summary = value.mean(dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># ここではv_proj前のmemory=key/valueの元入力を使う方が直感的なので下で修正</span>
+        <span class="hljs-comment"># -&gt; 実際には key(=value, 通常同一)の元テンソルを使う。呼び出し側は key=value=memory なので:</span>
+        memory_summary = key.mean(dim=<span class="hljs-number">1</span>, keepdim=<span class="hljs-literal">True</span>).expand(-<span class="hljs-number">1</span>, T, -<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, T, d_model) 相当に拡張するため元次元のkeyを使う</span>
+
+        <span class="hljs-comment"># 上のmemory_summaryはprojection後のk(=(B,S,d_model))ではなく元のmemoryテンソルを使うべきなので、</span>
+        <span class="hljs-comment"># forward引数として元のmemoryテンソル(=key引数, projection前)を利用する</span>
+        gate_input = torch.cat([query, memory_summary], dim=-<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, T, d_model*2)</span>
+        gate_scores = torch.sigmoid(self.gate_proj(gate_input))   <span class="hljs-comment"># (B, T, d_model)</span>
+        gate_scores = gate_scores.view(B, T, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        attn_logits = torch.matmul(q, k.transpose(-<span class="hljs-number">2</span>, -<span class="hljs-number">1</span>)) / np.sqrt(self.head_dim)
+
+        <span class="hljs-keyword">if</span> attn_mask <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">if</span> attn_mask.dtype == torch.<span class="hljs-built_in">bool</span>:
+                attn_logits = attn_logits.masked_fill(attn_mask.unsqueeze(<span class="hljs-number">0</span>).unsqueeze(<span class="hljs-number">1</span>), <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;-inf&#x27;</span>))
+            <span class="hljs-keyword">else</span>:
+                attn_logits = attn_logits + attn_mask
+
+        attn_probs = F.softmax(attn_logits, dim=-<span class="hljs-number">1</span>)
+        sdpa_out = torch.matmul(attn_probs, v)
+
+        gated_out = sdpa_out * gate_scores
+        gated_out = gated_out.transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).contiguous().view(B, T, self.d_model)
+        <span class="hljs-keyword">return</span> self.out_proj(gated_out), attn_probs
+</code></pre>
+<p>上のコードは説明のため冗長になったので、実際に使うクリーンな版を示します（<code>memory_summary</code> の計算を一箇所に整理）。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">GatedCrossAttention</span>(nn.Module):
+    <span class="hljs-string">&quot;&quot;&quot;
+    Cross-Attention用ゲート付きAttention。
+    ゲートは query と memory(key=value)の要約の両方から計算する。
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, nhead</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.d_model = d_model
+        self.nhead = nhead
+        self.head_dim = d_model // nhead
+        <span class="hljs-keyword">assert</span> self.head_dim * nhead == d_model, <span class="hljs-string">&quot;d_model must be divisible by nhead&quot;</span>
+
+        self.q_proj = nn.Linear(d_model, d_model)
+        self.k_proj = nn.Linear(d_model, d_model)
+        self.v_proj = nn.Linear(d_model, d_model)
+        self.gate_proj = nn.Linear(d_model * <span class="hljs-number">2</span>, d_model)  <span class="hljs-comment"># 🌟 query + memory要約</span>
+        self.out_proj = nn.Linear(d_model, d_model)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, query, key, value, attn_mask=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-comment"># query: (B, T, d_model), key == value == memory: (B, S, d_model)</span>
+        B, T, _ = query.shape
+        S = key.shape[<span class="hljs-number">1</span>]
+
+        q = self.q_proj(query).view(B, T, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        k = self.k_proj(key).view(B, S, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+        v = self.v_proj(value).view(B, S, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        <span class="hljs-comment"># 🌟 memory(key引数=projection前のmemoryテンソル)を平均して要約</span>
+        memory_summary = key.mean(dim=<span class="hljs-number">1</span>, keepdim=<span class="hljs-literal">True</span>).expand(-<span class="hljs-number">1</span>, T, -<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, T, d_model)</span>
+        gate_input = torch.cat([query, memory_summary], dim=-<span class="hljs-number">1</span>)           <span class="hljs-comment"># (B, T, d_model*2)</span>
+        gate_scores = torch.sigmoid(self.gate_proj(gate_input))           <span class="hljs-comment"># (B, T, d_model)</span>
+        gate_scores = gate_scores.view(B, T, self.nhead, self.head_dim).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+        attn_logits = torch.matmul(q, k.transpose(-<span class="hljs-number">2</span>, -<span class="hljs-number">1</span>)) / np.sqrt(self.head_dim)
+        <span class="hljs-keyword">if</span> attn_mask <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">if</span> attn_mask.dtype == torch.<span class="hljs-built_in">bool</span>:
+                attn_logits = attn_logits.masked_fill(attn_mask.unsqueeze(<span class="hljs-number">0</span>).unsqueeze(<span class="hljs-number">1</span>), <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;-inf&#x27;</span>))
+            <span class="hljs-keyword">else</span>:
+                attn_logits = attn_logits + attn_mask
+
+        attn_probs = F.softmax(attn_logits, dim=-<span class="hljs-number">1</span>)
+        sdpa_out = torch.matmul(attn_probs, v)
+
+        gated_out = sdpa_out * gate_scores
+        gated_out = gated_out.transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).contiguous().view(B, T, self.d_model)
+        <span class="hljs-keyword">return</span> self.out_proj(gated_out), attn_probs
+</code></pre>
+<p><strong><code>MoETransformerDecoderLayer</code> の修正（Cross-Attention部分だけ差し替え）</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MoETransformerDecoderLayer</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, nhead, num_experts=<span class="hljs-number">4</span>, dim_feedforward=<span class="hljs-number">128</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        self.self_attn = GatedMultiheadAttention(d_model, nhead)       <span class="hljs-comment"># Self-Attentionは従来通り</span>
+        self.multihead_attn = GatedCrossAttention(d_model, nhead)      <span class="hljs-comment"># 🌟 Cross-Attentionはこちらに変更</span>
+        self.moe = MoELayer(d_model, num_experts=num_experts, expert_hidden_dim=dim_feedforward)
+
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.norm3 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(<span class="hljs-number">0.1</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, tgt, memory, tgt_mask=<span class="hljs-literal">None</span></span>):
+        x = self.norm1(tgt)
+        attn_out, _ = self.self_attn(query=x, key=x, value=x, attn_mask=tgt_mask)
+        tgt = tgt + self.dropout(attn_out)
+
+        x = self.norm2(tgt)
+        attn_out2, _ = self.multihead_attn(query=x, key=memory, value=memory, attn_mask=<span class="hljs-literal">None</span>)
+        tgt = tgt + self.dropout(attn_out2)
+
+        x = self.norm3(tgt)
+        moe_out = self.moe(x)
+        tgt = tgt + self.dropout(moe_out)
+        <span class="hljs-keyword">return</span> tgt
+</code></pre>
+<p><code>MATDecoder</code> や <code>MATActorCritic</code> 側のコードは変更不要です（<code>MoETransformerDecoderLayer</code> の内部実装だけが変わったため）。</p>
+<p><strong>ゲート値の可視化（飽和確認用）</strong></p>
+<p>学習後、以下のようにCross-Attentionのゲート値の分布を確認できます。</p>
+<pre><code class="language-python"><span class="hljs-meta">@torch.no_grad()</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">inspect_cross_attn_gates</span>(<span class="hljs-params">model: MATActorCritic, joint_obs: torch.Tensor, order: torch.Tensor = <span class="hljs-literal">None</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    デコーダの各層のCross-Attentionゲート値の統計を出力する簡易デバッグ関数。
+    joint_obs: (B, N, obs_dim)
+    &quot;&quot;&quot;</span>
+    enc_out, _ = model.encode(joint_obs, order=order)
+    B = joint_obs.shape[<span class="hljs-number">0</span>]
+    start_col = torch.full((B, <span class="hljs-number">1</span>), model.decoder.START, dtype=torch.long, device=joint_obs.device)
+    dummy_actions = torch.zeros((B, model.decoder.num_agents), dtype=torch.long, device=joint_obs.device)
+    shifted_actions = torch.cat([start_col, dummy_actions[:, :-<span class="hljs-number">1</span>]], dim=<span class="hljs-number">1</span>)
+
+    tgt = model.decoder.action_embedding(shifted_actions) + model.decoder.pos_embedding
+    mask = model.decoder.causal_mask
+
+    <span class="hljs-keyword">for</span> i, layer <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(model.decoder.layers):
+        x = layer.norm2(tgt)
+        ca = layer.multihead_attn
+        memory_summary = enc_out.mean(dim=<span class="hljs-number">1</span>, keepdim=<span class="hljs-literal">True</span>).expand(-<span class="hljs-number">1</span>, x.shape[<span class="hljs-number">1</span>], -<span class="hljs-number">1</span>)
+        gate_input = torch.cat([x, memory_summary], dim=-<span class="hljs-number">1</span>)
+        gate_scores = torch.sigmoid(ca.gate_proj(gate_input))
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[layer <span class="hljs-subst">{i}</span>] cross-attn gate: mean=<span class="hljs-subst">{gate_scores.mean().item():<span class="hljs-number">.4</span>f}</span>, &quot;</span>
+              <span class="hljs-string">f&quot;std=<span class="hljs-subst">{gate_scores.std().item():<span class="hljs-number">.4</span>f}</span>, &quot;</span>
+              <span class="hljs-string">f&quot;near_zero_ratio=<span class="hljs-subst">{(gate_scores &lt; <span class="hljs-number">0.05</span>).<span class="hljs-built_in">float</span>().mean().item():<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+        tgt = layer(tgt, memory=enc_out, tgt_mask=mask)
+</code></pre>
+<p><code>near_zero_ratio</code> が高い（例えば0.8以上）ようであれば、ゲートが飽和して情報がほぼ遮断されている疑いが強いです。</p>
+<h3 id="2-同時比率クリッピングによる連帯抑制--個別アドバンテージ個別クリッピングへの変更">2. 同時比率クリッピングによる連帯抑制 → 個別アドバンテージ・個別クリッピングへの変更</h3>
+<p><strong>変更方針</strong></p>
+<p><code>MAT_PPO.update()</code> 内の、チーム全体の同時確率比率でクリッピングしている部分を、<strong>エージェントごとの比率・アドバンテージで個別にクリッピングし、その平均を取る</strong>方式に変更します。厳密なMATの定式化（同時分布の最適化）からは外れますが、「1体だけ大きな方策変更が必要な場面で、他のエージェントの学習が道連れで止まる」問題を避けるための実務的な変更です。</p>
+<p><code>RolloutBuffer</code> の <code>advantages</code> は既に <code>(buffer_size, num_agents)</code> の形状で保持されているので、そのまま使えます（現在の <code>update()</code> では <code>advantages.mean(dim=-1)</code> に潰されているのを、潰さずに使う形に変更します）。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, batch: <span class="hljs-built_in">dict</span>, epochs: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span>, use_individual_clipping: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">True</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    use_individual_clipping:
+        True  -&gt; エージェントごとに比率・アドバンテージを個別クリッピング(推奨・新方式)
+        False -&gt; 従来通りチーム全体の同時比率でクリッピング(比較用)
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">if</span> batch <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>
+
+    obs = torch.as_tensor(batch[<span class="hljs-string">&quot;obs&quot;</span>], dtype=torch.float32, device=self.device)
+    actions = torch.as_tensor(batch[<span class="hljs-string">&quot;actions&quot;</span>], dtype=torch.long, device=self.device)
+    old_log_probs = torch.as_tensor(batch[<span class="hljs-string">&quot;log_probs&quot;</span>], dtype=torch.float32, device=self.device)
+    advantages = torch.as_tensor(batch[<span class="hljs-string">&quot;advantages&quot;</span>], dtype=torch.float32, device=self.device)  <span class="hljs-comment"># (B, N)</span>
+    returns = torch.as_tensor(batch[<span class="hljs-string">&quot;rewards&quot;</span>], dtype=torch.float32, device=self.device)
+    order = torch.as_tensor(batch[<span class="hljs-string">&quot;order&quot;</span>], dtype=torch.long, device=self.device)
+
+    <span class="hljs-comment"># 🌟 変更点: アドバンテージの正規化を、エージェント次元も含めた全体で行う</span>
+    <span class="hljs-comment">#    (個別方式でもチーム方式でも、正規化のスケール基準は揃えておく)</span>
+    advantages = (advantages - advantages.mean()) / (advantages.std() + <span class="hljs-number">1e-8</span>)
+
+    actor_losses, critic_losses, entropies = [], [], []
+
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(epochs):
+        new_log_probs, entropy, values = self.model.forward_train(obs, actions, order=order)
+        <span class="hljs-comment"># new_log_probs, entropy: (B, N)  values: (B, N)</span>
+
+        <span class="hljs-keyword">if</span> use_individual_clipping:
+            <span class="hljs-comment"># 🌟 新方式: エージェントごとに比率とアドバンテージを個別評価</span>
+            per_agent_ratio = torch.exp(new_log_probs - old_log_probs)  <span class="hljs-comment"># (B, N)</span>
+
+            surr1 = per_agent_ratio * advantages
+            surr2 = torch.clamp(per_agent_ratio, <span class="hljs-number">1.0</span> - self.clip_epsilon, <span class="hljs-number">1.0</span> + self.clip_epsilon) * advantages
+
+            <span class="hljs-comment"># 各サンプル・各エージェントでmin(surr1, surr2)を取り、全体平均</span>
+            actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
+
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 従来方式: チーム全体の同時確率比率でクリッピング(比較用に残す)</span>
+            joint_new_log_prob = new_log_probs.<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>)
+            joint_old_log_prob = old_log_probs.<span class="hljs-built_in">sum</span>(dim=-<span class="hljs-number">1</span>)
+            ratio = torch.exp(joint_new_log_prob - joint_old_log_prob)
+
+            step_advantages = advantages.mean(dim=-<span class="hljs-number">1</span>)
+
+            surr1 = ratio * step_advantages
+            surr2 = torch.clamp(ratio, <span class="hljs-number">1.0</span> - self.clip_epsilon, <span class="hljs-number">1.0</span> + self.clip_epsilon) * step_advantages
+            actor_loss = -torch.<span class="hljs-built_in">min</span>(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
+
+        <span class="hljs-keyword">if</span> values.shape != returns.shape:
+            returns_reshaped = returns.view_as(values)
+        <span class="hljs-keyword">else</span>:
+            returns_reshaped = returns
+
+        critic_loss = nn.SmoothL1Loss()(values, returns_reshaped) * self.value_coef
+
+        loss = actor_loss + critic_loss
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), <span class="hljs-number">0.5</span>)
+        self.optimizer.step()
+
+        actor_losses.append(actor_loss.item())
+        critic_losses.append(critic_loss.item())
+        entropies.append(entropy.mean().item())
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">float</span>(np.mean(actor_losses)), <span class="hljs-built_in">float</span>(np.mean(critic_losses)), <span class="hljs-built_in">float</span>(np.mean(entropies))
+</code></pre>
+<p><strong><code>MAT_PPO.__init__</code> にオプションを追加しておくと切り替えやすいです</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MAT_PPO</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, ..., use_individual_clipping: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">True</span>, ...</span>):
+        ...
+        self.use_individual_clipping = use_individual_clipping
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">update</span>(<span class="hljs-params">self, batch: <span class="hljs-built_in">dict</span>, epochs: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span></span>):
+        ...
+        <span class="hljs-comment"># 呼び出し側でいちいち指定しなくて済むよう、self.use_individual_clippingを参照する形にする</span>
+        <span class="hljs-keyword">if</span> self.use_individual_clipping:
+            ...
+</code></pre>
+<p><strong>検証方法</strong></p>
+<p>両方式を切り替えられるようにしてあるので、<code>use_individual_clipping=True/False</code> それぞれで数百updateずつ学習し、以下を比較すると効果を判断しやすいです。</p>
+<ul>
+<li>捕獲完了までのエピソード長（短くなるほど良い）</li>
+<li>「1体目捕獲後、2体目までの経過ステップ数」のような<strong>捕獲間隔</strong>の指標（今回の課題に直結する指標として、ログに追加することを推奨します）</li>
+<li>entropy の推移（個別クリッピングの方が、特定エージェントだけが停滞せず全体的に学習が進みやすいはずです）</li>
+</ul>
+<h3 id="まとめ">まとめ</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>変更内容</th>
+<th>検証のポイント</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cross-Attentionゲート</td>
+<td><code>GatedCrossAttention</code> を新設し、<code>query</code>+<code>memory</code>要約からゲートを計算</td>
+<td><code>inspect_cross_attn_gates</code> でゲート値が0付近に張り付いていないか確認</td>
+</tr>
+<tr>
+<td>クリッピング方式</td>
+<td>チーム同時比率 → エージェント個別比率・個別クリッピングに変更可能に（<code>use_individual_clipping</code>で切替）</td>
+<td>捕獲間隔・entropy推移を<code>True/False</code>で比較</td>
+</tr>
+</tbody>
+</table>
+<p>どちらも既存の学習ループ（<code>train()</code>関数）やバッファ側の変更は不要で、<code>MoETransformerDecoderLayer</code> と <code>MAT_PPO.update()</code> の差し替えだけで組み込めます。まずは両方入れた状態で学習を回し、前回までの<code>order_mode=&quot;random&quot;</code>だけの状態と比べて、捕獲後の連携がどう変わるか確認してみてください。</p>
+<h3 id="実装コード">実装コード</h3>
+<p>以下レポジトリに保存しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat</a></p>
+<h2 id="学習結果">学習結果</h2>
+<h3 id="学習の経過">学習の経過</h3>
+<p>学習の経過を前回と今回で捕獲数、エントロピで比較します。</p>
+<p>捕獲数はあんまり変わらなかったかもしれません。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\16_team_action_v3\1785627541579.png" alt="1785627541579"></p>
+<p>エントロピは低下したようです。
+agentが迷いなく行動するようになったということでしょうか。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\16_team_action_v3\1785627559484.png" alt="1785627559484"></p>
+<h3 id="実際の動作">実際の動作</h3>
+<p>注目の学習後のエージェントの動作についてです。
+初期の動きの良さは前回と同程度、味方が集まってからは集中して敵を捕獲していきます。
+近づいてくる敵をさっと捕獲する速度は速くなったように見えます。
+残念ながら見つけた敵がいなくなった後、自分から進んで探しに行くという動作までは確認できませんでした。
+チーム連携まではここまでの技術で達成可能、全体を見る必要があるような作戦立てまでは未だ能力不足という感じが感触です。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\16_team_action_v3\pursuit_mat_fixed.gif">
+<h2 id="総括">総括</h2>
+<p><strong>課題</strong></p>
+<ul>
+<li>Cross-Attentionのゲートが「自分（query）だけ」から計算されていて、他エージェント情報（memory）を見る前にゲートが決まってしまう。初期学習でゲートが0付近に張り付くと、エージェント間の情報伝達が遮断されるリスクがある。</li>
+<li>PPOのクリッピングが「チーム全体の同時確率比率」で行われているため、1体だけ大きく方策を変えたい場面でも、そのサンプル全体の学習が止まってしまう（遅れているエージェントの学習が抑制される）。</li>
+</ul>
+<p><strong>修正法</strong></p>
+<ol>
+<li>Cross-Attention専用のゲート付きAttention（<code>GatedCrossAttention</code>）を新設し、<code>query</code> と <code>memory</code> の要約（平均）の両方からゲートを計算するように変更。</li>
+<li>PPOの更新で、チーム同時比率ではなく「エージェントごとの比率・アドバンテージ」で個別にクリッピングする方式（<code>use_individual_clipping=True</code>）を追加。これにより、1体だけの大きな更新が他のエージェントの学習を止めにくくなる。</li>
+</ol>
+<p><strong>学習結果</strong></p>
+<ul>
+<li>捕獲数は前回と大きな差はないが、エントロピーが低下し、エージェントの行動が迷いなく（決定的に）なった。</li>
+<li>実際の動作では、味方が集まってからの捕獲スピードは向上したが、「敵を見失った後に自ら探しに行く」ような高度な連携・作戦まではまだ到達していない。</li>
+</ul>
+<p>今回まででPursuitのチーム連携をする課題について一旦一区切りとしようと思います。
+次回はここまで行ったことについて結果をまとめていきます。</p>
+
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
