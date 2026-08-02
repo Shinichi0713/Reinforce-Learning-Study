@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ad6;&#x6587;&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>以前<a href="https://yoshishinnze.hatenablog.com/entry/2025/12/31/082922">RLHF</a>についてご説明しました。
+その時はRLHFの仕組みや効果のみにフォーカスを当ててましたが、やはり現論文で理解するとそれ以外の面にも使える知識になると思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>RLHFが世に公開された論文を当たって理解を深める</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="論文概要">論文概要</h2>
+<p><strong>RLHF（Reinforcement Learning from Human Feedback）</strong> の代表的な論文である<br>
+<strong>InstructGPT</strong>（Ouyang et al., 2022）の概要を説明します。</p>
+<h3 id="論文情報">論文情報</h3>
+<ul>
+<li><strong>タイトル</strong>：<br>
+<em>Training language models to follow instructions with human feedback</em></li>
+<li><strong>著者</strong>：<br>
+Long Ouyang, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al.</li>
+<li><strong>公開</strong>：<br>
+2022年3月（arXiv: <a href="https://arxiv.org/abs/2203.02155">2203.02155</a>）</li>
+<li><strong>所属</strong>：<br>
+OpenAI</li>
+</ul>
+<h3 id="背景と目的">背景と目的</h3>
+<ul>
+<li>GPT‑3 のような大規模言語モデルは、
+<ul>
+<li>大量のテキストから学習しているため、<strong>知識は豊富</strong>だが、</li>
+<li>「指示に従う」「有害でない」「有用である」といった<strong>人間の意図に沿った出力</strong>は必ずしも得意ではない。</li>
+</ul>
+</li>
+<li>そこで、<strong>人間のフィードバックを報酬として強化学習（RLHF）</strong> を行い、<br>
+<strong>モデルを「指示に従う」「安全で有用な」方向に調整する</strong>ことを目指しました。</li>
+</ul>
+<h3 id="手法の概要3段階パイプライン">手法の概要（3段階パイプライン）</h3>
+<p>InstructGPT は、次の3段階で訓練されます。</p>
+<p><strong>1. 教師あり微調整（SFT: Supervised Fine-Tuning）</strong></p>
+<ul>
+<li><strong>目的</strong>：
+<ul>
+<li>人間のアノテータが書いた「指示＋回答」のペアを使って、<br>
+モデルに「指示に従う」ことを教える。</li>
+</ul>
+</li>
+<li><strong>手順</strong>：
+<ul>
+<li>人間が様々な指示（タスク）に対して、望ましい回答を書く。</li>
+<li>そのデータで GPT‑3 を微調整し、<strong>SFT モデル</strong>を作る。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 報酬モデルの学習（Reward Model Training）</strong></p>
+<ul>
+<li><strong>目的</strong>：
+<ul>
+<li>「どの出力が人間にとって良いか」を予測する<strong>報酬モデル</strong>を作る。</li>
+</ul>
+</li>
+<li><strong>手順</strong>：
+<ul>
+<li>同じ指示に対して、モデルが複数の出力を生成。</li>
+<li>人間がそれらを**ランキング（どちらが良いか）**で評価。</li>
+<li>そのランキングデータを使って、<strong>報酬モデル</strong>を訓練。
+<ul>
+<li>報酬モデルは、入力（指示＋出力）に対してスコアを出すように学習される。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 強化学習（RLHF: Reinforcement Learning from Human Feedback）</strong></p>
+<ul>
+<li><strong>目的</strong>：
+<ul>
+<li>報酬モデルを「報酬関数」として使い、<br>
+<strong>PPO（Proximal Policy Optimization）</strong> でモデルを更新する。</li>
+</ul>
+</li>
+<li><strong>手順</strong>：
+<ul>
+<li>SFT モデルを初期ポリシーとして、<br>
+指示に対して出力を生成。</li>
+<li>報酬モデルがその出力にスコア（報酬）を付与。</li>
+<li>PPO で、<strong>報酬を最大化するようにポリシー（モデル）を更新</strong>。</li>
+<li>同時に、SFT モデルからの乖離が大きくなりすぎないよう、<br>
+<strong>KL 正則化</strong>をかけて安定化。</li>
+</ul>
+</li>
+</ul>
+<h3 id="実験結果と主な知見">実験結果と主な知見</h3>
+<ul>
+<li><strong>評価指標</strong>：
+<ul>
+<li>人間評価者による「どちらの出力が良いか」の比較（ペアワイズ比較）。</li>
+</ul>
+</li>
+<li><strong>主な結果</strong>：
+<ul>
+<li><strong>同じパラメータ数のモデルでも、RLHF をかけた InstructGPT は、元のGPT‑3 より人間評価で大きく勝る</strong> ことが示されました。</li>
+<li>特に、
+<ul>
+<li><strong>指示に従う能力</strong></li>
+<li><strong>有害でない・偏りの少ない出力</strong></li>
+<li><strong>有用性</strong><br>
+の面で改善が見られました。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>モデルサイズとの関係</strong>：
+<ul>
+<li>1.3B パラメータの InstructGPT が、<br>
+175B パラメータの GPT‑3 よりも人間評価で良い、という結果も報告されています。</li>
+<li>これは、「<strong>RLHF によるアライメントが、モデルサイズ以上に重要</strong>」であることを示唆しています。</li>
+</ul>
+</li>
+</ul>
+<h3 id="意義と影響">意義と影響</h3>
+<ul>
+<li><strong>RLHF の有効性を大規模に実証</strong>：
+<ul>
+<li>「人間フィードバックを報酬とした強化学習」が、<br>
+実際に LLM の振る舞いを大きく改善できることを示した代表的な論文です。</li>
+</ul>
+</li>
+<li><strong>ChatGPT の技術的基盤</strong>：
+<ul>
+<li>ChatGPT も同様の <strong>SFT + RLHF</strong> パイプラインを採用しており、<br>
+この論文の手法が実サービスレベルで有効であることを裏付けています。</li>
+</ul>
+</li>
+<li><strong>アライメント研究の起点</strong>：
+<ul>
+<li>「モデルを人間の意図に沿わせる」という<strong>アライメント研究</strong>の流れを強く後押ししました。</li>
+</ul>
+</li>
+</ul>
+<h2 id="課題">課題</h2>
+<p><strong>LLM に強化学習（RL）を使わないといけない根本的な課題</strong>は、一言で言うと、</p>
+<blockquote>
+<p><strong>「教師あり学習（SFT）だけでは、“人間が望む振る舞い”を十分に教えられない」</strong></p>
+</blockquote>
+<p>という問題です。</p>
+<p>もう少し分解すると、次の4つの根本的な課題に整理できます。</p>
+<h3 id="課題1教師データの限界ラベル付けのコストと質">課題1：教師データの限界（ラベル付けのコストと質）</h3>
+<ul>
+<li>**SFT（教師あり微調整）**は、
+<ul>
+<li>「入力（指示）」と「望ましい出力（回答）」のペアを大量に用意する必要があります。</li>
+</ul>
+</li>
+<li>しかし、
+<ul>
+<li><strong>高品質な教師データを作るには、人間の専門家が時間をかけて書く必要がある</strong>（コストが高い）。</li>
+<li>特に「安全でない出力を避ける」「偏りを減らす」「微妙なニュアンスを正す」といった<strong>質的な側面</strong>は、<br>
+単純な正解ラベルだけでは表現しきれません。</li>
+</ul>
+</li>
+<li><strong>根本的な課題</strong>：
+<ul>
+<li>「人間が望む振る舞い」をすべて教師データとして網羅するのは、<br>
+<strong>現実的には不可能</strong>に近い。</li>
+</ul>
+</li>
+</ul>
+<h3 id="課題2評価軸の複雑さ正しいだけでは足りない">課題2：評価軸の複雑さ（「正しい」だけでは足りない）</h3>
+<ul>
+<li>LLM の出力には、単に「正解か不正解か」だけでなく、
+<ul>
+<li><strong>有用性</strong>（役に立つか）</li>
+<li><strong>安全性</strong>（有害でないか）</li>
+<li><strong>スタイル・トーン</strong>（丁寧さ、専門性など）</li>
+<li><strong>一貫性・論理性</strong><br>
+など、<strong>複数の評価軸</strong>が絡みます。</li>
+</ul>
+</li>
+<li>これらをすべて「教師データの正解ラベル」として表現するのは困難です。</li>
+<li><strong>根本的な課題</strong>：
+<ul>
+<li>「正しい答え」を教えるだけでは、<br>
+<strong>人間が実際に“良い”と感じる出力</strong>を保証できない。</li>
+</ul>
+</li>
+</ul>
+<h3 id="課題3探索空間の広大さどう答えるかの選択肢が多すぎる">課題3：探索空間の広大さ（「どう答えるか」の選択肢が多すぎる）</h3>
+<ul>
+<li>LLM は、同じ質問に対して<strong>無数の出力</strong>を生成できます。
+<ul>
+<li>例：「日本の人口は？」に対して、
+<ul>
+<li>「約1億2千万人です」</li>
+<li>「2020年時点で約1億2600万人です」</li>
+<li>「1億2千万人くらいだと思います」<br>
+など、どれも“正しい”が、ニュアンスが異なる。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>SFT は「1つの正解」を教えることが多いため、<br>
+<strong>多様な“良い出力”の空間全体</strong>をカバーしきれません。</li>
+<li><strong>根本的な課題</strong>：
+<ul>
+<li>教師データで示された“1つの正解”以外の、<br>
+<strong>まだ見ていない“良い出力”をモデルが自ら探索する必要がある</strong>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="課題4報酬の定義人間が良いと感じるをどう数値化するか">課題4：報酬の定義（「人間が良いと感じる」をどう数値化するか）</h3>
+<ul>
+<li>人間が「この出力は良い／悪い」と感じる基準は、
+<ul>
+<li>明示的なルールでは書ききれない</li>
+<li>文脈依存で変わる<br>
+という特徴があります。</li>
+</ul>
+</li>
+<li>**強化学習（RL）**は、
+<ul>
+<li><strong>報酬関数</strong>を通じて「良い／悪い」を数値化し、</li>
+<li>モデルが<strong>報酬を最大化するように自分で探索・学習</strong>する枠組みです。</li>
+</ul>
+</li>
+<li><strong>根本的な課題</strong>：
+<ul>
+<li>「人間が良いと感じる」という<strong>主観的で複雑な基準</strong>を、<br>
+モデルに教えるには、<strong>報酬ベースの学習（RL）が適している</strong>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="なぜ-rlhf-が有効なのか">なぜ RLHF が有効なのか</h3>
+<ul>
+<li><strong>RLHF（Reinforcement Learning from Human Feedback）</strong> は、上記の課題に対して次のように対応します。
+<ol>
+<li><strong>教師データの限界</strong>：
+<ul>
+<li>人間が「どちらが良いか」を比較するだけで済む（ランキングデータ）ため、<br>
+完全な正解文を書くよりコストが低い。</li>
+</ul>
+</li>
+<li><strong>評価軸の複雑さ</strong>：
+<ul>
+<li>人間が「良い／悪い」を総合的に判断し、その判断を報酬モデルに学習させる。</li>
+</ul>
+</li>
+<li><strong>探索空間の広大さ</strong>：
+<ul>
+<li>RL によってモデル自身が<strong>報酬を最大化する出力を探索</strong>する。</li>
+</ul>
+</li>
+<li><strong>報酬の定義</strong>：
+<ul>
+<li>人間のフィードバックを報酬として使い、<br>
+「人間が良いと感じる」方向にモデルを誘導する。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="方法の着眼点">方法の着眼点</h2>
+<p><strong>RLHF（Reinforcement Learning from Human Feedback）の着眼点</strong>を一言で言うと、</p>
+<blockquote>
+<p><strong>「人間が“良い”と感じる出力を、報酬として強化学習で直接学ばせる」</strong></p>
+</blockquote>
+<p>という点です。</p>
+<p>もう少し分解すると、次の3つの着眼点に整理できます。</p>
+<h3 id="着眼点1人間の主観的な良さを報酬として扱う">着眼点1：人間の主観的な「良さ」を報酬として扱う</h3>
+<ul>
+<li>LLM の出力には、
+<ul>
+<li>正しさ（事実性）</li>
+<li>有用性</li>
+<li>安全性</li>
+<li>スタイル・トーン<br>
+など、<strong>複数の評価軸</strong>が絡みます。</li>
+</ul>
+</li>
+<li>これらをすべて「教師データの正解ラベル」として書き下ろすのは現実的ではありません。</li>
+<li><strong>RLHF の着眼点</strong>：
+<ul>
+<li>「人間が“良い”と感じる」という<strong>主観的で複雑な基準</strong>を、<br>
+<strong>報酬モデル</strong>を通じて数値化し、<br>
+<strong>強化学習で直接最適化する</strong>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="着眼点2教師データの限界を比較データで補う">着眼点2：教師データの限界を「比較データ」で補う</h3>
+<ul>
+<li>高品質な教師データ（完全な正解文）を作るのはコストが高く、すべてのタスク・文脈を網羅するのは困難です。</li>
+<li><strong>RLHF の着眼点</strong>：
+<ul>
+<li>完全な正解文ではなく、<br>
+<strong>「A と B のどちらが良いか」という比較（ランキング）データ</strong>を人間から集める。</li>
+<li>これにより、<strong>教師データの限界を補いながら、人間の好みを効率的に学習</strong>する。</li>
+</ul>
+</li>
+</ul>
+<h3 id="着眼点3モデル自身に良い出力を探索させる">着眼点3：モデル自身に「良い出力」を探索させる</h3>
+<ul>
+<li>SFT は「与えられた教師データに近づく」学習ですが、<br>
+実際には**まだ見ていない“良い出力”**が無数に存在します。</li>
+<li><strong>RLHF の着眼点</strong>：
+<ul>
+<li>報酬モデルを「報酬関数」として使い、<br>
+<strong>モデル自身が報酬を最大化する出力を探索する</strong>（PPO などの RL）。</li>
+<li>これにより、教師データにない文脈でも、<br>
+<strong>人間が“良い”と感じる方向に自律的に振る舞う</strong>ことを目指す。</li>
+</ul>
+</li>
+</ul>
+<h2 id="rlhfの流れ">RLHFの流れ</h2>
+<p><strong>RLHF（Reinforcement Learning from Human Feedback）の学習の仕組み</strong>は、大きく分けて <strong>3段階のパイプライン</strong>で構成されています。</p>
+<p>代表的な論文である <strong>InstructGPT</strong>（Ouyang et al., 2022）<a href="https://arxiv.org/abs/2203.02155">arXiv</a> を例に、順を追って説明します。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\4_instructGPT_RLHF\1785630185602.png" alt="1785630185602"></p>
+<h3 id="第1段階教師あり微調整sft-supervised-fine-tuning">第1段階：教師あり微調整（SFT: Supervised Fine-Tuning）</h3>
+<p><strong>目的</strong>：</p>
+<ul>
+<li>モデルに「指示に従う」という基本的な振る舞いを教える。</li>
+</ul>
+<p><strong>手順</strong>：</p>
+<ol>
+<li>
+<p><strong>データ収集</strong></p>
+<ul>
+<li>人間のアノテータが、様々な指示（タスク）に対して<strong>望ましい回答</strong>を書く。</li>
+<li>例：
+<ul>
+<li>指示：「日本の人口を教えてください」</li>
+<li>回答：「2020年時点で約1億2600万人です。」</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>学習</strong></p>
+<ul>
+<li>この「指示＋回答」のペアデータを使って、<br>
+GPT‑3 などのベースモデルを**教師あり学習（SFT）**で微調整。</li>
+<li>これにより、<strong>SFT モデル</strong>が得られる。</li>
+</ul>
+</li>
+</ol>
+<p><strong>役割</strong>：</p>
+<ul>
+<li>RLHF の<strong>土台となるモデル</strong>を作る段階です。</li>
+<li>ここではまだ「人間の好み」や「安全性」は十分に反映されていません。</li>
+</ul>
+<h3 id="第2段階報酬モデルの学習reward-model-training">第2段階：報酬モデルの学習（Reward Model Training）</h3>
+<p><strong>目的</strong>：</p>
+<ul>
+<li>「どの出力が人間にとって良いか」を予測する<strong>報酬モデル</strong>を作る。</li>
+</ul>
+<p><strong>手順</strong>：</p>
+<ol>
+<li>
+<p><strong>データ収集（人間のフィードバック）</strong></p>
+<ul>
+<li>SFT モデルに同じ指示を与え、<strong>複数の出力</strong>を生成させる。</li>
+<li>例：指示に対して出力 A, B, C を生成。</li>
+<li>人間がそれらを<strong>ランキング</strong>で評価（例：A &gt; B &gt; C）。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬モデルの学習</strong></p>
+<ul>
+<li>入力：指示＋出力</li>
+<li>出力：スコア（報酬）</li>
+<li>人間のランキングデータを使って、
+<ul>
+<li>A のスコア &gt; B のスコア &gt; C のスコア<br>
+となるように<strong>報酬モデル</strong>を訓練。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>役割</strong>：</p>
+<ul>
+<li><strong>人間の主観的な「良さ」を数値化する関数</strong>を作る段階です。</li>
+<li>後の RL では、この報酬モデルが「報酬関数」として使われます。</li>
+</ul>
+<blockquote>
+<p><strong>報酬モデルはどんなモデル？</strong><br>
+<strong>RLHF で用いる報酬モデルは、基本的には「生成モデル」ではなく「評価モデル（スコアリングモデル）」です。</strong>
+もう少し正確に言うと：</p>
+<ul>
+<li><strong>生成モデル</strong>：</li>
+<li>入力（指示など）に対して<strong>テキストを生成する</strong>モデル（例：GPT‑3, GPT‑4）。</li>
+<li><strong>報酬モデル</strong>：</li>
+<li>入力（指示＋出力）に対して<strong>スコア（報酬）を出す</strong>モデル。</li>
+<li>生成は行わず、<strong>“良い／悪い”を数値で評価する</strong>役割。
+<strong>報酬モデルの役割</strong>
+RLHF の報酬モデルは、次のような特徴を持ちます<a href="https://arxiv.org/abs/2203.02155">arXiv</a>。</li>
+</ul>
+<ol>
+<li><strong>入力</strong>：</li>
+</ol>
+<ul>
+<li>指示（prompt）＋モデルの出力（response）のペア。</li>
+</ul>
+<ol start="2">
+<li><strong>出力</strong>：</li>
+</ol>
+<ul>
+<li>単一のスカラー値（報酬スコア）。</li>
+<li>例：高いほど「人間が良いと感じる」出力。</li>
+</ul>
+<ol start="3">
+<li><strong>学習データ</strong>：</li>
+</ol>
+<ul>
+<li>人間が複数の出力を<strong>ランキング</strong>したデータ（A &gt; B &gt; C など）。</li>
+<li>報酬モデルは、このランキングに合うようにスコアを出力するように学習される。</li>
+</ul>
+<ol start="4">
+<li><strong>用途</strong>：</li>
+</ol>
+<ul>
+<li>強化学習（PPO など）の<strong>報酬関数</strong>として使われる。</li>
+<li>生成モデルが出力を生成するたびに、報酬モデルがその出力にスコアを付与し、<br>
+生成モデルはそのスコアを最大化するように更新される。
+<strong>報酬モデルは生成モデルか？</strong></li>
+<li><strong>構造的には</strong>：</li>
+<li>報酬モデルも Transformer ベースのモデルであることが多く、<br>
+内部的には生成モデルと似たアーキテクチャを使う場合があります。</li>
+<li>ただし、<strong>出力層はスカラー値（報酬）</strong> であり、テキスト生成は行いません。</li>
+<li><strong>機能的には</strong>：</li>
+<li>生成モデル：<strong>テキストを生成する</strong></li>
+<li>報酬モデル：<strong>生成されたテキストを評価する</strong></li>
+<li>というように、<strong>役割が明確に分かれています</strong>。
+したがって、RLHF の文脈で「報酬モデル」と言うときは、<br>
+<strong>生成モデルとは別の、評価専用のモデル</strong>を指すのが一般的です。</li>
+</ul>
+</blockquote>
+<h3 id="第3段階強化学習rlhf-reinforcement-learning-from-human-feedback">第3段階：強化学習（RLHF: Reinforcement Learning from Human Feedback）</h3>
+<p><strong>目的</strong>：</p>
+<ul>
+<li>報酬モデルを報酬関数として使い、<br>
+<strong>モデルが「人間が良いと感じる出力」を生成するように強化学習で調整する。</strong></li>
+</ul>
+<p><strong>手順</strong>：</p>
+<ol>
+<li>
+<p><strong>初期ポリシーの設定</strong></p>
+<ul>
+<li>第1段階で作った <strong>SFT モデル</strong>を初期ポリシーとして使う。</li>
+</ul>
+</li>
+<li>
+<p><strong>ロールアウト生成</strong></p>
+<ul>
+<li>モデルが指示に対して出力を生成（行動を選択）。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬の計算</strong></p>
+<ul>
+<li>第2段階で学習した<strong>報酬モデル</strong>が、<br>
+その出力にスコア（報酬）を付与。</li>
+</ul>
+</li>
+<li>
+<p><strong>PPO（Proximal Policy Optimization）による更新</strong></p>
+<ul>
+<li>PPO などの強化学習アルゴリズムで、<br>
+<strong>報酬を最大化するようにポリシー（モデル）を更新</strong>。</li>
+<li>同時に、SFT モデルからの乖離が大きくなりすぎないよう、<br>
+<strong>KL 正則化</strong>をかけて安定化。</li>
+</ul>
+</li>
+</ol>
+<p><strong>役割</strong>：</p>
+<ul>
+<li><strong>モデル自身が報酬を最大化する出力を探索する</strong>段階です。</li>
+<li>これにより、教師データにない文脈でも、<br>
+<strong>人間が“良い”と感じる方向に自律的に振る舞う</strong>ことを目指します。</li>
+</ul>
+<h3 id="なぜこの3段階なのか">なぜこの3段階なのか</h3>
+<ul>
+<li><strong>SFT だけ</strong>では、
+<ul>
+<li>教師データにない文脈や、微妙なニュアンス（安全性・有用性など）をカバーしきれない。</li>
+</ul>
+</li>
+<li><strong>報酬モデル＋RL</strong> によって、
+<ul>
+<li>人間の主観的な「良さ」を報酬として直接最適化できる。</li>
+<li>モデル自身がまだ見ていない“良い出力”を探索できる。</li>
+</ul>
+</li>
+</ul>
+<p>この3段階パイプラインにより、<br>
+<strong>「指示に従う」「安全で有用な」LLM</strong> を実現しているのが RLHF の学習の仕組みです。</p>
+<p>もし、「PPO の具体的な更新式」や「報酬モデルの学習損失の詳細」など、さらに技術的な部分を知りたい場合は、その点に絞って補足することも可能です。</p>
+<h2 id="rlhfの学習">RLHFの学習</h2>
+<p><strong>RLHF の学習は、基本的には「オフライン学習」に近いイメージですが、厳密には「オフポリシー強化学習」に分類されます。</strong></p>
+<p>もう少し正確に整理すると：</p>
+<h3 id="学習の流れイメージ">学習の流れ（イメージ）</h3>
+<ol>
+<li>
+<p><strong>データ収集（オフライン）</strong></p>
+<ul>
+<li>人間が指示に対する出力を書く（SFT用）。</li>
+<li>モデルの複数出力を人間がランキング評価する（報酬モデル用）。</li>
+<li>これらは<strong>事前に収集された静的なデータセット</strong>です。</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬モデルの学習（オフライン）</strong></p>
+<ul>
+<li>上記のランキングデータを使って、報酬モデルを教師あり学習。</li>
+<li>これも完全に<strong>オフライン</strong>です。</li>
+</ul>
+</li>
+<li>
+<p><strong>RLHF（強化学習）</strong></p>
+<ul>
+<li>ここが少しややこしい部分です。</li>
+<li>モデルは<strong>現在のポリシーで新しいロールアウト（出力）を生成</strong>します。</li>
+<li>その出力に対して、<strong>事前に学習済みの報酬モデルがスコアを付与</strong>します。</li>
+<li>このスコアをもとに、PPO などでポリシーを更新します。</li>
+</ul>
+</li>
+</ol>
+<h3 id="オフライン学習と言えるか">「オフライン学習」と言えるか？</h3>
+<ul>
+<li>
+<p><strong>報酬モデル学習</strong>：</p>
+<ul>
+<li>完全にオフライン（静的なデータセットから学習）。</li>
+</ul>
+</li>
+<li>
+<p><strong>RLHF（ポリシー更新）</strong>：</p>
+<ul>
+<li>モデルは<strong>新しいロールアウトを生成</strong>するので、<br>
+完全な意味での「オフライン学習（既存データのみで学習）」とは少し異なります。</li>
+<li>ただし、<strong>報酬は人間からリアルタイムで得ているわけではなく、事前に学習した報酬モデルから得ている</strong>ので、「オフポリシー強化学習」に近い性質を持ちます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>イメージとしては</strong>：</p>
+<ul>
+<li>「テキストベースの質問」と「生成AIの解答」、「報酬モデルの評価（スコア）」を使って、<strong>LLM が再学習（RLで更新）される</strong>という理解でほぼ正しいです。</li>
+<li>ただし、報酬モデル自体は<strong>事前に学習済み</strong>であり、人間がその場で評価しているわけではない点がポイントです。</li>
+</ul>
+<h2 id="実験結果">実験結果</h2>
+<p><strong>InstructGPT</strong>（Ouyang et al., 2022）<a href="https://arxiv.org/abs/2203.02155">arXiv</a> に掲載されている<strong>実験設定と実験結果</strong>について説明します。</p>
+<h3 id="実験の目的">実験の目的</h3>
+<ul>
+<li><strong>目的</strong>：
+<ul>
+<li>GPT‑3 などの大規模言語モデルを、<br>
+<strong>「指示に従う」「安全で有用な」方向に調整</strong>できるかを検証する。</li>
+<li>特に、<strong>RLHF（SFT + 報酬モデル + PPO）</strong> が、<br>
+元の GPT‑3 や単純な SFT モデルよりも<strong>人間評価で優れているか</strong>を確認する。</li>
+</ul>
+</li>
+</ul>
+<h3 id="実験設定モデルデータ評価方法">実験設定（モデル・データ・評価方法）</h3>
+<p><strong>1. モデル</strong></p>
+<ul>
+<li><strong>ベースモデル</strong>：
+<ul>
+<li>GPT‑3 ファミリー（1.3B, 6B, 175B パラメータなど）をベースに使用。</li>
+</ul>
+</li>
+<li><strong>比較対象</strong>：
+<ul>
+<li><strong>GPT‑3</strong>（そのまま）</li>
+<li><strong>SFT のみ</strong>（教師あり微調整のみ）</li>
+<li><strong>InstructGPT</strong>（SFT + 報酬モデル + RLHF）</li>
+<li>一部の実験では、<strong>GPT‑3 にプロンプトエンジニアリングを施したもの</strong>も比較。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. データ</strong></p>
+<ul>
+<li><strong>SFT データ</strong>：
+<ul>
+<li>人間のアノテータが書いた「指示＋回答」のペア（約13,000サンプル）。</li>
+</ul>
+</li>
+<li><strong>報酬モデル学習データ</strong>：
+<ul>
+<li>同じ指示に対してモデルが生成した複数出力を、<br>
+人間がランキング評価（どちらが良いか）したデータ（約33,000サンプル）。</li>
+</ul>
+</li>
+<li><strong>RLHF データ</strong>：
+<ul>
+<li>上記の報酬モデルを使って、PPO でポリシーを更新。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 評価方法</strong></p>
+<ul>
+<li><strong>人間評価（ペアワイズ比較）</strong>：
+<ul>
+<li>同じ指示に対して、2つのモデルの出力を並べ、人間評価者が「どちらが良いか」を選ぶ。</li>
+<li>「良い」の基準は、
+<ul>
+<li>指示に従っているか</li>
+<li>有用か</li>
+<li>有害でないか<br>
+など、総合的な判断。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>自動評価</strong>：
+<ul>
+<li>一部のタスクでは、正解率などの自動指標も使用。</li>
+</ul>
+</li>
+</ul>
+<h3 id="主な実験結果">主な実験結果</h3>
+<p><strong>1. 人間評価での優位性</strong></p>
+<ul>
+<li>
+<p><strong>同じパラメータ数での比較</strong>：</p>
+<ul>
+<li>1.3B パラメータの <strong>InstructGPT</strong> が、<br>
+175B パラメータの <strong>GPT‑3</strong> よりも<strong>人間評価で良い</strong>と判断されるケースが多く見られました。</li>
+<li>これは、「<strong>RLHF によるアライメントが、モデルサイズ以上に重要</strong>」であることを示唆しています。</li>
+</ul>
+</li>
+<li>
+<p><strong>SFT のみ vs RLHF</strong>：</p>
+<ul>
+<li>RLHF をかけた <strong>InstructGPT</strong> は、<br>
+SFT のみのモデルよりも<strong>一貫して人間評価で優れる</strong>ことが確認されました。</li>
+<li>特に、
+<ul>
+<li><strong>指示に従う能力</strong></li>
+<li><strong>有害でない・偏りの少ない出力</strong></li>
+<li><strong>有用性</strong><br>
+の面で改善が見られました。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. モデルサイズとの関係</strong></p>
+<ul>
+<li>
+<p><strong>小さいモデルでも RLHF で大きく改善</strong>：</p>
+<ul>
+<li>1.3B の InstructGPT が、175B の GPT‑3 より良いという結果は、<br>
+「<strong>モデルサイズが小さくても、RLHF で質を高められる</strong>」ことを示しています。</li>
+</ul>
+</li>
+<li>
+<p><strong>大きいモデルほど RLHF の効果も大きい傾向</strong>：</p>
+<ul>
+<li>ただし、モデルサイズが大きいほど、<br>
+RLHF による改善幅も大きくなる傾向も報告されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 安全性・アライメントの改善</strong></p>
+<ul>
+<li><strong>有害な出力の減少</strong>：
+<ul>
+<li>RLHF をかけたモデルは、<br>
+有害な内容や偏った内容を出力する頻度が<strong>減少</strong>したと報告されています。</li>
+</ul>
+</li>
+<li><strong>“お手上げ”回答の増加</strong>：
+<ul>
+<li>わからないときや不適切な質問に対して、<br>
+「答えられません」「これは不適切です」といった<strong>拒否応答</strong>が増え、<br>
+安全性が向上しました。</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\paper\image\4_instructGPT_RLHF\1785633388696.png" alt="1785633388696"></p>
+<p><strong>4. 一部のタスクでの性能低下</strong></p>
+<ul>
+<li><strong>事実性や一部のベンチマークスコア</strong>：
+<ul>
+<li>RLHF によって、<strong>事実性がわずかに低下する</strong>ケースも報告されています。</li>
+<li>これは、RLHF が「人間が良いと感じる」方向に最適化するため、<br>
+必ずしも「事実として正しい」ことと完全には一致しないためです。</li>
+<li>ただし、全体としては<strong>有用性・安全性の向上がトレードオフとして許容される</strong>と判断されています。</li>
+</ul>
+</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p><strong>RLHF の現在の立ち位置</strong>と<strong>その後継・補完的な手法</strong>について整理します。</p>
+<h3 id="rlhf-の現在の立ち位置">RLHF の現在の立ち位置</h3>
+<p><strong>1. 実サービスでの「事実上の標準」</strong></p>
+<ul>
+<li><strong>ChatGPT, Claude, Gemini</strong> など、主要な商用 LLM の多くが、<br>
+<strong>SFT + RLHF（あるいはその改良版）</strong> を採用しています。</li>
+<li>特に、
+<ul>
+<li><strong>指示に従う能力</strong></li>
+<li><strong>安全性（有害でない出力）</strong></li>
+<li><strong>有用性（ユーザーの意図に沿う）</strong><br>
+の向上に RLHF が有効であることが、実サービスレベルで確認されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. アライメント技術の「第一世代」としての位置づけ</strong></p>
+<ul>
+<li>RLHF は、<strong>「人間のフィードバックを報酬として強化学習する」</strong> という<br>
+アライメント技術の<strong>第一世代の代表的手法</strong>と見なされています。</li>
+<li>現在も、
+<ul>
+<li><strong>ベースラインとしての重要性</strong></li>
+<li><strong>実運用での実績</strong><br>
+から、依然として重要な位置を占めています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. 課題と限界も明らかになっている</strong></p>
+<p>一方で、RLHF には次のような<strong>課題・限界</strong>も指摘されています。</p>
+<ul>
+<li><strong>報酬モデルのバイアス</strong>：
+<ul>
+<li>報酬モデルが人間の評価データから学習するため、<br>
+評価者のバイアス（文化差・価値観の偏り）が反映されやすい。</li>
+</ul>
+</li>
+<li><strong>事実性の低下</strong>：
+<ul>
+<li>「人間が良いと感じる」方向に最適化するため、<br>
+必ずしも「事実として正しい」ことと一致しない場合がある。</li>
+</ul>
+</li>
+<li><strong>学習の不安定性・コスト</strong>：
+<ul>
+<li>PPO による RL は計算コストが高く、<br>
+報酬モデルと生成モデルの両方を訓練する必要がある。</li>
+</ul>
+</li>
+<li><strong>報酬ハッキング（reward hacking）</strong>：
+<ul>
+<li>報酬モデルの弱点を突いて、見かけ上「良い」が実質的には不適切な出力を生成するリスク。</li>
+</ul>
+</li>
+</ul>
+<h3 id="rlhf-の後継補完的な手法">RLHF の後継・補完的な手法</h3>
+<p>RLHF の課題を解決するために、次のような<strong>後継・補完的な手法</strong>が研究・実用化されています。</p>
+<p><strong>1. DPO（Direct Preference Optimization）</strong></p>
+<ul>
+<li><strong>概要</strong>：
+<ul>
+<li>RLHF のように<strong>報酬モデル＋PPO</strong>という2段構えではなく、<br>
+<strong>好みのデータから直接ポリシーを最適化</strong>する手法。</li>
+</ul>
+</li>
+<li><strong>特徴</strong>：
+<ul>
+<li>報酬モデルを明示的に学習せず、<br>
+好みのペアデータから<strong>閉形式の損失関数</strong>でポリシーを更新。</li>
+<li>RL ループが不要なため、<strong>学習が安定で計算コストが低い</strong>。</li>
+</ul>
+</li>
+<li><strong>立ち位置</strong>：
+<ul>
+<li>RLHF の**計算コストと不安定性を改善した「代替手法」**として注目されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. RLVR（Reinforcement Learning from Verifiable Rewards）</strong></p>
+<ul>
+<li><strong>概要</strong>：
+<ul>
+<li>人間フィードバックに依存せず、<br>
+<strong>自動で検証可能な報酬</strong>（例：正解・不正解、コードのテスト通過など）を使う RL。</li>
+</ul>
+</li>
+<li><strong>特徴</strong>：
+<ul>
+<li>数学問題・コード生成など、<strong>正解が明確なタスク</strong>で強力。</li>
+<li>人間評価のコストやバイアスを避けられる。</li>
+</ul>
+</li>
+<li><strong>立ち位置</strong>：
+<ul>
+<li>RLHF の<strong>補完的な手法</strong>として、<br>
+特に<strong>推論タスクやコード生成</strong>で活用が進んでいます。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3. Constitutional AI（Anthropic）</strong></p>
+<ul>
+<li><strong>概要</strong>：
+<ul>
+<li>「憲法（Constitution）」と呼ばれる<strong>原則セット</strong>に基づいて、<br>
+モデル自身に出力を批判・修正させる手法。</li>
+</ul>
+</li>
+<li><strong>特徴</strong>：
+<ul>
+<li>人間フィードバックを減らしつつ、<br>
+<strong>モデル自身の自己批判・自己改善</strong>でアライメントを実現。</li>
+<li>RLHF と組み合わせて使われることも多い。</li>
+</ul>
+</li>
+<li><strong>立ち位置</strong>：
+<ul>
+<li>RLHF を**補完する「原則ベースのアライメント」**として注目されています。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. オフライン強化学習・模倣学習の活用</strong></p>
+<ul>
+<li><strong>概要</strong>：
+<ul>
+<li>人間のデモンストレーションや高品質な出力データから、<br>
+<strong>模倣学習（Imitation Learning）</strong> や<strong>オフライン RL</strong>でポリシーを学習。</li>
+</ul>
+</li>
+<li><strong>特徴</strong>：
+<ul>
+<li>オンライン RL の不安定性を避けつつ、<br>
+高品質なデータから直接学習できる。</li>
+</ul>
+</li>
+<li><strong>立ち位置</strong>：
+<ul>
+<li>RLHF の<strong>前段階や代替手段</strong>として研究が進んでいます。</li>
+</ul>
+</li>
+</ul>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+            
+        </body>
+        </html>
