@@ -628,7 +628,8 @@ class TransformerPPOAgent:
     ):
         save_path = path if path is not None else self.path_save
         episode_rewards = []
-        success_flags = []  # 直近のゴール到達可否を記録（診断用・カリキュラム判定用）
+        success_flags = []  # 直近のゴール到達可否を記録（カリキュラム判定用。難易度UP時にリセットされる）
+        success_history = []  # 追加: カリキュラムでリセットされない、全エピソード分の完全な記録（分散分析用）
 
         # 追加: カリキュラム学習用の現在の難易度上限（スタート-ゴール間距離）
         current_max_distance = curriculum_start_distance if use_curriculum else None
@@ -690,6 +691,7 @@ class TransformerPPOAgent:
 
             episode_rewards.append(episode_reward)
             success_flags.append(1 if episode_done else 0)
+            success_history.append(1 if episode_done else 0)
 
             if episode % log_interval == 0:
                 window = success_flags[-log_interval:]
@@ -722,7 +724,7 @@ class TransformerPPOAgent:
                 self.save_model(save_path)
 
         print("Training finished.")
-        return episode_rewards
+        return episode_rewards, success_history
 
     def save_model(self, path):
         self.policy.cpu()
