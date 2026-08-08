@@ -2301,8 +2301,128 @@ plt.show()
 
 ```
 
+__出力結果__
+
+上記のコードを実行すると、以下のが確認出来ます。
+
+__テキスト出力__
+
+* **遷移確率行列 M**：手計算と同じ3×3の行列の値が確認できます。
+* **PageRankの計算結果**：固有値分解（解法A）とべき乗法（解法B）の結果が表示され、どちらのアプローチでも同じ最終的な重要度（A: 0.4, B: 0.2, C: 0.4）になることが確認できます。
+
+__グラフ出力__
+
+* **左図（ネットワーク図）**：リンク構造の可視化です。計算された重要度に比例して、ページAとCの円（ノード）が大きく、ページBの円が小さく描かれます。
+* **右図（収束グラフ）**：べき乗法のステップ（横軸）が進むにつれて、初期状態（すべて1/3）から最終的な値（0.4, 0.2, 0.4）へ確率分布がピタッと収束していく様子が折れ線グラフでわかります。
+
+数式で導き出した答えが、プログラム上のシミュレーションでも一致し、徐々に安定していく（定常状態になる）様子を視覚的に理解できる出力となっています。
 
 <img src="image/2_linear_graph/1786050555938.png" width="500px" style="display: block; margin: 0 auto;">
 
 <img src="image/2_linear_graph/1786050568004.png" width="500px" style="display: block; margin: 0 auto;">
+
+
+__例題:__
+
+次はグラフ直径を算出する例題について扱っていきます。
+
+5つのルーター **A, B, C, D, E** が以下のネットワーク構造で接続されています。
+
+* **A** は **B, C** と接続
+* **B** は **A, C, D** と接続
+* **C** は **A, B** と接続
+* **D** は **B, E** と接続
+* **E** は **D** のみと接続
+
+```text
+ (A)-------(C)
+  |       /
+  |     /
+  |   /
+ (B)-------(D)-------(E)
+
+```
+
+__問題__
+
+1. 全すべてのノード対 $(u, v)$ における最短経路長（ホップ数）を求めてください。
+2. このグラフの直径（Diameter）はいくつになるでしょうか？また、その直径を与えるノードのペア（最も遠いノード同士）はどれでしょうか？
+
+__1. 全ノード対の最短経路長一覧__
+
+各ノード間の最短距離（エッジの数）をカウントします。
+
+|  | A | B | C | D | E |
+| --- | --- | --- | --- | --- | --- |
+| **A** | 0 | 1 | 1 | 2 | 3 |
+| **B** | 1 | 0 | 1 | 1 | 2 |
+| **C** | 1 | 1 | 0 | 2 | 3 |
+| **D** | 2 | 1 | 2 | 0 | 1 |
+| **E** | 3 | 2 | 3 | 1 | 0 |
+
+※例えば、A から E への最短経路は `A -> B -> D -> E` の **3ステップ（ホップ）** です。
+
+__2. グラフの直径（Diameter）の算出__
+
+* 最短経路長の一覧表の中で、**最大の値は `3**` です。
+* したがって、このグラフの**直径は `3**` となります。
+* 直径を与えるノードのペアは **(A, E)** および **(C, E)** の2組です。
+
+このネットワークでは、どのノードからどのノードへデータを送る場合でも、**最大で 3 回の転送（ホップ）を行えば必ず到達できる**ことが分かります。
+
+__Pythonによる直径の算出と最遠パスの可視化コード__
+
+NetworkX の `nx.diameter()` を用いて直径を計算し、最も離れたノード間の最短経路をハイライト表示するプログラムです。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# 1. グラフの構築
+G = nx.Graph()
+edges = [("A", "B"), ("A", "C"), ("B", "C"), ("B", "D"), ("D", "E")]
+G.add_edges_from(edges)
+
+# 2. 全ノード間の最短経路長行列の計算
+all_shortest_paths = dict(nx.all_pairs_shortest_path_length(G))
+
+print("--- 全ノード間の最短距離 (Shortest Path Lengths) ---")
+for src in G.nodes():
+    print(f"Node {src}: {all_shortest_paths[src]}")
+
+# 3. グラフの直径 (Diameter) の取得
+diameter = nx.diameter(G)
+print(f"\n[結果] グラフの直径 (Diameter): {diameter}")
+
+# 4. 直径を与える最遠ノード対とその最短経路を取得
+# 例として (A, E) の最短経路を取得
+longest_path = nx.shortest_path(G, source="A", target="E")
+print(f"[最遠パス (A -> E)]: {' -> '.join(longest_path)} (長さ: {len(longest_path) - 1})")
+
+# 5. 可視化
+plt.figure(figsize=(8, 5))
+pos = {"A": (0, 1), "C": (0, 0), "B": (1, 0.5), "D": (2, 0.5), "E": (3, 0.5)}
+
+# ノードの色分け (最遠ノード A と E を赤色に)
+node_colors = [
+    "#FF5722" if node in ["A", "E"] else "#2196F3" for node in G.nodes()
+]
+
+# 最遠パスに含まれるエッジを太線・赤色で強調
+path_edges = list(zip(longest_path[:-1], longest_path[1:]))
+edge_colors = ["red" if edge in path_edges or edge[::-1] in path_edges else "gray" for edge in G.edges()]
+edge_widths = [3.5 if edge in path_edges or edge[::-1] in path_edges else 1.5 for edge in G.edges()]
+
+# ノード・エッジの描画
+nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=1200, edgecolors="black")
+nx.draw_networkx_edges(G, pos, edge_color=edge_colors, width=edge_widths)
+nx.draw_networkx_labels(G, pos, font_size=12, font_color="white", font_weight="bold")
+
+plt.title(f"Graph Diameter Example (Diameter = {diameter})", fontsize=12, pad=15)
+plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+```
+
 
