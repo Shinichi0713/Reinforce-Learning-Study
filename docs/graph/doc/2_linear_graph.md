@@ -2044,3 +2044,265 @@ __2. 可視化画像（`plt.show()`）の解説__
 
 <img src="image/2_linear_graph/1785964100548.png" width="500px" style="display: block; margin: 0 auto;">
 
+## 線形方程式と最適化
+
+グラフ理論における**線形方程式**と**最適化**は、主に以下の2つの文脈で使われます。
+
+1. **グラフ上の線形方程式**：グラフ構造を表す行列（隣接行列・ラプラシアンなど）に対する線形方程式  
+2. **グラフ上の最適化**：グラフ構造を制約条件として組み込んだ線形計画・整数計画など
+
+以下、それぞれを簡潔に説明します。
+
+### 1. グラフ上の線形方程式
+
+__(1) 隣接行列と線形方程式__
+
+- **隣接行列** $A$：  
+  - 頂点数 $n$ のグラフに対し、$n \times n$ の行列  
+  - $A_{ij} = 1$（頂点 $i$ と $j$ が隣接）、それ以外は 0
+- **線形方程式**：  
+  - $A \mathbf{x} = \mathbf{b}$  
+  - 例：各頂点に「影響」を割り当て、隣接頂点の影響の和が所定の値になるようにする問題
+
+__(2) ラプラシアン行列と線形方程式__
+
+- **ラプラシアン行列** $L$：  
+  - $L = D - A$  
+  - $D$：次数行列（対角成分が各頂点の次数）
+- **線形方程式**：  
+  - $L \mathbf{x} = \mathbf{b}$  
+  - 例：  
+    - **電位問題**：各頂点に電位 $x_i$ を割り当て、隣接頂点間の電位差の和が所定の電流になるようにする  
+    - **グラフ上の拡散**：熱や物質の拡散を表す連立方程式
+
+__(3) ページランク（固有値問題としての線形方程式）__
+
+- **ページランク方程式**：  
+  - $\mathbf{r} = (1 - d) \mathbf{e} + d M \mathbf{r}$  
+  - $M$：遷移確率行列（グラフの隣接行列を正規化）  
+  - $\mathbf{r}$：各ページの重要度（固有ベクトル）  
+- これは**線形方程式** $\mathbf{r} = A \mathbf{r}$ の形に変形でき、  
+  べき乗法や反復法で解くことができる。
+
+### 2. グラフ上の最適化
+
+__(1) 最短経路問題（線形計画としての定式化）__
+
+- **目的**：始点 $s$ から終点 $t$ までの最短経路を見つける  
+- **線形計画（LP）定式化**：  
+  - 変数：各辺 $e$ にフロー $f_e \ge 0$  
+  - 制約：  
+    - 始点：流出フロー合計 = 1  
+    - 終点：流入フロー合計 = 1  
+    - 中間頂点：流入フロー合計 = 流出フロー合計  
+  - 目的関数：$\min \sum_{e} c_e f_e$（$c_e$：辺のコスト）  
+- このLPの最適解は、**最短経路**に対応する。
+
+__(2) 最大流問題（線形計画）__
+
+- **目的**：始点 $s$ から終点 $t$ へ流せる最大フローを求める  
+- **線形計画定式化**：  
+  - 変数：各辺 $e$ のフロー $f_e \ge 0$  
+  - 制約：  
+    - 容量制約：$f_e \le u_e$（$u_e$：辺の容量）  
+    - 流量保存：各頂点で流入＝流出（$s, t$ を除く）  
+  - 目的関数：$\max$（$s$ から流出するフロー合計）  
+- 最適解が**最大流**に対応する。
+
+__(3) 最小カット問題（双対問題としての線形計画）__
+
+- **最大流・最小カット定理**：  
+  - 最大流の値 = 最小カットの容量  
+- 最大流問題の**双対問題**を解くことで、最小カット（グラフを分割する最小コスト）が求まる。
+
+__(4) マッチング・被覆問題（整数計画）__
+
+- **最大マッチング**：  
+  - 変数：各辺 $e$ に $x_e \in \{0,1\}$（マッチングに含むかどうか）  
+  - 制約：各頂点に接するマッチング辺は高々1本  
+  - 目的：$\max \sum_{e} x_e$
+- **最小頂点被覆**：  
+  - 変数：各頂点 $v$ に $y_v \in \{0,1\}$（被覆に含むかどうか）  
+  - 制約：各辺について、少なくとも一方の端点が被覆に含まれる  
+  - 目的：$\min \sum_{v} y_v$
+
+これらは**整数線形計画（ILP）** として定式化され、  
+グラフの構造を活かしたアルゴリズム（ハンガリアン法、最大流アルゴリズムなど）で効率的に解ける場合があります。
+
+
+__例題:__
+
+PageRank（ページランク）の核心である「遷移確率行列 $M$ に対する固有値問題 $\mathbf{r} = M\mathbf{r}$」を、手計算とコードの両方で直感的に体験できる例題を作成しました。
+
+PageRankは、ランダムにウェブ上を巡回するユーザー（ランダムサーファー）が「最終的に各ページに滞在する確率（確率分布）」を求める問題であり、数学的にはマルコフ鎖の定常分布（固有値 $1$ に対応する固有ベクトル）を求めることと同義です。
+
+__例題：3つのウェブページの重要度（PageRank）を求めよう__
+
+3つのウェブページ **A, B, C** があり、お互いに以下のようなハイパーリンク（一方向の矢印）を張っています。
+
+* **ページ A**: B と C の両方にリンクを張っている（遷移確率：Bへ 1/2, Cへ 1/2）。
+* **ページ B**: C のみにリンクを張っている（遷移確率：Cへ 1）。
+* **ページ C**: A のみにリンクを張っている（遷移確率：Aへ 1）。
+
+※ここでは説明をシンプルにするため、ランダムジャンプ（ダンピングファクター）なしの基本モデルで考えます。
+
+__問題__
+
+1. このネットワークの**遷移確率行列 $M$** を作成してください。
+* $M$ の $(i, j)$ 成分は「ページ $j$ からページ $i$ へ遷移する確率」とします（確率列ベクトルを行列として並べます）。
+* 行・列の順序は **[A, B, C]** とします。
+
+
+2. 各ページの重要度（滞在確率）を表すベクトルを $\mathbf{r} = \begin{pmatrix} r_A \\ r_B \\ r_C \end{pmatrix}$ とします。
+方程式 $\mathbf{r} = M\mathbf{r}$ および確率の総和条件 $r_A + r_B + r_C = 1$ を満たす**定常確率ベクトル（固有値 $1$ の固有ベクトル）$\mathbf{r}$** を求めてください。
+3. **【確認】** 求めた重要度ベクトル $\mathbf{r}$ の結果から、どのページが一番重要（人気）と言えますか？また、その理由をハイパーリンクの構造から考察してください。
+
+__1. 遷移確率行列 $M$ の作成__
+
+列 $j$ から行 $i$ への移動確率を並べます。
+
+* **A（1列目）から**: Bへ 1/2, Cへ 1/2 $\rightarrow \begin{pmatrix} 0 \\ 1/2 \\ 1/2 \end{pmatrix}$
+* **B（2列目）から**: Cへ 1 $\rightarrow \begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix}$
+* **C（3列目）から**: Aへ 1 $\rightarrow \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$
+
+$$M = \begin{pmatrix} 0 & 0 & 1 \\ 1/2 & 0 & 0 \\ 1/2 & 1 & 0 \end{pmatrix}$$
+
+※確率行列のため、**各列の要素の和は必ず `1**`（確率の保存）になります。
+
+__2. 固有値方程式 $\mathbf{r} = M\mathbf{r}$ の連立方程式による計算__
+
+$\begin{pmatrix} r_A \\ r_B \\ r_C \end{pmatrix} = \begin{pmatrix} 0 & 0 & 1 \\ 1/2 & 0 & 0 \\ 1/2 & 1 & 0 \end{pmatrix} \begin{pmatrix} r_A \\ r_B \\ r_C \end{pmatrix}$ を展開すると、以下の連立方程式が得られます。
+
+1. $r_A = r_C$
+2. $r_B = \frac{1}{2} r_A$
+3. $r_C = \frac{1}{2} r_A + r_B$
+
+これを比率に直すと、
+
+* $r_B = \frac{1}{2} r_A$
+* $r_C = r_A$
+
+比率は $r_A : r_B : r_C = 1 : \frac{1}{2} : 1 = 2 : 1 : 2$ となります。
+
+全体確率の和を $1$（$r_A + r_B + r_C = 1$）に正規化すると、
+
+$$\mathbf{r} = \begin{pmatrix} r_A \\ r_B \\ r_C \end{pmatrix} = \begin{pmatrix} 2/5 \\ 1/5 \\ 2/5 \end{pmatrix} = \begin{pmatrix} 0.4 \\ 0.2 \\ 0.4 \end{pmatrix}$$
+
+__3. 考察__
+
+* **最も重要なページ**: **A と C**（重要度 0.4）
+* **理由**:
+* ページ C は A と B の両方からリンクを集めているため評価が高くなります。
+* ページ A は重要度の高い C から直接リンクを受けているため、同様に高い重要度を獲得します。
+* ページ B は A からリンクを受けていますが、A が出しているリンクが2本に分散（1/2）しているため、相対的に半分（0.2）の重要度にとどまります。
+
+
+
+PageRankの「重要なページからリンクされているページもまた重要になる」という再帰的な性質が、固有値問題 $\mathbf{r} = M\mathbf{r}$ によって見事に表現されています。
+
+__Pythonによる固有値計算とべき乗法（Power Iteration）シミュレーション__
+
+PageRankの解法には、固有値分解を行う方法と、初期状態から $M$ を何度も掛け合わせて収束させるべき乗法（Power Iteration）があります。以下は両方を体験できるコードです。
+
+```python
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+# 1. 遷移確率行列 M の定義
+M = np.array([[0.0, 0.0, 1.0], [0.5, 0.0, 0.0], [0.5, 1.0, 0.0]])
+
+print("--- 遷移確率行列 M ---")
+print(M)
+
+# 2. 解法A: 固有値分解による解法 (M * r = 1 * r)
+eigenvalues, eigenvectors = np.linalg.eig(M)
+
+# 固有値 1 に対応するインデックスを取得 (実部がほぼ1のもの)
+idx = np.argmin(np.abs(eigenvalues - 1.0))
+r_eigen = np.real(eigenvectors[:, idx])
+
+# 総和が 1 になるように正規化
+r_eigen = r_eigen / np.sum(r_eigen)
+
+print("\n--- 解法A: 固有値分解による PageRank r ---")
+print(f"r_A: {r_eigen[0]:.4f}, r_B: {r_eigen[1]:.4f}, r_C: {r_eigen[2]:.4f}")
+
+
+# 3. 解法B: べき乗法 (Power Iteration) によるシミュレーション
+# 均等な初期確率分布 r0 = [1/3, 1/3, 1/3] からスタート
+r_k = np.array([1 / 3, 1 / 3, 1 / 3])
+history = [r_k.copy()]
+
+# 行列の積を 20 回繰り返して収束を見る
+for _ in range(20):
+    r_k = M @ r_k
+    history.append(r_k.copy())
+
+history = np.array(history)
+
+print("\n--- 解法B: べき乗法で20ステップ更新後の PageRank r ---")
+print(f"r_A: {r_k[0]:.4f}, r_B: {r_k[1]:.4f}, r_C: {r_k[2]:.4f}")
+
+
+# 4. 可視化
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+# グラフ構造の可視化
+G = nx.DiGraph()
+G.add_edge("A", "B", weight=0.5)
+G.add_edge("A", "C", weight=0.5)
+G.add_edge("B", "C", weight=1.0)
+G.add_edge("C", "A", weight=1.0)
+
+pos = {"A": (0, 1), "B": (1, 1), "C": (0.5, 0)}
+
+# ノードサイズを計算した PageRank (r) に比例させる
+node_sizes = [r_eigen[0] * 5000, r_eigen[1] * 5000, r_eigen[2] * 5000]
+
+nx.draw_networkx_nodes(
+    G,
+    pos,
+    ax=ax1,
+    node_color="#2196F3",
+    node_size=node_sizes,
+    edgecolors="black",
+)
+nx.draw_networkx_labels(
+    G, pos, ax=ax1, font_color="white", font_weight="bold", font_size=14
+)
+nx.draw_networkx_edges(
+    G,
+    pos,
+    ax=ax1,
+    connectionstyle="arc3,rad=0.1",
+    arrowsize=20,
+    edge_color="gray",
+    width=2,
+)
+
+ax1.set_title("Web Page Network (Node size = PageRank)", fontsize=12)
+ax1.axis("off")
+
+# 確率分布の収束プロット
+steps = np.arange(len(history))
+ax2.plot(steps, history[:, 0], "o-", label="Page A (0.4)", color="#E91E63")
+ax2.plot(steps, history[:, 1], "s-", label="Page B (0.2)", color="#4CAF50")
+ax2.plot(steps, history[:, 2], "^-", label="Page C (0.4)", color="#2196F3")
+
+ax2.set_xlabel("Iteration Step $k$")
+ax2.set_ylabel("Probability $r(k)$")
+ax2.set_title("Power Iteration Convergence: $r^{(k+1)} = M r^{(k)}$")
+ax2.grid(True, linestyle=":", alpha=0.6)
+ax2.legend()
+
+plt.tight_layout()
+plt.show()
+
+```
+
+
+<img src="image/2_linear_graph/1786050555938.png" width="500px" style="display: block; margin: 0 auto;">
+
+<img src="image/2_linear_graph/1786050568004.png" width="500px" style="display: block; margin: 0 auto;">
+
