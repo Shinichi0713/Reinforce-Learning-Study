@@ -83,7 +83,7 @@ result = {
     "success_history": success_history,
     "episode_rewards": episode_rewards,
 }
-with open("/mnt/user-data/outputs/stability_check_result.json", "w", encoding="utf-8") as f:
+with open("/content/stability_check_result.json", "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
-print("結果を /mnt/user-data/outputs/stability_check_result.json に保存しました。")
+print("結果を /content/stability_check_result.json に保存しました。")
  

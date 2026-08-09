@@ -1,5 +1,6 @@
 import math
 import os
+import random
 import numpy as np
 import torch
 import torch.nn as nn
@@ -625,6 +626,10 @@ class TransformerPPOAgent:
         curriculum_start_distance=3,   # 追加: 最初はこの距離までの迷路だけ出す
         curriculum_success_threshold=0.7,  # 追加: 直近window内の成功率がこれを超えたら難易度UP
         curriculum_window=20,
+        use_prioritized_replay=False,   # 追加: 苦手な迷路を優先出題するプールを使うか
+        pool_size=100,                  # プールに保持する迷路の最大数
+        pool_history_len=10,            # 1迷路あたり直近何回分の成功/失敗を見るか
+        pool_new_maze_prob=0.2,         # プールが満杯後、新規ランダム迷路を注入する確率
     ):
         save_path = path if path is not None else self.path_save
         episode_rewards = []
@@ -634,6 +639,15 @@ class TransformerPPOAgent:
         # 追加: カリキュラム学習用の現在の難易度上限（スタート-ゴール間距離）
         current_max_distance = curriculum_start_distance if use_curriculum else None
 
+        # 追加: 苦手迷路プール。curriculumと併用した場合、新規迷路の注入は
+        # その時点のcurriculumの難易度上限に従う（両方の恩恵を受けられる）。
+        pool = MazePool(
+            pool_size=pool_size,
+            history_len=pool_history_len,
+            new_maze_prob=pool_new_maze_prob,
+        ) if use_prioritized_replay else None
+        self.maze_pool = pool  # 学習後にも参照できるようエージェントに保持
+
         for episode in range(num_episodes):
             # 追加: エントロピー係数を線形にアニーリング（探索→活用へ）
             progress = episode / max(1, num_episodes - 1)
@@ -642,7 +656,24 @@ class TransformerPPOAgent:
                 + (self.entropy_coef_final - self.entropy_coef_start) * progress
             )
 
-            if use_curriculum:
+            current_entry = None
+            if use_prioritized_replay:
+                if pool.should_inject_new():
+                    # 新規ランダム迷路を生成してプールに追加（curriculum併用時は
+                    # その時点の難易度上限に従う）
+                    self.env.generate_random_maze(
+                        rows=self.env.rows, cols=self.env.cols,
+                        max_distance=current_max_distance if use_curriculum else None,
+                    )
+                    current_entry = pool.add(self.env.maze, self.env.start, self.env.goal)
+                else:
+                    # プールから苦手度に応じた確率で1つ選ぶ
+                    current_entry = pool.sample()
+                maze_override = (
+                    current_entry["maze"], current_entry["start"], current_entry["goal"]
+                )
+                state_pos = self.env.reset(maze_change=False, maze_override=maze_override)
+            elif use_curriculum:
                 state_pos = self.env.reset(
                     maze_change=maze_change, max_distance=current_max_distance
                 )
@@ -689,6 +720,10 @@ class TransformerPPOAgent:
             if len(self.buffer.states) > 0:
                 self.update(next_state_img, done=episode_done)
 
+            # 追加: このエピソードで使った迷路の成功/失敗をプールに記録
+            if use_prioritized_replay and current_entry is not None:
+                pool.record_result(current_entry, success=episode_done)
+
             episode_rewards.append(episode_reward)
             success_flags.append(1 if episode_done else 0)
             success_history.append(1 if episode_done else 0)
@@ -705,6 +740,18 @@ class TransformerPPOAgent:
                     f"直近{len(window)}エピソードのゴール到達率: {success_rate:.0%}, "
                     f"entropy_coef={self.entropy_coef:.4f}{curriculum_info}"
                 )
+                if use_prioritized_replay:
+                    stats = pool.stats(top_k=5)
+                    if stats["overall_success_rate"] is not None:
+                        hardest_str = ", ".join(
+                            f"id{h['id']}(成功率{h['recent_success_rate']:.0%}, 試行{h['attempts']}回)"
+                            for h in stats["hardest"]
+                        )
+                        print(
+                            f"  [プール] 試行済み{stats['num_tried']}/{stats['pool_size']}件, "
+                            f"プール全体の成功率={stats['overall_success_rate']:.0%}"
+                        )
+                        print(f"  [プール] 苦手Top{len(stats['hardest'])}: {hardest_str}")
 
             # 追加: カリキュラムの難易度更新判定
             if use_curriculum and len(success_flags) >= curriculum_window:
