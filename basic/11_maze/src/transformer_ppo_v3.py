@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
 
+from maze_pool import MazePool
+
 # TransformerEncoderLayer の fast path（融合カーネル）による形状バグを回避
 torch.backends.mha.set_fastpath_enabled(False)
 
@@ -124,12 +126,177 @@ class PPORolloutBuffer:
         self.values.clear()
 
 # ================================================================
+# 1.6. 2D Rotary Position Embedding (2D RoPE)
+# ================================================================
+# nn.TransformerEncoderLayer は RoPE を標準サポートしないため、
+# Q/K にその場で回転を適用する自前のAttention層を用意する。
+#
+# 設計:
+#   - head_dim を「行(row)用の前半」「列(col)用の後半」に2分割し、
+#     それぞれに独立した1D RoPEを適用する（2D RoPE）。
+#   - head_dim は 4 の倍数である必要がある
+#     （行/列で2分割 → さらにRoPEのペア回転で2分割、のため）。
+#   - CLSトークンは座標を持たないため、回転角0（＝回転なし）として扱う。
+#     これにより CLS-グリッド間の内積は各グリッドトークンの絶対位置に
+#     応じた値になり、CLSは「特別な原点」として振る舞う
+#     （ViT系のRoPE実装で一般的な慣習）。
+#
+# 従来の学習可能な絶対位置埋め込み(row_embedding/col_embedding)は、
+# 25マス個別にゼロから「隣に壁があればどうする」という関係を学習し
+# 直す必要があった。RoPEは相対位置関係をAttentionの内積計算そのものに
+# 組み込むため、同じ関係性（例:「1マス右に壁がある」）をマス間で
+# 共有して学習でき、サンプルが少ないレアな配置（ゴールが壁で
+# 囲まれているケースなど）でのデータ効率が上がることを期待している。
+
+def _rotate_half(x):
+    """最後の次元を半分に割り、(-後半, 前半) の順に結合する（RoPEの基本演算）"""
+    d = x.shape[-1]
+    x1 = x[..., : d // 2]
+    x2 = x[..., d // 2:]
+    return torch.cat((-x2, x1), dim=-1)
+
+
+def _rotate_half_2d(x):
+    """
+    head_dim全体を行用の前半/列用の後半に分け、それぞれの半分の中で
+    独立に _rotate_half を適用する（行と列の回転が混ざらないようにする）
+    """
+    d = x.shape[-1]
+    half = d // 2
+    row_part = x[..., :half]
+    col_part = x[..., half:]
+    return torch.cat((_rotate_half(row_part), _rotate_half(col_part)), dim=-1)
+
+
+def _apply_rope_2d(x, cos, sin):
+    """
+    x: (..., N, head_dim)
+    cos, sin: (N, head_dim) をブロードキャスト可能な形に整えたもの
+    """
+    return x * cos + _rotate_half_2d(x) * sin
+
+
+def build_2d_rope_tables(grid_size, head_dim, base=10000.0):
+    """
+    5x5などのグリッド上の各マス（行主走査順）とCLSトークン(先頭)を合わせた
+    (num_tokens+1, head_dim) の cos/sin テーブルを事前計算する。
+    """
+    assert head_dim % 4 == 0, (
+        "2D RoPEを使うには head_dim (=d_model // nhead) が4の倍数である必要があります"
+    )
+    half = head_dim // 2   # 行用/列用それぞれの次元数
+    quarter = half // 2    # 軸ごとの周波数ペア数
+
+    inv_freq = 1.0 / (base ** (torch.arange(0, quarter, dtype=torch.float32) / quarter))
+    positions = torch.arange(grid_size, dtype=torch.float32)
+    freqs = torch.outer(positions, inv_freq)          # (grid_size, quarter)
+    emb = torch.cat([freqs, freqs], dim=-1)            # (grid_size, half)
+    axis_cos = emb.cos()  # (grid_size, half)  行・列共通の周波数テーブル
+    axis_sin = emb.sin()
+
+    rows, cols = [], []
+    for r in range(grid_size):
+        for c in range(grid_size):
+            rows.append(r)
+            cols.append(c)
+    row_idx = torch.tensor(rows, dtype=torch.long)
+    col_idx = torch.tensor(cols, dtype=torch.long)
+
+    grid_cos = torch.cat([axis_cos[row_idx], axis_cos[col_idx]], dim=-1)  # (N, head_dim)
+    grid_sin = torch.cat([axis_sin[row_idx], axis_sin[col_idx]], dim=-1)
+
+    # CLSトークン(先頭)は回転なし: cos=1, sin=0
+    cls_cos = torch.ones(1, head_dim)
+    cls_sin = torch.zeros(1, head_dim)
+
+    full_cos = torch.cat([cls_cos, grid_cos], dim=0)  # (N+1, head_dim)
+    full_sin = torch.cat([cls_sin, grid_sin], dim=0)
+    return full_cos, full_sin
+
+
+class MultiHeadSelfAttentionRoPE(nn.Module):
+    """Q/KにRoPEを適用するマルチヘッド自己注意"""
+
+    def __init__(self, d_model, nhead, dropout=0.1):
+        super().__init__()
+        assert d_model % nhead == 0, "d_model は nhead で割り切れる必要があります"
+        self.nhead = nhead
+        self.head_dim = d_model // nhead
+        self.d_model = d_model
+        self.dropout_p = dropout
+
+        self.q_proj = nn.Linear(d_model, d_model)
+        self.k_proj = nn.Linear(d_model, d_model)
+        self.v_proj = nn.Linear(d_model, d_model)
+        self.out_proj = nn.Linear(d_model, d_model)
+
+    def forward(self, x, rope_cos, rope_sin, attn_mask=None):
+        # x: (B, N, d_model)
+        B, N, _ = x.shape
+        q = self.q_proj(x).view(B, N, self.nhead, self.head_dim).transpose(1, 2)  # (B,H,N,Dh)
+        k = self.k_proj(x).view(B, N, self.nhead, self.head_dim).transpose(1, 2)
+        v = self.v_proj(x).view(B, N, self.nhead, self.head_dim).transpose(1, 2)
+
+        cos = rope_cos.unsqueeze(0).unsqueeze(0)  # (1,1,N,Dh) -> ブロードキャスト
+        sin = rope_sin.unsqueeze(0).unsqueeze(0)
+        q = _apply_rope_2d(q, cos, sin)
+        k = _apply_rope_2d(k, cos, sin)
+
+        attn_out = torch.nn.functional.scaled_dot_product_attention(
+            q, k, v, attn_mask=attn_mask,
+            dropout_p=self.dropout_p if self.training else 0.0,
+        )  # (B,H,N,Dh)
+        attn_out = attn_out.transpose(1, 2).contiguous().view(B, N, self.d_model)
+        return self.out_proj(attn_out)
+
+
+class RoPEEncoderLayer(nn.Module):
+    """norm_first構成のTransformerEncoderLayer相当（Attention部分をRoPE版に置換）"""
+
+    def __init__(self, d_model, nhead, dim_feedforward, dropout=0.1):
+        super().__init__()
+        self.self_attn = MultiHeadSelfAttentionRoPE(d_model, nhead, dropout=dropout)
+        self.linear1 = nn.Linear(d_model, dim_feedforward)
+        self.linear2 = nn.Linear(dim_feedforward, d_model)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+        self.activation = nn.GELU()
+
+    def forward(self, x, rope_cos, rope_sin, attn_mask=None):
+        h = self.norm1(x)
+        attn_out = self.self_attn(h, rope_cos, rope_sin, attn_mask=attn_mask)
+        x = x + self.dropout1(attn_out)
+
+        h2 = self.norm2(x)
+        ff = self.linear2(self.dropout(self.activation(self.linear1(h2))))
+        x = x + self.dropout2(ff)
+        return x
+
+
+class RoPETransformerEncoder(nn.Module):
+    def __init__(self, d_model, nhead, dim_feedforward, num_layers, dropout=0.1):
+        super().__init__()
+        self.layers = nn.ModuleList([
+            RoPEEncoderLayer(d_model, nhead, dim_feedforward, dropout=dropout)
+            for _ in range(num_layers)
+        ])
+
+    def forward(self, x, rope_cos, rope_sin, attn_mask=None):
+        for layer in self.layers:
+            x = layer(x, rope_cos, rope_sin, attn_mask=attn_mask)
+        return x
+
+
+# ================================================================
 # 2. Transformer Actor-Critic Network (形状変換の完全防御)
 # ================================================================
 class TransformerActorCritic(nn.Module):
     def __init__(
         self,
-        in_channels=5,   # 変更: ch4=ゴールまでの正規化BFS距離 を追加（MazeEnv側の変更と対応）
+        in_channels=5,   # ch4=ゴールまでの正規化BFS距離（MazeEnv側の変更と対応）
         grid_size=5,
         d_model=64,
         nhead=4,
@@ -137,10 +304,17 @@ class TransformerActorCritic(nn.Module):
         action_dim=4,
         hidden_size=128,
         wall_channel_idx=0,   # obs[0] = 壁マップ (1=壁, 0=通行可)
-        use_wall_mask=False,  # 変更: 既定でOFF。理由は_build_attn_maskのdocstring参照
+        use_wall_mask=False,  # Trueで従来の壁トポロジーmaskを使う（アブレーション用）
+        rope_base=10000.0,    # RoPEの周波数の基数
     ):
         super().__init__()
-        assert d_model % 2 == 0, "d_model は2次元位置エンコーディングのため偶数にしてください"
+
+        head_dim = d_model // nhead
+        assert d_model % nhead == 0, "d_model は nhead で割り切れる必要があります"
+        assert head_dim % 4 == 0, (
+            "2D RoPEを使うには head_dim(=d_model//nhead) が4の倍数である必要があります。"
+            f"現在 d_model={d_model}, nhead={nhead} -> head_dim={head_dim}"
+        )
 
         self.grid_size = grid_size
         self.in_channels = in_channels
@@ -152,14 +326,9 @@ class TransformerActorCritic(nn.Module):
 
         self.embedding = nn.Linear(in_channels, d_model)
 
-        # --- 2次元位置エンコーディング ---
-        # row / col それぞれ d_model/2 次元。concatして d_model 次元にする。
-        half_dim = d_model // 2
-        self.row_embedding = nn.Parameter(torch.randn(grid_size, half_dim) * 0.02)
-        self.col_embedding = nn.Parameter(torch.randn(grid_size, half_dim) * 0.02)
-
-        # CLSトークン用（グリッド外の特別な位置なので独立パラメータ）
-        self.cls_pos_embedding = nn.Parameter(torch.randn(1, 1, d_model) * 0.02)
+        # 変更: 学習可能な絶対位置埋め込み(row_embedding/col_embedding/
+        # cls_pos_embedding)は廃止。位置情報は2D RoPEがAttention内で
+        # 直接扱うため、トークン特徴量に別途加算する必要がなくなった。
         self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
 
         # 事前計算: 各セルindex -> (row_idx, col_idx) の対応をbufferとして保持
@@ -167,17 +336,20 @@ class TransformerActorCritic(nn.Module):
         self.register_buffer("row_idx", row_idx, persistent=False)  # (N,)
         self.register_buffer("col_idx", col_idx, persistent=False)  # (N,)
 
-        encoder_layer = nn.TransformerEncoderLayer(
+        # 追加: 2D RoPEのcos/sinテーブル（CLS分1つ+グリッドN個 = N+1トークン分）
+        # グリッド構造は固定なので、モデル構築時に一度だけ計算しbufferとして保持する。
+        rope_cos, rope_sin = build_2d_rope_tables(grid_size, head_dim, base=rope_base)
+        self.register_buffer("rope_cos", rope_cos, persistent=False)  # (N+1, head_dim)
+        self.register_buffer("rope_sin", rope_sin, persistent=False)
+
+        # 変更: nn.TransformerEncoder(nn.TransformerEncoderLayer) を廃止し、
+        # RoPEをQ/Kに適用できる自前実装のEncoderに置き換える。
+        self.transformer = RoPETransformerEncoder(
             d_model=d_model,
             nhead=nhead,
             dim_feedforward=d_model * 2,
+            num_layers=num_layers,
             dropout=0.1,
-            activation="gelu",
-            batch_first=True,
-            norm_first=True,
-        )
-        self.transformer = nn.TransformerEncoder(
-            encoder_layer, num_layers=num_layers, enable_nested_tensor=False
         )
 
         self.actor_head = nn.Sequential(
@@ -223,16 +395,6 @@ class TransformerActorCritic(nn.Module):
                         pairs_j.append(nr * W + nc)
         return torch.tensor(pairs_i, dtype=torch.long), torch.tensor(pairs_j, dtype=torch.long)
 
-    def _build_2d_pos_embedding(self):
-        """
-        row_embedding[row_idx] と col_embedding[col_idx] をconcatして
-        (1, N, d_model) の位置エンコーディングを作る
-        """
-        row_pe = self.row_embedding[self.row_idx]  # (N, half_dim)
-        col_pe = self.col_embedding[self.col_idx]  # (N, half_dim)
-        pos = torch.cat([row_pe, col_pe], dim=-1)  # (N, d_model)
-        return pos.unsqueeze(0)  # (1, N, d_model)
-
     def _build_attn_mask(self, wall_map, agent_pos_flat, B, device):
         """
         wall_map: (B, H, W)
@@ -252,6 +414,10 @@ class TransformerActorCritic(nn.Module):
         use_wall_mask=True にすると従来通りこのmaskを使う（アブレーション用）。
         使う場合は num_layers を迷路の直径をカバーできる程度まで
         増やすことを推奨（5x5なら num_layers=4〜6程度）。
+
+        戻り値は scaled_dot_product_attention 向けの bool mask
+        （True=attend可, shape (B,1,N+1,N+1)。全headにブロードキャストされる）。
+        nn.MultiheadAttentionの旧APIとは True/False の意味が逆なので注意。
         """
         H = W = self.grid_size
         N = self.num_tokens
@@ -277,9 +443,8 @@ class TransformerActorCritic(nn.Module):
         full_adj[:, 1:, 0] = cls_connectivity
         full_adj[:, 0, 0] = True
 
-        attn_mask = ~full_adj
-        attn_mask = attn_mask.repeat_interleave(self.nhead, dim=0)
-        return attn_mask
+        # scaled_dot_product_attention は True=attend可 の意味なので full_adj をそのまま返す
+        return full_adj.unsqueeze(1)  # (B, 1, N+1, N+1) -> head方向にブロードキャスト
 
     def forward(self, x):
         if x.dim() == 3:
@@ -291,25 +456,20 @@ class TransformerActorCritic(nn.Module):
         wall_map = x[:, self.wall_channel_idx, :, :]  # (B, H, W)  ※permute前に取得
         agent_map = x[:, 3, :, :]  # (B, H, W) エージェント位置チャンネル
         agent_pos_flat = agent_map.reshape(B, -1).argmax(dim=1)  # (B,)
-        x = x.permute(0, 2, 3, 1).contiguous().reshape(B, H * W, C)  # (B, 25, 4)
+        x = x.permute(0, 2, 3, 1).contiguous().reshape(B, H * W, C)  # (B, 25, C)
 
         x = self.embedding(x)  # (B, 25, d_model)
 
-        # --- 2次元位置エンコーディングの加算 ---
-        pos_embedding = self._build_2d_pos_embedding()  # (1, 25, d_model)
-        x = x + pos_embedding
-
-        cls_tokens = self.cls_token.expand(B, -1, -1) + self.cls_pos_embedding
+        # 変更: 絶対位置埋め込みの加算を廃止（2D RoPEに置き換えたため不要）。
+        cls_tokens = self.cls_token.expand(B, -1, -1)
         x = torch.cat((cls_tokens, x), dim=1)  # (B, 26, d_model)
 
-        # 変更: 既定(use_wall_mask=False)ではフルの自己注意を使う。
-        # 壁を挟んだ受容野の制限をなくし、かつobs[4]の距離マップから
-        # グローバルな経路情報を各トークンが直接参照できるようにするため。
         if self.use_wall_mask:
             attn_mask = self._build_attn_mask(wall_map, agent_pos_flat, B, x.device)
-            x = self.transformer(x, mask=attn_mask)
         else:
-            x = self.transformer(x)
+            attn_mask = None
+
+        x = self.transformer(x, self.rope_cos, self.rope_sin, attn_mask=attn_mask)
 
         cls_out = x[:, 0]
         logits = self.actor_head(cls_out)

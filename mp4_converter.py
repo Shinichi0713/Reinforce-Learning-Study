@@ -23,7 +23,7 @@ def mp4_to_gif(input_path, output_path, fps=10):
 if __name__ == "__main__":
     # ファイルの存在を確認してから実行することをお勧めします
     import os
-    path_input = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\11_maze_improvement_v3\agent_maze_solve (4).mp4"
+    path_input = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\agent_maze_solve (5).mp4"
     dir_output = os.path.dirname(path_input)
     filename = os.path.basename(path_input).replace(".mp4", ".gif")
     path_output = os.path.join(dir_output, filename)

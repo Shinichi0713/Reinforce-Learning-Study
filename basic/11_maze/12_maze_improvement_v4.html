@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x73fe;&#x72b6;&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日は毎週恒例の迷路解決の強化学習についてです。</p>
+<p>前回の実装では以下に取り組みました。</p>
+<ul>
+<li>モデルのパラメータ見直し(モデルのレイヤ数を増加)</li>
+<li>強化学習の問題を統計を取り、不得手な問題を集中的に解かせる。</li>
+</ul>
+<p>目指しているのは安定的に、スラスラ問題を解くことだったのですが、まだそういう状態になっていません。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>強化学習モデルの見直しを行い、改善するか確認する。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="現状課題">現状課題</h2>
+<p>ゴール前でうろうろするが一番気になっているポイントでした。
+その他、ゴールが壁に囲まれる場合にゴールできなくなることがありました。</p>
+<h2 id="改善案と対策">改善案と対策</h2>
+<h3 id="1-距離感が正確につかめていない">1. 距離感が正確につかめていない</h3>
+<p>現在、今のモデルは学習可能な絶対位置埋め込み（25マスそれぞれに個別のベクトルを学習）です。
+以前紹介した<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/27/043000">位置エンコーディングの記事</a>でも触れましたが2Dの絶対位置埋め込みは2DのRoPEに比べて距離の埋め込みが分かりづらい状態にあります。</p>
+<p>レアな配置であるゴールが壁に囲まれるようなケースでは、エージェントからすると見たことがない、というケースになりやすいと思います。
+「壁が右にある」という関係性をマスごとに独立して学習し直す必要があり、特にサンプル数が少ないレアな配置（ゴールが壁で囲まれているケースなど）では学習効率が悪い可能性があります。2D RoPEは相対位置関係をAttentionの計算そのものに組み込むため、この点は改善が見込めます。</p>
+<p>一点補足すると、この症状には「そもそもゴールが壁でほぼ囲まれる配置が生成頻度として少なく学習データが薄い」「終盤でもエントロピーが残っていて同じ場所で右往左往する」といった別要因も併存している可能性がありますが、2D RoPEへの変更自体は理にかなっており、副作用も少ないので実装します。</p>
+<h3 id="2-うろうろ">2. うろうろ</h3>
+<p>同じようなシチュエーションを見た場合に行ったり来たりということがあります。
+状況としては、過去見たことあるが、どっちが良かったか分からないというシチュエーションです。</p>
+<p>このシチュエーションですが、こと迷路という話で言うと全く意味がありません。探索した同じ場所に来るということで状況が改善する可能性がゼロだからです。
+そして、同じ場所をうろうろすることに対してペナルティを与えていませんでした。やってほしい行動ではありませんが、やっても良いというように認識することになります。</p>
+<p>行ったり来たりという状況に対してペナルティを与えるようにしていきます。</p>
+<h2 id="実装法">実装法</h2>
+<h3 id="1-2d-ropeの実装方法">1. 2D RoPEの実装方法</h3>
+<p><strong>基本のアイデア</strong></p>
+<p>通常のAttentionでは、「このマスとあのマスが近いか遠いか」を教えるために、各マスに専用の&quot;住所ラベル&quot;（位置埋め込み）を貼り付けて、それを特徴量に<strong>足し算</strong>していました。</p>
+<p>2D RoPEはこれとは全く違うアプローチを取ります。位置情報を足し算するのではなく、<strong>QとK（Attentionで「似ているか」を測る2つのベクトル）そのものを、位置に応じて回転させる</strong>という方法です。</p>
+<p><strong>なぜ「回転」なのか</strong></p>
+<p>2次元ベクトルを角度θだけ回転させる操作には、面白い性質があります。ベクトルAをθ_A回転させたものと、ベクトルBをθ_B回転させたものの内積（≒似ている度合い）は、<strong>θ_Aとθ_Bの&quot;差&quot;だけ</strong>で決まります。絶対的な角度がいくつであろうと関係ありません。</p>
+<p>これをマスの座標に応用します。「行番号・列番号」を回転角度として使うと：</p>
+<ul>
+<li>クエリ側のマス（今いる場所）のベクトルを、そのマスの座標に応じて回転</li>
+<li>キー側のマス（比較対象）のベクトルを、そのマスの座標に応じて回転</li>
+<li>2つの内積を取ると、<strong>「2マスの座標の差」＝相対位置だけに依存する値</strong>になる</li>
+</ul>
+<p>つまり「(1,1)から見て(2,3)」も「(0,0)から見て(1,2)」も、相対的な位置関係(+1,+2)が同じなら、Attentionの計算結果が完全に一致します。これが前回の単体テストで確認した性質です。</p>
+<p><strong>具体的な実装のポイント</strong></p>
+<p><strong>① 行用と列用にhead_dimを半分ずつ割り当てる</strong></p>
+<p>5×5の迷路は2次元なので、回転角度も「行方向」と「列方向」の2種類必要です。1つのベクトル（head_dim次元）を前半・後半に分割し、</p>
+<ul>
+<li>前半：行番号を使って回転</li>
+<li>後半：列番号を使って回転</li>
+</ul>
+<p>とすることで、1本のベクトルに縦・横両方の位置情報を独立に埋め込みます。</p>
+<p><strong>② CLSトークンは「回転なし」</strong></p>
+<p>CLSトークンは特定のマスに対応しないので、座標を持ちません。そこで**回転角度0（＝何も回転させない）**として扱いました。これは「CLSは迷路のどこにも属さない特別な観測者」という位置づけとして自然な設計です。</p>
+<p><strong>③ nn.TransformerEncoderLayerが使えないので自作</strong></p>
+<p>PyTorchの標準Transformer層はRoPEに対応していないため、QueryとKeyを射影した直後に回転を挟む、独自のAttention層を実装しました。全体の骨組み（LayerNorm→Attention→残差→LayerNorm→FFN→残差、というnorm_first構成）は元の設計をそのまま踏襲し、Attention部分だけを差し替えています。</p>
+<p><strong>④ 事前計算しておく</strong></p>
+<p>5×5という盤面サイズは固定なので、「行r・列cのマスにはこの回転角度」という対応表は、モデル構築時に一度だけ計算してbufferとして保持しています（毎回計算し直す必要がない）。</p>
+<h3 id="2-出戻りペナルティの実装のポイント">2. 出戻りペナルティの実装のポイント</h3>
+<p><strong>何が問題だったか</strong></p>
+<p><code>deterministic=True</code>（greedy）で評価すると、確率的サンプリングより成功率が<strong>低くなる</strong>という逆転現象が見つかりました。これは、方策が特定の2マスの間を<strong>永遠に行ったり来たりする決定的なループ</strong>にハマっていることを示していました。確率的サンプリングは「たまたま」そのループから逸脱して抜け出せることがありますが、greedyは毎回同じ判断をするので、一度ループに入ると絶対に抜け出せません。</p>
+<p><strong>なぜ既存の報酬だけでは不十分だったか</strong></p>
+<p>すでに「ゴールに近づいたら+0.25」「遠ざかったら-0.30」という報酬がありましたが、これは<strong>方向</strong>にしか注目していません。「さっきいた場所に<strong>戻ってきた</strong>」という事実そのものには、何のペナルティも課していませんでした。</p>
+<p>拮抗した局面（ゴールがほぼ壁で囲まれていて、正しい進入路がギリギリ有利、というくらいの差しかない場面）では、この「方向だけの評価」では往復を明確に損だと教えきれず、モデルが「行って戻る」を安全策として選び続けてしまう余地が残っていた、というのが実装上のポイントです。</p>
+<p><strong>実装のポイント</strong></p>
+<p><strong>① 「直近何手訪れたか」を直接見る</strong></p>
+<p><code>self.history</code>（これまで訪れたマスの履歴）の直近<code>revisit_window</code>(=6)手を見て、今から移動しようとしているマスが、その中に<strong>すでに含まれているか</strong>を判定します。座標の差ではなく、「最近そこにいたかどうか」という<strong>時間的な情報</strong>を直接使っているのがポイントです。</p>
+<pre><code class="language-python"><span class="hljs-keyword">if</span> next_state <span class="hljs-keyword">in</span> self.history[-self.revisit_window:]:
+    step_reward += self.revisit_penalty
+</code></pre>
+<p><strong>② 既存の報酬に「上乗せ」する形にした</strong></p>
+<p>進む/戻るの方向判定（progress/regress）を置き換えるのではなく、それに<strong>追加で</strong>ペナルティを足す設計にしました。これにより、単純な1往復（2手）だけでなく、3マスや4マスを使った少し複雑な巡回ループも、巡回の中に「以前いたマスへの復帰」が含まれる限り検出して罰することができます。</p>
+<p><strong>③ ウィンドウ幅にすこし余裕を持たせた</strong></p>
+<p>「直前の1手だけ」ではなく6手分見ているのは、単純な1往復だけでなく、もう少し長い周期のループ（A→B→C→A→B→C…のような3マス巡回など）も拾えるようにするためです。</p>
+<p><strong>④ 結果として何が変わったか</strong></p>
+<p>単体テストで確認した通り、往復ループの合計収支が、修正前の「1往復あたり実質+0.05（得）」から、修正後は「1往復あたり実質-0.30〜-0.60（明確な損）」に変わりました。方策が往復を選ぶ理由がなくなるよう、報酬の勾配そのものを変えた、というのがこの修正の本質です。</p>
+<h2 id="学習">学習</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>今回のコードで学習した推移を示します。
+前回記事で苦手な迷路を集中的に解かせるようにしているので、右肩上がりということは期待しづらくなっています。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\1786334418892.png" alt="1786334418892"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\1786334437171.png" alt="1786334437171"></p>
+<p>また、苦手を保持するプールに対しても内容確認しました。
+苦手としてものにバラつきがある場合、極端に苦手な迷路が存在するということになります。
+現在は成功確率の分散÷平均で見ています。
+目安は0.2付近程度であれば、安定していると設定しています。</p>
+<pre><code>[全エピソード]
+  ウィンドウ数: 40
+  各ウィンドウの成功率: ['72%', '62%', '58%', '26%', '40%', '62%', '68%', '56%', '60%', '68%', '66%', '60%', '48%', '52%', '76%', '54%', '56%', '38%', '44%', '46%', '52%', '52%', '44%', '44%', '62%', '50%', '34%', '74%', '72%', '78%', '64%', '78%', '88%', '96%', '96%', '80%', '88%', '76%', '76%', '76%']
+  平均成功率: 62.3%
+  標準偏差: 0.167
+  変動係数(std/mean): 0.27  (目安: 0.2以下なら概ね安定、0.4以上ならまだ不安定)
+
+[後半エピソードのみ（収束後の安定性の目安）]
+  ウィンドウ数: 20
+  各ウィンドウの成功率: ['52%', '52%', '44%', '44%', '62%', '50%', '34%', '74%', '72%', '78%', '64%', '78%', '88%', '96%', '96%', '80%', '88%', '76%', '76%', '76%']
+  平均成功率: 69.0%
+  標準偏差: 0.180
+  変動係数(std/mean): 0.26  (目安: 0.2以下なら概ね安定、0.4以上ならまだ不安定)
+</code></pre>
+<h3 id="学習したエージェントの行動">学習したエージェントの行動</h3>
+<p>今回のコードで学習したエージェント動作の動画です。
+まだ、ちょっとふらりとします。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\agent_maze_solve (2).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\agent_maze_solve (4).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\agent_maze_solve (5).gif">
+<p>ゴールがあったとして、壁によって回り込みが必要な場合に方向だけではダメで、経路のプランニングが必要となるのでしょうが、現在のTransformerのままでは解決が難しいのかもしれません。</p>
+<h3 id="今回モデルで困難となっている原因について考察">今回モデルで困難となっている原因について考察</h3>
+<p>何度やってもダメだったので、大きな方針転換が必要となってきていると感じています。
+今回の問題で解くに正解率が低いと感じたのはゴール前に壁があるようなケースでした。つまりゴールまでの何もない場合の最短距離が正解でないこと。</p>
+<p>この問題の核心は、<strong>「状態空間での幾何学的な最短経路（迂回）」と「系列空間でのAttentionの依存関係」の間に強い不整合が生じる点</strong>にあります。</p>
+<p>Transformerなどの系列モデリング手法が「壁を迂回するために一時的にゴールから遠ざかる行動」を学習する際の難しさを、さらに解像度を上げて<strong>4つの技術的メカニズム</strong>に分解して分析します。</p>
+<p><strong>1. Return-to-Go (RTG) 条件付けの曖昧性とローカルオプティマ</strong></p>
+<p>Transformerは「これから得る予定の累積報酬（Return-to-Go: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>R</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{R}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）」を条件として入力し、行動を予測します。</p>
+<ul>
+<li><strong>高報酬データのコンテキスト認識:</strong>
+ゴールに到達したエキスパート軌跡において、迂回中のあるステップ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> での <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>R</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{R}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>（例: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>+</mo><mn>18.0</mn></mrow><annotation encoding="application/x-tex">+18.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">+</span><span class="mord">18.0</span></span></span></span>）は高く維持されています。しかし、その瞬間の局所的な状態（State）だけを見ると、「ゴールと逆方向を向いている」「マンハッタン距離が増加している」という特徴を示します。</li>
+<li><strong>ショートコンテキスト（短い文脈ウィンドウ）時の崩壊:</strong>
+コンテキスト長 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> が短い場合、モデルは「なぜ高報酬 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>R</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{R}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> が指定されているのに、状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">s_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> はゴールから遠ざかっているのか」を過去の軌跡（壁の存在を認識した過去のステップ）から参照できません。</li>
+<li><strong>結果:</strong>
+モデルは「高報酬を得るならゴールに一直線に向かうべきだ」というデータ全体の強い事前分布（Prior）に引きずられ、壁に突っ込む行動を選択するか、または高報酬条件（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>R</mi><mo>^</mo></mover><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\hat{R}_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0968em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9468em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span><span style="top:-3.2523em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1667em;"><span class="mord">^</span></span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）と矛盾する行動を出力して挙動が不安定化します。</li>
+</ul>
+<p><strong>2. 馬の背（Saddle Point）状態でのアテンションの霧散と方角の逆流</strong></p>
+<p>迂回行動の起点（「そのまま進むと行き止まりなので、反転・直行して横に逸れる」と決断するポイント）では、ゴールへの幾何学的距離（ユークリッド距離/マンハッタン距離）が局所的に極大値（悪化）を取ります。</p>
+<ul>
+<li><strong>状態表現の勾配:</strong>
+通常のゴール指向タスクでは、状態表現 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">s_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> からゴールへの距離の減少が行動選択の強力なバイアス（勾配）になります。しかし迂回地点では、<strong>「最適な行動（迂回）」が「距離を悪化させる行動」と完全に一致</strong>します。</li>
+<li><strong>Attentionの分散:</strong>
+この「局所的悪化」を正当化するためには、「過去に壁の存在を確認したトークン（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>s</mi><mrow><mi>t</mi><mo>−</mo><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">s_{t-m}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">m</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span>）」に対して強固なAttentionを向ける必要があります。
+しかし、探索中の軌跡には「壁に沿ってうろうろした無駄なステップ」なども混ざるため、キー・クエリ（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">QK^T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0358em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">Q</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span></span></span></span>）の内積計算において、真に必要な「壁の端点・障害物の位置」にピンポイントでAttentionの重みを集中させることが困難になります（アテンションの霧散）。</li>
+</ul>
+<p><strong>3. Markov性とNon-Markov性のジレンマ（Markovian Fallacy）</strong></p>
+<p>迷路構造自体は完全観測であればマルコフ決定過程（MDP）ですが、<strong>「迂回」という計画・意図は系列上で強力な非マルコフ性（Long-range Dependency）を帯びます</strong>。</p>
+<ul>
+<li>
+<p><strong>状態の重複とポリシーの混同:</strong>
+迷路内の同じ座標 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span>（例えば分岐点）にいる時：</p>
+</li>
+<li>
+<p><strong>パターンA（直進経路）</strong>: 前方に壁がないのでそのまま進む。</p>
+</li>
+<li>
+<p><strong>パターンB（迂回経路）</strong>: 前方の奥に壁があることを過去に知っているため、あえて曲がる。</p>
+</li>
+<li>
+<p><strong>系列長不足による状態の退廃:</strong>
+コンテキストが短く、過去に壁を見たという履歴がウィンドウ外に押し出されると、モデルから見て「パターンA」と「パターンB」の区分がつかなくなります（同一の状態 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span> として潰れる）。
+結果として、DTは両者の行動を平均化したような曖昧な確率分布を出力し、壁の周りを往復・旋回するデッドロック（Stuck）に陥ります。</p>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\1786335771407.png" alt="1786335771407"></p>
+<h2 id="総括">総括</h2>
+<p>今回の取り組みと結果を、できるだけ簡潔にまとめると以下のようになります。</p>
+<h3 id="1-今回の改善内容何を変えたか">1. 今回の改善内容（何を変えたか）</h3>
+<p><strong>2D RoPEの導入</strong></p>
+<ul>
+<li>従来：各マスに学習可能な絶対位置埋め込み（Learned APE）を加算。</li>
+<li>今回：Query/Keyベクトルを「行・列の座標に応じて回転」させる <strong>2D RoPE</strong> を実装。
+<ul>
+<li>これにより、Attention計算で**相対位置（マス間の距離・方向）**が自動的に抽出される。</li>
+</ul>
+</li>
+</ul>
+<p><strong>出戻りペナルティの追加</strong></p>
+<ul>
+<li>これまで：ゴールに近づく/遠ざかる方向のみを報酬で評価。</li>
+<li>今回：<strong>直近6手以内に訪れたマスに戻る行動</strong>に明示的なペナルティを追加。
+<ul>
+<li>往復ループの合計報酬を「得」から「明確な損」に変える設計。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-結果として何が起きたか">2. 結果として何が起きたか</h3>
+<p><strong>エージェントの挙動</strong></p>
+<ul>
+<li>以前よりは安定したが、<strong>依然としてゴール前でうろうろする</strong>。</li>
+<li>特に「ゴールが壁に囲まれ、回り込みが必要な迷路」で苦戦。</li>
+<li>2D RoPEと出戻りペナルティだけでは、<strong>「壁を迂回する計画」を安定して立てる段階には至っていない</strong>。</li>
+</ul>
+<h3 id="3-なぜまだうまくいっていないのか">3. なぜまだうまくいっていないのか</h3>
+<p>考察で示した通り、<strong>Transformerベースの強化学習が「壁を迂回する」という非マルコフ的な計画を安定して学習するのは本質的に難しい</strong>、という構造的な問題が残っています。</p>
+<p>主な要因は以下の4点です。</p>
+<ol>
+<li>
+<p><strong>Return-to-Go（RTG）条件付けの曖昧性</strong></p>
+<ul>
+<li>迂回中は「ゴールから遠ざかる」のに「RTGは高い」という矛盾が生じ、<br>
+短いコンテキストではモデルが「なぜ高報酬なのに遠ざかるのか」を理解できない。</li>
+</ul>
+</li>
+<li>
+<p><strong>Attentionの霧散と局所最適の罠</strong></p>
+<ul>
+<li>迂回地点では「最適行動＝距離を悪化させる行動」となるが、<br>
+Attentionが過去の壁情報に集中しきれず、局所的に「ゴールに近づく」行動を選びがち。</li>
+</ul>
+</li>
+<li>
+<p><strong>Markov性とNon-Markov性のジレンマ</strong></p>
+<ul>
+<li>迷路自体はMDPだが、「迂回」という意図は長距離依存（Non-Markov）。</li>
+<li>コンテキストが短いと「過去に壁を見たかどうか」の履歴が失われ、<br>
+同じ座標でも「直進すべきか」「迂回すべきか」が混同される。</li>
+</ul>
+</li>
+<li>
+<p><strong>状態空間の幾何学と系列空間のAttentionの不整合</strong></p>
+<ul>
+<li>幾何学的には「一度遠ざかってから回り込む」のが正解だが、<br>
+Transformerは「直近の状態列」からしか情報を取れないため、<br>
+長期的な迂回計画を安定して立てるのが難しい。</li>
+</ul>
+</li>
+</ol>
+<h3 id="4-結論">4. 結論</h3>
+<ul>
+<li><strong>2D RoPE</strong>と<strong>出戻りペナルティ</strong>は、
+<ul>
+<li>位置表現の精度向上</li>
+<li>明らかに無駄な往復行動の抑制<br>
+という点では理にかなった改善であり、副作用も少ない。</li>
+</ul>
+</li>
+<li>しかし、<strong>「壁を迂回する」という長期的な計画を安定して学習する</strong>には、
+<ul>
+<li>コンテキスト長の拡大</li>
+<li>RTG設計の見直し</li>
+<li>あるいはTransformer以外のアーキテクチャ（計画専用モジュールの追加など）<br>
+といった、より根本的な方針転換が必要な段階に来ている、というのが今回の結論です。</li>
+</ul>
+</li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/20S3gDn6rYI?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
