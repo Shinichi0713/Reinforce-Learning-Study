@@ -6,6 +6,8 @@
 「グラフ理論と線形代数する」とは、**グラフの構造を行列やベクトルで表現し、線形代数の手法を使って解析・計算すること**を指します。  
 グラフは「点と線」の幾何的なイメージですが、**行列として表すことで、計算機で扱いやすくなり、多くの数学的性質が明らかになります。**
 
+グラフ理論に線形代数を用いるステップについては以下のようなイメージとなります。
+
 ### 1. グラフを行列で表す
 
 __(1) 隣接行列（Adjacency Matrix）__
@@ -40,6 +42,9 @@ __(3) 線形方程式・最適化__
 - 最小二乗法や最適化手法を使って、グラフ上の問題を解くことができます。
 
 ### 3. ニューラルネットワークとの関連
+
+本章で扱うのは前項までです。
+ですがニューラルネットワークに線形代数を用いたグラフの表現を活用する用途があります。
 
 ニューラルネットワーク、特にGNN（グラフニューラルネットワーク）では、**グラフを行列として扱い、線形代数の操作で特徴を変換する**ことが基本です。
 
@@ -184,6 +189,12 @@ $$
 - 対角成分は 0（自己ループなし）
 - 対称行列（無向グラフ）
 
+上記隣接行列を可視化すると以下の絵のようになります。
+
+
+<img src="image/2_linear_graph/1786352718410.png" width="400px" style="display: block; margin: 0 auto;">
+
+
 __例2：有向グラフ__
 
 頂点1→2, 2→3, 3→1 の有向辺があるとします。
@@ -200,6 +211,8 @@ $$
 - 非対称（有向グラフ）
 - 各行の1の数が「出次数」、各列の1の数が「入次数」に対応します。
 
+<img src="image/2_linear_graph/1786352865285.png" width="400px" style="display: block; margin: 0 auto;">
+
 ### 3. 隣接行列の性質と使い道
 
 __(1) パス長の計算__
@@ -209,6 +222,161 @@ __(1) パス長の計算__
 - $A^2$：長さ2のパスの数
 - $A^3$：長さ3のパスの数
 - これにより、**到達可能性**や**最短経路の長さ**を調べるのに使えます。
+
+__例題:__
+
+(1)は結構面白い性質だと思います。
+
+隣接行列 $A$ の $k$ 乗 $A^k$ の $(i, j)$ 成分が「頂点 $i$ から頂点 $j$ への長さ $k$ のパスの総数」に一致することを、数値計算と経路検索で直接照合して確認できるPythonコードを作成しました。
+
+有向サイクルグラフ（1 $\to$ 2 $\to$ 3 $\to$ 1）に分岐（1 $\to$ 3）を1本追加したグラフで確認してみます。
+
+__1. 例題グラフ構造__
+
+ノード数を 3 とし、エッジを以下のように設定します。
+
+* **1 $\to$ 2**
+* **1 $\to$ 3** （分岐を追加）
+* **2 $\to$ 3**
+* **3 $\to$ 1**
+
+このとき、隣接行列 $A$ は以下のようになります。
+
+$$A = \begin{bmatrix} 0 & 1 & 1 \\ 0 & 0 & 1 \\ 1 & 0 & 0 \end{bmatrix}$$
+
+<img src="image/2_linear_graph/image.png" width="300px" style="display: block; margin: 0 auto;">
+
+
+__2. 確認用Pythonコード__
+
+`numpy` による行列の累乗計算（`A^k`）と、`networkx` で実際にすべての長さ $k$ のパスを全探索して得た「本数」を比較・検証します。
+
+```python
+import networkx as nx
+import numpy as np
+
+# 1. 隣接行列 A の定義
+A = np.array([[0, 1, 1], [0, 0, 1], [1, 0, 0]])
+
+# 2. NetworkX で有向グラフを構築 (0-indexed: 0, 1, 2)
+G = nx.from_numpy_array(A, create_using=nx.DiGraph)
+
+def count_paths_of_length_k(G, source, target, k):
+    """NetworkXで頂点 source から target への長さ k の全パスの数をカウント"""
+
+    def dfs(current_node, current_length):
+        # 長さが k に達したら探索終了
+        if current_length == k:
+            return 1 if current_node == target else 0
+
+        # 万が一 k を超えた場合は 0 を返して打ち切り
+        if current_length > k:
+            return 0
+
+        path_count = 0
+        for neighbor in G.successors(current_node):
+            path_count += dfs(neighbor, current_length + 1)
+        return path_count
+
+    return dfs(source, 0)
+
+
+# 3. k = 1, 2, 3, 4 で行列の累乗と全探索結果を比較検証
+num_nodes = A.shape[0]
+
+for k in range(1, 5):
+    # (A) 行列演算: A^k を計算
+    A_k = np.linalg.matrix_power(A, k)
+
+    # (B) グラフ構造からの実測パス数を格納する行列を作成
+    path_counts_dfs = np.zeros((num_nodes, num_nodes), dtype=int)
+    for i in range(num_nodes):
+        for j in range(num_nodes):
+            path_counts_dfs[i, j] = count_paths_of_length_k(G, i, j, k)
+
+    print(f"=== 長さ k = {k} のパス数比較 ===")
+    print(f"行列の累乗 A^{k}:\n{A_k}")
+
+    # (A) と (B) が完全一致するか検証
+    is_equal = np.array_equal(A_k, path_counts_dfs)
+    print(f"全探索で求めたパス数と一致するか?: {is_equal}\n")
+
+
+# 4. 長さ k = 3 における具体的経路の列挙例 (1 -> 3)
+# 1 (index 0) から 3 (index 2) への長さ 3 の経路
+print("--- [具体例] 1(N0) から 3(N2) への長さ 3 のパス一覧 ---")
+
+
+def find_all_paths_of_length_k(G, current, target, k, current_path):
+    if len(current_path) - 1 == k:
+        if current == target:
+            print(" -> ".join([f"ノード{n+1}" for n in current_path]))
+        return
+
+    for neighbor in G.successors(current):
+        find_all_paths_of_length_k(
+            G, neighbor, target, k, current_path + [neighbor]
+        )
+
+
+find_all_paths_of_length_k(G, 0, 2, 3, [0])
+```
+
+__3. コードの解説__
+
+* **`np.linalg.matrix_power(A, k)`**:
+* 隣接行列 $A$ を $k$ 回掛け合わせた行列 $A^k$ を計算します。
+
+
+* **`count_paths_of_length_k`**:
+* グラフ構造を深さ優先探索（DFS）で辿り、実際に「長さ $k$ のパスが何本存在するか」を全探索して数え上げます。
+
+
+* **結果の一致確認 (`np.array_equal`)**:
+* $k = 1, 2, 3, 4$ のすべてのケースで、行列の累乗結果 $A^k$ と DFS による実測カウント結果が完全一致（`True`）します。
+
+__出力結果__
+
+コードを実行すると、以下の 2つのパート がコンソールに出力されます。
+1. 長さ $k = 1, 2, 3, 4$ における「行列の累乗 $A^k$」と「DFS全探索による実測パス数」の比較検証
+2. 長さ $k = 3$ において、ノード1からノード3へ到達する具体例（パスの経路）の一覧
+
+1の結果はすべて塁乗とDFSの結果が一致することが確認されます。
+2のパスについても確認できます。
+
+```
+=== 長さ k = 1 のパス数比較 ===
+行列の累乗 A^1:
+[[0 1 1]
+ [0 0 1]
+ [1 0 0]]
+全探索で求めたパス数と一致するか?: True
+
+=== 長さ k = 2 のパス数比較 ===
+行列の累乗 A^2:
+[[1 0 1]
+ [1 0 0]
+ [0 1 1]]
+全探索で求めたパス数と一致するか?: True
+
+=== 長さ k = 3 のパス数比較 ===
+行列の累乗 A^3:
+[[1 1 1]
+ [0 1 1]
+ [1 0 1]]
+全探索で求めたパス数と一致するか?: True
+
+=== 長さ k = 4 のパス数比較 ===
+行列の累乗 A^4:
+[[1 1 2]
+ [1 0 1]
+ [1 1 1]]
+全探索で求めたパス数と一致するか?: True
+
+--- [具体例] 1(N0) から 3(N2) への長さ 3 のパス一覧 ---
+ノード1 -> ノード3 -> ノード1 -> ノード3
+```
+
 
 __(2) 次数の計算__
 
@@ -244,7 +412,7 @@ __(4) コンピュータでの扱いやすさ__
 
 __例題:__
 
-隣接行列（Adjacency Matrix）の概念を直感的に理解するための例題を作成しました。
+隣接行列の概念を直感的に理解するための例題を作成しました。
 
 __SNSの「フォロー関係」を隣接行列で表現__
 
@@ -363,7 +531,11 @@ __出力結果__
  [0 0 0 0]]
 ```
 
-<img src="image/2_linear_graph/1785271993635.png" width="500px" style="display: block; margin: 0 auto;">
+今回問題のグラフは以下のものです。
+例えば、$M^2$ の結果から確認される長さ2のA→Cのパスがあることが確認出来ます(A→B→C)。
+
+<img src="image/2_linear_graph/1786355117871.png" width="350px" style="display: block; margin: 0 auto;">
+
 
 
 ## 次数行列
@@ -450,7 +622,12 @@ __(1) ラプラシアン行列の構成__
   $$
   など、次数行列で正規化します。
 
-ラプラシアンは、グラフの**連結性**、**スペクトルクラスタリング**、**拡散過程**などに使われます。
+
+
+グラフラプラシアン（Graph Laplacian）は、一言で言うと「グラフ上での **『変化の滑らかさ』** や **『流れにくさ』** を測る微分演算子」です。
+
+物理の世界のラプラシアン（$\nabla^2$）が連続空間における**熱の拡散や波の伝播**を表すように、グラフラプラシアンは**ノードからノードへ情報やエネルギーがどう伝わるか**を記述します。
+
 
 __(2) 正規化（ノーマライゼーション）__
 
@@ -610,7 +787,7 @@ __出力結果__
  [ 0. -1.  0.  1.]]
 ```
 
-<img src="image/2_linear_graph/1785272725048.png" width="500px" style="display: block; margin: 0 auto;">
+<img src="image/2_linear_graph/1785272725048.png" width="300px" style="display: block; margin: 0 auto;">
 
 ## ラプラシアン行列
 
