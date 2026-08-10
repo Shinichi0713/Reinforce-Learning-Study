@@ -37,6 +37,7 @@ def train(
         num_agents=num_agents, obs_dim=obs_dim, action_dim=action_dim,
         lr=lr, gamma=gamma, gae_lambda=gae_lambda,
         clip_epsilon=clip_epsilon, value_coef=value_coef, entropy_coef=entropy_coef,
+        order_mode="priority",   # 🌟 忘れずに指定
         device=device,
     )
 
@@ -87,7 +88,8 @@ def train(
             joint_obs = joint_obs_flat.reshape(num_agents, obs_dim)
 
             # MATで8体分の行動を自己回帰的に一括デコード (サンプリング, 学習モード)
-            actions, log_probs, values = mat_ppo.get_action(joint_obs, greedy=False)
+            priority_scores = wrapper.compute_priority_scores()
+            actions, log_probs, values, order = mat_ppo.get_action(joint_obs, priority_scores=priority_scores, greedy=False)
             # print(actions)
 
             step_rewards = np.zeros(num_agents, dtype=np.float32)
@@ -101,8 +103,9 @@ def train(
                 step_rewards[i] = reward
                 step_dones[i] = float(terminated or truncated)
                 episode_captures += count_capture
-
-            buffer.add(joint_obs, actions, log_probs, values, step_rewards, step_dones)
+            # rollout_buffer.push(obs=joint_obs, action=action, log_prob=log_prob,
+            #          value=value, order=order, reward=reward, done=done)
+            buffer.add(joint_obs, actions, log_probs, values, step_rewards, step_dones, order=order)
             episode_reward += step_rewards
 
             # エピソード終了判定 (Pursuitはチーム全員が同時に終了する)
@@ -126,7 +129,7 @@ def train(
         joint_obs = joint_obs_flat.reshape(num_agents, obs_dim)
         # greedy=True: ブートストラップ用のValue推定なので行動のサンプリングは不要だが
         # get_action の実装上、Valueは行動デコードと同時に得られるためこの呼び方でよい
-        _, _, last_values = mat_ppo.get_action(joint_obs, greedy=False)
+        _, _, last_values, order_last = mat_ppo.get_action(joint_obs, priority_scores=priority_scores, greedy=False)
         last_dones = np.zeros(num_agents, dtype=np.float32)  # バッファ終端は通常「継続中」
 
         buffer.compute_returns_and_advantages(last_values, last_dones)

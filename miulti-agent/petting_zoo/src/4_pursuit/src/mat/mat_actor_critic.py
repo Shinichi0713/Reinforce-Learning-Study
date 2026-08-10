@@ -95,7 +95,7 @@ class GatedCrossAttention(nn.Module):
         gated_out = sdpa_out * gate_scores
         gated_out = gated_out.transpose(1, 2).contiguous().view(B, T, self.d_model)
         return self.out_proj(gated_out), attn_probs
-        
+
 class GatedMultiheadAttention(nn.Module):
     """
     "Gated Attention for Large Language Models" に基づく
