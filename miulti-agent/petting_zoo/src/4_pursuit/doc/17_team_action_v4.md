@@ -87,14 +87,16 @@ __対策__
 
 
 ## 実装
-以下の2点を実装します。
+上記節で検討した対策案を実施するため、以下の2点を実装します。
 
 1. **停滞ペナルティの抜け穴を撤廃**: 「4人ちょうど視界内にいれば免除」という条件をなくし、周囲に敵がいない時に動かなければ常に罰する
 2. **索敵中のチーム単位の接近報酬**: 局所観測内には敵が見えなくても、環境の実座標（`raw_env`）を使って「最寄りの未捕獲preyまでの距離」を計算し、それが縮まった上で**チームの一定数以上が同時に接近**した場合にボーナスを与える
 
 局所観測だけでは「敵の方向」が分からないため、報酬計算にはグローバル情報（`raw_env`）を使います。これは観測（エージェントに見せる入力）を変えるわけではなく、あくまで報酬シェーピングのための特権情報利用なので、CTDE（中央集権的学習）の枠組みでは一般的な手法です。
 
-### 変更箇所1. `__init__` に状態追跡用の変数とパラメータを追加
+### 変更箇所
+
+__変更箇所1. `__init__` に状態追跡用の変数とパラメータを追加__
 
 ```python
 def __init__(self, render_mode=None, max_cycles=500, obs_range=7):
@@ -112,7 +114,7 @@ def __init__(self, render_mode=None, max_cycles=500, obs_range=7):
     self._search_team_bonus_given_cycle = -1
 ```
 
-### 変更箇所2. `reset()` に初期化を追加
+__変更箇所2. `reset()` に初期化を追加__
 
 ```python
 def reset(self):
@@ -130,7 +132,7 @@ def reset(self):
     self._search_team_bonus_given_cycle = -1
 ```
 
-### 変更箇所3. グローバル距離を計算するヘルパーを追加
+__変更箇所3. グローバル距離を計算するヘルパーを追加__
 
 前回実装した `compute_priority_scores` とほぼ同じロジックですが、単一エージェント用に切り出します。既存の `compute_priority_scores` があるなら、内部でこちらを呼び出す形に統一しても構いません。
 
@@ -161,7 +163,7 @@ def _compute_global_min_dist_to_evader(self, agent) -> float | None:
     return min(abs(ay - py) + abs(ax - px) for py, px in evader_positions)
 ```
 
-### 変更箇所4. `step()` の索敵フェーズ部分を修正
+__変更箇所4. `step()` の索敵フェーズ部分を修正__
 
 該当箇所（`if current_min_dist is None:` のブロック）を以下に差し替えてください。
 
