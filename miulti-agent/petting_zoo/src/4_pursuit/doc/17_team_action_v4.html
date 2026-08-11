@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;&#x306e;&#x6574;&#x7406;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日はチーム連携の強化学習を行って捕獲を行っていくPursuitのトライアルについてです。
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/22/043000">前回</a>改修で以下を課題として、改修を行いました。</p>
+<ul>
+<li>Cross-Attentionのゲートが「クエリ（自分自身）」だけから計算されている</li>
+<li>チーム全体の同時クリッピングが、遅れているエージェントの学習を妨げる可能性</li>
+</ul>
+<p>ですが劇的before &amp; afterとはなりませんでした。
+現状でチーム連携は出来ているのですが、一角を捕獲し尽すと停滞してしまう傾向がありました。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>味方集結して、捕獲しつくした後にすぐに切り替え出来るようにする</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題の整理">課題の整理</h2>
+<p>開始直後には問題ありません。味方を目指して一角に集結する動作を行います。
+そして、その後のチーム連携の動作も問題ありません。</p>
+<p>課題となっているのは、一角の敵をとりつくした後も、チームで一角に居座り続けるという挙動を行っています。</p>
+<p>結果としてより高得点を目指すことが難しくなっています。</p>
+<p>一角をとりつくした後は次の行動＝チームとして敵を探索しに行くという行動を推奨するようにする必要があります。</p>
+<h2 id="課題の原因と対策">課題の原因と対策</h2>
+<p>課題としている事実の原因についてコードと見比べっこして確認してみました。
+主な課題と感じた部分を挙げます。</p>
+<h3 id="原因1-索敵フェーズの報酬設計が留まることを積極的には罰していない">原因1: 索敵フェーズの報酬設計が「留まる」ことを積極的には罰していない</h3>
+<p><code>PursuitWrapper.step()</code> の索敵フェーズ（<code>current_min_dist is None</code>、つまり視界内に敵がいない）の報酬ロジックを見てみます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+    allies_in_view = np.<span class="hljs-built_in">sum</span>(ally_layer &gt; <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+    ...
+    <span class="hljs-keyword">if</span> allies_in_view == <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> has_moved:
+        individual_reward += self.search_coop_move_bonus       <span class="hljs-comment"># +0.05</span>
+    <span class="hljs-keyword">elif</span> <span class="hljs-keyword">not</span> has_moved:
+        individual_reward += self.search_stagnation_penalty    <span class="hljs-comment"># -0.1</span>
+</code></pre>
+<p>一見「留まったら罰則がある」ように見えますが、よく見ると<strong>条件分岐が <code>allies_in_view == 4 and has_moved</code> のケース以外は全部 <code>elif not has_moved</code> に落ちるわけではありません</strong>。具体的には：</p>
+<ul>
+<li><code>allies_in_view == 4</code> かつ <strong>動いていない</strong> → どちらの分岐にも入らず、<code>individual_reward += 0</code>（何も加算されない）</li>
+<li><code>allies_in_view != 4</code> かつ 動いていない → <code>search_stagnation_penalty</code>(-0.1) が適用される</li>
+<li><code>allies_in_view != 4</code> かつ 動いている → 何も加算されない（ボーナスなし、罰則なし）</li>
+</ul>
+<p>つまり、<strong>「4人ちょうど集まった状態で止まっている」場合だけ、唯一ペナルティが免除される</strong>という抜け穴があります。一角を捕獲し終えた直後、生き残った4体（あるいはそれ以上）がちょうど集まった状態で近くにいると、この条件に該当してペナルティを受けずに停止し続けられてしまいます。</p>
+<p>さらに、<code>allies_in_view</code> は「視界7x7以内」に限定されているため、実際には索敵行動が必要な広いマップでも、<strong>近くの味方の頭数さえ数が合えば「留まる」ことが咎められない</strong>設計になっています。</p>
+<p><strong>対策</strong></p>
+<ul>
+<li>停滞ペナルティを <code>allies_in_view</code> の値に関わらず一律で適用する（「4人ちょうど揃っている場合の免除」をなくす）</li>
+<li>あるいは、免除条件を「4人揃っていて、かつ<strong>そのうち少なくとも1体は動いている</strong>」のようなチーム単位の判定にする（個々のエージェントの <code>has_moved</code> だけでなくチーム全体で見る）</li>
+</ul>
+<pre><code class="language-python"><span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+    allies_in_view = np.<span class="hljs-built_in">sum</span>(ally_layer &gt; <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>
+    prev_pos = self.prev_agent_positions.get(agent)
+    has_moved = prev_pos <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> curr_pos <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> prev_pos != curr_pos
+
+    <span class="hljs-keyword">if</span> has_moved:
+        <span class="hljs-keyword">if</span> allies_in_view == <span class="hljs-number">4</span>:
+            individual_reward += self.search_coop_move_bonus
+        <span class="hljs-comment"># 動いていれば人数に関わらず停滞ペナルティは受けない(現状維持)</span>
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># 🌟 修正: 4人揃っていても動いていなければペナルティを免除しない</span>
+        individual_reward += self.search_stagnation_penalty
+</code></pre>
+<h3 id="原因2-その場にとどまることが学習された方策としてローカルな最適解になっている探索不足">原因2: 「その場にとどまる」ことが、学習された方策としてローカルな最適解になっている（探索不足）</h3>
+<p>探索を行うことのメリットが非常に小さいことです。</p>
+<p><code>search_stagnation_penalty=-0.1</code> に対して、動いて索敵し次のターゲットに辿り着くまでの過程は、<code>distance_reward_scale=0.001</code>（かなり小さい）でしか報われません。つまり：</p>
+<ul>
+<li><strong>留まることの罰</strong>: -0.1/step（明確で即時）</li>
+<li><strong>正しく索敵に動くことの報酬</strong>: ターゲットが見つかるまでは基本的に何も得られない（見つかってようやく <code>distance_reward_scale</code> による小さな報酬が始まる）</li>
+</ul>
+<p>このバランスだと、探索空間が広い（マップが大きい、残りpreyが少ない）状況ほど、「留まって-0.1を受け続ける」方が「見えないゴールを求めて動き回る」より学習上&quot;損切りしやすい&quot;局所解になりがちです。特にエントロピー係数 <code>entropy_coef=0.01</code> が小さいと、学習が進むにつれ探索的な行動が失われ、この局所解に収束しやすくなります。</p>
+<p><strong>対策</strong></p>
+<ul>
+<li><code>search_coop_move_bonus</code> を明確に「動いて索敵している」ことに対して継続的に与える設計にする（現状は<code>allies_in_view==4</code>の場合のみで発生条件が狭すぎます）</li>
+<li>索敵時の移動そのものに小さな正の報酬を与える（<code>has_moved</code>なら常に微小ボーナス、動かなければ罰、というシンプルな設計に一度戻して検証する）</li>
+<li><code>entropy_coef</code> を一時的に上げて（例: <code>0.01 → 0.03</code>）、停滞という局所解からの脱出を促す</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>上記節で検討した対策案を実施するため、以下の2点の想定原因の解決のための実装を行います。</p>
+<ol>
+<li><strong>停滞ペナルティの抜け穴を撤廃</strong>: 「4人ちょうど視界内にいれば免除」という条件をなくし、周囲に敵がいない時に動かなければ常に罰する</li>
+<li><strong>索敵中のチーム単位の接近報酬</strong>: 局所観測内には敵が見えなくても、環境の実座標（<code>raw_env</code>）を使って「最寄りの未捕獲preyまでの距離」を計算し、それが縮まった上で<strong>チームの一定数以上が同時に接近</strong>した場合にボーナスを与える</li>
+</ol>
+<p>局所観測だけでは「敵の方向」が分からないため、報酬計算にはグローバル情報（<code>raw_env</code>）を使います。これは観測（エージェントに見せる入力）を変えるわけではなく、あくまで報酬シェーピングのための特権情報利用なので、CTDE（中央集権的学習）の枠組みでは一般的な手法です。</p>
+<h3 id="変更箇所">変更箇所</h3>
+<p><strong>変更箇所1. <code>__init__</code> に状態追跡用の変数とパラメータを追加</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, render_mode=<span class="hljs-literal">None</span>, max_cycles=<span class="hljs-number">500</span>, obs_range=<span class="hljs-number">7</span></span>):
+    ...(既存のコードはそのまま)...
+
+    <span class="hljs-comment"># 🌟 追加: 索敵フェーズ用の追加パラメータ</span>
+    self.search_stagnation_penalty = -<span class="hljs-number">0.1</span>   <span class="hljs-comment"># 既存。仕様は変更せず流用（免除条件だけ撤廃）</span>
+    self.search_approach_bonus = <span class="hljs-number">0.05</span>       <span class="hljs-comment"># 🌟 追加: 個別に、未捕獲preyへグローバル距離が縮まったときの報酬</span>
+    self.search_team_approach_bonus = <span class="hljs-number">0.2</span>   <span class="hljs-comment"># 🌟 追加: チーム(規定人数以上)が同時に接近したときの追加ボーナス</span>
+    self.search_team_approach_threshold = <span class="hljs-number">3</span> <span class="hljs-comment"># 🌟 追加: 「チームで接近」とみなす最低人数</span>
+
+    <span class="hljs-comment"># 🌟 追加: 索敵フェーズでのグローバル距離追跡用</span>
+    self.prev_global_min_dist = {}
+    self._search_approach_registry = {}
+    self._search_team_bonus_given_cycle = -<span class="hljs-number">1</span>
+</code></pre>
+<p><strong>変更箇所2. <code>reset()</code> に初期化を追加</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+    self.env.reset()
+    self.prev_min_distances = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self.prev_agent_positions = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self.last_actions = np.zeros((self.num_agents, <span class="hljs-number">5</span>), dtype=np.float32)
+    self.last_actions[:, <span class="hljs-number">4</span>] = <span class="hljs-number">1.0</span>
+    self.capture_count = <span class="hljs-number">0</span>
+    self.captured_prey_ids = <span class="hljs-built_in">set</span>()
+
+    <span class="hljs-comment"># 🌟 追加</span>
+    self.prev_global_min_dist = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self._search_approach_registry = {}
+    self._search_team_bonus_given_cycle = -<span class="hljs-number">1</span>
+</code></pre>
+<p><strong>変更箇所3. グローバル距離を計算するヘルパーを追加</strong></p>
+<p>前回実装した <code>compute_priority_scores</code> とほぼ同じロジックですが、単一エージェント用に切り出します。既存の <code>compute_priority_scores</code> があるなら、内部でこちらを呼び出す形に統一しても構いません。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_global_min_dist_to_evader</span>(<span class="hljs-params">self, agent</span>) -&gt; <span class="hljs-built_in">float</span> | <span class="hljs-literal">None</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    局所観測(7x7)の視界に関わらず、環境の実座標を使って
+    エージェントから最寄りの未捕獲preyまでのマンハッタン距離を計算する。
+    報酬シェーピング専用(観測には使わない特権情報)。
+    未捕獲preyが存在しない、または座標取得に失敗した場合はNoneを返す。
+    &quot;&quot;&quot;</span>
+    raw_env = self.env.unwrapped
+
+    <span class="hljs-keyword">try</span>:
+        evader_positions = [(e.state[<span class="hljs-number">1</span>], e.state[<span class="hljs-number">0</span>]) <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> raw_env.evaders]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> evader_positions:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">try</span>:
+        agent_obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+        ay, ax = agent_obj.state[<span class="hljs-number">1</span>], agent_obj.state[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">min</span>(<span class="hljs-built_in">abs</span>(ay - py) + <span class="hljs-built_in">abs</span>(ax - px) <span class="hljs-keyword">for</span> py, px <span class="hljs-keyword">in</span> evader_positions)
+</code></pre>
+<p><strong>変更箇所4. <code>step()</code> の索敵フェーズ部分を修正</strong></p>
+<p>該当箇所（<code>if current_min_dist is None:</code> のブロック）を以下に差し替えてください。</p>
+<pre><code class="language-python">    <span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, agent, action</span>):
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">return</span> np.zeros(self.obs_dim, dtype=np.float32), <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}, <span class="hljs-number">0</span>
+
+        current_cycle = <span class="hljs-built_in">getattr</span>(self.env.unwrapped, <span class="hljs-string">&#x27;cycles&#x27;</span>, <span class="hljs-number">0</span>)
+        _, _, terminated, truncated, _ = self.env.last(agent)
+        step_action = <span class="hljs-literal">None</span> <span class="hljs-keyword">if</span> (terminated <span class="hljs-keyword">or</span> truncated) <span class="hljs-keyword">else</span> action
+
+        agent_idx = <span class="hljs-built_in">int</span>(agent.split(<span class="hljs-string">&#x27;_&#x27;</span>)[-<span class="hljs-number">1</span>])
+        <span class="hljs-keyword">if</span> step_action <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            self.last_actions[agent_idx] = <span class="hljs-number">0.0</span>
+            self.last_actions[agent_idx, step_action] = <span class="hljs-number">1.0</span>
+
+        self.env.step(step_action)
+
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">return</span> np.zeros(self.obs_dim, dtype=np.float32), <span class="hljs-number">0.0</span>, <span class="hljs-literal">True</span>, <span class="hljs-literal">True</span>, {}, <span class="hljs-number">0</span>
+
+        obs_flat, team_reward, terminated, truncated, info = self.env.last(agent)
+        obs = self.get_obs(agent)
+
+        individual_reward = <span class="hljs-number">0.0</span>
+
+        raw_env = self.env.unwrapped
+        curr_pos = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">try</span>:
+            agent_obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+            curr_pos = (agent_obj.state[<span class="hljs-number">1</span>], agent_obj.state[<span class="hljs-number">0</span>])
+        <span class="hljs-keyword">except</span> Exception:
+            <span class="hljs-keyword">pass</span>
+
+        current_min_dist, allies_count, flank_allies, shaping_reward, count_capture, coop_density_reward = self._analyze_observation(agent, obs)
+        count_capture = count_capture <span class="hljs-keyword">if</span> count_capture <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+        team_reward += self.surround_reward * count_capture
+
+        <span class="hljs-comment"># -----------------------------------------------------------------</span>
+        <span class="hljs-comment"># 🌟 索敵フェーズ(視界内に敵がいない)の処理 — ここを修正</span>
+        <span class="hljs-comment"># -----------------------------------------------------------------</span>
+        <span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            prev_pos = self.prev_agent_positions.get(agent)
+            has_moved = <span class="hljs-literal">False</span>
+            <span class="hljs-keyword">if</span> prev_pos <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> curr_pos <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                <span class="hljs-keyword">if</span> prev_pos != curr_pos:
+                    has_moved = <span class="hljs-literal">True</span>
+
+            <span class="hljs-comment"># 🌟 修正1: 停滞ペナルティは人数条件に関わらず一律で適用する</span>
+            <span class="hljs-comment">#    (「4人揃っていれば免除」という抜け穴を撤廃)</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> has_moved:
+                individual_reward += self.search_stagnation_penalty
+                is_search_approaching = <span class="hljs-literal">False</span>
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 🌟 修正2: グローバル座標を使い、未捕獲preyへの距離が縮まったかを評価</span>
+                current_global_dist = self._compute_global_min_dist_to_evader(agent)
+                prev_global_dist = self.prev_global_min_dist.get(agent)
+
+                is_search_approaching = <span class="hljs-literal">False</span>
+                <span class="hljs-keyword">if</span> current_global_dist <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> prev_global_dist <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+                    <span class="hljs-keyword">if</span> current_global_dist &lt; prev_global_dist:
+                        individual_reward += self.search_approach_bonus
+                        is_search_approaching = <span class="hljs-literal">True</span>
+
+                self.prev_global_min_dist[agent] = current_global_dist
+
+            <span class="hljs-comment"># 🌟 修正3: チーム単位で同時に接近しているかを集計し、</span>
+            <span class="hljs-comment">#    規定人数以上が同時接近していれば追加ボーナス</span>
+            <span class="hljs-keyword">if</span> current_cycle <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self._search_approach_registry:
+                self._search_approach_registry[current_cycle] = {}
+            self._search_approach_registry[current_cycle][agent] = is_search_approaching
+
+            <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(self._search_approach_registry[current_cycle]) &gt;= <span class="hljs-built_in">len</span>(self.env.agents):
+                approaching_count = <span class="hljs-built_in">sum</span>(self._search_approach_registry[current_cycle].values())
+                <span class="hljs-keyword">if</span> (approaching_count &gt;= self.search_team_approach_threshold
+                        <span class="hljs-keyword">and</span> self._search_team_bonus_given_cycle != current_cycle):
+                    individual_reward += self.search_team_approach_bonus
+                    self._search_team_bonus_given_cycle = current_cycle
+                    self._search_approach_registry = {
+                        k: v <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> self._search_approach_registry.items() <span class="hljs-keyword">if</span> k &gt;= current_cycle
+                    }
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 敵が視界内にいる場合は、既存の包囲シェイピング・人数最適化報酬を適用</span>
+            individual_reward += shaping_reward
+            individual_reward += coop_density_reward
+            <span class="hljs-comment"># 🌟 視界内に敵が現れたら、索敵フェーズ用のグローバル距離追跡はリセットしておく</span>
+            self.prev_global_min_dist[agent] = <span class="hljs-literal">None</span>
+
+        <span class="hljs-comment"># 座標の更新</span>
+        <span class="hljs-keyword">if</span> curr_pos <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            self.prev_agent_positions[agent] = curr_pos
+
+        <span class="hljs-comment"># 1. 距離・回り込みベースの評価(視界内に敵がいる場合のみ意味を持つ既存ロジック)</span>
+        reward_distance = <span class="hljs-number">0.0</span>
+        prev_dist = self.prev_min_distances.get(agent)
+
+        is_approaching = <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> prev_dist <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            change = prev_dist - current_min_dist
+            reward_distance = change * self.distance_reward_scale
+            <span class="hljs-keyword">if</span> change &gt; <span class="hljs-number">0</span>:
+                is_approaching = <span class="hljs-literal">True</span>
+                <span class="hljs-keyword">if</span> flank_allies == <span class="hljs-number">0</span>:
+                    reward_distance += self.flanking_bonus_scale
+
+        self.prev_min_distances[agent] = current_min_dist
+        individual_reward += reward_distance
+
+        <span class="hljs-comment"># 2. 協調行動(接近＋包囲網)の評価</span>
+        reward_coop = <span class="hljs-number">0.0</span>
+        <span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">and</span> current_min_dist &lt;= <span class="hljs-number">2</span>:
+            <span class="hljs-keyword">if</span> allies_count &gt;= <span class="hljs-number">1</span>:
+                reward_coop += self.coop_reward_scale
+            <span class="hljs-keyword">if</span> allies_count &gt;= <span class="hljs-number">3</span>:
+                reward_coop += self.surround_reward
+        individual_reward += reward_coop
+
+        <span class="hljs-comment"># 3. 同時アプローチ(視界内に敵が見えている状態での4人同時接近)のチーム集計とボーナス適用</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">hasattr</span>(self, <span class="hljs-string">&#x27;_approach_registry&#x27;</span>):
+            self._approach_registry = {}
+            self._cycle_bonus_given = -<span class="hljs-number">1</span>
+
+        <span class="hljs-keyword">if</span> current_cycle <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self._approach_registry:
+            self._approach_registry[current_cycle] = {}
+
+        self._approach_registry[current_cycle][agent] = is_approaching
+
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(self._approach_registry[current_cycle]) &gt;= <span class="hljs-built_in">len</span>(self.env.agents):
+            approaching_count = <span class="hljs-built_in">sum</span>(self._approach_registry[current_cycle].values())
+            <span class="hljs-keyword">if</span> approaching_count == <span class="hljs-number">4</span> <span class="hljs-keyword">and</span> self._cycle_bonus_given != current_cycle:
+                individual_reward += self.simultaneous_approach_bonus
+                self._cycle_bonus_given = current_cycle
+                self._approach_registry = {k: v <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> self._approach_registry.items() <span class="hljs-keyword">if</span> k &gt;= current_cycle}
+
+        <span class="hljs-comment"># 4. 衝突ペナルティの評価</span>
+        <span class="hljs-keyword">if</span> info.get(<span class="hljs-string">&#x27;wasted_move&#x27;</span>, <span class="hljs-literal">False</span>):
+            individual_reward += self.collision_penalty
+
+        <span class="hljs-comment"># 5. 完全捕獲成功時のボーナス</span>
+        <span class="hljs-keyword">if</span> terminated <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> truncated:
+            <span class="hljs-keyword">if</span> team_reward &gt; <span class="hljs-number">0</span>:
+                time_bonus = <span class="hljs-built_in">max</span>(<span class="hljs-number">0</span>, <span class="hljs-number">500</span> - current_cycle) * <span class="hljs-number">1.0</span>
+                individual_reward += (<span class="hljs-number">500.0</span> + time_bonus)
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;--- 🎉 TRUE CAPTURE SUCCESS! Agent: <span class="hljs-subst">{agent}</span> | Bonus: <span class="hljs-subst">{<span class="hljs-number">500.0</span> + time_bonus}</span> ---&quot;</span>)
+
+        hybrid_reward = (team_reward + individual_reward) * <span class="hljs-number">0.05</span>
+
+        <span class="hljs-keyword">return</span> obs, hybrid_reward, terminated, truncated, info, count_capture
+</code></pre>
+<h3 id="主な変更点の解説">主な変更点の解説</h3>
+<p><strong>修正1: 停滞ペナルティの一律適用</strong></p>
+<p>旧コードは <code>elif not has_moved:</code> という分岐で、「<code>allies_in_view == 4 and has_moved</code>」の条件に合致しない場合の<strong>一部だけ</strong>しかペナルティが発生しませんでした（<code>allies_in_view==4</code> かつ動いていない場合は両方の条件に該当せず何も起きなかった）。新コードでは <code>if not has_moved:</code> を最初の分岐にして、<strong>視界内に敵がいない状態で動いていなければ、味方の人数に関係なく常にペナルティ</strong>が入るようにしました。</p>
+<p><strong>修正2: グローバル距離を使った個別接近報酬</strong></p>
+<p><code>_compute_global_min_dist_to_evader</code> で、局所観測に映っていない敵も含めた「実際に一番近い未捕獲prey」までの距離を計算し、前ステップと比較して縮まっていれば <code>search_approach_bonus</code> を与えます。これにより、<strong>視界の外にいる敵に向かって正しい方向に歩いている場合にだけ報酬</strong>が発生します（ランダムに動いただけでは平均的には縮まらないので、報われません）。</p>
+<p><strong>修正3: チーム単位の同時接近ボーナス</strong></p>
+<p>既存の「視界内に敵がいる場合の <code>simultaneous_approach_bonus</code>」と同じレジストリパターンを、索敵フェーズ専用に複製しました（<code>_search_approach_registry</code>）。<strong>同じサイクル内で <code>search_team_approach_threshold</code>（デフォルト3）人以上が同時にグローバル距離を縮めていれば</strong>、それぞれに <code>search_team_approach_bonus</code> を追加で与えます。これが「チーム単位で敵に向かって移動する」ことへの直接的な報酬になります。</p>
+<h2 id="学習">学習</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>今回実装コードによる学習の推移を前回と比較してみました。
+報酬はどうでしょう・・・？上がってないことは間違いありません。
+エントロピは上がっています。報酬系が上がったことで想定と異なることが増えたという感じでしょうか。
+もう少し安定化するまで学習させてみても良いという結果だったかもしれません。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\17_team_action_v4\1786405003920.png" alt="1786405003920"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\17_team_action_v4\1786405025790.png" alt="1786405025790"></p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\17_team_action_v4\1786405044953.png" alt="1786405044953"></p>
+<h3 id="実際の動作">実際の動作</h3>
+<p>学習後のエージェントの動作について確認してみます。
+まず前回確認されたような一カ所に集結をそこまで必死にしなくなったようです。</p>
+<p>その上で捕獲後に停滞はせず、一角の敵が少なくなった後、チーム全体で北上するような動作が確認出来ました。</p>
+<p>これは・・・期待通りでは。
+捕獲数が思ったより伸びませんでしたが、捕獲後に停滞するという挙動ではなくなったと考えます。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\17_team_action_v4\pursuit_mat_fixed.gif" width="400">
+<h2 id="総括">総括</h2>
+<p>今回トライアルの結果をまとめていきます。</p>
+<h3 id="今回の改修で効いたポイント">今回の改修で効いたポイント</h3>
+<ol>
+<li>
+<p><strong>停滞ペナルティの抜け穴をなくした</strong></p>
+<ul>
+<li>旧：4人ちょうど集まっていると、止まってもペナルティがかからなかった</li>
+<li>新：<strong>視界内に敵がいないときは、動いていなければ常にペナルティ</strong><br>
+→ 捕獲後に一角に居座る局所解が弱まり、チームで次の敵を探しに行く動きが出るようになった</li>
+</ul>
+</li>
+<li>
+<p><strong>グローバル情報を使った「索敵中の接近報酬」を追加</strong></p>
+<ul>
+<li>局所観測だけでは「敵の方向」が分からず、探索のメリットが小さかった</li>
+<li>環境の実座標から<strong>最寄りの未捕獲preyまでの距離</strong>を計算し、縮まれば個別に報酬</li>
+<li>さらに、<strong>チームの一定人数以上が同時に距離を縮めたら追加ボーナス</strong><br>
+→ 視界外の敵に向かってチームで移動する行動が報酬づけされ、実際に「一角クリア後に北上」などの探索行動が確認された</li>
+</ul>
+</li>
+<li>
+<p><strong>エントロピーが上がり、局所解から抜け出しやすくなった</strong></p>
+<ul>
+<li>報酬設計の変更で停滞が不利になり、探索的な行動が相対的に有利に</li>
+<li>学習曲線ではエントロピー上昇 → <strong>局所解からの脱出が進んでいる</strong></li>
+</ul>
+</li>
+</ol>
+<h3 id="残っている課題">残っている課題</h3>
+<ul>
+<li>
+<p><strong>報酬はまだ伸びきっていない</strong></p>
+<ul>
+<li>停滞は減ったが、捕獲数・総報酬は大きく向上していない</li>
+<li>報酬スケールや学習ステップの調整が必要な可能性</li>
+</ul>
+</li>
+<li>
+<p><strong>探索空間が広い局面での「損切り」設計</strong></p>
+<ul>
+<li>遠くの敵を探しに行くほどすぐには報酬が得られない</li>
+<li>索敵中の移動そのものに小さな常時ボーナスを追加するなど、探索インセンティブの強化余地あり</li>
+</ul>
+</li>
+<li>
+<p><strong>報酬設計がやや複雑</strong></p>
+<ul>
+<li>個別接近・チーム接近・停滞ペナルティなどシェイピングが増えた</li>
+<li>今後はどの報酬がどの行動に効いているかを分離評価し、不要な要素を削るか重み調整が必要になる可能性</li>
+</ul>
+</li>
+</ul>
+<h3 id="結論">結論</h3>
+<p>期待通りではありました。ただ成績に結びつかなかったという感じでしょうか。</p>
+<ul>
+<li>「捕獲後に一角に居座る」という局所解が弱まり、<strong>チームで次の敵を探しに行く行動</strong>が学習されるようになった</li>
+<li>報酬はまだ伸びていないが、<strong>チーム連携の質と探索性は改善</strong>しており、今後は報酬バランスと学習ステップの調整でさらなる性能向上が見込める</li>
+</ul>
+
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/20S3gDn6rYI?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+            
+        </body>
+        </html>
