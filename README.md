@@ -430,7 +430,7 @@ Initially, I implemented them as standard CNN-based agents, but even with MAPPO,
 
 repogitory: https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit
 
-<img src="miulti-agent/petting_zoo/src/4_pursuit/doc/image/10_model_improvement/pursuit_mappo.gif" width="500px" style="display: block; margin: 0 auto;">
+<img src="miulti-agent/petting_zoo/src/4_pursuit/doc/image/17_team_action_v4/pursuit_mat_fixed.gif" width="500px" style="display: block; margin: 0 auto;">
 
 # cite
 
