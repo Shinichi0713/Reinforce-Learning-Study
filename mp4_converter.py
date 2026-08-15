@@ -1,4 +1,5 @@
 from moviepy import VideoFileClip  # 修正：.editorを削除
+from pathlib import Path
 
 def mp4_to_gif(input_path, output_path, fps=10):
     """
@@ -23,9 +24,9 @@ def mp4_to_gif(input_path, output_path, fps=10):
 if __name__ == "__main__":
     # ファイルの存在を確認してから実行することをお勧めします
     import os
-    path_input = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\12_maze_improvement_v4\agent_maze_solve (5).mp4"
-    dir_output = os.path.dirname(path_input)
+    path_input = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\13_maze_improvement_v5\agent_maze_solve (4).mp4"
     filename = os.path.basename(path_input).replace(".mp4", ".gif")
+    dir_output = Path(path_input).parent  # 入力ファイルと同じディレクトリに出力
     path_output = os.path.join(dir_output, filename)
     if os.path.exists(path_input):
         mp4_to_gif(path_input, path_output, fps=10)

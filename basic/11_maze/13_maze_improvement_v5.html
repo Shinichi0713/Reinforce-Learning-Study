@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>今回は毎度の迷路シリーズです。
+ここまでTransformerを採用、位置エンコーダをRoPEに変更など試して、前回更に報酬設計変更を行いました。
+ですが、迂回が必要となるような迷路に対してうまく解くことが出来ませんでした。</p>
+<p>ということで、解き方を再度転換させようと思います。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>Universal Transformerを使ってみて、改善するか確認してみる。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題">課題</h2>
+<p>ゴール前が壁で遮られたようなケースでうまく経路を見つけられないことが多いようです。</p>
+<p>壁にさえぎられた時の検討が、ノーマルのTransformerが得意な修飾のような系列データの解析だけでは解けていないのか、というのが現状感じている課題です。</p>
+<h2 id="先行研究の振り返り">先行研究の振り返り</h2>
+<p>過去Transformerのレイヤを反復計算させることで問題を解くという論文がありました。
+論文で説明されていた手法は<strong>Universal Transformer (UT)</strong> です。</p>
+<p>Universal Transformer 自体はなかなか年代物で、2018年（論文発表はICLR 2019）にGoogle BrainのMostafa Dehghaniらによって提案されたモデルです。
+先程の表現をより詳細に言うと、<strong>「標準のTransformerに、RNN（循環神経網）のような『時間の経過（反復処理）』の概念を組み込んだモデル」</strong> です。</p>
+<p>通常のTransformerが「層（Depth）を縦方向に深く重ねていく」構造なのに対し、Universal Transformerは「1つの層（重み）をループさせて何度も再帰的に適用する」 という大きな違いがあります。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\13_maze_improvement_v5\1786510508422.png" alt="1786510508422"></p>
+<h3 id="1-universal-transformerの仕組み">1. Universal Transformerの仕組み</h3>
+<p>UTの基本構造は、主に <strong>「重み共有（Weight Sharing）」</strong> と <strong>「動的計算（Dynamic Halting）」</strong> の2つのメカニズムによって成り立っています。</p>
+<pre><code>【標準のTransformer】            【Universal Transformer】
+ Input                             Input
+   │                                 │
+ [Layer 1] (パラメータA)          ┌─► [Shared Layer] (パラメータ共有)
+   │                             │   │
+ [Layer 2] (パラメータB)          └───┤ (N回ループ / 動的に停止)
+   │                                 │
+ [Layer 3] (パラメータC)            Output
+   │
+ Output
+
+</code></pre>
+<p><strong>① 重み共有（Weight Sharing Across Depth）</strong></p>
+<p>通常のTransformerでは、1層目、2層目、3層目…と層ごとに異なるパラメータ（Self-AttentionやFFNの重み）を保持します。</p>
+<p>これに対しUTでは、<strong>単一のTransformerブロック（Self-Attention + FFN）を定義し、それをすべてのステップ（N回）で繰り返し適用</strong>します。</p>
+<ul>
+<li><strong>入力時:</strong> トークン情報に「位置エンコーディング（Positional Encoding）」だけでなく、現在何ループ目かを示す「ステップエンコーディング（Step Encoding）」を足し合わせて入力します。</li>
+<li><strong>計算:</strong> 同じ重みを使って <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><mi>T</mi></mrow><annotation encoding="application/x-tex">t=1, 2, \dots, T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span> と状態を更新していきます。</li>
+</ul>
+<p><strong>② 動的計算量 / Adaptive Computation Time (ACT)</strong></p>
+<p>通常のモデルは全トークンに対して固定の層数（例: 12層）の計算を行いますが、UTは<strong>トークンごと・入力データごとに計算回数（ループ数）を動的に変化</strong>させることができます。</p>
+<p>これを実現するために <strong>ACT (Adaptive Computation Time)</strong> という仕組みを採用しています。</p>
+<ul>
+<li>各ループの終わりで、各トークンが「もう計算を終了してよいか（Halting Probability）」を判定する小さなネットワークを実行します。</li>
+<li><strong>簡単な単語・構造:</strong> 少ないループ数（例: 2~3回）で早期に計算を打ち切り、次の処理へ送る。</li>
+<li><strong>複雑な単語・構造:</strong> 納得いく表現が得られるまで何回もループ（例: 8~10回）させて深く思考する。</li>
+</ul>
+<h3 id="2-期待できる効果とメリット">2. 期待できる効果とメリット</h3>
+<p>Universal Transformer構造を導入することで、以下の大きな効果が得られます。</p>
+<p><strong>① チューリング完全性と「アルゴリズム的タスク（推論・伝播）」の獲得</strong></p>
+<p>標準のTransformer（固定層数）は「入力長に対して計算量が固定の順伝播型ネットワーク」であるため、複雑な論理推論やグラフの探索（BFS/DFS）、数式処理などの「反復計算が必要なタスク」を一般化して解くのが苦手です。</p>
+<p>UTは再帰構造（RNN構造）を持つため、理論上<strong>チューリング完全（Turing-Complete）</strong> となり、<strong>「同じローカルルールを何度も適用して解くアルゴリズム的なタスク」に対して圧倒的な強さ</strong> を発揮します。</p>
+<p><strong>② パラメータ数の大幅削減と過学習の抑制</strong></p>
+<p>層を重ねても保持するパラメータは「1層分」だけで済むため、層数を増やしても（ループ数を増やしても）メモリ上のモデルサイズは増えません。</p>
+<ul>
+<li><strong>モデルの軽量化:</strong> 通常の6層〜12層モデルに比べてパラメータ数を数分の一に削減できます。</li>
+<li><strong>汎化性能の向上:</strong> パラメータが少ないため過学習（Overfitting）しにくく、少量のデータや強化学習環境でも学習が安定しやすくなります。</li>
+</ul>
+<p><strong>③ インファレンス時（テスト時）の柔軟性</strong></p>
+<p>学習時には少ないループ数（例: 6回）で学習させておき、テスト時により複雑な問題が出た際に<strong>モデルを再学習することなくループ回数だけを増やす（例: 12回にする）</strong> といった調整が可能です。</p>
+<h3 id="3-なぜllmchatgpt等で全面的に使われていないのか">3. なぜLLM（ChatGPT等）で全面的に使われていないのか？</h3>
+<p>非常に優れた理論を持つUTですが、現在のGPT-4などの大規模言語モデル（LLM）で主流になっていない理由もあります。</p>
+<ul>
+<li><strong>並列処理（GPU効率）の低下:</strong>
+通常のTransformerは全層をパイプライン化して高速に並列計算できますが、UTは「前のステップの出力を次のステップの入力にする」という時系列的なループが発生するため、GPUの並列計算効率が落ち、学習・推論速度が遅くなりやすい側面があります。</li>
+<li><strong>勾配爆発・消失の制御:</strong>
+RNNと同様に「同じ重みを何度も掛ける」ため、ループ数が多くなると勾配が不安定になりやすく、学習のハイパーパラメータ調整がややシビアになります。</li>
+</ul>
+<h2 id="対策案">対策案</h2>
+<p>Attentionを「壁を考慮した隣接マスのみ」に戻し、反復計算として機能させるUniversal Transformerをメインに据えてみようと思います。</p>
+<p>言語に比べると今回のタスクは容易です。言語のように理解する上で観点を変える必要がないからです。
+なので場所を理解して、壁は迂回する、ゴールの経路を目指すというタスクを、頭の中でシミュレーションするような今回の方法がうまくはまるのではと考えています。</p>
+<p>以前、<code>use_wall_mask=True</code>で実装していた「隣接マスのみに注意を向けるAttention」を思い出してください。あれを<strong>層数を迷路の直径分（5x5なら8層程度）まで増やして</strong>使えば、まさに「隣のマスの価値を見て、自分の価値を更新する」という計算を、<strong>1層＝1ホップ</strong>として、強制的に繰り返させることができます。これはVINが畳み込みで実現している価値伝播と、原理的に同じことをAttentionでやっているだけです。</p>
+<p>さらに一歩進めて、<strong>全層で同じ重みを共有</strong>（1つのAttention層を8回繰り返し適用する、&quot;Universal Transformer&quot;的な構成）にすれば、VINが「同じ畳み込みカーネルをK回繰り返す」ことで実現している <strong>「どのマスでも同じ伝播規則が成り立つ」という帰納バイアス</strong> も再現できます。パラメータ数も減るので学習も安定しやすくなります。</p>
+<p>その他気になっている点は、PPOの報酬信号は「間接的」で「弱い」という点です。</p>
+<p>PPOでは、モデルは行動した後にもらえる、遅れた・ノイズの多いスカラー報酬からしか学べません。「ch4を正しく読んだかどうか」と「最終的な報酬が上がったかどうか」の因果関係を、何百・何千回もの試行錯誤の中から間接的に発見しなければならず、非常にサンプル効率が悪い学習方法だと言えます。</p>
+<p>これは<strong>アーキテクチャを変えるだけでは解決しません</strong>。せっかく正解のBFS距離を持っているので、これを直接の教師信号として使わない手はありません。</p>
+<p>各マスのトークン表現から「このマスのゴールまでの距離は何か」を予測する小さなヘッドを追加し、真のBFS距離との誤差(MSE)を<strong>PPOの損失に補助項として足す</strong>ことで評価する観点を増やそうかと思います。
+PPOの弱点を補填できるのではと期待します。</p>
+<pre><code>total_loss = policy_loss + value_loss係数×value_loss - entropy係数×entropy
+             + distance_loss係数×distance_prediction_loss   ← 追加
+</code></pre>
+<h3 id="clsトークンの扱い">CLSトークンの扱い</h3>
+<p>その他、もう1点課題ではないかと考えているポイントがあります。
+ゴールまでの経路を見る上で「CLSトークンのアテンションマスクが全層で固定されていること」です。</p>
+<p><strong>精度を阻害している4つの主要ポイント</strong></p>
+<ul>
+<li>
+<p><strong>1. 【最重要】CLSトークンが「足元1ホップ」しか見えていない</strong>
+<code>_build_attn_mask</code> 内で、CLSトークン（インデックス0）のアテンションマスクが毎層「エージェントの現在位置＋上下左右1マス」に固定されています。</p>
+</li>
+<li>
+<p><strong>何が起きているか:</strong> グリッドセル間（1〜N）では層を重ねるごとに 1ホップ, 2ホップ... と遠くの価値情報が伝播していきますが、<strong>CLSトークンはどの層でも「足元の初期情報」しか受け取れません</strong>。</p>
+</li>
+<li>
+<p><strong>結果:</strong> 8層かけて迷路の反対側から迂回路の価値が伝播してきても、Policy/Valueを出力する <code>cls_out</code> にはその情報が届かず、近視眼的な判断しかできなくなっています。</p>
+</li>
+<li>
+<p><strong>2. 2D RoPE と CLSトークンの不整合</strong>
+CLSトークンは空間上の座標を持たない抽象トークンですが、<code>rope_cos</code>, <code>rope_sin</code> のインデックス0が適用されてしまっています。これにより、アテンション計算時にCLSと各セルの相対位置関係が歪む原因になります。</p>
+</li>
+<li>
+<p><strong>3. 迷路の最大パス長に対して <code>num_layers</code>（ホップ数）が不足している</strong>
+<code>grid_size=5</code> であっても、複雑な壁で大きく迂回する場合、ゴールまでの最短パス長が 12〜15ホップ 以上になることがあります。<code>num_layers=8</code>（かつ <code>use_wall_mask=True</code>）では、物理的に8マス分しか情報が届かないため、遠い迂回路の先にあるゴール情報を読み取れません。</p>
+</li>
+<li>
+<p><strong>4. 入力への正解距離マップ（<code>obs[4]</code>）の与え方</strong>
+入力に正解のBFS距離マップを与えてしまうと、モデルが自力で壁を通した価値伝播アルゴリズムを再現するのではなく、「入力された距離チャンネルの勾配だけを見る」というショートカット（過学習）を起こしやすくなります。</p>
+</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>前節で挙げたUniversal Transformerの実装をまず行った上で、CLSトークンの対処を行います。</p>
+<h3 id="universal-transformerの実装">Universal Transformerの実装</h3>
+<p>主要な変更箇所は以下です。
+特に大物が<code>1</code>と<code>2</code>です。</p>
+<ol>
+<li><code>RoPETransformerEncoder</code>に重み共有(Universal Transformer化)オプションを追加</li>
+<li><code>TransformerActorCritic</code>の既定値を「壁マスク使用＋層数を迷路の直径程度」に変更</li>
+<li>各マスのゴールまでの距離を予測する補助ヘッドを追加し、PPOの損失に補助ロスとして組み込む</li>
+</ol>
+<p><strong>1. 重み共有(Universal Transformer化)</strong></p>
+<p><code>RoPETransformerEncoder</code>に<code>share_weights</code>引数を追加。<code>True</code>にすると、独立したN層ではなく<strong>1つの層を重み共有したままN回繰り返し適用</strong>します。検証の通り、<code>num_layers=8</code>でパラメータ数が約1/5.6(285,574→51,270)に抑えられ、「同じ伝播規則をどこでも繰り返す」というVIN的な帰納バイアスを再現しています。</p>
+<p><strong>2. 既定構成の変更</strong></p>
+<p><code>TransformerActorCritic</code>・<code>TransformerPPOAgent</code>の既定値を変更：</p>
+<ul>
+<li><code>use_wall_mask</code>: <code>False</code> → <strong><code>True</code></strong>（隣接マスのみへのAttentionに戻す）</li>
+<li><code>num_layers</code>: <code>2</code> → <strong><code>8</code></strong>（5x5迷路の直径をカバー）</li>
+<li><code>share_weights</code>: 新規追加、既定**<code>True</code>**</li>
+</ul>
+<p>これにより「1層＝1ホップの価値伝播」を8回繰り返す構造になり、VINの畳み込み+maxの反復に相当する計算をAttentionで再現しています。</p>
+<p><strong>3. 距離予測補助ロス</strong></p>
+<p><code>TransformerActorCritic.forward</code>に<code>return_aux=True</code>オプションを追加し、各マスのトークン表現(CLSを除く25マス分)から<code>distance_head</code>でそのマスの正しいBFS距離を予測、真値(<code>obs[4]</code>)とのMSEを計算できるようにしました。<code>TransformerPPOAgent.update()</code>でこれを呼び出し、<code>distance_loss_coef</code>(既定0.1)で重み付けしてPPOの損失に加算しています(壁マスは予測対象から除外)。</p>
+<p>主立つ変更点 1 + 2 の実装は以下の通り。</p>
+<pre><code class="language-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">RoPETransformerEncoder</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, nhead, dim_feedforward, num_layers, dropout=<span class="hljs-number">0.1</span>,
+                 share_weights=<span class="hljs-literal">False</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        share_weights=True にすると、num_layers個の独立した層ではなく、
+        「1つの層を重み共有したままnum_layers回繰り返し適用する」→ Universal Transformer的な構成になる。
+        壁マスク(use_wall_mask=True)と組み合わせ、num_layersを迷路の直径程度まで増やすことで、Attentionを
+        「1層=1ホップの価値伝播」として機能させることを狙っている。
+        &quot;&quot;&quot;</span>
+        <span class="hljs-built_in">super</span>().__init__()
+        self.share_weights = share_weights
+        self.num_layers = num_layers
+        <span class="hljs-keyword">if</span> share_weights:
+            self.shared_layer = RoPEEncoderLayer(d_model, nhead, dim_feedforward, dropout=dropout)
+            self.layers = <span class="hljs-literal">None</span>
+        <span class="hljs-keyword">else</span>:
+            self.layers = nn.ModuleList([
+                RoPEEncoderLayer(d_model, nhead, dim_feedforward, dropout=dropout)
+                <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_layers)
+            ])
+            self.shared_layer = <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, rope_cos, rope_sin, attn_mask=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-keyword">if</span> self.share_weights:
+            <span class="hljs-comment"># 指定のレイヤ数繰り返す。(パラメータは使いまわし)</span>
+            <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self.num_layers):
+                x = self.shared_layer(x, rope_cos, rope_sin, attn_mask=attn_mask)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">for</span> layer <span class="hljs-keyword">in</span> self.layers:
+                x = layer(x, rope_cos, rope_sin, attn_mask=attn_mask)
+        <span class="hljs-keyword">return</span> x
+</code></pre>
+<h3 id="cls削除">CLS削除</h3>
+<p>CLSトークンを廃止し、<strong>「最終層におけるエージェント位置のセル表現」を直接抽出して Policy / Critic Head に渡す設計</strong>に変更するのが最もスマートで強力です。</p>
+<p>これにより、層を重ねるごとにエージェント位置のトークンへ全方向から迂回路の情報が集約され、RoPEの座標問題も解消されます。</p>
+<p><strong>1. <code>_build_attn_mask</code> の修正（CLSを排除）</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_build_attn_mask</span>(<span class="hljs-params">self, wall_map, B, device</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    N×N のセル間のみの隣接マスクを作成（CLS用処理を削除）
+    &quot;&quot;&quot;</span>
+    H = W = self.grid_size
+    N = self.num_tokens
+    wall_flat = wall_map.reshape(B, N)
+
+    adjacency = torch.zeros(B, N, N, dtype=torch.<span class="hljs-built_in">bool</span>, device=device)
+    not_wall_i = (wall_flat[:, self.neighbor_i] == <span class="hljs-number">0</span>)
+    not_wall_j = (wall_flat[:, self.neighbor_j] == <span class="hljs-number">0</span>)
+    connected = not_wall_i &amp; not_wall_j
+    batch_idx = torch.arange(B, device=device).unsqueeze(<span class="hljs-number">1</span>).expand(-<span class="hljs-number">1</span>, self.neighbor_i.shape[<span class="hljs-number">0</span>])
+    adjacency[batch_idx, self.neighbor_i.expand(B, -<span class="hljs-number">1</span>), self.neighbor_j.expand(B, -<span class="hljs-number">1</span>)] = connected
+    
+    diag_idx = torch.arange(N, device=device)
+    adjacency[:, diag_idx, diag_idx] = <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">return</span> adjacency.unsqueeze(<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, 1, N, N)</span>
+
+</code></pre>
+<p><strong>2. <code>forward</code> 処理の修正</strong></p>
+<p>CLSトークンを結合せず、エージェント位置のトークンから行動を決定します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, return_aux=<span class="hljs-literal">False</span></span>):
+    <span class="hljs-keyword">if</span> x.dim() == <span class="hljs-number">3</span>:
+        x = x.unsqueeze(<span class="hljs-number">0</span>)
+
+    B, C, H, W = x.shape
+    wall_map = x[:, self.wall_channel_idx, :, :]
+    agent_map = x[:, <span class="hljs-number">3</span>, :, :]
+    distance_target = x[:, self.distance_channel_idx, :, :].reshape(B, -<span class="hljs-number">1</span>)
+
+    agent_pos_flat = agent_map.reshape(B, -<span class="hljs-number">1</span>).argmax(dim=<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B,)</span>
+    x = x.permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>).contiguous().reshape(B, H * W, C)  <span class="hljs-comment"># (B, N, C)</span>
+
+    x = self.embedding(x)  <span class="hljs-comment"># (B, N, d_model)</span>
+
+    <span class="hljs-comment"># CLSトークンの結合処理を廃止</span>
+    <span class="hljs-keyword">if</span> self.use_wall_mask:
+        attn_mask = self._build_attn_mask(wall_map, B, x.device)
+    <span class="hljs-keyword">else</span>:
+        attn_mask = <span class="hljs-literal">None</span>
+
+    <span class="hljs-comment"># RoPEの適用（N個のセル表現に対して直接適用）</span>
+    <span class="hljs-comment"># ※rope_cos, rope_sin の先頭1つ(CLS用)を除いた N個分 を使用</span>
+    rope_cos = self.rope_cos[<span class="hljs-number">1</span>:] <span class="hljs-keyword">if</span> self.rope_cos.size(<span class="hljs-number">0</span>) == self.num_tokens + <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> self.rope_cos
+    rope_sin = self.rope_sin[<span class="hljs-number">1</span>:] <span class="hljs-keyword">if</span> self.rope_sin.size(<span class="hljs-number">0</span>) == self.num_tokens + <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> self.rope_sin
+
+    x = self.transformer(x, rope_cos, rope_sin, attn_mask=attn_mask)  <span class="hljs-comment"># (B, N, d_model)</span>
+
+    <span class="hljs-comment"># CLSの代わりに「最終層のエージェント位置のトークン表現」を取得</span>
+    batch_range = torch.arange(B, device=x.device)
+    agent_out = x[batch_range, agent_pos_flat]  <span class="hljs-comment"># (B, d_model)</span>
+
+    logits = self.actor_head(agent_out)
+    value = self.critic_head(agent_out)
+
+    <span class="hljs-keyword">if</span> return_aux:
+        distance_pred = self.distance_head(x).squeeze(-<span class="hljs-number">1</span>)  <span class="hljs-comment"># (B, N)</span>
+        <span class="hljs-keyword">return</span> logits, value.squeeze(-<span class="hljs-number">1</span>), distance_pred, distance_target
+
+    <span class="hljs-keyword">return</span> logits, value.squeeze(-<span class="hljs-number">1</span>)
+
+</code></pre>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>前回と今回でエポックごとの報酬を比較しました。
+今回が明らかに良くない状態のようです。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\13_maze_improvement_v5\1786504790052.png" alt="1786504790052"></p>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習後のエージェントの動作を確認します。
+前回より悪化しています。
+同じパラメータを何度も使って、経路を長期で考えるという方法には課題があるようです。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\13_maze_improvement_v5\agent_maze_solve (2).gif">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\13_maze_improvement_v5\agent_maze_solve (4).gif">
+<h3 id="敗因分析">敗因分析</h3>
+<p>後付けですが、今回良くなかった理由を考えました。</p>
+<ol>
+<li>反復ステップ（「いま何回目の計算か」）の情報の欠如</li>
+</ol>
+<p>通常の Transformer では、1層目、2層目、3層目がそれぞれ「初期特徴抽出」「ローカル伝播」「広域集約」といった層ごとの役割を自然に分担して学習します。</p>
+<ul>
+<li>share_weights=True の問題: 全く同じパラメータの層をループさせるため、モデルは「いまが1ホップ目の伝播なのか、10ホップ目の伝播なのか」を判別できません。</li>
+<li>本来必要な工夫: Universal Transformer の原論文（Dehghani et al.）などでは、何回目の反復かを示す Step Embedding（時間的・層的エンコーディング） を毎ステップ加算して入力します。これが無いと、1層目（初期状態）と10層目（伝播完了状態）で全く同じ変換を強制されるため、モデルの表現力が著しく制約されます。</li>
+</ul>
+<ol start="2">
+<li>残差接続（Residual Connection）によるスケール漂流と勾配問題</li>
+</ol>
+<p>TransformerLayer は x = x + Dropout(SubLayer(Norm(x))) という残差構造を持っています。</p>
+<ul>
+<li>スケール膨張: 同じ重みの残差接続を 8〜16 回繰り返すと、層を経るごとに内部ベクトル <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> のノルム（大きさ）が徐々に膨れ上がり、LayerNorm を挟んでいても Attention logits のスケールが歪んでいきます。</li>
+<li>勾配消失・爆発: BPTT（時間方向の逆伝播）と同様に、同じ行列を8回通過する勾配パスが生じるため、PPOの勾配更新が非常に不安定になります。PPOはポリシーの更新が少しブレるだけで学習が崩壊しやすいため、この不安定さが直撃したと考えられます。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>今回のまとめを行います。</p>
+<p><strong>今回の取り組みのエッセンス</strong></p>
+<ul>
+<li><strong>目的</strong><br>
+迷路タスクで「壁を迂回する経路探索」を、Transformerで「1層＝1ホップの価値伝播」として解くこと。</li>
+<li><strong>手段</strong>
+<ul>
+<li>Universal Transformer（UT）風に「1つのTransformer層を共有して反復適用」し、VINのように「同じ伝播規則をどこでも繰り返す」帰納バイアスを再現。</li>
+<li>Attentionを「隣接マスのみ」に制限（<code>use_wall_mask=True</code>）し、層数（≒ホップ数）を迷路の直径程度（8層）まで増やした。</li>
+<li>CLSトークンを廃止し、最終層の「エージェント位置のセル表現」から行動を決定する設計に変更。</li>
+</ul>
+</li>
+</ul>
+<p><strong>結果と敗因</strong></p>
+<ul>
+<li><strong>結果</strong>：報酬曲線が前回より悪化し、実際の迷路探索も劣化。</li>
+<li><strong>主な敗因</strong>（ご自身の分析を踏まえた整理）
+<ol>
+<li><strong>反復ステップ情報の欠如</strong><br>
+UTでは「いま何回目の反復か」を表す<strong>Step Embedding</strong>を加えるのが基本ですが、それを入れず、<strong>同じ重みを同じ変換として8回繰り返した</strong>ため、
+<ul>
+<li>初期状態（1ホップ目）と伝播完了状態（8ホップ目）を区別できず、</li>
+<li>層ごとの役割分担（初期特徴抽出→ローカル伝播→広域集約）が学習できなかった。</li>
+</ul>
+</li>
+<li><strong>残差接続のスケール・勾配問題</strong>
+<ul>
+<li>同じ残差構造を8回繰り返すと、内部ベクトルのノルムが膨れ上がり、Attentionのスケールが歪みやすい。</li>
+<li>同じ行列を8回通る勾配パスができ、PPOのような敏感な強化学習では<strong>勾配が不安定になり学習が崩壊しやすい</strong>。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p><strong>まとめ</strong></p>
+<ul>
+<li><strong>しかし実装が不十分</strong>：<br>
+UTの本質である<strong>Step Embeddingによる時間情報の付与</strong>と、<strong>残差接続のスケール制御（例：LayerNormの工夫、ACTなど）</strong> を入れなかったため、PPOの不安定さに直撃し、学習が悪化した。</li>
+</ul>
+<p>次回もう少し実装見直してリトライしてみます。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/QyzK21nx70o?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
