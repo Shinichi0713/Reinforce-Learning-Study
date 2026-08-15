@@ -46,6 +46,34 @@ def priority_agent_order(priority_scores: torch.Tensor) -> torch.Tensor:
     order = torch.argsort(priority_scores, dim=1)  # 小さい順 = 優先度が高い順
     return order
 
+def collect_moe_aux_loss(model: nn.Module) -> torch.Tensor:
+    """
+    モデル内の全MoELayerからaux_lossを収集して平均する。
+    どのMoELayerも一度もforwardされていない(last_aux_lossがNone)場合は
+    0を返す(通常、forward_train実行後に呼べば全層に値が入っているはず)。
+    """
+    aux_losses = []
+    for module in model.modules():
+        if isinstance(module, MoELayer) and module.last_aux_loss is not None:
+            aux_losses.append(module.last_aux_loss)
+
+    if not aux_losses:
+        # モデルがまだ一度もforwardされていない場合の安全策
+        return torch.tensor(0.0, device=next(model.parameters()).device)
+
+    return torch.stack(aux_losses).mean()
+
+def collect_moe_expert_usage(model: nn.Module) -> dict:
+    """
+    各MoELayerのexpert選択頻度をログ用に収集する(ログ・デバッグ専用、勾配不要)。
+    戻り値: {"obs_encoder.layers.0.moe": tensor([0.3, 0.2, 0.3, 0.2]), ...}
+    """
+    usage = {}
+    for name, module in model.named_modules():
+        if isinstance(module, MoELayer) and module.last_expert_usage is not None:
+            usage[name] = module.last_expert_usage.cpu().numpy()
+    return usage
+
 # ==========================================
 # 1. 🌟 新設: Gated Multi-Head Attention (Attention-Sink-Free)
 # ==========================================
@@ -174,28 +202,44 @@ class MoELayer(nn.Module):
             ) for _ in range(num_experts)
         ])
 
-    def forward(self, x):
+        # 🌟 追加: 直近のforwardで計算された負荷分散損失を保持するバッファ
+        #    (勾配を持つTensorのままモジュール属性として保持し、update側で回収する)
+        self.last_aux_loss = None
+        # 🌟 追加: expert選択頻度の可視化用(勾配不要、ログ専用)
+        self.last_expert_usage = None
+
+    def forward(self, x: torch.Tensor):
         orig_shape = x.shape
         x_flat = x.view(-1, self.d_model)
 
         gate_logits = self.gate(x_flat)
         gate_probs = F.softmax(gate_logits, dim=-1)
+
         top1_probs, top1_indices = torch.topk(gate_probs, k=1, dim=-1)
 
-        # --- 追加: 負荷分散損失（Switch Transformer方式）---
+        # -----------------------------------------------------------------
+        # 🌟 追加: Switch Transformer方式の負荷分散損失
+        #    frac_tokens_per_expert: 実際にそのexpertに割り当てられたトークンの割合
+        #    frac_prob_per_expert:   ゲートが平均的にそのexpertに割いた確率
+        #    両者の積の和が小さいほど、負荷が均等に分散されている
+        # -----------------------------------------------------------------
         num_tokens = x_flat.shape[0]
         one_hot = F.one_hot(top1_indices.squeeze(-1), num_classes=self.num_experts).float()
-        frac_tokens_per_expert = one_hot.mean(dim=0)          # 各expertに実際に割り当てられた割合
-        frac_prob_per_expert = gate_probs.mean(dim=0)          # 各expertのゲート確率の平均
+        frac_tokens_per_expert = one_hot.mean(dim=0)          # (num_experts,) 勾配なし(離散選択)
+        frac_prob_per_expert = gate_probs.mean(dim=0)          # (num_experts,) 勾配あり
         aux_loss = self.num_experts * (frac_tokens_per_expert * frac_prob_per_expert).sum()
-        self.last_aux_loss = aux_loss  # 後でupdate側で回収
+
+        self.last_aux_loss = aux_loss
+        with torch.no_grad():
+            self.last_expert_usage = frac_tokens_per_expert.detach().clone()
 
         output_flat = torch.zeros_like(x_flat)
         for expert_idx in range(self.num_experts):
             mask = (top1_indices.squeeze(-1) == expert_idx)
             if not mask.any():
                 continue
-            expert_out = self.experts[expert_idx](x_flat[mask])
+            expert_in = x_flat[mask]
+            expert_out = self.experts[expert_idx](expert_in)
             output_flat[mask] = expert_out * gate_probs[mask, expert_idx:expert_idx+1]
 
         return output_flat.view(orig_shape)
@@ -494,7 +538,8 @@ class MAT_PPO:
                  d_model=64, nhead=4, spatial_layers=2, enc_layers=2, dec_layers=2,
                  lr=1e-4, gamma=0.99, gae_lambda=0.95,
                  clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
-                 order_mode="random",  # 🌟 追加: "fixed" | "random" | "priority"
+                 order_mode="random",
+                 moe_aux_loss_coef=0.01,   # 🌟 追加: 負荷分散損失の重み
                  device=torch.device("cpu")):
         self.num_agents = num_agents
         self.obs_dim = obs_dim
@@ -505,6 +550,7 @@ class MAT_PPO:
         self.value_coef = value_coef
         self.entropy_coef = entropy_coef
         self.order_mode = order_mode
+        self.moe_aux_loss_coef = moe_aux_loss_coef   # 🌟 追加
         self.device = device
 
         self.model = MATActorCritic(
@@ -555,53 +601,37 @@ class MAT_PPO:
             order.squeeze(0).cpu().numpy(),  # 🌟 rolloutバッファに保存しておく（学習時に再利用するため）
         )
 
-    def update(self, batch: dict, epochs: int = 3, use_individual_clipping: bool = True):
-        """
-        use_individual_clipping:
-            True  -> エージェントごとに比率・アドバンテージを個別クリッピング(推奨・新方式)
-            False -> 従来通りチーム全体の同時比率でクリッピング(比較用)
-        """
+    def update(self, batch: dict, epochs: int = 3):
         if batch is None:
-            return 0.0, 0.0, 0.0
+            return 0.0, 0.0, 0.0, 0.0   # 🌟 戻り値にaux_lossを追加(呼び出し側の修正が必要、後述)
 
         obs = torch.as_tensor(batch["obs"], dtype=torch.float32, device=self.device)
         actions = torch.as_tensor(batch["actions"], dtype=torch.long, device=self.device)
         old_log_probs = torch.as_tensor(batch["log_probs"], dtype=torch.float32, device=self.device)
-        advantages = torch.as_tensor(batch["advantages"], dtype=torch.float32, device=self.device)  # (B, N)
+        advantages = torch.as_tensor(batch["advantages"], dtype=torch.float32, device=self.device)
         returns = torch.as_tensor(batch["rewards"], dtype=torch.float32, device=self.device)
         order = torch.as_tensor(batch["order"], dtype=torch.long, device=self.device)
 
-        # 🌟 変更点: アドバンテージの正規化を、エージェント次元も含めた全体で行う
-        #    (個別方式でもチーム方式でも、正規化のスケール基準は揃えておく)
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-        actor_losses, critic_losses, entropies = [], [], []
+        actor_losses, critic_losses, entropies, aux_losses = [], [], [], []
 
         for _ in range(epochs):
             new_log_probs, entropy, values = self.model.forward_train(obs, actions, order=order)
-            # new_log_probs, entropy: (B, N)  values: (B, N)
 
-            if use_individual_clipping:
-                # 🌟 新方式: エージェントごとに比率とアドバンテージを個別評価
-                per_agent_ratio = torch.exp(new_log_probs - old_log_probs)  # (B, N)
+            joint_new_log_prob = new_log_probs.sum(dim=-1)
+            joint_old_log_prob = old_log_probs.sum(dim=-1)
+            ratio = torch.exp(joint_new_log_prob - joint_old_log_prob)
 
-                surr1 = per_agent_ratio * advantages
-                surr2 = torch.clamp(per_agent_ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * advantages
-
-                # 各サンプル・各エージェントでmin(surr1, surr2)を取り、全体平均
-                actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
-
-            else:
-                # 従来方式: チーム全体の同時確率比率でクリッピング(比較用に残す)
-                joint_new_log_prob = new_log_probs.sum(dim=-1)
-                joint_old_log_prob = old_log_probs.sum(dim=-1)
-                ratio = torch.exp(joint_new_log_prob - joint_old_log_prob)
-
+            if len(advantages.shape) > 1 and advantages.shape[1] == self.num_agents:
                 step_advantages = advantages.mean(dim=-1)
+            else:
+                step_advantages = advantages.squeeze(-1) if len(advantages.shape) > 1 else advantages
 
-                surr1 = ratio * step_advantages
-                surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * step_advantages
-                actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
+            surr1 = ratio * step_advantages
+            surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * step_advantages
+
+            actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
 
             if values.shape != returns.shape:
                 returns_reshaped = returns.view_as(values)
@@ -610,7 +640,10 @@ class MAT_PPO:
 
             critic_loss = nn.SmoothL1Loss()(values, returns_reshaped) * self.value_coef
 
-            loss = actor_loss + critic_loss
+            # 🌟 追加: forward_train実行直後、モデル内の全MoE層からaux_lossを回収
+            moe_aux_loss = collect_moe_aux_loss(self.model)
+
+            loss = actor_loss + critic_loss + self.moe_aux_loss_coef * moe_aux_loss
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -620,8 +653,14 @@ class MAT_PPO:
             actor_losses.append(actor_loss.item())
             critic_losses.append(critic_loss.item())
             entropies.append(entropy.mean().item())
+            aux_losses.append(moe_aux_loss.item())   # 🌟 追加
 
-        return float(np.mean(actor_losses)), float(np.mean(critic_losses)), float(np.mean(entropies))
+        return (
+            float(np.mean(actor_losses)),
+            float(np.mean(critic_losses)),
+            float(np.mean(entropies)),
+            float(np.mean(aux_losses)),   # 🌟 追加
+        )
 
     def save_checkpoint(self, path: str, episode: int):
         self.model.cpu()
