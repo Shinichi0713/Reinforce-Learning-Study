@@ -37,7 +37,7 @@ def train(
         num_agents=num_agents, obs_dim=obs_dim, action_dim=action_dim,
         lr=lr, gamma=gamma, gae_lambda=gae_lambda,
         clip_epsilon=clip_epsilon, value_coef=value_coef, entropy_coef=entropy_coef,
-        order_mode="priority",   # 🌟 忘れずに指定
+        order_mode="random",   # 🌟 忘れずに指定: priority
         device=device,
     )
 
@@ -137,22 +137,29 @@ def train(
         # =========================================================
         # 3. PPO更新: epochs回、シャッフルしたミニバッチで学習
         # =========================================================
-        actor_losses, critic_losses, entropies = [], [], []
+        actor_losses, critic_losses, entropies, aux_losses = [], [], [], []   # 🌟 修正
         for _epoch in range(epochs):
             for minibatch in buffer.get_batches(batch_size=batch_size, shuffle=False):
-                # epochs=1: 1回のミニバッチにつき1回の勾配更新
-                a_loss, c_loss, ent = mat_ppo.update(minibatch, epochs=1)
+                a_loss, c_loss, ent, aux_loss = mat_ppo.update(minibatch, epochs=1)   # 🌟 修正
                 actor_losses.append(a_loss)
                 critic_losses.append(c_loss)
                 entropies.append(ent)
+                aux_losses.append(aux_loss)   # 🌟 追加
 
         if update_idx % log_every == 0:
             print(
                 f"update={update_idx}/{total_updates} "
                 f"actor_loss={np.mean(actor_losses):.4f} "
                 f"critic_loss={np.mean(critic_losses):.4f} "
-                f"entropy={np.mean(entropies):.4f}"
+                f"entropy={np.mean(entropies):.4f} "
+                f"moe_aux_loss={np.mean(aux_losses):.4f}"   # 🌟 追加
             )
+
+            # 🌟 追加: expert選択頻度を定期的にログして偏りを確認
+            expert_usage = collect_moe_expert_usage(mat_ppo.model)
+            for layer_name, usage in expert_usage.items():
+                usage_str = ", ".join(f"{u:.2f}" for u in usage)
+                print(f"    [{layer_name}] expert_usage=[{usage_str}]")
 
         # =========================================================
         # 4. チェックポイント保存
