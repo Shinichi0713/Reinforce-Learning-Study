@@ -193,7 +193,13 @@ class MoELayer(nn.Module):
         super().__init__()
         self.num_experts = num_experts
         self.d_model = d_model
+
+        # 🌟 追加: gate専用のLayerNorm
+        #    expert本体の計算経路には影響を与えず、
+        #    「どのexpertを選ぶか」の判断だけを正規化された特徴で行う
+        self.gate_norm = nn.LayerNorm(d_model)
         self.gate = nn.Linear(d_model, num_experts)
+
         self.experts = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(d_model, expert_hidden_dim),
@@ -202,31 +208,25 @@ class MoELayer(nn.Module):
             ) for _ in range(num_experts)
         ])
 
-        # 🌟 追加: 直近のforwardで計算された負荷分散損失を保持するバッファ
-        #    (勾配を持つTensorのままモジュール属性として保持し、update側で回収する)
         self.last_aux_loss = None
-        # 🌟 追加: expert選択頻度の可視化用(勾配不要、ログ専用)
         self.last_expert_usage = None
 
     def forward(self, x: torch.Tensor):
         orig_shape = x.shape
         x_flat = x.view(-1, self.d_model)
 
-        gate_logits = self.gate(x_flat)
+        # 🌟 変更点: gateへの入力だけ正規化する
+        #    (expertへの入力 x_flat 自体は従来通り生の値を使う)
+        gate_input = self.gate_norm(x_flat)
+        gate_logits = self.gate(gate_input)
         gate_probs = F.softmax(gate_logits, dim=-1)
 
         top1_probs, top1_indices = torch.topk(gate_probs, k=1, dim=-1)
 
-        # -----------------------------------------------------------------
-        # 🌟 追加: Switch Transformer方式の負荷分散損失
-        #    frac_tokens_per_expert: 実際にそのexpertに割り当てられたトークンの割合
-        #    frac_prob_per_expert:   ゲートが平均的にそのexpertに割いた確率
-        #    両者の積の和が小さいほど、負荷が均等に分散されている
-        # -----------------------------------------------------------------
         num_tokens = x_flat.shape[0]
         one_hot = F.one_hot(top1_indices.squeeze(-1), num_classes=self.num_experts).float()
-        frac_tokens_per_expert = one_hot.mean(dim=0)          # (num_experts,) 勾配なし(離散選択)
-        frac_prob_per_expert = gate_probs.mean(dim=0)          # (num_experts,) 勾配あり
+        frac_tokens_per_expert = one_hot.mean(dim=0)
+        frac_prob_per_expert = gate_probs.mean(dim=0)
         aux_loss = self.num_experts * (frac_tokens_per_expert * frac_prob_per_expert).sum()
 
         self.last_aux_loss = aux_loss
@@ -238,12 +238,11 @@ class MoELayer(nn.Module):
             mask = (top1_indices.squeeze(-1) == expert_idx)
             if not mask.any():
                 continue
-            expert_in = x_flat[mask]
+            expert_in = x_flat[mask]                     # 🌟 expert本体には生のx_flatを渡す(変更なし)
             expert_out = self.experts[expert_idx](expert_in)
             output_flat[mask] = expert_out * gate_probs[mask, expert_idx:expert_idx+1]
 
         return output_flat.view(orig_shape)
-
 
 # ==========================================
 # 3. 🌟 Gated Attention 統合型 Transformer レイヤー
