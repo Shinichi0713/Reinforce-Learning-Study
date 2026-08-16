@@ -85,3 +85,165 @@ MoEは入力に応じて、どのexpert（専門のサブネットワーク）�
 
 以下、コードレベルで「何を」実装するかについて説明していきます。
 
+__1. `MoELayer.forward()` に負荷分散損失の計算を追加__
+
+**変更前**にはこの処理はありませんでした。**変更後**、forwardのたびに以下を追加で計算するようにしました。
+
+```python
+one_hot = F.one_hot(top1_indices.squeeze(-1), num_classes=self.num_experts).float()
+frac_tokens_per_expert = one_hot.mean(dim=0)   # 実際に各expertへ振り分けられたトークンの割合
+frac_prob_per_expert = gate_probs.mean(dim=0)   # gateが平均的に各expertへ割いた確率
+aux_loss = self.num_experts * (frac_tokens_per_expert * frac_prob_per_expert).sum()
+
+self.last_aux_loss = aux_loss   # 後で回収できるようモジュールに保持しておく
+```
+
+**やっていることの意味**:
+- `frac_tokens_per_expert`: 「実際にどのexpertがどれくらいの頻度で選ばれたか」の実測値（例: `[0.7, 0.1, 0.1, 0.1]` なら1番目のexpertに偏っている）
+- `frac_prob_per_expert`: gateが出した確率の平均値（実際に選ばれたかは関係なく、gateの"傾向"）
+- 両者を掛け合わせて合計することで、「**特定のexpertに実測でも確率でも偏っているほど大きくなる値**」を作っています。これを損失として最小化すると、gateは自然と各expertを均等に選ぶよう学習されます
+
+`self.last_aux_loss` にその値をモジュール自身の属性として保存しています。これは後で他の場所（`update()`関数）から取り出して使うための"置き場"です。
+
+併せて、確認用に選択頻度そのものも保存しています。
+
+```python
+with torch.no_grad():
+    self.last_expert_usage = frac_tokens_per_expert.detach().clone()
+```
+
+__2. モデル全体から損失・使用状況を集めるための2つの関数を追加__
+
+`MATActorCritic` は内部に `obs_encoder` → `encoder` → `decoder` と複数の階層があり、それぞれの中に複数の `MoELayer` が埋め込まれています（`num_layers`分）。1箇所ずつ手で取り出すのは大変なので、**モデル全体を自動的に探索して集める関数**を2つ新設しました。
+
+```python
+def collect_moe_aux_loss(model):
+    aux_losses = []
+    for module in model.modules():         # モデル内の全サブモジュールを走査
+        if isinstance(module, MoELayer) and module.last_aux_loss is not None:
+            aux_losses.append(module.last_aux_loss)
+    return torch.stack(aux_losses).mean()  # 全MoE層の平均を1つの値にまとめる
+```
+
+`model.modules()` はPyTorchの標準機能で、「このモデルの中に埋め込まれている全てのモジュールを再帰的に列挙する」ものです。これを使うことで、`obs_encoder`の中のMoE層も、`encoder`の中のMoE層も、`decoder`の中のMoE層も、**構造を意識せず自動的に全部拾えます**。
+
+```python
+def collect_moe_expert_usage(model):
+    usage = {}
+    for name, module in model.named_modules():   # 名前付きで走査(ログでどの層か分かるように)
+        if isinstance(module, MoELayer) and module.last_expert_usage is not None:
+            usage[name] = module.last_expert_usage.cpu().numpy()
+    return usage
+```
+
+こちらは損失計算用ではなく、**人間が確認するためのログ出力専用**です。「`obs_encoder.layers.0.moe` というMoE層では、4つのexpertがそれぞれ何%ずつ使われているか」を辞書として返します。
+
+__3. `MAT_PPO.update()` で、通常の損失にこのaux_lossを加算__
+
+これまでは
+
+```python
+loss = actor_loss + critic_loss
+```
+
+だけでしたが、これを
+
+```python
+moe_aux_loss = collect_moe_aux_loss(self.model)   # ①で計算した値を②の関数でモデル全体から回収
+loss = actor_loss + critic_loss + self.moe_aux_loss_coef * moe_aux_loss   # 小さい重みを掛けて加算
+```
+
+に変更しました。`self.moe_aux_loss_coef`（デフォルト`0.01`）という新しい設定値を追加し、「行動決定の学習(`actor_loss`)や状態価値の学習(`critic_loss`)を邪魔しない程度に、控えめな重みでexpertの均等化も一緒に学習させる」ようにしています。
+
+この `loss` を1つの塊として `loss.backward()` することで、**通常のPPO学習と同時に、gateのパラメータ（`self.gate`）にも「均等に選べ」という勾配が流れる**ようになります。
+
+__4. gate専用の`LayerNorm`を追加__
+
+こちらは、ほとんど参考とされないExpertが出てくることに対する対策です。
+
+`MATEncoder` の入力は
+
+```python
+x = agent_feats + self.agent_pos_embedding
+```
+
+という**単純な加算**です。`agent_pos_embedding` は `torch.randn(1, num_agents, d_model)` で初期化される学習パラメータで、初期値のノルムが `agent_feats`（実際のエージェントの状態から計算された特徴量）と比べて大きい、あるいは学習が進んでも縮小しない場合、**gateへの入力ベクトルの向き・大きさが「どのスロットか」でほぼ決まってしまい、「今何が起きているか」の情報が埋もれてしまいます**。
+
+`LayerNorm` はベクトルの各次元を平均0・分散1に正規化するので、**特定の次元だけが大きい値を持つ(=位置埋め込みが支配的)という状態を緩和し、各次元が相対的に対等な影響力を持つように補正**します。これにより、gateが「スロット位置」ではなく「特徴の中身」により敏感に反応しやすくなることを期待しています。
+
+**expert本体への入力は正規化していない点が重要**です。もし`x_flat`全体を正規化してしまうと、`agent_pos_embedding`が本来持っていた「このエージェントは何番目か」という有用な位置情報まで、expertの計算からも失われてしまいます。今回は「gateの判断」だけをピンポイントで補正し、expertの表現力自体は変えないようにしています。
+
+__ログ出力への追加__
+
+`train()` 関数側では、以下の2つを新たに画面出力するようにしました。
+
+```python
+print(f"... moe_aux_loss={np.mean(aux_losses):.4f}")
+
+expert_usage = collect_moe_expert_usage(mat_ppo.model)
+for layer_name, usage in expert_usage.items():
+    print(f"    [{layer_name}] expert_usage=[{0.25, 0.24, 0.26, 0.25のような配列}]")
+```
+
+これにより、学習を回しながら「aux_lossの値が下がってきているか（＝偏りが解消に向かっているか）」「実際の選択頻度が均等に近づいているか」を、数値として目視確認できるようにしています。
+
+### 変更のイメージ図
+
+```
+【変更前】
+MoELayer.forward()
+  └ gateで選ばれたexpertだけ計算して出力を返す（それだけ）
+
+  MAT_PPO.update()
+  └ loss = actor_loss + critic_loss
+
+【変更後】
+MoELayer.forward()
+  └ gateで選ばれたexpertだけ計算して出力を返す
+  └ ＋「偏り具合」を数値化してself.last_aux_lossに保存 ★NEW
+  └ ＋「実際の選択割合」をself.last_expert_usageに保存 ★NEW
+
+  collect_moe_aux_loss() / collect_moe_expert_usage()  ★NEW
+  └ モデル内の全MoELayerを自動で探し出し、値をかき集める
+
+  MAT_PPO.update()
+  └ moe_aux_loss = collect_moe_aux_loss(model)          ★NEW
+  └ loss = actor_loss + critic_loss + 0.01 * moe_aux_loss   ★変更
+
+  ログ出力
+  └ moe_aux_lossの値、各層の選択頻度を表示            ★NEW
+```
+
+やっていることは、**「MoEの中身に、選択の偏りを測るセンサーを仕込み、その偏りを小さくする方向の力を通常の学習と一緒にかける」** という、この1点に尽きます。既存の行動決定ロジック（Attention、デコード順序など）には一切手を加えていません。
+
+### 実装コード
+
+以下のレポジトリに完成コードを保管しています。
+ご参考下さい。
+
+https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src
+
+後、今回から参照するpursuitのversionが変わってました。
+`pursuit_v4`から`pursuit_v5`に変更になっています。
+
+## 学習
+今回実装により学習した結果をまとめます。
+
+### 学習の結果
+
+学習中に"おっ"と思ったことがありました。
+学習中にエポックごとにどれだけの捕獲者が捕まえられたかを表示しているのですが、通常は良くても 33 か 34 でしたが、今回初めて 38 という捕獲者を得るものが出てきました。
+
+![1786837925405](image/18_more_well_predator_v1/1786837925405.png)
+
+今回の学習の推移を前回と比較して表示します。
+横軸が学習時のエポック、縦軸が報酬とエントロピです。
+
+### agentの動作
+
+学習後のエージェントの動作を確認します。
+
+## 総括
+
+
+
