@@ -1,10 +1,10 @@
 import numpy as np
-from pettingzoo.sisl import pursuit_v4
+from pettingzoo.sisl import pursuit_v5
 
 class PursuitWrapper:
     def __init__(self, render_mode=None, max_cycles=500, obs_range=7):
         # チームとしての共通目的を維持するため shared_reward=True で環境を初期化
-        self.env = pursuit_v4.env(
+        self.env = pursuit_v5.env(
             render_mode=render_mode,
             max_cycles=max_cycles,
             shared_reward=True
