@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x672c;&#x65e5;&#x6539;&#x4fee;&#x306e;&#x65b9;&#x5411;&#x6027;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>本日はチーム連携の強化学習を行って捕獲を行っていくPursuitのトライアルについてです。
+<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/05/043000">前回</a>改修で以下を課題と考えて、改修を行いました。</p>
+<ul>
+<li>
+<p>一角の敵を捕獲後にも停滞してしまう<br>
+4人ちょうど集まっていると、止まってもペナルティがかからなかったことを受けて、視界内に敵がいないときは、動いていなければ常にペナルティを与えるようにした。
+→ 捕獲後に一角に居座る局所解が弱まり、チームで次の敵を探しに行く動きが出るようになった。</p>
+</li>
+<li>
+<p>一角の捕獲の後に敵の居所が分からなくなる
+局所観測だけでは「敵の方向」が分からず、探索のメリットが小さかった。環境の実座標から<strong>最寄りの未捕獲preyまでの距離</strong>を計算し、縮まれば個別に報酬を与える報酬設計に変更した。さらに、チームの一定人数以上が同時に距離を縮めたら追加ボーナスを追加。
+→ 視界外の敵に向かってチームで移動する行動が報酬づけされ、実際に「一角クリア後に北上」などの探索行動が確認された。</p>
+</li>
+</ul>
+<p>結果、敵が少なくなってきたら移動して捕獲するという動作が確認できるようになったのですが、まだ改善できる余地がありそうでした。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="本日改修の方向性">本日改修の方向性</h2>
+<p>本日は、捕獲に集中、敵を探索をもう少しメリハリの利いた切り替え出来ないか考えていこうと思います。</p>
+<h3 id="変更の目的">変更の目的</h3>
+<p>以前、攻守の交代を行えるようにするようにということでモデルに役割分担を行わせる機能を付与→<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/08/043000">MoE（Mixture of Experts）を実装しました</a>。</p>
+<p>ですが、MoEを実装したのは良いものの、基本的に敵を追いかけるパターンのExpertのみが動作している可能性が感じられます。
+一言でいうと、<strong>MoEの中身が、一部のexpertだけを使い続ける状態に固まっていないか</strong>を疑い、それを是正するための変更です。</p>
+<h3 id="背景-なぜこれを疑ったか">背景: なぜこれを疑ったか</h3>
+<p>モデル構造を見直した際、<code>MoELayer</code>（Top-1ゲーティング方式のMoE）に、<strong>負荷分散のための仕組みが一切ない</strong>ことに気づきました。</p>
+<pre><code class="language-python">top1_probs, top1_indices = torch.topk(gate_probs, k=<span class="hljs-number">1</span>, dim=-<span class="hljs-number">1</span>)
+</code></pre>
+<p>MoEは入力に応じて、どのexpert（専門のサブネットワーク）を使うかをゲート（<code>self.gate</code>）に学習させる仕組みです。
+ここで何の補正もかけないと、<strong>学習初期のわずかな偶然の偏り（例えば「expert 2がたまたま少し良い出力をした」）が自己強化されてしまう</strong>ことが、MoEの研究（Switch Transformerなど）で広く知られています。</p>
+<ul>
+<li>expert 2が少し良い出力をする</li>
+<li>→ gateがexpert 2をより高い確率で選ぶようになる</li>
+<li>→ expert 2だけが多くのデータで訓練され、さらに上手くなる</li>
+<li>→ 他のexpert（0, 1, 3）はほとんど訓練されず、性能が伸びない</li>
+<li>→ gateはますますexpert 2ばかり選ぶ</li>
+</ul>
+<p>という<strong>正のフィードバックループ</strong>が起き、最終的に「実質1つのexpertしか使っていない、<code>num_experts=4</code>で確保したかった表現力が無駄になっている」状態（collapse）に陥りやすいのです。</p>
+<h3 id="なぜこれが一角の敵が少なくなった後も居座る味方がいる症状と結びつくか">なぜこれが「一角の敵が少なくなった後も居座る味方がいる」症状と結びつくか</h3>
+<p>このモデルは、Transformerの各層に複数のexpertを配置することで、「状況に応じて異なる振る舞いを専門化して学習する」ことを狙った設計になっています。例えば理想的には、</p>
+<ul>
+<li>「近くに大量の敵がいて包囲している」状況用のexpert</li>
+<li>「敵が少なく、次のターゲットを探すべき」状況用のexpert</li>
+</ul>
+<p>のように、状況によって使うexpertが切り替わることで、柔軟な行動が学習されることが期待されます。しかし、もしcollapseが起きていて実質1つのexpertしか機能していない場合、<strong>「敵を包囲する」という頻度の高い状況に最適化されたexpertが、そのまま「敵が少なくなった後」という頻度の低い、切り替えが必要な状況にも使われ続けてしまいます</strong>。結果として、「本来なら次の行動に切り替えるべき局面でも、慣れた振る舞い(＝待機・現状維持)」しか出力できない、という症状が起きても不思議ではありません。</p>
+<p>つまり今回の改修により、<strong>「モデルの表現力の一部が、実質的に死んでいるのではないか」という仮説を検証・是正するための処置</strong>を行うという意図です。</p>
+<h2 id="対策">対策</h2>
+<h3 id="具体的に何をしたか">具体的に何をしたか</h3>
+<p>エキスパートの分散を促す機構を入れて役割分担を学習できるようにしていこうと思います。</p>
+<p>具体的には以下を行います。</p>
+<ol>
+<li>
+<p><strong>負荷分散損失（load-balancing loss）の追加</strong>: 各expertが「均等に選ばれる」ように誘導する補助的な損失項を追加し、通常の学習損失（<code>actor_loss + critic_loss</code>）に小さい重みで加算しました。これにより、gateが特定のexpertだけに偏る動きを、学習の過程で継続的に押し戻します。</p>
+</li>
+<li>
+<p><strong>expert選択頻度の可視化ログ</strong>: 実際に「各expertがどれくらいの割合で選ばれているか」を学習中に確認できるようにしました。これは仮説そのものが正しいかどうか（本当にcollapseが起きているのか）を、感覚ではなく数値で確認するためのものです。</p>
+</li>
+</ol>
+<h3 id="期待される効果">期待される効果</h3>
+<ul>
+<li><strong>主目的</strong>: 各expertが幅広い状況で使われるようになり、「頻度は低いが重要な状況（捕獲後の切り替えなど）」に対応する表現力がモデル内に確保されやすくなる。結果として、<strong>居座り行動が減ることを期待</strong>しています。</li>
+<li><strong>副次的な効果</strong>: MoE全体としての実効的なパラメータ利用効率が上がるため、単純にモデルの表現力・学習効率自体が改善する可能性もあります（居座り以外の面でも性能向上が見られるかもしれません）。</li>
+</ul>
+<h3 id="この変更でわからないことも正直にお伝えします">この変更で「わからないこと」も正直にお伝えします</h3>
+<p>この変更は、あくまで <strong>「MoE collapseが症状2の原因である」という仮説に基づく処置</strong> です。ログで確認して、</p>
+<ul>
+<li><strong>もし <code>expert_usage</code> の偏りが実際に解消され、かつ居座り行動も減った</strong> → 仮説が正しかったことになります</li>
+<li><strong><code>expert_usage</code> の偏りは解消されたが、居座り行動が変わらない</strong> → MoE collapseは実在したが、居座りの主因ではなかったことになります。この場合は、前回提示した「担当ターゲットを明示的に観測へ追加する」対策（対策E）など、別の角度からのアプローチに進む必要があります</li>
+<li><strong>そもそも <code>expert_usage</code> に大きな偏りが見られなかった</strong> → 今回の仮説自体が外れていたことになり、原因は他（報酬設計、観測情報の不足など）にある可能性が高くなります</li>
+</ul>
+<p>今回の対応が、<strong>今回の変更は「効果がある対策」というより「原因を1つ検証・除外するための処置」という性格が強い</strong>点はご理解いただければと思います。
+学習段階でのログを確認の上、expertの分散が出来るようになったかを確認することも目的の一つです。</p>
+<h2 id="実装">実装</h2>
+<h3 id="実装方針">実装方針</h3>
+<p>以下、コードレベルで「何を」実装するかについて説明していきます。</p>
+<p><strong>1. <code>MoELayer.forward()</code> に負荷分散損失の計算を追加</strong></p>
+<p><strong>変更前</strong>にはこの処理はありませんでした。<strong>変更後</strong>、forwardのたびに以下を追加で計算するようにしました。</p>
+<pre><code class="language-python">one_hot = F.one_hot(top1_indices.squeeze(-<span class="hljs-number">1</span>), num_classes=self.num_experts).<span class="hljs-built_in">float</span>()
+frac_tokens_per_expert = one_hot.mean(dim=<span class="hljs-number">0</span>)   <span class="hljs-comment"># 実際に各expertへ振り分けられたトークンの割合</span>
+frac_prob_per_expert = gate_probs.mean(dim=<span class="hljs-number">0</span>)   <span class="hljs-comment"># gateが平均的に各expertへ割いた確率</span>
+aux_loss = self.num_experts * (frac_tokens_per_expert * frac_prob_per_expert).<span class="hljs-built_in">sum</span>()
+
+self.last_aux_loss = aux_loss   <span class="hljs-comment"># 後で回収できるようモジュールに保持しておく</span>
+</code></pre>
+<p><strong>やっていることの意味</strong>:</p>
+<ul>
+<li><code>frac_tokens_per_expert</code>: 「実際にどのexpertがどれくらいの頻度で選ばれたか」の実測値（例: <code>[0.7, 0.1, 0.1, 0.1]</code> なら1番目のexpertに偏っている）</li>
+<li><code>frac_prob_per_expert</code>: gateが出した確率の平均値（実際に選ばれたかは関係なく、gateの&quot;傾向&quot;）</li>
+<li>両者を掛け合わせて合計することで、「<strong>特定のexpertに実測でも確率でも偏っているほど大きくなる値</strong>」を作っています。これを損失として最小化すると、gateは自然と各expertを均等に選ぶよう学習されます</li>
+</ul>
+<p><code>self.last_aux_loss</code> にその値をモジュール自身の属性として保存しています。これは後で他の場所（<code>update()</code>関数）から取り出して使うための&quot;置き場&quot;です。</p>
+<p>併せて、確認用に選択頻度そのものも保存しています。</p>
+<pre><code class="language-python"><span class="hljs-keyword">with</span> torch.no_grad():
+    self.last_expert_usage = frac_tokens_per_expert.detach().clone()
+</code></pre>
+<p><strong>2. モデル全体から損失・使用状況を集めるための2つの関数を追加</strong></p>
+<p><code>MATActorCritic</code> は内部に <code>obs_encoder</code> → <code>encoder</code> → <code>decoder</code> と複数の階層があり、それぞれの中に複数の <code>MoELayer</code> が埋め込まれています（<code>num_layers</code>分）。1箇所ずつ手で取り出すのは大変なので、<strong>モデル全体を自動的に探索して集める関数</strong>を2つ新設しました。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">collect_moe_aux_loss</span>(<span class="hljs-params">model</span>):
+    aux_losses = []
+    <span class="hljs-keyword">for</span> module <span class="hljs-keyword">in</span> model.modules():         <span class="hljs-comment"># モデル内の全サブモジュールを走査</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(module, MoELayer) <span class="hljs-keyword">and</span> module.last_aux_loss <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            aux_losses.append(module.last_aux_loss)
+    <span class="hljs-keyword">return</span> torch.stack(aux_losses).mean()  <span class="hljs-comment"># 全MoE層の平均を1つの値にまとめる</span>
+</code></pre>
+<p><code>model.modules()</code> はPyTorchの標準機能で、「このモデルの中に埋め込まれている全てのモジュールを再帰的に列挙する」ものです。これを使うことで、<code>obs_encoder</code>の中のMoE層も、<code>encoder</code>の中のMoE層も、<code>decoder</code>の中のMoE層も、<strong>構造を意識せず自動的に全部拾えます</strong>。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">collect_moe_expert_usage</span>(<span class="hljs-params">model</span>):
+    usage = {}
+    <span class="hljs-keyword">for</span> name, module <span class="hljs-keyword">in</span> model.named_modules():   <span class="hljs-comment"># 名前付きで走査(ログでどの層か分かるように)</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(module, MoELayer) <span class="hljs-keyword">and</span> module.last_expert_usage <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            usage[name] = module.last_expert_usage.cpu().numpy()
+    <span class="hljs-keyword">return</span> usage
+</code></pre>
+<p>こちらは損失計算用ではなく、<strong>人間が確認するためのログ出力専用</strong>です。「<code>obs_encoder.layers.0.moe</code> というMoE層では、4つのexpertがそれぞれ何%ずつ使われているか」を辞書として返します。</p>
+<p><strong>3. <code>MAT_PPO.update()</code> で、通常の損失にこのaux_lossを加算</strong></p>
+<p>これまでは</p>
+<pre><code class="language-python">loss = actor_loss + critic_loss
+</code></pre>
+<p>だけでしたが、これを</p>
+<pre><code class="language-python">moe_aux_loss = collect_moe_aux_loss(self.model)   <span class="hljs-comment"># ①で計算した値を②の関数でモデル全体から回収</span>
+loss = actor_loss + critic_loss + self.moe_aux_loss_coef * moe_aux_loss   <span class="hljs-comment"># 小さい重みを掛けて加算</span>
+</code></pre>
+<p>に変更しました。<code>self.moe_aux_loss_coef</code>（デフォルト<code>0.01</code>）という新しい設定値を追加し、「行動決定の学習(<code>actor_loss</code>)や状態価値の学習(<code>critic_loss</code>)を邪魔しない程度に、控えめな重みでexpertの均等化も一緒に学習させる」ようにしています。</p>
+<p>この <code>loss</code> を1つの塊として <code>loss.backward()</code> することで、<strong>通常のPPO学習と同時に、gateのパラメータ（<code>self.gate</code>）にも「均等に選べ」という勾配が流れる</strong>ようになります。</p>
+<p><strong>4. gate専用の<code>LayerNorm</code>を追加</strong></p>
+<p>こちらは、ほとんど参考とされないExpertが出てくることに対する対策です。</p>
+<p><code>MATEncoder</code> の入力は</p>
+<pre><code class="language-python">x = agent_feats + self.agent_pos_embedding
+</code></pre>
+<p>という<strong>単純な加算</strong>です。<code>agent_pos_embedding</code> は <code>torch.randn(1, num_agents, d_model)</code> で初期化される学習パラメータで、初期値のノルムが <code>agent_feats</code>（実際のエージェントの状態から計算された特徴量）と比べて大きい、あるいは学習が進んでも縮小しない場合、<strong>gateへの入力ベクトルの向き・大きさが「どのスロットか」でほぼ決まってしまい、「今何が起きているか」の情報が埋もれてしまいます</strong>。</p>
+<p><code>LayerNorm</code> はベクトルの各次元を平均0・分散1に正規化するので、<strong>特定の次元だけが大きい値を持つ(=位置埋め込みが支配的)という状態を緩和し、各次元が相対的に対等な影響力を持つように補正</strong>します。これにより、gateが「スロット位置」ではなく「特徴の中身」により敏感に反応しやすくなることを期待しています。</p>
+<p><strong>expert本体への入力は正規化していない点が重要</strong>です。もし<code>x_flat</code>全体を正規化してしまうと、<code>agent_pos_embedding</code>が本来持っていた「このエージェントは何番目か」という有用な位置情報まで、expertの計算からも失われてしまいます。今回は「gateの判断」だけをピンポイントで補正し、expertの表現力自体は変えないようにしています。</p>
+<p><strong>ログ出力への追加</strong></p>
+<p><code>train()</code> 関数側では、以下の2つを新たに画面出力するようにしました。</p>
+<pre><code class="language-python"><span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;... moe_aux_loss=<span class="hljs-subst">{np.mean(aux_losses):<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+
+expert_usage = collect_moe_expert_usage(mat_ppo.model)
+<span class="hljs-keyword">for</span> layer_name, usage <span class="hljs-keyword">in</span> expert_usage.items():
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;    [<span class="hljs-subst">{layer_name}</span>] expert_usage=[<span class="hljs-subst">{<span class="hljs-number">0.25</span>, <span class="hljs-number">0.24</span>, <span class="hljs-number">0.26</span>, <span class="hljs-number">0.25</span>のような配列}</span>]&quot;</span>)
+</code></pre>
+<p>これにより、学習を回しながら「aux_lossの値が下がってきているか（＝偏りが解消に向かっているか）」「実際の選択頻度が均等に近づいているか」を、数値として目視確認できるようにしています。</p>
+<h3 id="変更のイメージ図">変更のイメージ図</h3>
+<pre><code>【変更前】
+MoELayer.forward()
+  └ gateで選ばれたexpertだけ計算して出力を返す（それだけ）
+
+  MAT_PPO.update()
+  └ loss = actor_loss + critic_loss
+
+【変更後】
+MoELayer.forward()
+  └ gateで選ばれたexpertだけ計算して出力を返す
+  └ ＋「偏り具合」を数値化してself.last_aux_lossに保存 ★NEW
+  └ ＋「実際の選択割合」をself.last_expert_usageに保存 ★NEW
+
+  collect_moe_aux_loss() / collect_moe_expert_usage()  ★NEW
+  └ モデル内の全MoELayerを自動で探し出し、値をかき集める
+
+  MAT_PPO.update()
+  └ moe_aux_loss = collect_moe_aux_loss(model)          ★NEW
+  └ loss = actor_loss + critic_loss + 0.01 * moe_aux_loss   ★変更
+
+  ログ出力
+  └ moe_aux_lossの値、各層の選択頻度を表示            ★NEW
+</code></pre>
+<p>やっていることは、<strong>「MoEの中身に、選択の偏りを測るセンサーを仕込み、その偏りを小さくする方向の力を通常の学習と一緒にかける」</strong> という、この1点に尽きます。既存の行動決定ロジック（Attention、デコード順序など）には一切手を加えていません。</p>
+<h3 id="実装コード">実装コード</h3>
+<p>以下のレポジトリに完成コードを保管しています。
+ご参考下さい。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src</a></p>
+<p>後、今回から参照するpursuitのversionが変わってました。
+<code>pursuit_v4</code>から<code>pursuit_v5</code>に変更になっています。</p>
+<h2 id="学習">学習</h2>
+<p>今回実装により学習した結果をまとめます。</p>
+<h3 id="学習の結果">学習の結果</h3>
+<p>学習中に&quot;おっ&quot;と思ったことがありました。
+学習中にエポックごとにどれだけの捕獲者が捕まえられたかを表示しているのですが、通常は良くても 33 か 34 でしたが、今回初めて 38 という捕獲者を得るものが出てきました。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\1786837925405.png" alt="1786837925405"></p>
+<p>今回の学習の推移を前回と比較して表示します。
+横軸が学習時のエポック、縦軸が報酬とエントロピです。
+青が前回、緑が今回です。</p>
+<p>報酬は前回を上回る結果となりました。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\1786840301132.png" alt="1786840301132"></p>
+<p>エントロピにも低下＝エージェントの迷いが小さくなっていることが確認出来ます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\1786840462250.png" alt="1786840462250"></p>
+<h3 id="moeの結果">MoEの結果</h3>
+<p>気になっていたエキスパートの分散について確認しました。
+モジュールから収集した4体のエキスパートの利用率を学習開始段階と終了段階で比較しました。</p>
+<p>グラフの見方ですが散布図の左側が学習開始時点で右側は学習終了時点の利用率の推移を示します。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\1786841611328.png" alt="1786841611328"></p>
+<p><strong>エキスパート利用率の変化・分析ポイント</strong></p>
+<p>極端な偏り（Dead Expert / Dominant Expert）の解消が解消されました。</p>
+<p>初期（Update 1001-1003）: decoder.layers.0.moe の Expert 2 は利用率が 0.01（約0.7%） とほぼ休眠状態（Dead Expert）であり、一方で Expert 3 に 0.52（約52%） が集中する極端な偏りがありました。</p>
+<p>終盤（Update 1048-1050）: 同レイヤーの Expert 2 は 0.09〜0.12 まで復調し、特定エキスパートへの超過過重が解消されています。</p>
+<p><strong>moe_aux_loss とロードバランスの収束</strong></p>
+<p>学習進展に伴い補助損失（moe_aux_loss）が 1.063 → 1.011 へと減少しています。</p>
+<p>これに連動して、全6レイヤー×4エキスパート（計24個）のデータポイントが、散布図上の理想点 (0.25, 0.25) 付近に集中的に収縮しており、ロードバランシング機能が正常に機能して全エキスパートが効率的に活用される状態へ移行したことが確認できます。</p>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習後のエージェントの動作を確認します。
+正直、、、うーん。どうでしょう・・・。</p>
+<p>敵が近づいたときに味方で集団で上手に囲むため、1体の敵を上手に捕獲していきます。
+ですが、以前課題と感じていた待機型に戻っています。
+スコアは前回よりも良いですが、敵が多いところにわーと集団移動するような動作がなくなってしまった感があります。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\pursuit_mat_fixed (3).gif">
+<p>結局、敵を捕まえるには待ち構えることが良いということなのでしょうか。</p>
+<h2 id="総括">総括</h2>
+<p>今回の取り組みと結果のについてまとめました。</p>
+<p><strong>1. 仮説は部分的に間違っていた</strong></p>
+<p>MoE collapse（特定expertへの偏り）が「敵が減った後も居座る」行動の原因だと仮説を立て、負荷分散損失とgateのLayerNormを導入した。結果として、<strong>expertの使用分散は改善し、学習性能自体も向上</strong>（捕獲数の増加・エントロピー低下）した。しかし、<strong>行動パターンの切り替え（待機から探索へ）は起きなかった</strong>。つまり、MoE collapseは実在したが、それが「居座り」の主因ではなかった。</p>
+<p><strong>2. 待機戦略が最適解に近い可能性</strong></p>
+<p>性能は向上したにも関わらずエージェントが「待ち構える」行動を選択し続けたことは、<strong>その行動が与えられた観測情報と報酬設計の下で、実は合理的な戦略</strong>であることを示唆している。敵が自ら近づいてくる環境（pursuit_v5）では、能動的に探索するより待機して包囲囲網を維持する方が累積報酬が高くなる可能性がある。</p>
+<p><strong>3. 次に検証すべきは「観測情報の質」</strong></p>
+<p>MoEの表現力を引き出しても、モデルに「切り替えるべき状況」を認識させる情報が入力されていなければ行動は変わらない。今回の結果は、<strong>原因が観測情報の不足（例：担当ターゲントの明示的付与）や報酬の時間的スパース性にある</strong>という仮説を強く支持する。MoEの構造改善ではなく、エージェントが「今誰を追うべきか」「敵がいないエリアを探索する価値」を認識できるよう、入力や報酬設計を改修する段階に移るべきである。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/FhSBK8VaLss?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+            
+        </body>
+        </html>

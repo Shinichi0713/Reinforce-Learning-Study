@@ -50,7 +50,7 @@ def resize_gif(input_path, output_path, scale=0.5):
     print(f"  - リサイズ後: {new_size:.2f} MB ({new_width}x{new_height})")
 
 # 実行
-input_gif = "/content/videos/pursuit_mat_fixed.gif"
-output_gif = "/content/videos/pursuit_mat_fixed_.gif"
+input_gif = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\pursuit_mat_fixed (3).gif"
+output_gif = r"D:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\18_more_well_predator_v1\pursuit_mat_fixed_compressed.gif"
 
-resize_gif(input_gif, output_gif, scale=0.5)
+resize_gif(input_gif, output_gif, scale=0.3)
