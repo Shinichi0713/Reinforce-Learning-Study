@@ -3018,4 +3018,252 @@ $$
 
 グラフのラプラシアンに対しては、この「座標軸」がグラフ上の **「なめらかな振動モード」**（固有ベクトル）に対応し、「伸縮率」が **「そのモードの拡散しやすさ」**（固有値）に対応します。
 
+__例題:__
+
+スペクトル定理をイメージできる可視化例題を作成しました。以下に、図の内容と学習ポイントを解説いたします。
+
+__例題：スペクトル定理の幾何学的・グラフ的可視化__
+
+__左図：2×2実対称行列による「単位円 → 楕円」の変換__
+
+**対象行列**
+$$
+A = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}
+$$
+
+**スペクトル分解の結果**
+- 固有値：$\lambda_1 = 1,\ \lambda_2 = 3$
+- 固有ベクトル：$\mathbf{v}_1 \propto \begin{bmatrix} 1 \\ -1 \end{bmatrix},\ \mathbf{v}_2 \propto \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+
+**図の見方**
+- **青い破線**：単位円（すべての $\|\mathbf{x}\| = 1$ なるベクトル $\mathbf{x}$）
+- **赤い実線**：行列 $A$ を掛けた結果 $A\mathbf{x}$（楕円に変形）
+- **緑・紫の矢印**：固有ベクトル方向への伸縮（長さ＝固有値）
+- **点線**：楕円の主軸（固有ベクトル方向）
+
+**スペクトル定理の意味**
+スペクトル定理 $A = Q\Lambda Q^\top$ は、
+
+> 「実対称行列による線形変換は、固有ベクトル方向への座標軸回転のあと、各軸を固有値倍でスケーリングし、元の座標系に戻す操作に等しい」
+
+と言っています。図では、単位円が楕円に変形していますが、その**長軸・短軸の方向が固有ベクトル**、**軸方向の伸び率が固有値**に対応しています。
+
+__右図：パスグラフ $P_5$ のラプラシアン固有ベクトル（振動モード）__
+
+**グラフ構造**
+頂点 $0 - 1 - 2 - 3 - 4$ が一直線につながったパスグラフです。
+
+**ラプラシアンの固有値**
+$$
+\lambda_1 = 0,\ \lambda_2 \approx 0.382,\ \lambda_3 \approx 1.382,\ \lambda_4 \approx 2.618,\ \lambda_5 \approx 3.618
+$$
+
+**図の見方**
+- 横軸：頂点番号（0〜4）
+- 縦軸：固有ベクトルの成分値
+- 各色の折れ線：各固有値に対応する固有ベクトル（振動モード）
+
+**各モードの解釈**
+
+| モード | 固有値 | 振動の様子 |
+|--------|--------|-----------|
+| $\lambda_1 = 0$ | 定数モード | すべての頂点が同じ値（全体の平行移動） |
+| $\lambda_2 \approx 0.382$ | 低周波 | グラフ全体が緩やかに1山の波形 |
+| $\lambda_3 \approx 1.382$ | 中周波 | 2山の波形（ノード間で符号が変わる） |
+| $\lambda_4 \approx 2.618$ | 高周波 | 3山、より激しい振動 |
+| $\lambda_5 \approx 3.618$ | 最高周波 | 隣接ノード間で符号が交互に変わる最速振動 |
+
+**スペクトル定理の意味**
+ラプラシアン $L$ は実対称行列なので、スペクトル定理より
+
+$$
+L = \sum_{k=1}^5 \lambda_k \mathbf{u}_k \mathbf{u}_k^\top
+$$
+
+と直交対角化できます。これにより：
+- 固有ベクトル $\{\mathbf{u}_k\}$ は $\mathbb{R}^5$ の正規直交基底
+- 任意のグラフ上関数 $\mathbf{x}$ は $\mathbf{x} = \sum c_k \mathbf{u}_k$ と展開可能
+- 二次形式は $\mathbf{x}^\top L \mathbf{x} = \sum \lambda_k c_k^2$ と分解される
+
+**重要なポイント**
+- **固有値が小さい**モードほど「滑らか」（隣接ノード間の差が小さい）
+- **固有値が大きい**モードほど「激しく振動」（隣接ノード間で符号が反転）
+- これがグラフフーリエ変換の基礎となり、GNNの「周波数」概念に対応します
+
+__この可視化から学べること__
+
+1. **スペクトル定理は「座標回転＋スケーリング」**  
+   左図の楕円変換が、固有ベクトル方向への伸縮だけで説明できることを直感的に示します。
+
+2. **固有値は「振動の速さ・エネルギーの大きさ」**  
+   右図で固有値が大きいほど波形が複雑になることから、固有値の物理的・幾何的な意味が理解できます。
+
+3. **実対称性が「複素数を避け、現実世界で使える」ことを保証**  
+   グラフのラプラシアンは常に実対称なので、すべての固有値が実数で、固有ベクトルが直交基底をなすことが保証されます。
+
+
+以下に、先ほどの可視化を生成するPythonコードを提示いたします。
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ============================================================
+# スペクトル定理の可視化例題
+# 左: 2x2実対称行列による単位円→楕円の変換
+# 右: パスグラフ P5 のラプラシアン固有ベクトル（振動モード）
+# ============================================================
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+
+# ============================================================
+# 【左図】2x2実対称行列 A = [[2,1],[1,2]] の幾何学的可視化
+# ============================================================
+ax1 = axes[0]
+
+# 実対称行列 A
+A = np.array([[2.0, 1.0],
+              [1.0, 2.0]])
+
+# 固有値・固有ベクトル（スペクトル定理より直交対角化可能）
+eigvals, eigvecs = np.linalg.eigh(A)
+print("【左図】行列 A = [[2,1],[1,2]] のスペクトル分解")
+print("固有値:", eigvals)
+print("固有ベクトル（列ベクトル）:\n", eigvecs)
+
+# 単位円上の点を生成
+theta = np.linspace(0, 2*np.pi, 400)
+unit_circle = np.vstack([np.cos(theta), np.sin(theta)])
+
+# A で変換
+transformed = A @ unit_circle
+
+# 単位円を描画
+ax1.plot(unit_circle[0], unit_circle[1], 'b--', linewidth=2, label='Unit circle (||x||=1)')
+
+# 変換後の楕円を描画
+ax1.plot(transformed[0], transformed[1], 'r-', linewidth=3, label='Transformed Ax (Ellipse)')
+
+# 固有ベクトルを矢印で描画（長さを固有値倍に）
+colors_eig = ['darkgreen', 'purple']
+labels_eig = [f'λ₁={eigvals[0]:.1f}, v₁', f'λ₂={eigvals[1]:.1f}, v₂']
+for i in range(2):
+    vec = eigvecs[:, i]
+    ax1.annotate('', xy=(eigvals[i]*vec[0], eigvals[i]*vec[1]),
+                xytext=(0, 0),
+                arrowprops=dict(arrowstyle='->', color=colors_eig[i], lw=3))
+    ax1.text(eigvals[i]*vec[0]*1.2, eigvals[i]*vec[1]*1.2, 
+             labels_eig[i], color=colors_eig[i], fontsize=13, fontweight='bold',
+             ha='center', va='center')
+
+# 主軸の線（楕円の長軸・短軸）
+for i in range(2):
+    vec = eigvecs[:, i]
+    t = np.linspace(-eigvals[i], eigvals[i], 100)
+    line_pts = np.outer(vec, t)
+    ax1.plot(line_pts[0], line_pts[1], color=colors_eig[i], linestyle=':', alpha=0.6, linewidth=2)
+
+ax1.set_aspect('equal')
+ax1.set_xlim(-3.5, 3.5)
+ax1.set_ylim(-3.5, 3.5)
+ax1.axhline(0, color='gray', linewidth=0.5)
+ax1.axvline(0, color='gray', linewidth=0.5)
+ax1.set_title('Spectral Theorem: A = QΛQ^T\nUnit circle → Ellipse', fontsize=14, fontweight='bold')
+ax1.set_xlabel('x₁')
+ax1.set_ylabel('x₂')
+ax1.legend(loc='upper left', fontsize=10)
+ax1.grid(True, alpha=0.3)
+
+# 数式テキスト（シンプルに）
+info_text = (
+    "A = [[2, 1],\n"
+    "     [1, 2]]\n\n"
+    "λ₁=1, v₁ ∝ [1, -1]ᵀ\n"
+    "λ₂=3, v₂ ∝ [1,  1]ᵀ"
+)
+ax1.text(0.95, 0.02, info_text,
+         transform=ax1.transAxes, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+         family='monospace',
+         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+# ============================================================
+# 【右図】パスグラフ P5 のラプラシアン固有ベクトル（振動モード）
+# ============================================================
+ax2 = axes[1]
+
+# 5頂点のパスグラフ: 0 - 1 - 2 - 3 - 4
+n = 5
+A_path = np.zeros((n, n))
+for i in range(n-1):
+    A_path[i, i+1] = 1
+    A_path[i+1, i] = 1
+
+D_path = np.diag(A_path.sum(axis=1))
+L_path = D_path - A_path
+
+eigvals_l, eigvecs_l = np.linalg.eigh(L_path)
+
+print("\n【右図】パスグラフ P5 のラプラシアン L のスペクトル")
+print("固有値:", np.round(eigvals_l, 4))
+
+# 各固有ベクトルをプロット
+x_nodes = np.arange(n)
+colors_mode = plt.cm.viridis(np.linspace(0, 0.9, n))
+
+for k in range(n):
+    vec = eigvecs_l[:, k]
+    lam = eigvals_l[k]
+    if k > 0 and vec[0] < 0:
+        vec = -vec
+    ax2.plot(x_nodes, vec, 'o-', color=colors_mode[k], linewidth=2.5, markersize=8,
+             label=f'λ{k+1}={lam:.3f}')
+    ax2.scatter(x_nodes, vec, color=colors_mode[k], s=80, zorder=5)
+
+ax2.axhline(0, color='black', linewidth=0.5, linestyle='--', alpha=0.5)
+
+# グラフの接続関係を下部に薄く表示
+for i in range(n-1):
+    ax2.plot([i, i+1], [-0.7, -0.7], 'k-', linewidth=3, alpha=0.3)
+    ax2.text(i+0.5, -0.85, f'{i}-{i+1}', ha='center', fontsize=9, color='gray')
+for i in range(n):
+    ax2.text(i, -0.65, f'{i}', ha='center', fontsize=11, fontweight='bold', color='gray')
+
+ax2.set_xticks(x_nodes)
+ax2.set_xticklabels([f'Node {i}' for i in x_nodes])
+ax2.set_ylim(-1.0, 1.2)
+ax2.set_title('Graph Laplacian Eigenvectors as Vibration Modes\n(Path Graph P5)', fontsize=14, fontweight='bold')
+ax2.set_xlabel('Vertex index')
+ax2.set_ylabel('Component value of eigenvector')
+ax2.legend(loc='upper right', fontsize=10, title='Eigenvalue')
+ax2.grid(True, alpha=0.3, axis='y')
+
+# 解説テキスト
+explain_text = (
+    "• λ₁=0: constant mode (rigid motion)\n"
+    "• Small λ: smooth, slow variation\n"
+    "• Large λ: rapid oscillation (high freq.)"
+)
+ax2.text(0.02, 0.02, explain_text,
+         transform=ax2.transAxes, fontsize=11, verticalalignment='bottom',
+         bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.9))
+
+plt.tight_layout()
+plt.savefig('spectral_theorem_visualization.png', dpi=150, bbox_inches='tight')
+plt.show()
+```
+
+__実行に必要な環境__
+
+- `numpy`
+- `matplotlib`
+
+標準的なPython環境で動作します。`pip install numpy matplotlib` でインストール可能です。
+
+__コードのポイント__
+
+- **左図**：`np.linalg.eigh()` を使って実対称行列の固有値・固有ベクトルを取得。単位円上の点を行列 `A` で変換し、楕円を描画しています。固有ベクトル方向への伸縮率が固有値に対応することを矢印で表現しています。
+- **右図**：パスグラフのラプラシアン行列を手動構築し、`np.linalg.eigh()` で固有値分解。各固有ベクトルを「頂点番号 vs 成分値」の折れ線グラフとしてプロットし、固有値の小さい順から大きい順へ「滑らかな定数モード → 激しい振動モード」の変化を可視化しています。
+
+<img src="image/2_linear_graph/1787259535563.png" width="500px" style="display: block; margin: 0 auto;">
+
 
