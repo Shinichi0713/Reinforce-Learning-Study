@@ -3605,13 +3605,7 @@ for name, res in results.items():
     print(f"  理論的混合時間スケール ~ 1/λ₂ = {1/res['lambda2']:.2f}")
 ```
 
-__実行に必要な環境__
 
-- `numpy`
-- `matplotlib`
-- `networkx`
-
-標準的なPython環境で動作します。`pip install numpy matplotlib networkx` でインストール可能です。
 
 __図の見方（`mixing_time_simulation.png`）__
 
