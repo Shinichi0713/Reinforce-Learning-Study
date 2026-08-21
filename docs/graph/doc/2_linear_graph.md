@@ -3266,4 +3266,380 @@ __コードのポイント__
 
 <img src="image/2_linear_graph/1787259535563.png" width="500px" style="display: block; margin: 0 auto;">
 
+## ランダムウォークと混合時間
+
+グラフ上の**ランダムウォーク（random walk）** とは、**「現在いる頂点から、隣接する頂点の中から等確率に次の移動先を選び、それを繰り返す」** という確率過程です。  
+**混合時間（mixing time）** とは、そのランダムウォーカーが**「グラフ全体に十分よく散らばった定常状態」に近づくのに要する時間**のことです。
+
+以下、数学的な構造から直感的な意味まで順を追って説明いたします。
+
+### 1. グラフ上のランダムウォークの定義
+
+無向連結グラフ $G=(V,E)$（頂点数 $n$）を考えます。  
+頂点 $i$ の次数を $d_i$ とすると、**ランダムウォークの遷移確率行列** $P$ は
+
+$$
+P = D^{-1}A
+$$
+
+で定義されます。ここで $A$ は隣接行列、$D$ は次数行列です。
+
+__遷移確率の意味__
+
+$P$ の $(i,j)$ 成分は
+
+$$
+P_{ij} = \frac{A_{ij}}{d_i} = 
+\begin{cases}
+\frac{1}{d_i} & \text{頂点 } i \text{ と } j \text{ が隣接しているとき} \\
+0 & \text{それ以外}
+end{cases}
+$$
+
+となります。つまり、**頂点 $i$ にいるとき、各隣接頂点へ $\frac{1}{d_i}$ の確率で移動する**というルールです。
+
+__定常分布（stationary distribution）__
+
+時刻 $t$ に頂点 $i$ にいる確率を $ \pi_i(t) $ とし、確率ベクトルを $\boldsymbol{\pi}(t) = (\pi_1(t), \dots, \pi_n(t))^\top$ とします。  
+遷移は $\boldsymbol{\pi}(t+1) = P^\top \boldsymbol{\pi}(t)$ で記述されます（無向グラフでは $P$ を正規化すれば対称化できるため、議論を簡単にできます）。
+
+無向連結グラフでは、**定常分布** $\boldsymbol{\pi}$ は
+
+$$
+\pi_i = \frac{d_i}{\sum_{j=1}^n d_j} = \frac{d_i}{2|E|}
+$$
+
+で与えられます。これは次数に比例した分布で、**「次数の多い頂点により長く滞在する」** という自然なバランスを表します。
+
+### 2. 混合時間とは
+
+__直感的な意味__
+
+ランダムウォークを始めたばかりの頃は、出発点の影響が強く残っています（例：出発点の周辺に偏って分布している）。  
+しかし歩数を重ねるうちに、**どこから出発しても同じ定常分布 $\boldsymbol{\pi}$ に近づいていきます**。
+
+この「定常分布に十分近づく」までに必要なステップ数のことを**混合時間**と呼びます。
+
+__数学的な定義（概略）__
+
+初期分布 $\boldsymbol{\pi}(0)$ から出発したとき、時刻 $t$ の分布 $\boldsymbol{\pi}(t) = (P^\top)^t \boldsymbol{\pi}(0)$ と定常分布 $\boldsymbol{\pi}$ の距離（全変動距離など）が $\varepsilon$ 以下になる最小の $t$ を混合時間と呼びます。
+
+### 3. 混合時間と固有値の関係（スペクトルギャップ）
+
+ランダムウォークの混合の速さは、**ラプラシアン行列の固有値**で精密に特徴づけられます。
+
+__ラプラシアンと遷移行列の固有値の関係__
+
+無向グラフのラプラシアン $L = D - A$ の固有値を
+
+$$
+0 = \lambda_1 \le \lambda_2 \le \dots \le \lambda_n
+$$
+
+とします。  
+遷移行列 $P = D^{-1}A$（または対称化した $D^{-1/2}AD^{-1/2}$）の固有値を $\mu_1, \dots, \mu_n$ とすると、次の関係が成り立ちます。
+
+$$
+\mu_i = 1 - \lambda_i
+$$
+
+特に $\mu_1 = 1$（定常分布に対応）で、$|\mu_i| < 1\ (i \ge 2)$ です。
+
+__スペクトルギャップ（spectral gap）__
+
+$\lambda_2 = 1 - \mu_2$ を**スペクトルギャップ**と呼びます。  
+この値が大きいほど、$\mu_2$ が小さく、非定常モードの減衰が速くなります。
+
+**混合時間のスケーリング**（ざっくりとした関係）は
+
+$$
+t_{\text{mix}} \sim O\left(\frac{1}{\lambda_2}\right) = O\left(\frac{1}{1-\mu_2}\right)
+$$
+
+となります。
+
+| スペクトルギャップ $\lambda_2$ | 混合時間 | グラフの様子 |
+|----------------------------------|----------|--------------|
+| **大きい** | **短い**（速く混合） | つながりが強く、拡散しやすい |
+| **小さい** | **長い**（遅く混合） | ボトルネックがあり、拡散しにくい |
+
+### 4. なぜボトルネックがあると混合が遅いか
+
+__直感的な例__
+
+2つの密なクラスタ（A群とB群）が、**1本の細い橋（辺）だけ**で繋がっているグラフを考えます。
+
+- A群の中ではランダムウォーカーは自由に動き回れますが、B群に行くには橋を渡る必要があります。
+- 橋が1本しかないため、**A群からB群へ移る確率が低く**、全体としてのバランス（定常分布）に達するのに時間がかかります。
+- つまり、**「AにいるかBにいるか」という大局的な偏りが長く残ります**。
+
+__代数的連結度 $\lambda_2$ の役割__
+
+ラプラシアンの第2固有値 $\lambda_2$（代数的連結度）は、**グラフを2つに分ける「最も細い切断」の大きさ**を反映しています。
+
+- $\lambda_2$ が小さい ⇔ 細い橋で繋がっている ⇔ 混合が遅い
+- $\lambda_2$ が大きい ⇔ どこからどこへでも行き来しやすい ⇔ 混合が速い
+
+これは**Cheegerの不等式**によって厳密に定量化されています。
+
+### 5. 応用例
+
+__(1) GNN（グラフニューラルネットワーク）の過平滑化（over-smoothing）__
+
+GNNでは、層を重ねるたびに隣接ノードの特徴を平均化していきます。これはランダムウォークの拡散と本質的に同じです。
+
+- 層数が増える ⇔ ランダムウォークのステップ数が増える
+- $\lambda_2$ が小さいグラフ（細い橋がある）では、**異なるクラスタ間の情報が混ざりにくく**、全体が均一な定常分布に近づく（＝過平滑化）までに多くの層が必要
+- 逆に $\lambda_2$ が大きいグラフでは、少ない層ですぐに特徴が均一化しすぎるリスクがある
+
+__(2) MCMC（マルコフ連鎖モンテカルロ）__
+
+複雑な確率分布からサンプリングする際、ランダムウォークを使って定常分布に近づける手法（メトロポリス法など）があります。  
+混合時間が短い（$\lambda_2$ が大きい）グラフや状態空間では、**少ないステップで正しい分布に近いサンプルが得られます**。
+
+__(3) PageRank__
+
+PageRankもランダムウォーク（テレポート付き）の定常分布として定義されます。  
+混合時間の観点から、**「どれくらいの反復でランクが収束するか」** を評価できます。
+
+__例題:__
+
+混合時間をPythonでシミュレーションする例題を作成しました。以下に、コードの解説と結果の分析を示します。
+
+__比較する2つのグラフ__
+
+| グラフ | 構造 | ボトルネック | 代数的連結度 $\lambda_2$ |
+|--------|------|-------------|------------------------|
+| **Bottleneck Graph** | 2つの $K_5$（5頂点の完全グラフ）を1本の橋（辺4-5）で繋いだグラフ | **あり**（橋が1本のみ） | 0.2984（小さい） |
+| **Complete Graph $K_{10}$** | 10頂点すべてが互いに繋がった完全グラフ | **なし** | 10.0000（大きい） |
+
+__シミュレーションの設定__
+
+- **初期状態**：頂点0に確率1.0を集中（$\boldsymbol{\pi}(0) = [1, 0, 0, \dots, 0]^\top$）
+- **遷移ルール**：$\boldsymbol{\pi}(t+1) = P^\top \boldsymbol{\pi}(t)$（$P = D^{-1}A$ はランダムウォークの遷移確率行列）
+- **評価指標**：**全変動距離** $d_{\text{TV}}(\boldsymbol{\pi}(t), \boldsymbol{\pi}) = \frac{1}{2}\sum_{i} |\pi_i(t) - \pi_i|$
+  - 定常分布 $\boldsymbol{\pi}$ との「距離」。0に近いほど混合が進んでいる。
+
+__結果の分析__
+
+__数値結果__
+
+| 指標 | Bottleneck Graph | Complete Graph $K_{10}$ |
+|------|------------------|--------------------------|
+| $\lambda_2$ | 0.2984 | 10.0000 |
+| $t=5$ の全変動距離 | 0.3623 | 0.000015 |
+| $t=20$ の全変動距離 | 0.1169 | $\approx 0$ |
+| 混合時間スケール $1/\lambda_2$ | 3.35 | 0.10 |
+
+__学べるポイント__
+
+1. **$\lambda_2$ が混合時間の支配的な指標であること**
+   - $t_{\text{mix}} \sim O(1/\lambda_2)$ のスケーリングが数値的に確認できます。
+   - Bottleneck Graph の $\lambda_2 \approx 0.3$ に対し、Complete Graph は $\lambda_2 = 10$ と30倍以上大きく、その分混合が30倍以上速いです。
+
+2. **ボトルネックが情報拡散を遅らせること**
+   - 2つの密なクラスタが1本の橋で繋がっている構造では、**クラスタ内では速く拡散するが、クラスタ間の移動が律速**になります。
+   - これが「A群とB群の情報がなかなか混ざらない」という現象の数学的表現です。
+
+3. **GNNの過平滑化（over-smoothing）との関連**
+   - GNNで層を重ねるたびに隣接ノードの特徴を平均化する操作は、このランダムウォークの拡散と本質的に同じです。
+   - $\lambda_2$ が小さいグラフ（細い橋がある）では、**異なるクラスタ間の情報が混ざりにくく**、深い層でもクラスタ構造が保たれます。
+   - $\lambda_2$ が大きいグラフ（密なグラフ）では、**少ない層ですぐに特徴が均一化**し、過平滑化が起こりやすくなります。
+
+__Pythonコード__
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import networkx as nx
+
+# ============================================================
+# 混合時間シミュレーション
+# グラフ1: 2つのK5を1本の橋で繋いだグラフ（ボトルネックあり → 混合遅い）
+# グラフ2: K10 完全グラフ（ボトルネックなし → 混合速い）
+# ============================================================
+
+# --- グラフ構造を構築 ---
+# グラフ1: 2つのK5を橋で接続 (頂点0-4 が左K5, 5-9 が右K5, 橋は 4-5)
+G1 = nx.Graph()
+G1.add_nodes_from(range(10))
+# 左K5 (0-4)
+for i in range(5):
+    for j in range(i+1, 5):
+        G1.add_edge(i, j)
+# 右K5 (5-9)
+for i in range(5, 10):
+    for j in range(i+1, 10):
+        G1.add_edge(i, j)
+# 橋
+G1.add_edge(4, 5)
+
+# グラフ2: K10 (10頂点の完全グラフ)
+G2 = nx.complete_graph(10)
+
+graphs = {"Bottleneck Graph\n(Two K5 + Bridge)": G1, "Complete Graph K10": G2}
+
+fig, axes = plt.subplots(2, 3, figsize=(16, 10))
+
+results = {}
+
+for idx, (name, G) in enumerate(graphs.items()):
+    n = G.number_of_nodes()
+    # 隣接行列・次数行列
+    A = nx.to_numpy_array(G, nodelist=range(n))
+    degrees = A.sum(axis=1)
+    D = np.diag(degrees)
+    # ラプラシアンと固有値
+    L = D - A
+    eigvals, eigvecs = np.linalg.eigh(L)
+    lambda2 = eigvals[1]  # 代数的連結度
+    
+    # ランダムウォーク遷移行列 P = D^{-1} A (行確率行列)
+    P = np.linalg.inv(D) @ A
+    
+    # 定常分布 π_i = d_i / Σ d_j
+    pi_stationary = degrees / degrees.sum()
+    
+    # シミュレーション: 頂点0からスタート
+    pi = np.zeros(n)
+    pi[0] = 1.0
+    
+    max_steps = 50
+    history = [pi.copy()]
+    tv_distances = []
+    
+    for t in range(max_steps):
+        # 全変動距離 d_TV(π(t), π_stationary)
+        tv = 0.5 * np.sum(np.abs(pi - pi_stationary))
+        tv_distances.append(tv)
+        # 次のステップ: π(t+1) = P^T π(t)
+        pi = P.T @ pi
+        history.append(pi.copy())
+    
+    results[name] = {
+        "lambda2": lambda2,
+        "tv_distances": tv_distances,
+        "history": np.array(history),
+        "pi_stationary": pi_stationary,
+        "G": G
+    }
+    
+    # === グラフ構造の可視化 (上段左・中央) ===
+    ax_graph = axes[0, idx]
+    if idx == 0:
+        # ボトルネックグラフ: 2クラスタが見える配置
+        pos = {}
+        for i in range(5):
+            pos[i] = (-1.5 + 0.5*np.cos(2*np.pi*i/5), 0.8*np.sin(2*np.pi*i/5))
+        for i in range(5, 10):
+            pos[i] = (1.5 + 0.5*np.cos(2*np.pi*(i-5)/5), 0.8*np.sin(2*np.pi*(i-5)/5))
+    else:
+        pos = nx.circular_layout(G)
+    
+    node_colors = ["#FF5722" if i == 0 else "#2196F3" for i in G.nodes()]
+    nx.draw_networkx_nodes(G, pos, ax=ax_graph, node_color=node_colors, node_size=500, edgecolors="black")
+    nx.draw_networkx_edges(G, pos, ax=ax_graph, edge_color="gray", width=0.8, alpha=0.6)
+    # 橋を強調
+    if idx == 0:
+        nx.draw_networkx_edges(G, pos, ax=ax_graph, edgelist=[(4,5)], edge_color="red", width=4)
+    nx.draw_networkx_labels(G, pos, ax=ax_graph, font_size=9, font_color="white", font_weight="bold")
+    ax_graph.set_title(f"{name}\nλ₂ = {lambda2:.4f}", fontsize=12, fontweight="bold")
+    ax_graph.axis("off")
+    
+    # === 確率分布の時間発展ヒートマップ (下段左・中央) ===
+    ax_heat = axes[1, idx]
+    im = ax_heat.imshow(results[name]["history"][:21].T, aspect="auto", cmap="YlOrRd", vmin=0, vmax=0.5)
+    ax_heat.set_title(f"Probability π(t) Heatmap\n(Initial: Node 0 = 1.0)", fontsize=11)
+    ax_heat.set_xlabel("Time step t")
+    ax_heat.set_ylabel("Vertex index")
+    ax_heat.set_xticks(range(0, 21, 5))
+    ax_heat.set_xticklabels(range(0, 21, 5))
+    plt.colorbar(im, ax=ax_heat, fraction=0.046, pad=0.04)
+
+# === 全変動距離の比較 (上段右) ===
+ax_tv = axes[0, 2]
+for name, res in results.items():
+    marker = "o" if "Bottleneck" in name else "s"
+    linestyle = "-" if "Bottleneck" in name else "--"
+    short_name = "Bottleneck" if "Bottleneck" in name else "Complete K10"
+    ax_tv.plot(range(50), res["tv_distances"], marker=marker, linestyle=linestyle, 
+               label=f"{short_name}\n(λ₂={res['lambda2']:.3f})", linewidth=2.5, markersize=5, markevery=5)
+
+ax_tv.set_xlabel("Time step t", fontsize=12)
+ax_tv.set_ylabel("Total Variation Distance d_TV(π(t), π)", fontsize=12)
+ax_tv.set_title("Mixing Time Comparison\n(Lower = Faster Mixing)", fontsize=12, fontweight="bold")
+ax_tv.legend(fontsize=10)
+ax_tv.grid(True, alpha=0.3)
+ax_tv.set_yscale("log")
+ax_tv.axhline(0.01, color="green", linestyle=":", alpha=0.7, label="ε=0.01 threshold")
+
+# === 定常分布との比較 (下段右) ===
+ax_bar = axes[1, 2]
+x = np.arange(10)
+width = 0.35
+colors_bar = ["#FF5722", "#2196F3"]
+for idx, (name, res) in enumerate(results.items()):
+    offset = -width/2 if idx == 0 else width/2
+    short_name = "Bottleneck" if "Bottleneck" in name else "Complete K10"
+    ax_bar.bar(x + offset, res["pi_stationary"], width, label=f"{short_name}", 
+               color=colors_bar[idx], alpha=0.7, edgecolor="black")
+
+ax_bar.set_xlabel("Vertex index", fontsize=12)
+ax_bar.set_ylabel("Stationary Probability π_i", fontsize=12)
+ax_bar.set_title("Stationary Distribution π_i ∝ d_i", fontsize=12, fontweight="bold")
+ax_bar.set_xticks(x)
+ax_bar.legend(fontsize=10)
+ax_bar.grid(True, alpha=0.3, axis="y")
+
+plt.tight_layout()
+plt.savefig('mixing_time_simulation.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print("=== シミュレーション結果 ===")
+for name, res in results.items():
+    short_name = "Bottleneck" if "Bottleneck" in name else "Complete K10"
+    print(f"\n{short_name}:")
+    print(f"  代数的連結度 λ₂ = {res['lambda2']:.4f}")
+    print(f"  t=5  の全変動距離 = {res['tv_distances'][5]:.6f}")
+    print(f"  t=20 の全変動距離 = {res['tv_distances'][20]:.6f}")
+    print(f"  理論的混合時間スケール ~ 1/λ₂ = {1/res['lambda2']:.2f}")
+```
+
+__実行に必要な環境__
+
+- `numpy`
+- `matplotlib`
+- `networkx`
+
+標準的なPython環境で動作します。`pip install numpy matplotlib networkx` でインストール可能です。
+
+__図の見方（`mixing_time_simulation.png`）__
+
+**上段左：Bottleneck Graph の構造**
+- 左側のクラスタ（頂点0-4）と右側のクラスタ（頂点5-9）が、**赤い太線の1本の橋（4-5）**だけで繋がっています。
+- オレンジ色の頂点0が初期位置です。
+
+**上段中央：Complete Graph $K_{10}$ の構造**
+- すべての頂点が互いに繋がった密なグラフです。
+- どこからどこへでも1ステップで到達可能です。
+
+**上段右：全変動距離の時間変化（対数スケール）**
+- **Bottleneck Graph（赤実線）**：全変動距離がゆるやかに減少。$t=20$ でもまだ0.1以上残っています。
+- **Complete Graph（青破線）**：$t=5$ でほぼ0に到達し、一瞬で混合が完了します。
+- $\lambda_2$ が小さいほど（Bottleneck）、減衰が遅く、混合時間が長くなることが視覚的に確認できます。
+
+**下段左・中央：確率分布のヒートマップ**
+- **Bottleneck Graph**：初期の赤い濃さ（頂点0の確率）が、左クラスタ内では速く拡散するものの、**右クラスタへの移動が遅い**（橋が1本しかないため）。時間とともに全体が薄く均一化していく様子が見えます。
+- **Complete Graph**：初期の濃さが**1ステップでほぼ全体に一様に拡散**し、すぐに平坦な定常分布に到達します。
+
+**下段右：定常分布 $\boldsymbol{\pi}_i \propto d_i$**
+- 両グラフとも、定常分布は次数に比例します。
+- Bottleneck Graphでは各頂点の次数が異なる（橋の端点4,5は次数5、他は次数4）ため、分布にわずかな偏りがあります。
+- Complete Graphではすべての頂点の次数が9で等しいため、完全に一様分布（各頂点0.1）になります。
+
+
+<img src="image/2_linear_graph/1787260279213.png" width="500px" style="display: block; margin: 0 auto;">
+
+<img src="image/2_linear_graph/1787260301921.png" width="500px" style="display: block; margin: 0 auto;">
+
 
