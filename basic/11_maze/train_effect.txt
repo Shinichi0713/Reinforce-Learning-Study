@@ -573,3 +573,147 @@ Episode 1900, save model to /content/drive/MyDrive/maze/maze_agent.pth
 Training finished.
 
 
+Episode 0, Reward: 30.15, 直近1エピソードのゴール到達率: 100%, entropy_coef=0.0500, 難易度(max_distance)=3
+  [プール] 試行済み1/1件, プール全体の成功率=100%
+  [プール] 苦手Top1: id0(成功率100%, 試行1回)
+[curriculum] 直近20エピソードの成功率85% >= 閾値。難易度を引き上げ: max_distance=4
+[curriculum] 直近20エピソードの成功率90% >= 閾値。難易度を引き上げ: max_distance=5
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=6
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=7
+Episode 100, Reward: -31.70, 直近21エピソードのゴール到達率: 62%, entropy_coef=0.0477, 難易度(max_distance)=7
+  [プール] 試行済み50/50件, プール全体の成功率=74%
+  [プール] 苦手Top5: id55(成功率0%, 試行1回), id45(成功率0%, 試行3回), id28(成功率12%, 試行8回), id36(成功率33%, 試行6回), id42(成功率33%, 試行3回)
+Episode 100, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=8
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=9
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=10
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=11
+Episode 200, Reward: -33.85, 直近32エピソードのゴール到達率: 66%, entropy_coef=0.0455, 難易度(max_distance)=11
+  [プール] 試行済み50/50件, プール全体の成功率=70%
+  [プール] 苦手Top5: id62(成功率17%, 試行6回), id28(成功率20%, 試行13回), id58(成功率25%, 試行8回), id81(成功率33%, 試行3回), id23(成功率33%, 試行3回)
+Episode 200, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=12
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=13
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=14
+Episode 300, Reward: -32.05, 直近10エピソードのゴール到達率: 60%, entropy_coef=0.0432, 難易度(max_distance)=14
+  [プール] 試行済み50/50件, プール全体の成功率=68%
+  [プール] 苦手Top5: id93(成功率14%, 試行7回), id91(成功率17%, 試行6回), id62(成功率20%, 試行12回), id99(成功率25%, 試行4回), id98(成功率33%, 試行3回)
+Episode 300, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=15
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=16
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=17
+Episode 400, Reward: 30.60, 直近50エピソードのゴール到達率: 54%, entropy_coef=0.0410, 難易度(max_distance)=17
+  [プール] 試行済み50/50件, プール全体の成功率=67%
+  [プール] 苦手Top5: id110(成功率0%, 試行3回), id114(成功率0%, 試行1回), id58(成功率20%, 試行15回), id62(成功率20%, 試行14回), id93(成功率22%, 試行9回)
+Episode 400, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=18
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=19
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=20
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=21
+Episode 500, Reward: 8.85, 直近18エピソードのゴール到達率: 72%, entropy_coef=0.0387, 難易度(max_distance)=21
+  [プール] 試行済み50/50件, プール全体の成功率=67%
+  [プール] 苦手Top5: id131(成功率0%, 試行2回), id62(成功率10%, 試行20回), id58(成功率20%, 試行18回), id93(成功率30%, 試行10回), id28(成功率40%, 試行25回)
+Episode 500, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=22
+[curriculum] 直近20エピソードの成功率80% >= 閾値。難易度を引き上げ: max_distance=23
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=24
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=25
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=26
+Episode 600, Reward: 18.10, 直近12エピソードのゴール到達率: 75%, entropy_coef=0.0365, 難易度(max_distance)=26
+  [プール] 試行済み50/50件, プール全体の成功率=68%
+  [プール] 苦手Top5: id151(成功率0%, 試行2回), id160(成功率0%, 試行1回), id58(成功率20%, 試行19回), id62(成功率20%, 試行26回), id28(成功率40%, 試行29回)
+Episode 600, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率80% >= 閾値。難易度を引き上げ: max_distance=27
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=28
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=29
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=30
+Episode 700, Reward: 30.30, 直近4エピソードのゴール到達率: 75%, entropy_coef=0.0342, 難易度(max_distance)=30
+  [プール] 試行済み50/50件, プール全体の成功率=67%
+  [プール] 苦手Top5: id151(成功率0%, 試行5回), id62(成功率10%, 試行31回), id58(成功率20%, 試行22回), id93(成功率40%, 試行22回), id28(成功率40%, 試行30回)
+Episode 700, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=31
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=32
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=33
+Episode 800, Reward: 6.80, 直近23エピソードのゴール到達率: 57%, entropy_coef=0.0320, 難易度(max_distance)=33
+  [プール] 試行済み50/50件, プール全体の成功率=66%
+  [プール] 苦手Top5: id58(成功率20%, 試行26回), id151(成功率20%, 試行11回), id62(成功率30%, 試行37回), id180(成功率33%, 試行3回), id112(成功率40%, 試行14回)
+Episode 800, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=34
+Episode 900, Reward: 18.10, 直近78エピソードのゴール到達率: 56%, entropy_coef=0.0297, 難易度(max_distance)=34
+  [プール] 試行済み50/50件, プール全体の成功率=65%
+  [プール] 苦手Top5: id206(成功率0%, 試行1回), id180(成功率14%, 試行7回), id58(成功率20%, 試行31回), id151(成功率20%, 試行14回), id62(成功率40%, 試行42回)
+Episode 900, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=35
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=36
+Episode 1000, Reward: 30.30, 直近30エピソードのゴール到達率: 57%, entropy_coef=0.0275, 難易度(max_distance)=36
+  [プール] 試行済み50/50件, プール全体の成功率=61%
+  [プール] 苦手Top5: id217(成功率0%, 試行1回), id62(成功率0%, 試行50回), id219(成功率0%, 試行1回), id223(成功率0%, 試行1回), id151(成功率0%, 試行18回)
+Episode 1000, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=37
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=38
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=39
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=40
+Episode 1100, Reward: 15.50, 直近6エピソードのゴール到達率: 100%, entropy_coef=0.0252, 難易度(max_distance)=40
+  [プール] 試行済み50/50件, プール全体の成功率=61%
+  [プール] 苦手Top5: id62(成功率0%, 試行55回), id231(成功率0%, 試行1回), id151(成功率10%, 試行21回), id58(成功率30%, 試行40回), id81(成功率30%, 試行27回)
+Episode 1100, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=41
+[curriculum] 直近20エピソードの成功率90% >= 閾値。難易度を引き上げ: max_distance=42
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=43
+Episode 1200, Reward: 21.45, 直近27エピソードのゴール到達率: 52%, entropy_coef=0.0230, 難易度(max_distance)=43
+  [プール] 試行済み50/50件, プール全体の成功率=62%
+  [プール] 苦手Top5: id263(成功率0%, 試行1回), id256(成功率0%, 試行1回), id262(成功率0%, 試行1回), id151(成功率10%, 試行23回), id62(成功率20%, 試行59回)
+Episode 1200, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=44
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=45
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=46
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=47
+Episode 1300, Reward: 18.20, 直近3エピソードのゴール到達率: 33%, entropy_coef=0.0207, 難易度(max_distance)=47
+  [プール] 試行済み50/50件, プール全体の成功率=59%
+  [プール] 苦手Top5: id282(成功率0%, 試行1回), id266(成功率0%, 試行4回), id277(成功率0%, 試行1回), id62(成功率20%, 試行61回), id151(成功率30%, 試行27回)
+Episode 1300, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=48
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=49
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=50
+Episode 1400, Reward: 14.25, 直近6エピソードのゴール到達率: 83%, entropy_coef=0.0185, 難易度(max_distance)=50
+  [プール] 試行済み50/50件, プール全体の成功率=57%
+  [プール] 苦手Top5: id297(成功率0%, 試行1回), id301(成功率0%, 試行2回), id266(成功率14%, 試行7回), id263(成功率20%, 試行5回), id270(成功率25%, 試行4回)
+Episode 1400, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=51
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=52
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=53
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=54
+Episode 1500, Reward: 8.70, 直近5エピソードのゴール到達率: 100%, entropy_coef=0.0162, 難易度(max_distance)=54
+  [プール] 試行済み50/50件, プール全体の成功率=57%
+  [プール] 苦手Top5: id297(成功率0%, 試行2回), id301(成功率0%, 試行3回), id151(成功率20%, 試行32回), id266(成功率22%, 試行9回), id229(成功率29%, 試行7回)
+Episode 1500, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率75% >= 閾値。難易度を引き上げ: max_distance=55
+Episode 1600, Reward: 28.85, 直近85エピソードのゴール到達率: 53%, entropy_coef=0.0140, 難易度(max_distance)=55
+  [プール] 試行済み50/50件, プール全体の成功率=57%
+  [プール] 苦手Top5: id301(成功率0%, 試行6回), id341(成功率0%, 試行1回), id151(成功率20%, 試行35回), id229(成功率22%, 試行9回), id291(成功率29%, 試行7回)
+Episode 1600, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=56
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=57
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=58
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=59
+Episode 1700, Reward: 18.25, 直近12エピソードのゴール到達率: 75%, entropy_coef=0.0117, 難易度(max_distance)=59
+  [プール] 試行済み50/50件, プール全体の成功率=56%
+  [プール] 苦手Top5: id341(成功率0%, 試行4回), id151(成功率10%, 試行41回), id301(成功率12%, 試行8回), id58(成功率20%, 試行57回), id229(成功率20%, 試行11回)
+Episode 1700, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=60
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=61
+Episode 1800, Reward: 10.80, 直近35エピソードのゴール到達率: 49%, entropy_coef=0.0095, 難易度(max_distance)=61
+  [プール] 試行済み50/50件, プール全体の成功率=52%
+  [プール] 苦手Top5: id393(成功率0%, 試行1回), id341(成功率0%, 試行7回), id151(成功率10%, 試行44回), id301(成功率10%, 試行11回), id292(成功率10%, 試行15回)
+Episode 1800, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=62
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=63
+Episode 1900, Reward: 4.45, 直近3エピソードのゴール到達率: 100%, entropy_coef=0.0072, 難易度(max_distance)=63
+  [プール] 試行済み50/50件, プール全体の成功率=47%
+  [プール] 苦手Top5: id420(成功率0%, 試行1回), id394(成功率0%, 試行2回), id414(成功率0%, 試行1回), id151(成功率10%, 試行45回), id393(成功率20%, 試行5回)
+Episode 1900, save model to /content/drive/MyDrive/maze/maze_agent.pth
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=64
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=65
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=66
+[curriculum] 直近20エピソードの成功率70% >= 閾値。難易度を引き上げ: max_distance=67
+Training finished.

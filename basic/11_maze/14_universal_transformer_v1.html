@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/09/06/043000">前回迷路の解決用の強化学習エージェントにUniversal Transformerを適用</a>しましたが、結果は返って悪い結果となりました。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題">課題</h2>
+<p>前回Transformerのレイヤの重みを共有して、反復計算することでゴールを目指すUniversal Transformerを適用しました。
+しかし、調べるとそもそもUniversal Transformerに失敗しやすいモードがありました。
+前回記事の考察で挙げたものと合わせて、現状うまくいっていない理由について整理します。</p>
+<h3 id="1-反復ステップいま何回目の計算かの情報の欠如">1. 反復ステップ（「いま何回目の計算か」）の情報の欠如</h3>
+<p>通常の Transformer では、1層目、2層目、3層目がそれぞれ「初期特徴抽出」「ローカル伝播」「広域集約」といった層ごとの役割を自然に分担して学習します。</p>
+<ul>
+<li>share_weights=True の問題: 全く同じパラメータの層をループさせるため、モデルは「いまが1ホップ目の伝播なのか、10ホップ目の伝播なのか」を判別できません。</li>
+<li>本来必要な工夫: Universal Transformer の原論文（Dehghani et al.）などでは、何回目の反復かを示す Step Embedding（時間的・層的エンコーディング） を毎ステップ加算して入力します。これが無いと、1層目（初期状態）と10層目（伝播完了状態）で全く同じ変換を強制されるため、モデルの表現力が著しく制約されます。</li>
+</ul>
+<h3 id="2-残差接続residual-connectionによるスケール漂流と勾配問題">2. 残差接続（Residual Connection）によるスケール漂流と勾配問題</h3>
+<p>TransformerLayer は x = x + Dropout(SubLayer(Norm(x))) という残差構造を持っています。</p>
+<ul>
+<li>スケール膨張: 同じ重みの残差接続を 8〜16 回繰り返すと、層を経るごとに内部ベクトル <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> のノルム（大きさ）が徐々に膨れ上がり、LayerNorm を挟んでいても Attention logits のスケールが歪んでいきます。</li>
+<li>勾配消失・爆発: BPTT（時間方向の逆伝播）と同様に、同じ行列を8回通過する勾配パスが生じるため、PPOの勾配更新が非常に不安定になります。PPOはポリシーの更新が少しブレるだけで学習が崩壊しやすいため、この不安定さが直撃したと考えられます。</li>
+</ul>
+<h3 id="3-dropoutが多重にかかりすぎている">3. Dropoutが「多重にかかりすぎている」</h3>
+<p><code>RoPEEncoderLayer</code>は内部に<code>dropout=0.1</code>を複数箇所（Attention出力、FFN内、残差直前）に持っています。独立した8層構成なら、それぞれの層に1回ずつ10%のドロップアウトがかかるだけで済みますが、<strong>重み共有ありだと、&quot;同じdropoutモジュール&quot;が8回呼び出される</strong>ことになります。<code>nn.Dropout</code>は呼び出すたびに新しい乱数マスクを生成するため、実質的には「同じ情報が8回連続でランダムに10%ずつ欠落させられる」形になり、素朴に考えても8回分の欠落が積み重なります。これは単純な「層が増えた」以上に、<strong>同一パラメータへの勾配が、毎回異なるノイズパターンの下で計算される</strong>ため、勾配のばらつきを大きくし、学習を不安定にする一因になり得ます。</p>
+<h3 id="4-反復に適した関数であることを構造的に保証していない">4. 「反復に適した関数」であることを構造的に保証していない</h3>
+<p>ご指摘の1点目と関連しますが、もう一段掘り下げると、そもそも<strong>同じ重みを繰り返し適用して意味のある結果に収束させる</strong>には、その関数が「反復に適した性質」（不動点に収束する、単調性を持つ、など）を満たしている必要があります。以前ご検討いただいたVINでは、<code>Q = R + γ・max(近傍のV)</code>という更新式自体が、<strong>割引率<code>γ</code>によって縮小写像（contraction mapping）になることが数学的に保証</strong>されており、だからこそ「同じ演算をK回繰り返せば必ず正しい値に収束する」と言えます。</p>
+<p>一方、今回のTransformer層（Attention+FFN+残差+LayerNorm）は、汎用的な非線形変換であり、<strong>反復適用したときにどこかに収束する保証は一切ありません</strong>。Step Embeddingを足しても「今何回目か」は分かるようになりますが、それでも「反復に適した関数のクラス」に押し込めているわけではないので、根本的な設計のミスマッチが残ります。これはご指摘の1点目・2点目の背後にある、より一般的な原因だと考えています。</p>
+<h3 id="5-変更点が複数同時に入っており何が悪化の原因か切り分けられていない">5. 変更点が複数同時に入っており、何が悪化の原因か切り分けられていない</h3>
+<p>今回の変更では、以下を<strong>同時に</strong>変えています。</p>
+<ul>
+<li><code>use_wall_mask</code>: False → True</li>
+<li><code>num_layers</code>: 2 → 8</li>
+<li><code>share_weights</code>: 新規追加してTrue</li>
+<li>距離予測の補助ロス（<code>distance_loss_coef=0.1</code>）も同時に導入</li>
+</ul>
+<p>「Universal Transformerにしたから悪化した」と結論づけていますが、実際には<strong>壁マスクの再導入自体</strong>（8ホップの情報伝播を要求される難しさ）や、<strong>補助ロスとPPOの目的関数のせめぎ合い</strong>が悪化の主因という可能性も排除できていません。これは実装上のバグというより、<strong>検証設計の問題</strong>です。</p>
+<h3 id="6-パラメータ数の減少が役割の重さに見合っていない">6. パラメータ数の減少が、役割の重さに見合っていない</h3>
+<p>重み共有によってパラメータ数は約1/5.6（285,574→51,270）に減っています。ご指摘の通り「1層で全ての反復段階を担う」という役割の複雑さが増しているのに、<strong>その役割を表現するための重み自体は逆に減っている</strong>ため、力不足に陥っている可能性もあります。</p>
+<h2 id="対策">対策</h2>
+<p>単一の重みを共有する Universal Transformer（UT）が抱えていた「役割の過小化」「時間の不感」という構造的ボトルネックを直接打ち消しつつ、計算コストを跳ね上げずに表現力を回復させる必要があるということが考えられます。</p>
+<p>上記課題にたいする解決案として今回MoEにより4パターン程度のエキスパートを準備、入力に計算ステップを意味する情報を付与するという対策案を検討しました。</p>
+<p>対策案の意図について説明します。</p>
+<h3 id="1-役割分担の復元と-step-embedding-の相乗効果課題1の解決">1. 役割分担の復元と Step Embedding の相乗効果（課題1の解決）</h3>
+<p>Step Embedding を入力（または各層の入力）に足すことで、モデルは「いまが何ホップ目の伝播か」を識別できるようになります。
+さらにここに MoE を組み合わせると、<strong>ステップ情報（あるいはステップ依存のトークン表現）をキーにして、ルーターが適切なエキスパートへ処理を振り分けられるようになります。</strong></p>
+<ul>
+<li><strong>ステップ0〜1（初期段階）:</strong> 壁や初期配置の特徴抽出に特化したエキスパート</li>
+<li><strong>ステップ2〜5（中間伝播）:</strong> 隣接マス間の価値や距離を繰り返し更新・集約するエキスパート</li>
+<li><strong>ステップ6〜7（収束・出力直前）:</strong> 集約された広域情報から最終的な行動・価値判断を導くエキスパート</li>
+</ul>
+<p>このように、完全共有では不可能だった「時間軸に沿った動的な役割分担（Specialization）」が実現します。</p>
+<h3 id="2-計算コストflopsを維持したまま表現力を拡張課題6の解決">2. 計算コスト（FLOPs）を維持したまま表現力を拡張（課題6の解決）</h3>
+<p>完全共有（1層）ではパラメータ数が約1/5.6に激減し、8回分の異なる反復フェーズを1つの重みに押し込める必要がありました。
+MoEを導入してエキスパートを4つ用意すれば、モデル全体の総パラメータ数（Capacity）は独立多層モデルと同等以上に引き上げることができます。一方、1ステップあたりに起動するエキスパートを1〜2個（Top-1 / Top-2）に制限すれば、<strong>推論・学習の計算量（FLOPs）やメモリ帯域を抑えたまま、多層同等の表現能力を獲得できます。</strong></p>
+<h3 id="3-動的演算子による単一累積エラーの緩和課題24の緩和">3. 動的演算子による「単一累積エラー」の緩和（課題2・4の緩和）</h3>
+<p>課題4にある通り、固定の1つの行列 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span> を単に <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>A</mi><mn>8</mn></msup></mrow><annotation encoding="application/x-tex">A^8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">8</span></span></span></span></span></span></span></span></span></span></span> や <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>A</mi><mn>16</mn></msup></mrow><annotation encoding="application/x-tex">A^{16}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">16</span></span></span></span></span></span></span></span></span></span></span></span> と掛け合わせる処理は、スケールの膨張や特定の固有値方向への偏り（オーバースモーシング）を引き起こしやすい性質があります。
+MoEによってステップやトークンに応じて適用される変換 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">A_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> が変化すると、実質的に <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mn>8</mn></msub><mo>⋅</mo><msub><mi>A</mi><mn>7</mn></msub><mo>…</mo><msub><mi>A</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">A_8 \cdot A_7 \dots A_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">8</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> という非定常な系（動的な非線形変換）になります。これにより、単一関数の反復適用で発生するスケール漂流や情報消失のリスクが軽減されます。</p>
+<h2 id="コードの変更点">コードの変更点</h2>
+<p>ここまで実装したコードを、変更するべき点を整理して説明します。</p>
+<p>全体として、「2D RoPE（回転位置埋め込み）の導入」「Universal Transformer的発想に基づく層間の重み共有・MoE化」「価値伝播を模した補助ロスの導入」など、グリッド環境におけるAttentionの帰納バイアスを強化し、データ効率と一般化性能を高める改良が加えられています。</p>
+<h3 id="1-transformer構造の柔軟化universal-transformer--step-moe">1. Transformer構造の柔軟化（Universal Transformer &amp; Step-MoE）</h3>
+<p>前回改修により1つの標準的なTransformer構成から、価値伝播（Value Iteration）を模した柔軟な構造へ拡張されました。
+今回 Transformer 構造の中にステップ情報を埋め込めるように修正します。</p>
+<ul>
+<li><strong><code>RoPETransformerEncoder</code> の新設:</strong></li>
+<li><strong>重み共有 (<code>share_weights=True</code>):</strong> 1つのアテンション層を <code>num_layers</code> 回繰り返し適用するUniversal Transformer的構成をサポート。VIN（Value Iteration Network）のように「1層＝1ホップの価値伝播」という帰納バイアスを持たせる目的。</li>
+<li><strong>ステップ埋め込み (<code>use_step_embedding</code>):</strong> 重み共有時に「今が何回目の反復か」を識別できるよう、反復回数ごとの学習可能ベクトルを加算する仕組みを追加。</li>
+<li><strong>ステップルーティングMoE (<code>num_experts &gt; 1</code>):</strong> 完全な重み共有と完全な独立層の中間として、複数エキスパート（<code>RoPEEncoderLayer</code>）を配置。</li>
+<li><code>fixed</code>: 反復ステップ数に応じて決定的にエキスパートを割り当てる（エキスパート崩壊を抑止）。</li>
+<li><code>learned</code>: CLSトークン表現からゲーティング重みを計算する密なMoE（全エキスパート出力の加重平均）。</li>
+</ul>
+<h3 id="2-価値反復ネットワークvinactorcriticの追加">2. 価値反復ネットワーク（VINActorCritic）の追加</h3>
+<p>前回アテンション機構では「隣接マスの値を比較して最善方向を選ぶ」計算の学習が難しいケースへの対照群・代替モジュールとして、<strong>VIN（Value Iteration Network）</strong> が追加されました。</p>
+<ul>
+<li>壁・ゴール・歩行コストから報酬マップ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span> を直接構成。</li>
+<li>畳み込み（<code>q_conv</code>）と <code>max</code> 演算を <code>vi_iterations</code>（15回）重み共有で繰り返すことで、Bellman Backup（価値反復）を明示的にネットワーク構造として再現。</li>
+</ul>
+<h3 id="3-agenttransformerppoagentの堅牢化と学習設定の拡充">3. Agent（TransformerPPOAgent）の堅牢化と学習設定の拡充</h3>
+<ul>
+<li>
+<p><strong>エントロピー係数のアニーリング対応 (<code>entropy_coef_final</code>):</strong></p>
+</li>
+<li>
+<p>学習進行に伴い <code>entropy_coef_start</code> から <code>entropy_coef_final</code> へ線形減衰させる設定項目を追加（探索から活用へのスムーズな移行）。</p>
+</li>
+<li>
+<p><strong>距離補助ロスの管理 (<code>distance_loss_coef</code>):</strong></p>
+</li>
+<li>
+<p>Actor-Criticの距離予測補助タスクの損失係数を受け取れるよう引数を調整。</p>
+</li>
+</ul>
+<h3 id="4-実装コード">4. 実装コード</h3>
+<p>今回変更のコードを以下レポジトリに保存しました。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/basic/11_maze/src</a></p>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の推移">学習の推移</h3>
+<p>前回と今回で学習のエピソードごとの報酬の推移を可視化します。</p>
+<p>後半エピソードの安定性（Ep 500〜1900）</p>
+<ul>
+<li>前回: Ep 600以降、報酬がマイナス（-30〜-40前後）に急落する頻度が高く、学習が不安定な状態が続いていました。</li>
+<li>今回: Ep 400以降は一度もマイナスに落ち込まず、プラス圏（+5〜+30）で極めて安定して推移しています。</li>
+</ul>
+<p>序盤の挙動（Ep 100〜300）</p>
+<ul>
+<li>前回: 序盤から緩やかにプラス報酬を維持していました。</li>
+<li>今回: Ep 100〜300付近で一時的にマイナス報酬を記録していますが、Ep 400以降で急激にパフォーマンスが改善し、そのまま高水準を維持しています。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\14_universal_transformer_v1\1787444304182.png" alt="1787444304182"></p>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習したエージェントの動作を確認してみます。
+下2個の動画についてはアテンションもオーバーレイ(ヒートマップ化)してみました。</p>
+<p>まずは前回よりはゴールへ向かうようになったように見えます。
+学習の推移が改善したことと合わせると、アーキテクチャとしては改善したといえるかもしれません。</p>
+<p>ちょっと気になったのはアテンションを可視化したヒートマップ見ると、ゴールにアテンションはついていることが確認出来ますが、肝心の経路はゴール付近に集まってますが、本当に通って欲しい経路にはそこまで注意が高くないような結果のようです。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\14_universal_transformer_v1\agent_maze_solve (6).gif" width="300px">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\14_universal_transformer_v1\agent_maze_solve (7).gif" width="300px">
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\11_maze\image\14_universal_transformer_v1\agent_maze_solve (8).gif" width="300px">
+<h3 id="課題の検討">課題の検討</h3>
+<p>今回の実験結果（報酬推移の改善）およびアテンション可視化の洞察を踏まえ、取り組みにおける良かった点（技術的成果・設計の妥当性）と悪かった点（残された課題・考察）を整理してまとめました。</p>
+<p><strong>良かった点（技術的成果と成功要因）</strong></p>
+<ul>
+<li>
+<p><strong>学習の安定性と破滅的忘却の抑制</strong></p>
+</li>
+<li>
+<p>エピソード500〜1900においてマイナス報酬へ急落するスパイクが消滅し、+5〜+30のプラス圏で維持されたのは改善したと言えます。PPOのポリシー崩壊を引き起こしていた「完全重み共有による勾配ノイズ」が、MoEとStep Embeddingによって効果的に抑え込まれました。</p>
+</li>
+<li>
+<p><strong>Step Embedding + Step-MoE による表現力の回復</strong></p>
+</li>
+<li>
+<p>単一の重みを使い回す「時間の不感」に対し、<code>Step Embedding</code> で反復フェーズを識別させ、<code>MoE</code> でエキスパートを動的切り替え（<code>fixed</code> / <code>learned</code>）させた設計は課題には適切だったといえるかもしれません。</p>
+</li>
+<li>
+<p>FLOPs（計算量）を維持したままパラメータ容量を拡張し、<strong>「1ホップ目（ローカル壁判定）」〜「Nホップ目（広域パス集約）」という段階的役割分担（Specialization）を実現</strong>できました。</p>
+</li>
+<li>
+<p><strong>単一累積エラーとスケール漂流の軽減</strong></p>
+</li>
+<li>
+<p>同一関数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span> の単純反復から、ステップ依存の関数系列 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>t</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f_t(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>（動的演算子）へ移行したことで、残差接続によるスケール膨張や特定方向への偏り（オーバースモーシング）が緩和されように考えられます。</p>
+</li>
+</ul>
+<p><strong>悪かった点・残された課題（アテンション挙動と構成要素の切り分け）</strong></p>
+<ul>
+<li>
+<p><strong>アテンション（注視度）が「ゴール周辺」に集中し、「最短経路」を捉えていない</strong></p>
+</li>
+<li>
+<p>可視化動画で確認された通り、モデルは「ゴール（目的地の場所）」は強く認識できているものの、<strong>「現在地からゴールを結ぶ連続的なパス（経路）」に対する注意配分ができていません</strong>。</p>
+</li>
+<li>
+<p>これは Transformer の Self-Attention が本質的に「全点対全点（All-to-All）のグローバル参照」を行うためです。迷路の解法に必要な <strong>「隣接マスを1歩ずつ辿る（Bellman Backup / Graph Distance）」という</strong>強い局所的帰納バイアス（Local Inductive Bias）が、Attention単体では依然として不足している可能性を示唆しています（VINが畳み込みカーネルでこれを明示的に担保しているのとは対照的です）。</p>
+</li>
+<li>
+<p><strong>複数要素の同時変更による要因の曖昧さ（検証設計の課題）</strong></p>
+</li>
+<li>
+<p>前回の反省（課題5）にも挙げられていた通り、今回も MoE 化・Step Embedding・壁マスク (<code>use_wall_mask</code>)・エントロピーアニーリング・距離補助ロスなど<strong>複数のハイパーパラメータやモジュールが同時に変更</strong>されています。</p>
+</li>
+<li>
+<p>序盤（Ep 100〜300）の停滞からの劇的な回復が「MoEによる表現力向上」のおかげなのか、「補助ロスの寄与」や「エントロピー減衰による活用へのシフト」によるものなのか、単体ごとのアブレーション（消去実験）がないため厳密な要因特定には至っていません。</p>
+</li>
+<li>
+<p><strong>コンバージェンス（収束）の保証自体は依然としてない</strong></p>
+</li>
+<li>
+<p>MoE により動的変換化（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mn>8</mn></msub><mo>⋅</mo><msub><mi>A</mi><mn>7</mn></msub><mo>…</mo><msub><mi>A</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">A_8 \cdot A_7 \dots A_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">8</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）されたことで学習は安定しましたが、課題4で触れられた「反復適用による不動点への収束性（縮小写像）」が数学的に補償されたわけではありません。ステップ数を8から16に増やした際などに、追加学習なしでそのまま適用できる汎用性（Zero-shot extrapolation）があるかは未知数です。</p>
+</li>
+</ul>
+<h3 id="次の一手改善アイデア">次の一手・改善アイデア</h3>
+<ol>
+<li><strong>アテンションへの「近傍マスク（Local Mask）」または「距離バイアス」の導入</strong></li>
+</ol>
+<ul>
+<li>現在は「ゴールだけに目が行く」状態ですが、Attention Map 計算時に <strong><code>2D RoPE</code> に加えて「マンハッタン距離に応じたアテンションバイアス（またはk近傍マスク）」</strong> を追加することで、隣接マスへの情報伝播を直接強制できます。</li>
+</ul>
+<ol start="2">
+<li><strong>VIN と Transformer のハイブリッド化</strong></li>
+</ol>
+<ul>
+<li>畳み込みによる局所価値伝播（VIN）で「距離/コストマップ」を事前生成し、それを Transformer の Positional Bias として与える設計も、より直接的な解決策になり得ます。</li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>以下、今回の取り組みの本質を整理してまとめます。</p>
+<h3 id="今回の要点">今回の要点</h3>
+<p>迷路の最短経路探索という『局所的な価値伝播』タスクに対し、TransformerのグローバルAttentionを用いる際、単純な重み共有（Universal Transformer）では時間的・空間的な帰納バイアスが不足し、Step EmbeddingとMoEによる動的役割分担でその欠陥を補うことで学習の安定化につながりました。しかし、最短経路そのものをAttentionが捉えるには、さらなる局所バイアスの付与が必要な可能性があります。</p>
+<h3 id="1-前回の失敗の本質">1. 前回の失敗の本質</h3>
+<p>前回のUniversal Transformer（重み共有）が失敗した根本的原因は、<strong>「同じ変換を時間軸方向に繰り返すことで、各ステップが『今何をすべきか』を自己識別できなくなった」</strong> ことにあります。</p>
+<p>具体的には以下の3つの構造的欠陥が重なりました。</p>
+<ul>
+<li><strong>時間情報の欠如</strong>：ステップ数に応じた役割分担（初期特徴抽出→局所伝播→広域集約）ができず、全ステップで同じ処理を強制された</li>
+<li><strong>動的安定性の欠如</strong>：VINのような縮小写像（収束保証）を持たない非線形変換を単純反復したことで、残差接続によるスケール漂流と勾配不安定化が生じた</li>
+<li><strong>表現力の過小化</strong>：1つの層に8ステップ分の役割を押し込んだ結果、パラメータ数が1/5.6に減少し、PPOの安定した政策学習に必要な表現力を欠いた</li>
+</ul>
+<h3 id="2-今回の改善の本質">2. 今回の改善の本質</h3>
+<p>今回のStep Embedding＋Step-MoEによる改善は、<strong>「時間軸に沿った動的役割分担（Specialization）」を無理なく実現した</strong>点に本質があります。</p>
+<ul>
+<li><strong>Step Embedding</strong>により、「今が何ホップ目か」という時間的文脈を変換器に与え、ステップごとに異なる振る舞いを可能にした</li>
+<li><strong>Step-MoE（ステップ単位のエキスパート切り替え）</strong> により、初期段階・中間伝播段階・出力段階で異なるエキスパートが担当する「ソフトな層の分離」を実現した</li>
+<li>結果として、FLOPs（計算コスト）は抑えたまま、パラメータ容量を回復し、単一関数の反復による累積誤差も分散させることに成功した</li>
+</ul>
+<p>これにより、エピソード後半での報酬のマイナス急落（学習崩壊）が消失し、プラス圏での安定した収束が達成されました。</p>
+<h3 id="3-残された課題の本質">3. 残された課題の本質</h3>
+<p>しかし、改善されたとはいえ、<strong>「ゴールは見えているが、そこに至る経路（パス）をAttentionが捉えきれていない」</strong> という構造的限界が残りました。</p>
+<p>これは以下のミスマッチを示唆しています。</p>
+<ul>
+<li><strong>TransformerのSelf-Attentionは「全点対全点」のグローバル参照</strong>であり、迷路解法に必要な**「隣接マスから1歩ずつ価値を伝播させる」という局所的・距離的な帰納バイアス**を本質的に持ち合わせていない</li>
+<li>VINは畳み込みカーネルによってこの局所伝播を明示的に構造化していたのに対し、Transformerはそれをデータから学習させる必要があるため、サンプル効率と一般化の観点で不利である</li>
+</ul>
+<p>また、今回も<strong>複数の変更（MoE化・Step Embedding・壁マスク・エントロピーアニーリング・距離補助ロス）を同時に導入</strong>したため、どの要素が改善に寄与したかの厳密な切り分け（アブレーション）は未解決です。</p>
+<h3 id="4-技術的教訓">4. 技術的教訓</h3>
+<p>今回の取り組みから得られる本質的な教訓は以下の通りです。</p>
+<table>
+<thead>
+<tr>
+<th>教訓</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>反復計算には時間情報が必須</strong></td>
+<td>重みを共有してループさせる場合、ステップIDや時間埋め込みを与えないと、各ステップの役割が曖昧になり学習が崩壊する</td>
+</tr>
+<tr>
+<td><strong>役割分担は「ソフトな分離」で実現する</strong></td>
+<td>完全な重み共有は表現力不足、完全な独立層はコスト過大。MoEはその中間的な解として有効</td>
+</tr>
+<tr>
+<td><strong>タスクの帰納バイアスとモデルの帰納バイアスは一致させる</strong></td>
+<td>迷路のような「局所伝播」タスクには、グローバルAttentionだけでは不十分で、近傍マスクやVIN的な畳み込み伝播といった局所バイアスの付与が必要</td>
+</tr>
+<tr>
+<td><strong>検証設計は変更を1つずつ行う</strong></td>
+<td>複数のハイパーパラメータを同時に変えると、改善・悪化の要因特定が不可能になる</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-次の一手の方向性">5. 次の一手の方向性</h3>
+<p>記事で示された次の一手は、上記の本質的課題に対する自然な帰結です。</p>
+<ol>
+<li><strong>近傍マスク（Local Mask）または距離バイアスの導入</strong>：Attentionをグローバルから局所的に制限し、隣接マスへの価値伝播を直接強制する</li>
+<li><strong>VINとTransformerのハイブリッド化</strong>：畳み込みによる局所価値伝播（VIN）で距離マップを事前生成し、Transformerはその上で高次の意思決定を行うという役割分離</li>
+</ol>
+<p>つまり、<strong>Transformerにすべてを任せる」のではなく、「各アーキテクチャの強み（VINの局所伝播＋Transformerの広域集約）を組み合わせる</strong>ことが、迷路のような構造化された空間推論タスクにおける本質的な解決策であると言えます。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/RrXJGGxZI50?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+
+        </body>
+        </html>
