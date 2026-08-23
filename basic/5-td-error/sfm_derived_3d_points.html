@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ad6;&#x6587;&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>3D点群データを精度よく得たいという要望があります。
+3D点群には精度を影響するパラメータとしてカメラの内部パラメータやマップのオーバーラップがよく知られます。
+ですが、この情報以外にも精度を左右するパラメータが存在します。</p>
+<p>本日はそんなパラメータについて調査・研究した論文について読んでいきます。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>UAV-Based LiDAR and SfM-derived 3D Point Clouds of Forest Canopiesについて読んでいく</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="論文概要">論文概要</h2>
+<p>論文「UAV-Based LiDAR and SfM-derived 3D Point Clouds of Forest Canopies – Observation Angles Matter」の概要を以下にまとめます。</p>
+<h3 id="研究の背景と目的">研究の背景と目的</h3>
+<p>森林構造の正確な3Dマッピングは、生態系モニタリング、生物量推定、生息地解析などにおいて極めて重要です。近年、UAV（無人航空機）を搭載プラットフォームとしたLiDARとSfM（Structure-from-Motion）の両方が、森林キャノピーの詳細な3D点群を生成する手段として広く利用されています。</p>
+<p>LiDARは高精度で、ある程度キャノピーを貫通して林下や地形を捉えられる強みがありますが、高価で大型のプラットフォームが必要です。一方、SfMは重複画像から3D表面を再構成する手法で、低コストかつ運用が柔軟ですが、特に密なキャノピーでは遮蔽（オクルージョン）の問題があり、林下や地形の精度が低下しやすいという課題があります。</p>
+<p>本研究の目的は、<strong>最適化された3D取得パラメータ（多数の画像と多様な観測角度）を用いたSfMが、最先端のUAV搭載LiDARと比較してどの程度の性能を示すかを評価すること</strong>です。</p>
+<h3 id="研究地とデータ取得">研究地とデータ取得</h3>
+<ul>
+<li><strong>研究地</strong>: スイス・ビルメンスドルフ近郊の「Ramerenwald」（温帯混交林）</li>
+<li><strong>調査プロット</strong>: 50m×50mの4つのプロット（うち本研究では広葉樹優占のFP05と針葉樹優占のFP08を使用）</li>
+<li><strong>調査時期</strong>: 2024年3月26日（落葉期・leaf-off）と2024年5月29日（展葉期・leaf-on）の2回</li>
+<li><strong>使用機器</strong>:
+<ul>
+<li>LiDAR: Riegl miniVUX（DJI M600搭載）</li>
+<li>SfM: DJI Mavic 3 Multispectral（20MP RGBカメラ）</li>
+</ul>
+</li>
+<li><strong>取得高度</strong>: 両システムとも地上約60–80m</li>
+<li><strong>SfMの取得戦略</strong>:
+<ul>
+<li><strong>高品質SfM</strong>: 2つのダブルグリッド飛行パターンを45度ずつ回転させ、カメラをオフナディア（70度傾斜）に設定。多様な観測角度からの多数の画像を取得。</li>
+<li><strong>標準SfM</strong>: 従来型のナディア（真下向き）カメラによる単一ダブルグリッド飛行（比較用ベースライン）</li>
+</ul>
+</li>
+</ul>
+<p>両システムのデータは同日に連続して取得され、時間差による環境条件の変化を排除しています。</p>
+<h3 id="比較評価方法">比較・評価方法</h3>
+<p>取得した全データセットから3D点群を生成し、以下の方法で比較しました。</p>
+<ol>
+<li><strong>視覚的比較</strong></li>
+<li><strong>垂直プロファイル（高さ方向の点分布）の比較</strong></li>
+<li><strong>3つのキャノピー指標</strong>:
+<ul>
+<li><strong>CH（Canopy Height / キャノピー高さ）</strong></li>
+<li><strong>FCO（Fractional Cover / 被覆率）</strong></li>
+<li><strong>FHD（Foliage Height Diversity / 葉群高さ多様性）</strong></li>
+</ul>
+</li>
+</ol>
+<h3 id="主な結果と結論">主な結果と結論</h3>
+<p><strong>SfMの性能</strong></p>
+<ul>
+<li>最適化された飛行計画（多様な観測角度）を用いたSfMは、<strong>専用LiDARシステムと同等品質の点群を生成できる</strong>ことが示されました。</li>
+<li>キャノピー高さや垂直プロファイルについて、高品質SfMデータセットはLiDARとほぼ一致しました。</li>
+<li>森林の全体的な構造は、両手法とも良好に捉えられました。</li>
+</ul>
+<p><strong>LiDARの優位性</strong></p>
+<ul>
+<li>LiDARは<strong>キャノピー貫通能力に優れ</strong>、林下植生や地形の検出において明らかに優位でした。</li>
+<li>密なキャノピーにおける複雑な指標（FCOやFHD）の導出では、SfMは課題を残しました。</li>
+</ul>
+<p><strong>総合的な評価</strong></p>
+<ul>
+<li><strong>SfM（3D最適化飛行計画あり）は、コスト効率の高い代替手段</strong>となり得ます。特に、詳細な林下情報がそれほど重要でない場合や、LiDARベースのDTM（数値地形モデル）が既に利用可能な場合に有効です。</li>
+<li>しかし、<strong>微細な垂直構造の捉え方においては、LiDARが依然としてより堅牢なツール</strong>であることも確認されました。</li>
+</ul>
+<h3 id="研究の意義">研究の意義</h3>
+<p>従来のLiDARとSfMの比較研究では、主に固定翼機やナディア指向の撮影構成が用いられ、2Dオルソモザイク生成に最適化された設定が多かったため、SfMの真のポテンシャルが十分に評価されていませんでした。本研究は、<strong>多様な観測角度を活用したSfMの3D取得戦略が、森林構造マッピングにおいてLiDARに近い性能を発揮しうる</strong>ことを実証した点に大きな意義があります。<code>&lt;source-chip title=&quot;DGPF&quot; url=&quot;https://www.dgpf.de/src/tagung/jt2025/proceedings/paper/22_3LT2025_Morsdorf_et_al.pdf&quot; /&gt;</code></p>
+<h2 id="実験設定">実験設定</h2>
+<p>本論文の実験設定について、以下に詳しく説明します。</p>
+<h3 id="1-研究地">1. 研究地</h3>
+<ul>
+<li><strong>名称</strong>: Ramerenwald（ラメレンヴァルト）</li>
+<li><strong>位置</strong>: スイス・ビルメンスドルフ（Birmensdorf）近郊、スイス連邦森林・雪・景観研究所（WSL）キャンパスの隣接区域</li>
+<li><strong>植生</strong>: 温帯混交林
+<ul>
+<li>主要樹種: ヨーロッパブナ（<em>Fagus sylvatica</em>）、シルバーファー（<em>Abies alba</em>）、ノルウェースプルース（<em>Picea abies</em>）</li>
+</ul>
+</li>
+<li><strong>プロット構成</strong>: 50m×50mの4つの調査プロット（FP05, FP07, FP08, FP10）
+<ul>
+<li>広葉樹優占から針葉樹優占まで、樹木密度・樹冠サイズ・構造の複雑さが異なるプロットが含まれています</li>
+<li>本研究では特に<strong>広葉樹優占のFP05</strong>と<strong>針葉樹優占のFP08</strong>を使用</li>
+<li>各プロットは永久標識で中心点が設定されており、長期的なモニタリングが可能です</li>
+</ul>
+</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\9-td-lambda\image\sfm_derived_3d_points\1787443484217.png" alt="1787443484217"></p>
+<h3 id="2-データ取得時期と環境条件">2. データ取得時期と環境条件</h3>
+<table>
+<thead>
+<tr>
+<th>調査回</th>
+<th>日付</th>
+<th>状態</th>
+<th>天候</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第1回</td>
+<td>2024年3月26日</td>
+<td>leaf-off（落葉期）</td>
+<td>晴れ、風速低</td>
+</tr>
+<tr>
+<td>第2回</td>
+<td>2024年5月29日</td>
+<td>leaf-on（展葉期）</td>
+<td>曇り時々晴れ、風速低</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>両調査日ともLiDARとSfMのデータを<strong>連続して取得</strong>し、時間差による環境条件の変化を排除</li>
+<li>取得所要時間:
+<ul>
+<li>LiDAR: 約20分</li>
+<li>SfM: 約1時間20分</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-使用機器">3. 使用機器</h3>
+<p><strong>LiDARシステム</strong></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>センサ</td>
+<td>Riegl miniVUX</td>
+</tr>
+<tr>
+<td>搭載プラットフォーム</td>
+<td>DJI M600（ヘキサコプター型UAV）</td>
+</tr>
+<tr>
+<td>取得高度</td>
+<td>地上60–80m AGL</td>
+</tr>
+</tbody>
+</table>
+<p><strong>SfMシステム</strong></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UAV</td>
+<td>DJI Mavic 3 Multispectral（M3M）</td>
+</tr>
+<tr>
+<td>カメラ</td>
+<td>20MP RGBメインカメラ</td>
+</tr>
+<tr>
+<td>飛行時間</td>
+<td>バッテリー1本あたり約40分（標準的な野外条件）</td>
+</tr>
+<tr>
+<td>取得高度</td>
+<td>地上60–80m AGL（LiDARと同様）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-sfmの取得戦略実験条件の核心">4. SfMの取得戦略（実験条件の核心）</h3>
+<p>本研究の大きな特徴は、SfMの取得戦略を2パターンに分けて比較した点です。</p>
+<p><strong>高品質SfM（3D最適化取得）</strong></p>
+<ul>
+<li><strong>飛行パターン</strong>: 2つのダブルグリッド飛行を実施
+<ul>
+<li>2つのグリッドは互いに<strong>45度回転</strong>させて配置</li>
+</ul>
+</li>
+<li><strong>カメラ角度</strong>: <strong>オフナディア70度</strong>（真下から20度傾けた角度）</li>
+<li><strong>目的</strong>: 多数の観測角度から画像を取得し、3D再構成の精度を最大化、遮蔽の影響を最小化</li>
+<li><strong>利点</strong>: キャノピー隙間を通じて下層の視認性が向上、画像冗長性の増加</li>
+</ul>
+<p><strong>標準SfM（従来型・ベースライン）</strong></p>
+<ul>
+<li><strong>飛行パターン</strong>: 単一のダブルグリッド飛行</li>
+<li><strong>カメラ角度</strong>: <strong>ナディア（真下向き、0度）</strong></li>
+<li><strong>目的</strong>: 2Dオルソモザイク生成に最適化された従来型の取得方法との比較用</li>
+</ul>
+<h3 id="5-データ処理">5. データ処理</h3>
+<p>取得した全データセットから3D点群を生成し、以下の指標で比較・評価しました。</p>
+<p><strong>評価指標</strong></p>
+<ol>
+<li><strong>CH（Canopy Height / キャノピー高さ）</strong>: 樹冠の高さ</li>
+<li><strong>FCO（Fractional Cover / 被覆率）</strong>: 樹冠が地面を覆う割合</li>
+<li><strong>FHD（Foliage Height Diversity / 葉群高さ多様性）</strong>: 垂直方向の葉群構造の複雑さ</li>
+</ol>
+<p><strong>比較方法</strong></p>
+<ul>
+<li>視覚的比較（点群の外観）</li>
+<li>垂直プロファイルの比較（高さ方向の点分布）</li>
+<li>上記3指標の数値的比較</li>
+</ul>
+<h3 id="6-実験設計の特徴">6. 実験設計の特徴</h3>
+<p>本実験の設計には以下の工夫が含まれています。</p>
+<ul>
+<li><strong>同時取得</strong>: LiDARとSfMを同日に連続取得することで、時間的要因を排除</li>
+<li><strong>2つの季節</strong>: leaf-offとleaf-onの両方で取得し、キャノピー条件の違いの影響を評価</li>
+<li><strong>多様な林分</strong>: 広葉樹優占と針葉樹優占の両方を含むことで、樹種構成の影響を検討</li>
+<li><strong>SfMの最適化</strong>: 従来のナディア取得と、多様な観測角度を用いた3D最適化取得を比較することで、SfMの真のポテンシャルを評価</li>
+</ul>
+<p>この実験設計により、LiDARとSfMの相対的な性能を、森林の構造的複雑さと季節的変化の観点から包括的に評価することが可能となっています。<source-chip title="DGPF" url="https://www.dgpf.de/src/tagung/jt2025/proceedings/paper/22_3LT2025_Morsdorf_et_al.pdf" /></p>
+<h2 id="評価指標">評価指標</h2>
+<p>本研究で用いられた性能指標は、森林構造を定量的に評価するための3つの指標です。以下にそれぞれの定義と本研究での役割を説明します。</p>
+<h3 id="1-chcanopy-height--キャノピー高さ">1. CH（Canopy Height / キャノピー高さ）</h3>
+<p><strong>定義</strong>:
+キャノピー高さは、各位置における樹冠表面の高さを示す指標です。一般的に、点群データから得られた植被の高さ（DSM: 地表モデル）から地形高さ（DTM: 数値地形モデル）を差し引くことで算出されます。</p>
+<p><strong>本研究での評価内容</strong>:</p>
+<ul>
+<li>LiDARはキャノピー貫通能力により高精度なDTMを生成できるため、直接的な高さ測定が可能です。</li>
+<li>SfMは密なキャノピー下の地形検出が困難なため、DTMの精度が低下しやすく、結果としてCHの精度にも影響が出る可能性があります。</li>
+<li>結果として、<strong>高品質SfM（多様な観測角度）はLiDARとほぼ同等のCHを再現</strong>できました。</li>
+</ul>
+<h3 id="2-fcofractional-cover---fractional-canopy-cover--被覆率">2. FCO（Fractional Cover /  fractional canopy cover / 被覆率）</h3>
+<p><strong>定義</strong>:
+キャノピー被覆率は、水平面上で樹冠が占める割合を示す指標です。点群データを水平方向に積分・投影し、植被が存在するピクセルやグリッドセルの割合を算出することで求められます。0（植被なし）から1（完全に植被で覆われている）の範囲で表されます。</p>
+<p><strong>本研究での評価内容</strong>:</p>
+<ul>
+<li>森林の水平方向の密さや隙間の分布を評価する指標です。</li>
+<li>結果として、<strong>SfMは密なキャノピーにおけるFCOの導出に苦労</strong>しました。これは、SfMが画像ベースであるため、密な樹冠の隙間を通じた下層の視認性がLiDARに比べて低いことに起因します。</li>
+<li>特に複雑な構造を持つ林分では、LiDARの優位性が顕著になりました。</li>
+</ul>
+<h3 id="3-fhdfoliage-height-diversity--葉群高さ多様性">3. FHD（Foliage Height Diversity / 葉群高さ多様性）</h3>
+<p><strong>定義</strong>:
+葉群高さ多様性は、垂直方向の植被構造の複雑さや多様性を定量化する指標です。一般的に、植被の高さをいくつかの階層（ビン）に分け、各階層に含まれる点の割合（または葉面積の割合）に基づいて**シャノン多様性指数（Shannon diversity index）**などを適用して算出されます。値が高いほど、垂直方向に多様な植被構造（上層、中層、下層などに葉が分布している）を持つことを示します。</p>
+<p><strong>本研究での評価内容</strong>:</p>
+<ul>
+<li>森林の垂直構造の複雑さを捉える重要な生態指標です。</li>
+<li>結果として、<strong>SfMはFHDのような複雑な指標の導出において、特に密なキャノピーで課題</strong>を示しました。</li>
+<li>LiDARは多重回波により垂直方向の葉群分布を詳細に捉えられるため、FHDの推定においてより堅牢な結果を示しました。</li>
+</ul>
+<h3 id="指標の比較まとめ">指標の比較まとめ</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>評価対象</th>
+<th>LiDARの優位性</th>
+<th>SfMの性能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CH</strong></td>
+<td>樹冠の高さ</td>
+<td>地形からの直接測定が高精度</td>
+<td>最適化取得でLiDARとほぼ同等</td>
+</tr>
+<tr>
+<td><strong>FCO</strong></td>
+<td>水平方向の被覆率</td>
+<td>密なキャノピーでも高精度</td>
+<td>密な林分で課題あり</td>
+</tr>
+<tr>
+<td><strong>FHD</strong></td>
+<td>垂直方向の構造多様性</td>
+<td>多重回波により最も優位</td>
+<td>複雑な構造で苦労</td>
+</tr>
+</tbody>
+</table>
+<h3 id="補足比較方法">補足：比較方法</h3>
+<p>これらの指標は、以下の3段階で比較されました。</p>
+<ol>
+<li><strong>視覚的比較</strong>: 点群の外観的な違いを確認</li>
+<li><strong>垂直プロファイルの比較</strong>: 高さ方向の点分布を比較</li>
+<li><strong>3指標の数値的比較</strong>: CH、FCO、FHDを定量的に算出し、LiDARと2種類のSfM（高品質・標準）の間で比較</li>
+</ol>
+<p>これらの指標を組み合わせることで、本研究はLiDARとSfMが森林構造のどの側面を捉えるのに優れているか、またSfMの取得戦略の最適化がどの程度の改善効果をもたらすかを包括的に評価しています。<source-chip title="DGPF" url="https://www.dgpf.de/src/tagung/jt2025/proceedings/paper/22_3LT2025_Morsdorf_et_al.pdf" /></p>
+<h2 id="結果">結果</h2>
+<p>本研究の主な結果を、3つの評価観点ごとにまとめます。</p>
+<h3 id="1-点群品質と森林構造の再現性">1. 点群品質と森林構造の再現性</h3>
+<ul>
+<li>**高品質SfM（多様な観測角度）**は、<strong>専用LiDARシステムと同等品質の3D点群を生成できる</strong>ことが示されました。</li>
+<li>両手法とも、森林構造の全体像を良好に捉えることができました。</li>
+<li><strong>キャノピー高さ（CH）と垂直プロファイル</strong>については、高品質SfMデータセットがLiDARとほぼ一致する結果となりました。</li>
+</ul>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\basic\9-td-lambda\image\sfm_derived_3d_points\1787444869699.png" alt="1787444869699"></p>
+<h3 id="2-各性能指標での比較結果">2. 各性能指標での比較結果</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CH（キャノピー高さ）</strong></td>
+<td>高品質SfMはLiDARとほぼ同等の精度で再現可能</td>
+</tr>
+<tr>
+<td><strong>FCO（被覆率）</strong></td>
+<td>SfMは密なキャノピーで課題あり。LiDARが優位</td>
+</tr>
+<tr>
+<td><strong>FHD（葉群高さ多様性）</strong></td>
+<td>SfMは複雑な垂直構造の定量化で苦労。LiDARが堅牢</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-lidarの優位性">3. LiDARの優位性</h3>
+<ul>
+<li><strong>キャノピー貫通能力</strong>においてLiDARが明らかに優位でした。</li>
+<li>これにより、<strong>林下植生（understory）と地形の検出</strong>がより正確に行えました。</li>
+<li>特に<strong>密なキャノピー環境</strong>では、LiDARの多重回波による微細な垂直構造の捉え方がSfMを上回りました。</li>
+</ul>
+<h3 id="4-sfmの有効性と限界">4. SfMの有効性と限界</h3>
+<ul>
+<li><strong>有効性</strong>: 最適化された取得戦略（多様な観測角度・オフナディア撮影）を用いたSfMは、コスト効率の高い代替手段となり得ます。</li>
+<li><strong>限界</strong>: 一般的な植被プロファイルは再現できましたが、<strong>複雑な指標（FCOやFHD）や密なキャノピー下の構造</strong>では、LiDARに比べて精度が低下しました。</li>
+</ul>
+<h3 id="5-総合的な結論">5. 総合的な結論</h3>
+<ul>
+<li><strong>SfM（3D最適化飛行計画あり）</strong> は、以下の条件で実用的な選択肢となります：
+<ul>
+<li>詳細な林下情報がそれほど重要でない場合</li>
+<li>LiDARベースのDTM（数値地形モデル）が既に利用可能な場合</li>
+</ul>
+</li>
+<li>しかし、<strong>微細な垂直複雑性を捉える必要がある場合は、LiDARが依然としてより堅牢なツール</strong>であることが確認されました。</li>
+<li>従来型のナディア撮影SfMと比較して、<strong>多様な観測角度を活用したSfMは森林構造マッピングの性能を大幅に向上させる</strong>ことが実証されました。<source-chip title="DGPF" url="https://www.dgpf.de/src/tagung/jt2025/proceedings/paper/22_3LT2025_Morsdorf_et_al.pdf" /></li>
+</ul>
+<h2 id="総括">総括</h2>
+<p>本論文の本質的な結論は、<strong>SfMによる3D点群の精度は、カメラの内部パラメータや画像のオーバーラップだけでなく、「観測角度の多様性」という取得戦略が決定的に左右する</strong>という点に集約されます。</p>
+<h3 id="本質的な結論">本質的な結論</h3>
+<p><strong>1. 観測角度の多様性が3D点群精度の鍵である</strong></p>
+<p>カメラのキャリブレーションや画像の重複率（オーバーラップ）はSfMの精度にとって重要なパラメータとして知られていますが、本研究はそれに加えて、<strong>撮影方向の多様性（ナディアだけでなくオフナディア方向からの撮影、複数方向からのアプローチ）が3D再構成の精度を飛躍的に向上させる</strong>ことを実証しました。2つの飛行グリッドを45度回転させ、カメラを70度傾斜させることで、キャノピー隙間からの下層視認性が向上し、遮蔽（オクルージョン）の影響を大幅に低減できました。</p>
+<p><strong>2. 最適化されたSfMはLiDARに匹敵するが、根本的な限界も存在する</strong></p>
+<p>取得戦略を最適化したSfMは、キャノピー高さ（CH）や全体的な垂直プロファイルにおいて最先端のUAV-LiDARとほぼ同等の品質を実現しました。しかし、SfMは画像ベースの受動的センシングであるため、<strong>キャノピー貫通能力に根本的な限界</strong>があります。結果として、林下植生の検出や、被覆率（FCO）・葉群高さ多様性（FHD）といった微細な垂直構造の定量化では、LiDARが依然として優位なツールであり続けます。</p>
+<p><strong>3. 応用上の示唆：コストと精度のトレードオフを観測角度で最適化できる</strong></p>
+<p>LiDARは高精度だが高価格・大型プラットフォームが必要である一方、SfMは低コストで柔軟です。本研究は、<strong>SfMの取得戦略を「3D最適化」（多様な観測角度）に設計し直すことで、従来の2Dオルソモザイク重視のナディア撮影を大きく上回る精度が得られ、LiDARに代替しうるレベルまで性能を引き上げられる</strong>ことを示しました。これは、詳細な林下情報が必須でない場面や、LiDARによる地形データ（DTM）が既存である場合に、SfMが極めてコスト効率の高い選択肢となりうることを意味します。</p>
+<h3 id="一言でまとめると">一言でまとめると</h3>
+<p><strong>「3D点群の精度を追求する際、カメラ内部パラメータやオーバーラップだけでなく、撮影角度の多様性（観測角度）こそがSfMの性能を最大限に引き出す決定的なパラメータである。しかし、キャノピー貫通や微細な垂直構造の捉え方ではLiDARの優位性は揺るがない。」</strong></p>
+<p>このことが、論文タイトル「Observation Angles Matter（観測角度が重要である）」の核心です。<source-chip title="DGPF" url="https://www.dgpf.de/src/tagung/jt2025/proceedings/paper/22_3LT2025_Morsdorf_et_al.pdf" /></p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/RrXJGGxZI50?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
