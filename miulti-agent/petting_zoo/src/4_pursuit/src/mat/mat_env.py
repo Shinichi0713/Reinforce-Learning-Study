@@ -1,722 +1,521 @@
-from __future__ import annotations
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.distributions import Categorical
-import torch.nn.functional as F
+from pettingzoo.sisl import pursuit_v5
 
-
-# ==========================================
-# 追加: エージェント順序のユーティリティ
-# ==========================================
-def permute_along_agent_dim(x: torch.Tensor, order: torch.Tensor) -> torch.Tensor:
-    """
-    x: (B, N, ...)  order: (B, N)  の順序でエージェント次元を並べ替える
-    order[b, i] = 「i番目のデコードスロットに入る、元のエージェントindex」
-    """
-    B, N = order.shape
-    idx = order.view(B, N, *([1] * (x.dim() - 2))).expand_as(x) if x.dim() > 2 else order
-    return torch.gather(x, dim=1, index=idx)
-
-
-def unpermute_along_agent_dim(x: torch.Tensor, order: torch.Tensor) -> torch.Tensor:
-    """
-    permute_along_agent_dim の逆変換。
-    デコード順に並んだ x を、元のエージェントID順に戻す。
-    """
-    B, N = order.shape
-    inv_order = torch.argsort(order, dim=1)  # 逆置換
-    idx = inv_order.view(B, N, *([1] * (x.dim() - 2))).expand_as(x) if x.dim() > 2 else inv_order
-    return torch.gather(x, dim=1, index=idx)
-
-
-def random_agent_order(B: int, N: int, device) -> torch.Tensor:
-    """バッチ内サンプルごとに独立なランダム順序を生成"""
-    order = torch.stack([torch.randperm(N, device=device) for _ in range(B)], dim=0)
-    return order
-
-
-def priority_agent_order(priority_scores: torch.Tensor) -> torch.Tensor:
-    """
-    priority_scores: (B, N) 値が小さいほど優先度が高い（例: 最寄りの未捕獲ターゲットまでの距離）
-    捕獲済みなど「優先度なし」のエージェントは呼び出し側で十分大きな値（例: 1e6）にしておく。
-    戻り値 order: (B, N) スコア昇順（優先度の高い順）のエージェントindex列
-    """
-    order = torch.argsort(priority_scores, dim=1)  # 小さい順 = 優先度が高い順
-    return order
-
-def collect_moe_aux_loss(model: nn.Module) -> torch.Tensor:
-    """
-    モデル内の全MoELayerからaux_lossを収集して平均する。
-    どのMoELayerも一度もforwardされていない(last_aux_lossがNone)場合は
-    0を返す(通常、forward_train実行後に呼べば全層に値が入っているはず)。
-    """
-    aux_losses = []
-    for module in model.modules():
-        if isinstance(module, MoELayer) and module.last_aux_loss is not None:
-            aux_losses.append(module.last_aux_loss)
-
-    if not aux_losses:
-        # モデルがまだ一度もforwardされていない場合の安全策
-        return torch.tensor(0.0, device=next(model.parameters()).device)
-
-    return torch.stack(aux_losses).mean()
-
-def collect_moe_expert_usage(model: nn.Module) -> dict:
-    """
-    各MoELayerのexpert選択頻度をログ用に収集する(ログ・デバッグ専用、勾配不要)。
-    戻り値: {"obs_encoder.layers.0.moe": tensor([0.3, 0.2, 0.3, 0.2]), ...}
-    """
-    usage = {}
-    for name, module in model.named_modules():
-        if isinstance(module, MoELayer) and module.last_expert_usage is not None:
-            usage[name] = module.last_expert_usage.cpu().numpy()
-    return usage
-
-# ==========================================
-# 1. 🌟 新設: Gated Multi-Head Attention (Attention-Sink-Free)
-# ==========================================
-class GatedCrossAttention(nn.Module):
-    """
-    Cross-Attention用ゲート付きAttention。
-    ゲートは query と memory(key=value)の要約の両方から計算する。
-    """
-    def __init__(self, d_model, nhead):
-        super().__init__()
-        self.d_model = d_model
-        self.nhead = nhead
-        self.head_dim = d_model // nhead
-        assert self.head_dim * nhead == d_model, "d_model must be divisible by nhead"
-
-        self.q_proj = nn.Linear(d_model, d_model)
-        self.k_proj = nn.Linear(d_model, d_model)
-        self.v_proj = nn.Linear(d_model, d_model)
-        self.gate_proj = nn.Linear(d_model * 2, d_model)  # 🌟 query + memory要約
-        self.out_proj = nn.Linear(d_model, d_model)
-
-    def forward(self, query, key, value, attn_mask=None):
-        # query: (B, T, d_model), key == value == memory: (B, S, d_model)
-        B, T, _ = query.shape
-        S = key.shape[1]
-
-        q = self.q_proj(query).view(B, T, self.nhead, self.head_dim).transpose(1, 2)
-        k = self.k_proj(key).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
-        v = self.v_proj(value).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
-
-        # 🌟 memory(key引数=projection前のmemoryテンソル)を平均して要約
-        memory_summary = key.mean(dim=1, keepdim=True).expand(-1, T, -1)  # (B, T, d_model)
-        gate_input = torch.cat([query, memory_summary], dim=-1)           # (B, T, d_model*2)
-        gate_scores = torch.sigmoid(self.gate_proj(gate_input))           # (B, T, d_model)
-        gate_scores = gate_scores.view(B, T, self.nhead, self.head_dim).transpose(1, 2)
-
-        attn_logits = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.head_dim)
-        if attn_mask is not None:
-            if attn_mask.dtype == torch.bool:
-                attn_logits = attn_logits.masked_fill(attn_mask.unsqueeze(0).unsqueeze(1), float('-inf'))
-            else:
-                attn_logits = attn_logits + attn_mask
-
-        attn_probs = F.softmax(attn_logits, dim=-1)
-        sdpa_out = torch.matmul(attn_probs, v)
-
-        gated_out = sdpa_out * gate_scores
-        gated_out = gated_out.transpose(1, 2).contiguous().view(B, T, self.d_model)
-        return self.out_proj(gated_out), attn_probs
-
-class GatedMultiheadAttention(nn.Module):
-    """
-    "Gated Attention for Large Language Models" に基づく
-    SDPAの直後にヘッド固有のSigmoidゲートを適用するアテンション機構
-    """
-    def __init__(self, d_model, nhead):
-        super().__init__()
-        self.d_model = d_model
-        self.nhead = nhead
-        self.head_dim = d_model // nhead
-
-        assert self.head_dim * nhead == d_model, "d_model must be divisible by nhead"
-
-        # Q, K, V の射影層
-        self.q_proj = nn.Linear(d_model, d_model)
-        self.k_proj = nn.Linear(d_model, d_model)
-        self.v_proj = nn.Linear(d_model, d_model)
-
-        # 🌟 論文の肝: Query（または入力）から各ヘッド固有のゲートスコア（スカラーまたはベクトル）を計算する層
-        # 最も安定して効果の高い、ヘッドごとの次元に合わせる射影を設定
-        self.gate_proj = nn.Linear(d_model, d_model)
-
-        # 出力の射影層
-        self.out_proj = nn.Linear(d_model, d_model)
-
-    def forward(self, query, key, value, attn_mask=None):
-        # query, key, value: (B, T, d_model)
-        B, T, _ = query.shape
-        S = key.shape[1] # Keyのシーケンス長
-
-        # 1. 線形投影およびヘッド分割 (B, nhead, T, head_dim)
-        q = self.q_proj(query).view(B, T, self.nhead, self.head_dim).transpose(1, 2)
-        k = self.k_proj(key).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
-        v = self.v_proj(value).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
-
-        # 2. ゲートスコアの計算 (Query依存のシグモイド)
-        # 論文の数式: O = SDPA(Q,K,V) ⊙ σ(XW) に準拠
-        gate_scores = torch.sigmoid(self.gate_proj(query)) # (B, T, d_model)
-        gate_scores = gate_scores.view(B, T, self.nhead, self.head_dim).transpose(1, 2) # (B, nhead, T, head_dim)
-
-        # 3. Scaled Dot-Product Attention (SDPA)
-        attn_logits = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.head_dim)
-
-        if attn_mask is not None:
-            # 決定論的マスク/因果関係マスクの適用
-            if attn_mask.dtype == torch.bool:
-                attn_logits = attn_logits.masked_fill(attn_mask.unsqueeze(0).unsqueeze(1), float('-inf'))
-            else:
-                attn_logits = attn_logits + attn_mask
-
-        attn_probs = F.softmax(attn_logits, dim=-1)
-        sdpa_out = torch.matmul(attn_probs, v) # (B, nhead, T, head_dim)
-
-        # 4. 🌟 ゲートの適用 (ここで Attention Sink が除去され、Sparsityが生まれる)
-        gated_out = sdpa_out * gate_scores
-
-        # 5. ヘッドの結合と最終投影
-        gated_out = gated_out.transpose(1, 2).contiguous().view(B, T, self.d_model)
-        return self.out_proj(gated_out), attn_probs
-
-
-# ==========================================
-# 2. MoE (Top-1 Gating) モジュール
-# ==========================================
-class MoELayer(nn.Module):
-    def __init__(self, d_model, num_experts=4, expert_hidden_dim=128):
-        super().__init__()
-        self.num_experts = num_experts
-        self.d_model = d_model
-
-        # 🌟 追加: gate専用のLayerNorm
-        #    expert本体の計算経路には影響を与えず、
-        #    「どのexpertを選ぶか」の判断だけを正規化された特徴で行う
-        self.gate_norm = nn.LayerNorm(d_model)
-        self.gate = nn.Linear(d_model, num_experts)
-
-        self.experts = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(d_model, expert_hidden_dim),
-                nn.GELU(),
-                nn.Linear(expert_hidden_dim, d_model)
-            ) for _ in range(num_experts)
-        ])
-
-        self.last_aux_loss = None
-        self.last_expert_usage = None
-
-    def forward(self, x: torch.Tensor):
-        orig_shape = x.shape
-        x_flat = x.view(-1, self.d_model)
-
-        # 🌟 変更点: gateへの入力だけ正規化する
-        #    (expertへの入力 x_flat 自体は従来通り生の値を使う)
-        gate_input = self.gate_norm(x_flat)
-        gate_logits = self.gate(gate_input)
-        gate_probs = F.softmax(gate_logits, dim=-1)
-
-        top1_probs, top1_indices = torch.topk(gate_probs, k=1, dim=-1)
-
-        num_tokens = x_flat.shape[0]
-        one_hot = F.one_hot(top1_indices.squeeze(-1), num_classes=self.num_experts).float()
-        frac_tokens_per_expert = one_hot.mean(dim=0)
-        frac_prob_per_expert = gate_probs.mean(dim=0)
-        aux_loss = self.num_experts * (frac_tokens_per_expert * frac_prob_per_expert).sum()
-
-        self.last_aux_loss = aux_loss
-        with torch.no_grad():
-            self.last_expert_usage = frac_tokens_per_expert.detach().clone()
-
-        output_flat = torch.zeros_like(x_flat)
-        for expert_idx in range(self.num_experts):
-            mask = (top1_indices.squeeze(-1) == expert_idx)
-            if not mask.any():
-                continue
-            expert_in = x_flat[mask]                     # 🌟 expert本体には生のx_flatを渡す(変更なし)
-            expert_out = self.experts[expert_idx](expert_in)
-            output_flat[mask] = expert_out * gate_probs[mask, expert_idx:expert_idx+1]
-
-        return output_flat.view(orig_shape)
-
-# ==========================================
-# 3. 🌟 Gated Attention 統合型 Transformer レイヤー
-# ==========================================
-class MoETransformerEncoderLayer(nn.Module):
-    def __init__(self, d_model, nhead, num_experts=4, dim_feedforward=128):
-        super().__init__()
-        # nn.MultiheadAttention から GatedMultiheadAttention へ変更
-        self.self_attn = GatedMultiheadAttention(d_model, nhead)
-        self.moe = MoELayer(d_model, num_experts=num_experts, expert_hidden_dim=dim_feedforward)
-
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.dropout = nn.Dropout(0.1)
-
-    def forward(self, src, src_mask=None):
-        x = self.norm1(src)
-        # 自作アテンションのため引数を明示指定
-        attn_out, _ = self.self_attn(query=x, key=x, value=x, attn_mask=src_mask)
-        src = src + self.dropout(attn_out)
-
-        x = self.norm2(src)
-        moe_out = self.moe(x)
-        src = src + self.dropout(moe_out)
-        return src
-
-
-class MoETransformerDecoderLayer(nn.Module):
-    def __init__(self, d_model, nhead, num_experts=4, dim_feedforward=128):
-        super().__init__()
-        self.self_attn = GatedMultiheadAttention(d_model, nhead)       # Self-Attentionは従来通り
-        self.multihead_attn = GatedCrossAttention(d_model, nhead)      # 🌟 Cross-Attentionはこちらに変更
-        self.moe = MoELayer(d_model, num_experts=num_experts, expert_hidden_dim=dim_feedforward)
-
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
-        self.dropout = nn.Dropout(0.1)
-
-    def forward(self, tgt, memory, tgt_mask=None):
-        x = self.norm1(tgt)
-        attn_out, _ = self.self_attn(query=x, key=x, value=x, attn_mask=tgt_mask)
-        tgt = tgt + self.dropout(attn_out)
-
-        x = self.norm2(tgt)
-        attn_out2, _ = self.multihead_attn(query=x, key=memory, value=memory, attn_mask=None)
-        tgt = tgt + self.dropout(attn_out2)
-
-        x = self.norm3(tgt)
-        moe_out = self.moe(x)
-        tgt = tgt + self.dropout(moe_out)
-        return tgt
-
-
-# ==========================================
-# 3. MoE 対応 MAT 各コンポーネント
-# ==========================================
-class MATObsEncoder(nn.Module):
-    def __init__(self, obs_range=7, in_channels=4, d_model=64, nhead=4,
-                 num_layers=2, num_agents=8, num_experts=4):
-        super().__init__()
+class PursuitWrapper:
+    def __init__(self, render_mode=None, max_cycles=500, obs_range=7):
+        # チームとしての共通目的を維持するため shared_reward=True で環境を初期化
+        self.env = pursuit_v5.env(
+            render_mode=render_mode,
+            max_cycles=max_cycles,
+            shared_reward=True
+        )
         self.obs_range = obs_range
-        self.num_tokens = obs_range * obs_range
-        self.spatial_dim = obs_range * obs_range * in_channels
-        self.num_agents = num_agents
-        self.direction_dim = 2  # 🌟 追加
+        self.center_idx = obs_range // 2  # 7x7 の中心 (3, 3) が自分自身の位置
 
-        self.embedding = nn.Linear(in_channels, d_model)
+        self.possible_agents = self.env.possible_agents
+        self.num_agents = len(self.possible_agents)
 
-        pos_emb = self._get_2d_sin_cos_embedding(obs_range, d_model)
-        self.register_buffer("pos_embedding", pos_emb)
+        # 空間観測: 7x7x4 = 196次元 / 味方の行動履歴: 5行動 × 8人 = 40次元 -> 計236次元
+        self.spatial_dim = (obs_range * obs_range * 4)
+        self.action_history_dim = 5 * self.num_agents
+        self.direction_dim = 2  # 🌟 追加: 対策1で加えた相対方向ベクトルの次元数
+        self.obs_dim = self.spatial_dim + self.action_history_dim + self.direction_dim
+        self.state_dim = self.obs_dim * self.num_agents
 
-        self.action_history_embed = nn.Sequential(
-            nn.Linear(num_agents * 5, d_model),
-            nn.GELU(),
-        )
-        # self.feature_fuse = nn.Linear(d_model * 2, d_model)
-        self.feature_fuse = nn.Linear(d_model * 2 + self.direction_dim, d_model)
+        self.action_space = self.env.action_space(self.possible_agents[0])
+        self.action_dim = self.action_space.n
 
-        # 🌟 修正: 標準の Transformer を MoE 対応のレイヤーで構築
-        self.layers = nn.ModuleList([
-            MoETransformerEncoderLayer(d_model=d_model, nhead=nhead, num_experts=num_experts, dim_feedforward=d_model * 2)
-            for _ in range(num_layers)
-        ])
+        # ハイブリッド報酬の重みパラメータ
+        self.distance_reward_scale = 0.001  # 0.01*0 から固定値にする場合は調整してください
+        self.coop_reward_scale = 0.02          # 獲物の近くで味方と連携したときの報酬
+        self.flanking_bonus_scale = 0.1       # 他に味方がいないルートから回り込んだときの報酬
+        self.surround_reward = 50.0            # 3人以上で包囲網を形成したときの報酬
 
-    def _get_2d_sin_cos_embedding(self, grid_size, d_model):
-        assert d_model % 4 == 0, "d_model must be divisible by 4 for 2D sin-cos embedding"
-        y, x = torch.meshgrid(torch.arange(grid_size), torch.arange(grid_size), indexing="ij")
-        y = y.flatten().float()
-        x = x.flatten().float()
+        # 包囲網シェイピング用のパラメータ
+        self.soft_gather_reward_scale = 0.05    # 2マス先までに味方が集まっているとき
+        self.cross_position_reward_scale = 0.25 # 上下左右のジャスト位置に配置されたとき
 
-        d_feat = d_model // 2
-        omega = torch.exp(torch.arange(0, d_feat, 2).float() * -(np.log(10000.0) / d_feat))
+        # 連携人数最適化パラメータ
+        self.optimal_coop_scale = 0.1          # 4人連携時のベースボーナス
+        self.overcrowd_penalty_scale = -0.05    # 5人以上で群がったときのペナルティ（減衰用）
 
-        out_y_sin = torch.sin(torch.outer(y, omega))
-        out_y_cos = torch.cos(torch.outer(y, omega))
-        out_x_sin = torch.sin(torch.outer(x, omega))
-        out_x_cos = torch.cos(torch.outer(x, omega))
+        # 同時アプローチボーナス
+        self.simultaneous_approach_bonus = 0.5  # 4人が同時に敵に近づいたときのボーナス
 
-        pos_emb = torch.cat([out_y_sin, out_y_cos, out_x_sin, out_x_cos], dim=-1)
-        return pos_emb.unsqueeze(0)
+        # 🌟 新設: 索敵フェーズ用の報酬パラメータ
+        self.search_coop_move_bonus = 0.05      # 敵がいない時、4人チームで移動した時のボーナス
+        self.search_stagnation_penalty = -0.1   # 敵がいない時、その場に留まり続けた（うろうろ含む）ペナルティ
 
-    def forward(self, obs: torch.Tensor) -> torch.Tensor:
-        B = obs.shape[0]
-        spatial_obs = obs[:, :self.spatial_dim]
-        action_history = obs[:, self.spatial_dim : self.spatial_dim + self.num_agents * 5]
-        direction_feat = obs[:, self.spatial_dim + self.num_agents * 5 :]  # 🌟 追加: 末尾2次元
+        # 衝突ペナルティ
+        self.collision_penalty = -0.5
 
-        x = spatial_obs.view(B, self.num_tokens, -1)
-        x = self.embedding(x) + self.pos_embedding
+        # エージェントごとの状態記録
+        self.prev_min_distances = {}
+        self.prev_agent_positions = {}         # 🌟 追加: 前ステップのグローバル座標記録用
+        self.capture_count = 0
+        self.captured_prey_ids = set()
 
-        for layer in self.layers:
-            x = layer(x)
+        # 全エージェントの直前行動バッファ
+        self.last_actions = np.zeros((self.num_agents, 5), dtype=np.float32)
+        self.last_actions[:, 4] = 1.0  # 4: 滞在 (NONE)
 
-        spatial_feature = x.mean(dim=1)
-        act_emb = self.action_history_embed(action_history)
+        # 🌟 追加: 索敵フェーズ用の追加パラメータ
+        self.search_stagnation_penalty = -0.1   # 既存。仕様は変更せず流用（免除条件だけ撤廃）
+        self.search_approach_bonus = 0.05       # 🌟 追加: 個別に、未捕獲preyへグローバル距離が縮まったときの報酬
+        self.search_team_approach_bonus = 0.2   # 🌟 追加: チーム(規定人数以上)が同時に接近したときの追加ボーナス
+        self.search_team_approach_threshold = 3 # 🌟 追加: 「チームで接近」とみなす最低人数
 
-        # 🌟 修正: direction_featも連結
-        fused = torch.cat([spatial_feature, act_emb, direction_feat], dim=-1)
-        return self.feature_fuse(fused)
+        # 🌟 追加: 索敵フェーズでのグローバル距離追跡用
+        self.prev_global_min_dist = {}
+        self._search_approach_registry = {}
+        self._search_team_bonus_given_cycle = -1
 
+    def reset(self):
+        self.env.reset()
+        self.prev_min_distances = {agent: None for agent in self.possible_agents}
+        self.prev_agent_positions = {agent: None for agent in self.possible_agents} # 🌟 初期化
+        self.last_actions = np.zeros((self.num_agents, 5), dtype=np.float32)
+        self.last_actions[:, 4] = 1.0
+        self.capture_count = 0
+        self.captured_prey_ids = set()
 
-class MATEncoder(nn.Module):
-    def __init__(self, num_agents=8, d_model=64, nhead=4, num_layers=2, num_experts=4):
-        super().__init__()
-        self.num_agents = num_agents
-        self.agent_pos_embedding = nn.Parameter(torch.randn(1, num_agents, d_model))
+        # 🌟 追加
+        self.prev_global_min_dist = {agent: None for agent in self.possible_agents}
+        self._search_approach_registry = {}
+        self._search_team_bonus_given_cycle = -1
+        self.visit_counts = {}  # {(y, x): 訪問回数}
 
-        # 🌟 修正: エージェント間トランスフォーマーを MoE 化
-        self.layers = nn.ModuleList([
-            MoETransformerEncoderLayer(d_model=d_model, nhead=nhead, num_experts=num_experts, dim_feedforward=d_model * 2)
-            for _ in range(num_layers)
-        ])
+    def get_obs(self, agent):
+        if agent not in self.env.agents:
+            return None
+        obs, _, _, _, _ = self.env.last(agent)
+        if obs is None:
+            return None
 
-        self.value_head = nn.Sequential(
-            nn.Linear(d_model, 128),
-            nn.GELU(),
-            nn.Linear(128, 1),
-        )
+        wall_layer = obs[:, :, 0]
+        ally_layer = obs[:, :, 1]
+        prey_layer = obs[:, :, 2]
 
-    def forward(self, agent_feats: torch.Tensor):
-        x = agent_feats + self.agent_pos_embedding
+        id_ally_layer = np.zeros((self.obs_range, self.obs_range), dtype=np.float32)
+        raw_env = self.env.unwrapped
+        try:
+            my_agent_obj = next(a for a in raw_env.agents if a.name == agent)
+            my_y, my_x = my_agent_obj.state[1], my_agent_obj.state[0]
 
-        for layer in self.layers:
-            x = layer(x)
+            for other_agent in raw_env.agents:
+                if other_agent.name == agent:
+                    continue
+                oy, ox = other_agent.state[1], other_agent.state[0]
+                local_y = oy - my_y + self.center_idx
+                local_x = ox - my_x + self.center_idx
 
-        values = self.value_head(x).squeeze(-1)
-        return x, values
+                if 0 <= local_y < self.obs_range and 0 <= local_x < self.obs_range:
+                    agent_id = int(other_agent.name.split('_')[-1]) + 1
+                    id_ally_layer[local_y, local_x] = float(agent_id)
+        except Exception:
+            id_ally_layer = ally_layer.astype(np.float32)
 
+        empty_layer = ((wall_layer == 0) & (id_ally_layer == 0) & (prey_layer == 0)).astype(np.float32)
 
-class MATDecoder(nn.Module):
-    def __init__(self, num_agents=8, action_dim=5, d_model=64, nhead=4, num_layers=2, num_experts=4):
-        super().__init__()
-        self.num_agents = num_agents
-        self.action_dim = action_dim
-        self.START = action_dim
+        semantic_obs = np.stack([
+            empty_layer,
+            wall_layer.astype(np.float32),
+            id_ally_layer,
+            prey_layer.astype(np.float32)
+        ], axis=-1)
 
-        self.action_embedding = nn.Embedding(action_dim + 1, d_model)
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_agents, d_model))
+        spatial_flat = semantic_obs.reshape(-1)
+        action_history_flat = self.last_actions.reshape(-1)
+        # 🌟 追加: グローバル情報(観測範囲外)から、最寄り未捕獲preyへの相対方向を計算
+        rel_vec = self._compute_relative_direction_to_nearest_prey(agent)  # (dy, dx)を正規化した値
 
-        # 🌟 修正: デコーダ側トランスフォーマーも MoE 化
-        self.layers = nn.ModuleList([
-            MoETransformerDecoderLayer(d_model=d_model, nhead=nhead, num_experts=num_experts, dim_feedforward=d_model * 2)
-            for _ in range(num_layers)
-        ])
+        full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+        return full_obs
 
-        self.action_head = nn.Linear(d_model, action_dim)
+    def _compute_relative_direction_to_nearest_prey(self, agent) -> np.ndarray:
+        raw_env = self.env.unwrapped
+        try:
+            evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
+            agent_obj = next(a for a in raw_env.agents if a.name == agent)
+            ay, ax = agent_obj.state[1], agent_obj.state[0]
+        except Exception:
+            return np.zeros(2, dtype=np.float32)
 
-        mask = torch.triu(torch.ones(num_agents, num_agents, dtype=torch.bool), diagonal=1)
-        self.register_buffer("causal_mask", mask)
+        if not evader_positions:
+            return np.zeros(2, dtype=np.float32)  # 全捕獲済み
 
-    def forward(self, enc_out: torch.Tensor, shifted_actions: torch.Tensor) -> torch.Tensor:
-        tgt = self.action_embedding(shifted_actions) + self.pos_embedding[:, :shifted_actions.shape[1], :]
-        mask = self.causal_mask[:shifted_actions.shape[1], :shifted_actions.shape[1]]
+        ty, tx = min(evader_positions, key=lambda p: abs(ay - p[0]) + abs(ax - p[1]))
+        dy, dx = (ty - ay), (tx - ax)
+        # マップサイズで正規化(方向のみを与え、絶対距離のスケールに依存しすぎないようにする)
+        norm = max(abs(dy), abs(dx), 1)
+        return np.array([dy / norm, dx / norm], dtype=np.float32)
 
-        # デコーダのループ処理
-        for layer in self.layers:
-            tgt = layer(tgt, memory=enc_out, tgt_mask=mask)
-
-        logits = self.action_head(tgt)
-        return logits
-
-    @torch.no_grad()
-    def autoregressive_decode(self, enc_out: torch.Tensor, greedy: bool = False):
-        B = enc_out.shape[0]
-        device = enc_out.device
-
-        shifted_actions = torch.full((B, self.num_agents), self.START, dtype=torch.long, device=device)
-        actions = torch.zeros((B, self.num_agents), dtype=torch.long, device=device)
-        log_probs = torch.zeros((B, self.num_agents), device=device)
-
-        for i in range(self.num_agents):
-            tgt = self.action_embedding(shifted_actions) + self.pos_embedding
-
-            mask = self.causal_mask
-
-            # デコードステップも MoE レイヤーを順に通過
-            cur_tgt = tgt
-            for layer in self.layers:
-                cur_tgt = layer(cur_tgt, memory=enc_out, tgt_mask=mask)
-
-            logits_i = self.action_head(cur_tgt[:, i, :])
-            dist_i = Categorical(logits=logits_i)
-
-            a_i = torch.argmax(logits_i, dim=-1) if greedy else dist_i.sample()
-
-            actions[:, i] = a_i
-            log_probs[:, i] = dist_i.log_prob(a_i)
-
-            if i + 1 < self.num_agents:
-                shifted_actions[:, i + 1] = a_i
-
-        return actions, log_probs
-
-
-class MATActorCritic(nn.Module):
-    def __init__(self, obs_range=7, in_channels=4, d_model=64, nhead=4,
-                 spatial_layers=2, enc_layers=2, dec_layers=2,
-                 act_dim=5, num_agents=8):
-        super().__init__()
-        self.num_agents = num_agents
-        self.action_dim = act_dim
-        # self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5
-        self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5 + 2
-        self.obs_encoder = MATObsEncoder(obs_range, in_channels, d_model, nhead,
-                                         spatial_layers, num_agents)
-        self.encoder = MATEncoder(num_agents, d_model, nhead, enc_layers)
-        self.decoder = MATDecoder(num_agents, act_dim, d_model, nhead, dec_layers)
-
-    def encode(self, joint_obs: torch.Tensor, order: torch.Tensor = None):
+    def _compute_global_min_dist_to_evader(self, agent) -> float | None:
         """
-        order: (B, N) 指定があれば、その順序でエージェント次元を並べ替えてからエンコードする。
-        Noneなら並べ替えなし（従来通りのID順）。
+        局所観測(7x7)の視界に関わらず、環境の実座標を使って
+        エージェントから最寄りの未捕獲preyまでのマンハッタン距離を計算する。
+        報酬シェーピング専用(観測には使わない特権情報)。
+        未捕獲preyが存在しない、または座標取得に失敗した場合はNoneを返す。
         """
-        B, N, D = joint_obs.shape
+        raw_env = self.env.unwrapped
 
-        if order is not None:
-            joint_obs = permute_along_agent_dim(joint_obs, order)
+        try:
+            evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
+        except Exception:
+            return None
 
-        flat_obs = joint_obs.reshape(B * N, D)
-        agent_feats = self.obs_encoder(flat_obs).view(B, N, -1)
-        enc_out, values = self.encoder(agent_feats)
-        # valuesも並べ替えられた順で出てくるので、後で使う側は必要に応じてunpermuteする
-        return enc_out, values
+        if not evader_positions:
+            return None
 
-    def forward_train(self, joint_obs: torch.Tensor, joint_actions: torch.Tensor,
-                       order: torch.Tensor = None):
-        """
-        order: (B, N) 学習時に使った（rolloutで実際に使われた）順序。
-        rollout時にorderを記録しておき、学習時は必ず同じorderを再現する必要がある
-        （でないとcausal maskの意味とactionの対応がズレる）。
-        """
-        enc_out, values = self.encode(joint_obs, order=order)
+        try:
+            agent_obj = next(a for a in raw_env.agents if a.name == agent)
+            ay, ax = agent_obj.state[1], agent_obj.state[0]
+        except Exception:
+            return None
 
-        B = joint_obs.shape[0]
+        return min(abs(ay - py) + abs(ax - px) for py, px in evader_positions)
 
-        # joint_actionsもorderに合わせて並べ替える
-        if order is not None:
-            actions_for_decode = permute_along_agent_dim(joint_actions, order)
-        else:
-            actions_for_decode = joint_actions
-
-        start_col = torch.full((B, 1), self.decoder.START, dtype=torch.long, device=joint_obs.device)
-        shifted_actions = torch.cat([start_col, actions_for_decode[:, :-1]], dim=1)
-
-        logits = self.decoder(enc_out, shifted_actions)
-        dist = Categorical(logits=logits)
-
-        log_probs = dist.log_prob(actions_for_decode)
-        entropy = dist.entropy()
-
-        # 呼び出し側（元のエージェントID順）に揃えて返す
-        if order is not None:
-            log_probs = unpermute_along_agent_dim(log_probs, order)
-            entropy = unpermute_along_agent_dim(entropy, order)
-            values = unpermute_along_agent_dim(values, order)
-
-        return log_probs, entropy, values
-
-    @torch.no_grad()
-    def act(self, joint_obs: torch.Tensor, order: torch.Tensor = None, greedy: bool = False):
-        enc_out, values = self.encode(joint_obs, order=order)
-        actions, log_probs = self.decoder.autoregressive_decode(enc_out, greedy=greedy)
-
-        # デコード順（order順）で出てくるので、元のエージェントID順に戻す
-        if order is not None:
-            actions = unpermute_along_agent_dim(actions, order)
-            log_probs = unpermute_along_agent_dim(log_probs, order)
-            values = unpermute_along_agent_dim(values, order)
-
-        return actions, log_probs, values
-
-
-class MAT_PPO:
-    def __init__(self, num_agents=8, obs_dim=236, action_dim=5,
-                 d_model=64, nhead=4, spatial_layers=3, enc_layers=4, dec_layers=2,
-                 lr=1e-4, gamma=0.99, gae_lambda=0.95,
-                 clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
-                 order_mode="random",
-                 moe_aux_loss_coef=0.01,   # 🌟 追加: 負荷分散損失の重み
-                 device=torch.device("cpu")):
-        self.num_agents = num_agents
-        self.obs_dim = obs_dim
-        self.action_dim = action_dim
-        self.gamma = gamma
-        self.gae_lambda = gae_lambda
-        self.clip_epsilon = clip_epsilon
-        self.value_coef = value_coef
-        self.entropy_coef = entropy_coef
-        self.order_mode = order_mode
-        self.moe_aux_loss_coef = moe_aux_loss_coef   # 🌟 追加
-        self.device = device
-
-        self.model = MATActorCritic(
-            d_model=d_model, nhead=nhead,
-            spatial_layers=spatial_layers, enc_layers=enc_layers, dec_layers=dec_layers,
-            act_dim=action_dim, num_agents=num_agents,
-        ).to(device)
-
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
-
-    def _make_order(self, B: int, priority_scores: np.ndarray = None) -> torch.Tensor:
-        """
-        order_modeに応じて (B, N) の並べ替えインデックスを生成する。
-        priority_scores: (B, N) or (N,) の優先度スコア（値が小さいほど優先）。
-                          order_mode="priority" のときに必須。
-        """
-        if self.order_mode == "fixed":
-            return torch.arange(self.num_agents, device=self.device).unsqueeze(0).expand(B, -1)
-
-        elif self.order_mode == "random":
-            return random_agent_order(B, self.num_agents, self.device)
-
-        elif self.order_mode == "priority":
-            assert priority_scores is not None, "priority_scores が必要です（order_mode='priority'）"
-            scores_t = torch.as_tensor(priority_scores, dtype=torch.float32, device=self.device)
-            if scores_t.dim() == 1:
-                scores_t = scores_t.unsqueeze(0).expand(B, -1)
-            return priority_agent_order(scores_t)
-
-        else:
-            raise ValueError(f"unknown order_mode: {self.order_mode}")
-
-    def get_action(self, joint_obs: np.ndarray, priority_scores: np.ndarray = None, greedy: bool = False):
-        """
-        priority_scores: 環境側で計算した「各エージェントの最寄り未捕獲ターゲットまでの距離」など。
-                          (num_agents,) の配列。order_mode="priority" のとき使用。
-                          未指定なら order_mode に従う（推論時は基本 "priority" か "fixed" 推奨。
-                          "random" は学習時の探索目的で使うのが基本）。
-        """
-        obs_t = torch.as_tensor(joint_obs, dtype=torch.float32, device=self.device).unsqueeze(0)
-        order = self._make_order(B=1, priority_scores=priority_scores)
-
-        actions, log_probs, values = self.model.act(obs_t, order=order, greedy=greedy)
-        return (
-            actions.squeeze(0).cpu().numpy(),
-            log_probs.squeeze(0).cpu().numpy(),
-            values.squeeze(0).cpu().numpy(),
-            order.squeeze(0).cpu().numpy(),  # 🌟 rolloutバッファに保存しておく（学習時に再利用するため）
-        )
-
-    def update(self, batch: dict, epochs: int = 3):
-        if batch is None:
-            return 0.0, 0.0, 0.0, 0.0   # 🌟 戻り値にaux_lossを追加(呼び出し側の修正が必要、後述)
-
-        obs = torch.as_tensor(batch["obs"], dtype=torch.float32, device=self.device)
-        actions = torch.as_tensor(batch["actions"], dtype=torch.long, device=self.device)
-        old_log_probs = torch.as_tensor(batch["log_probs"], dtype=torch.float32, device=self.device)
-        advantages = torch.as_tensor(batch["advantages"], dtype=torch.float32, device=self.device)
-        returns = torch.as_tensor(batch["rewards"], dtype=torch.float32, device=self.device)
-        order = torch.as_tensor(batch["order"], dtype=torch.long, device=self.device)
-
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-        actor_losses, critic_losses, entropies, aux_losses = [], [], [], []
-
-        for _ in range(epochs):
-            new_log_probs, entropy, values = self.model.forward_train(obs, actions, order=order)
-
-            joint_new_log_prob = new_log_probs.sum(dim=-1)
-            joint_old_log_prob = old_log_probs.sum(dim=-1)
-            ratio = torch.exp(joint_new_log_prob - joint_old_log_prob)
-
-            if len(advantages.shape) > 1 and advantages.shape[1] == self.num_agents:
-                step_advantages = advantages.mean(dim=-1)
+    def get_global_state(self):
+        obs_list = []
+        for agent in self.possible_agents:
+            obs_flat = self.get_obs(agent)
+            if obs_flat is not None:
+                obs_list.append(obs_flat)
             else:
-                step_advantages = advantages.squeeze(-1) if len(advantages.shape) > 1 else advantages
+                obs_list.append(np.zeros(self.obs_dim, dtype=np.float32))
+        return np.concatenate(obs_list)
 
-            surr1 = ratio * step_advantages
-            surr2 = torch.clamp(ratio, 1.0 - self.clip_epsilon, 1.0 + self.clip_epsilon) * step_advantages
+    def _local_to_global(self, agent, local_y, local_x):
+        raw_env = self.env.unwrapped
+        try:
+            my_agent_obj = next(a for a in raw_env.agents if a.name == agent)
+            my_y, my_x = my_agent_obj.state[1], my_agent_obj.state[0]
+            offset_y = local_y - self.center_idx
+            offset_x = local_x - self.center_idx
+            return (my_y + offset_y, my_x + offset_x)
+        except Exception:
+            current_cycle = getattr(raw_env, 'cycles', 0)
+            return (current_cycle, local_y, local_x)
 
-            actor_loss = -torch.min(surr1, surr2).mean() - self.entropy_coef * entropy.mean()
+    def count_captures(self, agent, prey_positions, ally_layer):
+        count_capture = 0
+        for py, px in prey_positions:
+            allies_around_prey = 0
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    if dy == 0 and dx == 0:
+                        continue
+                    ny, nx = py + dy, px + dx
+                    if 0 <= ny < self.obs_range and 0 <= nx < self.obs_range:
+                        if ally_layer[ny, nx] > 0:
+                            allies_around_prey += 1
 
-            if values.shape != returns.shape:
-                returns_reshaped = returns.view_as(values)
-            else:
-                returns_reshaped = returns
+            if allies_around_prey >= 3:
+                prey_id = self._local_to_global(agent, py, px)
+                if prey_id not in self.captured_prey_ids:
+                    self.captured_prey_ids.add(prey_id)
+                    self.capture_count += 1
+                    count_capture += 1
+        return count_capture
 
-            critic_loss = nn.SmoothL1Loss()(values, returns_reshaped) * self.value_coef
+    def _analyze_observation(self, agent, obs_flat):
+        if obs_flat is None:
+            return None, 0, 0, 0.0, 0, 0.0
 
-            # 🌟 追加: forward_train実行直後、モデル内の全MoE層からaux_lossを回収
-            moe_aux_loss = collect_moe_aux_loss(self.model)
+        spatial_part = obs_flat[:self.spatial_dim]
+        obs = spatial_part.reshape(self.obs_range, self.obs_range, 4)
 
-            loss = actor_loss + critic_loss + self.moe_aux_loss_coef * moe_aux_loss
+        ally_layer = obs[:, :, 2]
+        prey_layer = obs[:, :, 3]
 
-            self.optimizer.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
-            self.optimizer.step()
+        prey_positions = np.argwhere(prey_layer > 0)
+        count_capture = self.count_captures(agent, prey_positions, ally_layer)
 
-            actor_losses.append(actor_loss.item())
-            critic_losses.append(critic_loss.item())
-            entropies.append(entropy.mean().item())
-            aux_losses.append(moe_aux_loss.item())   # 🌟 追加
+        min_dist = float('inf')
+        closest_prey_pos = None
+        cy, cx = self.center_idx, self.center_idx
 
-        return (
-            float(np.mean(actor_losses)),
-            float(np.mean(critic_losses)),
-            float(np.mean(entropies)),
-            float(np.mean(aux_losses)),   # 🌟 追加
-        )
+        for py, px in prey_positions:
+            dist = abs(py - cy) + abs(px - cx)
+            if dist < min_dist:
+                min_dist = dist
+                closest_prey_pos = (py, px)
 
-    def save_checkpoint(self, path: str, episode: int):
-        self.model.cpu()
-        torch.save({
-            "model_state_dict": self.model.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict(),
-            "episode": episode,
-        }, path)
-        self.model.to(self.device)
+        if min_dist == float('inf'):
+            return None, 0, 0, 0.0, count_capture, 0.0
 
-    def load_checkpoint(self, checkpoint_path: str):
-        import torch
+        # 隣接マスの味方カウント
+        allies_count = 0
+        neighbors = [(cy-1, cx), (cy+1, cx), (cy, cx-1), (cy, cx+1)]
+        for ny, nx in neighbors:
+            if 0 <= ny < self.obs_range and 0 <= nx < self.obs_range:
+                if ally_layer[ny, nx] > 0:
+                    allies_count += 1
 
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        # 回り込み判定用
+        py, px = closest_prey_pos
+        flank_allies = 0
+        if py < cy: flank_allies += np.sum(ally_layer[0:cy, :] > 0)
+        elif py > cy: flank_allies += np.sum(ally_layer[cy+1:, :] > 0)
+        if px < cx: flank_allies += np.sum(ally_layer[:, 0:cx] > 0)
+        elif px > cx: flank_allies += np.sum(ally_layer[:, cx+1:] > 0)
 
-        model_dict = self.model.state_dict()
-        checkpoint_dict = checkpoint["model_state_dict"]
+        # 通常のシェイピング報酬および連携人数のカウント
+        shaping_reward = 0.0
+        total_allies_around_closest_prey = 0  # 最も近い獲物の周囲2マスにいる味方の総数
 
-        filtered_dict = {}
-        skipped_keys = []
+        for dy in range(-2, 3):
+            for dx in range(-2, 3):
+                target_y = py + dy
+                target_x = px + dx
 
-        for k, v in checkpoint_dict.items():
-            if k in model_dict:
-                if model_dict[k].shape == v.shape:
-                    filtered_dict[k] = v
-                else:
-                    skipped_keys.append(f"{k} (形状不一致: {v.shape} -> {model_dict[k].shape})")
-            else:
-                skipped_keys.append(f"{k} (現在のモデルに存在しない)")
+                if (0 <= target_y < self.obs_range) and (0 <= target_x < self.obs_range) and (dy != 0 or dx != 0):
+                    if ally_layer[target_y, target_x] > 0:
+                        total_allies_around_closest_prey += 1
+                        m_dist = abs(dy) + abs(dx)
+                        if m_dist == 1:
+                            shaping_reward += self.cross_position_reward_scale
+                        elif m_dist <= 2:
+                            shaping_reward += self.soft_gather_reward_scale
 
-        model_dict.update(filtered_dict)
-        self.model.load_state_dict(model_dict)
+        # 自分自身もカウントに含める（視野の中心にいるため、敵の2マス以内に自分がいる場合）
+        if min_dist <= 2:
+            total_allies_around_closest_prey += 1
 
-        if skipped_keys:
-            print(f"⚠️ 以下の {len(skipped_keys)} 個のパラメータは互換性がないためロードをスキップしました:")
-            for key in skipped_keys[:5]:
-                print(f"  - {key}")
-            if len(skipped_keys) > 5:
-                print(f"  - 他 {len(skipped_keys) - 5} 件...")
+        # 4人をベスト（ピーク）とし、離れるほどペナルティを与えるロジック
+        coop_density_reward = 0.0
+        discrepancy = abs(total_allies_around_closest_prey - 4)
 
-        # 🌟 修正: モデル構造に変更があった場合(skipped_keysが存在する場合)は
-        #    Optimizer状態はパラメータのindex対応が崩れているため一切復元しない。
-        #    中途半端に読み込むと、今回のように shape mismatch が
-        #    optimizer.step() 実行時まで表面化しないバグを生むため。
-        if skipped_keys:
-            print("⚠️ モデル構造の変更を検出したため、Optimizer状態の復元はスキップし、"
-                  "オプティマイザは初期状態から再開します。")
+        if discrepancy == 0:
+            coop_density_reward += self.optimal_coop_scale
         else:
+            coop_density_reward += discrepancy * abs(self.overcrowd_penalty_scale) * -1.0
+
+        return min_dist, allies_count, flank_allies, shaping_reward, count_capture, coop_density_reward
+
+    def step(self, agent, action):
+        if agent not in self.env.agents:
+            return np.zeros(self.obs_dim, dtype=np.float32), 0.0, True, True, {}, 0
+
+        current_cycle = getattr(self.env.unwrapped, 'cycles', 0)
+        _, _, terminated, truncated, _ = self.env.last(agent)
+        step_action = None if (terminated or truncated) else action
+
+        agent_idx = int(agent.split('_')[-1])
+        if step_action is not None:
+            self.last_actions[agent_idx] = 0.0
+            self.last_actions[agent_idx, step_action] = 1.0
+
+        self.env.step(step_action)
+
+        if agent not in self.env.agents:
+            return np.zeros(self.obs_dim, dtype=np.float32), 0.0, True, True, {}, 0
+
+        obs_flat, team_reward, terminated, truncated, info = self.env.last(agent)
+        obs = self.get_obs(agent)
+
+        individual_reward = 0.0
+
+        raw_env = self.env.unwrapped
+        curr_pos = None
+        try:
+            agent_obj = next(a for a in raw_env.agents if a.name == agent)
+            curr_pos = (agent_obj.state[1], agent_obj.state[0])
+        except Exception:
+            pass
+
+        current_min_dist, allies_count, flank_allies, shaping_reward, count_capture, coop_density_reward = self._analyze_observation(agent, obs)
+        count_capture = count_capture if count_capture else 0
+        team_reward += self.surround_reward * count_capture
+
+        # -----------------------------------------------------------------
+        # 🌟 索敵フェーズ(視界内に敵がいない)の処理 — ここを修正
+        # -----------------------------------------------------------------
+        if current_min_dist is None:
+            prev_pos = self.prev_agent_positions.get(agent)
+            has_moved = False
+            if prev_pos is not None and curr_pos is not None:
+                if prev_pos != curr_pos:
+                    has_moved = True
+
+            # 🌟 修正1: 停滞ペナルティは人数条件に関わらず一律で適用する
+            #    (「4人揃っていれば免除」という抜け穴を撤廃)
+            if not has_moved:
+                individual_reward += self.search_stagnation_penalty
+                is_search_approaching = False
+            else:
+                # 🌟 修正2: グローバル座標を使い、未捕獲preyへの距離が縮まったかを評価
+                current_global_dist = self._compute_global_min_dist_to_evader(agent)
+                prev_global_dist = self.prev_global_min_dist.get(agent)
+
+                is_search_approaching = False
+                if current_global_dist is not None and prev_global_dist is not None:
+                    if current_global_dist < prev_global_dist:
+                        individual_reward += self.search_approach_bonus
+                        is_search_approaching = True
+
+                self.prev_global_min_dist[agent] = current_global_dist
+                exploration_bonus = self._get_exploration_bonus(curr_pos) * 0.02  # 係数は調整
+                individual_reward += exploration_bonus
+
+            # 🌟 修正3: チーム単位で同時に接近しているかを集計し、
+            #    規定人数以上が同時接近していれば追加ボーナス
+            if current_cycle not in self._search_approach_registry:
+                self._search_approach_registry[current_cycle] = {}
+            self._search_approach_registry[current_cycle][agent] = is_search_approaching
+
+            if len(self._search_approach_registry[current_cycle]) >= len(self.env.agents):
+                approaching_count = sum(self._search_approach_registry[current_cycle].values())
+                if (approaching_count >= self.search_team_approach_threshold
+                        and self._search_team_bonus_given_cycle != current_cycle):
+                    individual_reward += self.search_team_approach_bonus
+                    self._search_team_bonus_given_cycle = current_cycle
+                    self._search_approach_registry = {
+                        k: v for k, v in self._search_approach_registry.items() if k >= current_cycle
+                    }
+        else:
+            # 敵が視界内にいる場合は、既存の包囲シェイピング・人数最適化報酬を適用
+            individual_reward += shaping_reward
+            individual_reward += coop_density_reward
+            # 🌟 視界内に敵が現れたら、索敵フェーズ用のグローバル距離追跡はリセットしておく
+            self.prev_global_min_dist[agent] = None
+
+        # 座標の更新
+        if curr_pos is not None:
+            self.prev_agent_positions[agent] = curr_pos
+
+        # 1. 距離・回り込みベースの評価(視界内に敵がいる場合のみ意味を持つ既存ロジック)
+        reward_distance = 0.0
+        prev_dist = self.prev_min_distances.get(agent)
+
+        is_approaching = False
+        if current_min_dist is not None and prev_dist is not None:
+            change = prev_dist - current_min_dist
+            reward_distance = change * self.distance_reward_scale
+            if change > 0:
+                is_approaching = True
+                if flank_allies == 0:
+                    reward_distance += self.flanking_bonus_scale
+
+        self.prev_min_distances[agent] = current_min_dist
+        individual_reward += reward_distance
+
+        # 2. 協調行動(接近＋包囲網)の評価
+        reward_coop = 0.0
+        if current_min_dist is not None and current_min_dist <= 2:
+            if allies_count >= 1:
+                reward_coop += self.coop_reward_scale
+            if allies_count >= 3:
+                reward_coop += self.surround_reward
+        individual_reward += reward_coop
+
+        # 3. 同時アプローチ(視界内に敵が見えている状態での4人同時接近)のチーム集計とボーナス適用
+        if not hasattr(self, '_approach_registry'):
+            self._approach_registry = {}
+            self._cycle_bonus_given = -1
+
+        if current_cycle not in self._approach_registry:
+            self._approach_registry[current_cycle] = {}
+
+        self._approach_registry[current_cycle][agent] = is_approaching
+
+        if len(self._approach_registry[current_cycle]) >= len(self.env.agents):
+            approaching_count = sum(self._approach_registry[current_cycle].values())
+            if approaching_count == 4 and self._cycle_bonus_given != current_cycle:
+                individual_reward += self.simultaneous_approach_bonus
+                self._cycle_bonus_given = current_cycle
+                self._approach_registry = {k: v for k, v in self._approach_registry.items() if k >= current_cycle}
+
+        # 4. 衝突ペナルティの評価
+        if info.get('wasted_move', False):
+            individual_reward += self.collision_penalty
+
+        # 5. 完全捕獲成功時のボーナス
+        if terminated and not truncated:
+            if team_reward > 0:
+                time_bonus = max(0, 500 - current_cycle) * 1.0
+                individual_reward += (500.0 + time_bonus)
+                print(f"--- 🎉 TRUE CAPTURE SUCCESS! Agent: {agent} | Bonus: {500.0 + time_bonus} ---")
+
+        hybrid_reward = (team_reward + individual_reward) * 0.05
+
+        return obs, hybrid_reward, terminated, truncated, info, count_capture
+
+    def _get_exploration_bonus(self, curr_pos) -> float:
+        count = self.visit_counts.get(curr_pos, 0)
+        self.visit_counts[curr_pos] = count + 1
+        # 訪問回数が少ないマスほど高いボーナス(count-based exploration)
+        return 1.0 / np.sqrt(count + 1)
+        def render(self):
+            render_mode = getattr(self.env, "render_mode", None)
+            if render_mode is None:
+                return None
+            frame = self.env.render()
+            if frame is None and render_mode == "human":
+                try:
+                    import pygame
+                    screen = pygame.display.get_surface()
+                    if screen is not None:
+                        img_str = pygame.image.tostring(screen, "RGB")
+                        frame = np.frombuffer(img_str, dtype=np.uint8).reshape(screen.get_size()[1], screen.get_size()[0], 3)
+                except Exception:
+                    pass
+            return frame
+
+    def compute_priority_scores(self) -> np.ndarray:
+        """
+        各エージェント(possible_agents順)について、
+        最寄りの未捕獲prey(evader)までのマンハッタン距離を返す。
+        値が小さいほど「優先度が高い」＝MATデコード順で先に決定されるべき。
+
+        - 終了済みエージェント（env.agentsに存在しない）や
+          視界に関わらずグローバル座標で評価するため、
+          prey側もraw_env.evadersから直接位置を取得する。
+        - prey/pursuerどちらも取得に失敗した場合は大きな値(優先度最低)のままにする。
+        """
+        scores = np.full(self.num_agents, 1e6, dtype=np.float32)
+        raw_env = self.env.unwrapped
+
+        # 現在まだ捕獲されていないpreyの座標一覧を取得
+        try:
+            evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
+        except Exception:
+            # evadersが取得できない場合は全員優先度最低のまま返す
+            return scores
+
+        if not evader_positions:
+            # 全捕獲済み（あるいは取得不可）なら優先度最低のまま
+            return scores
+
+        for i, agent in enumerate(self.possible_agents):
+            if agent not in self.env.agents:
+                continue  # 既に終了済みのエージェントは優先度最低のまま
+
             try:
-                self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-            except Exception as e:
-                print(f"⚠️ オプティマイザの状態復元に失敗したため、初期状態から再開します: {e}")
+                agent_obj = next(a for a in raw_env.agents if a.name == agent)
+                ay, ax = agent_obj.state[1], agent_obj.state[0]
+            except Exception:
+                continue  # 座標取得失敗時は優先度最低のまま
 
-        episode = checkpoint.get("episode", 0)
-        print(f"チェックポイントの読み込み完了: {checkpoint_path} (episode: {episode})")
-        return episode
+            scores[i] = min(
+                abs(ay - py) + abs(ax - px)
+                for py, px in evader_positions
+            )
+
+        return scores
+
+    def render(self):
+        render_mode = getattr(self.env, "render_mode", None)
+        if render_mode is None:
+            return None
+        frame = self.env.render()
+        if frame is None and render_mode == "human":
+            try:
+                import pygame
+                screen = pygame.display.get_surface()
+                if screen is not None:
+                    img_str = pygame.image.tostring(screen, "RGB")
+                    frame = np.frombuffer(img_str, dtype=np.uint8).reshape(screen.get_size()[1], screen.get_size()[0], 3)
+            except Exception:
+                pass
+        return frame
