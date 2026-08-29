@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回<a href="https://yoshishinnze.hatenablog.com/entry/2026/09/26/043000">MoE均等化、順序ランダム化によるMoEが抱えるモデルの偏りを解消する方法を実装</a>しました。
+結果、MoEのルーティングの改善につながりましたが結果として、敵を捕獲した後も同じ場所に居座り続けるという問題が解消されていません。
+現状から改善できないか検討していきます。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="課題">課題</h2>
+<p>前回記事の考察をそのまま引用しますが。</p>
+<blockquote>
+<p>敵が近づいたときに味方で集団で上手に囲むため、1体の敵を上手に捕獲していきます。
+ですが、以前課題と感じていた待機型に戻っています。
+スコアは前回よりも良いですが、敵が多いところにわーと集団移動するような動作がなくなってしまった感があります。</p>
+</blockquote>
+<p>行動は状況を見て決めてもらうと良いのですが、現状は一角に待機するような動作となっています。
+何とか状況を判断してもらうようにしたいというのが現時点です。</p>
+<h2 id="対応策">対応策</h2>
+<p><a href="https://yoshishinnze.hatenablog.com/entry/2026/09/26/043000">前回の対応（MoE均等化、順序ランダム化、報酬修正）</a>はいずれも「既にある仕組みの偏りを補正する」対策でした。
+これはMoEをうまく効率化することで捕獲と待機などの行動パターンをうまく切り替えるようになることを期待していたことによります。
+それでも改善しないということは、<strong>モデルに「敵がいない場所を探しに行く」ための情報や仕組みそのものが構造的に欠けている</strong>可能性が高いです。</p>
+<p>ということで現状で考えられる問題の原因と対応策について検討します。</p>
+<h3 id="原因の本質-エージェントは見えている範囲でしか判断材料がない">原因の本質: エージェントは「見えている範囲」でしか判断材料がない</h3>
+<p><code>get_obs()</code> は7x7の局所観測だけを返します。索敵報酬(<code>search_stagnation_penalty</code>など)は改善しましたが、<strong>「罰を避けるために何かしら動く」ことは学習できても、「どちらに向かえば敵がいるか」という方向情報自体が観測に含まれていません</strong>。
+局所観測が空なら、モデルにとってはどちらへ動いても「見えている情報」としては同じです。結果、学習が収束するにつれて「無難な、リスクの低い狭い範囲での徘徊」に落ち着きやすくなります。現時点ではこのリスクを避けるための無難な徘徊をしているという仮説が一番確度が高いと考えています。</p>
+<p><strong>対策1（最優先）: 「最寄り未捕獲ターゲットへの相対方向」を観測に直接追加する</strong></p>
+<p>以前<code>order_mode=&quot;priority&quot;</code>のために作った<code>compute_priority_scores</code>は、<strong>順序決定だけに使われ、モデルの入力(観測)には渡っていません</strong>。これをエージェントの観測特徴として直接与えます。</p>
+<pre><code class="language-python"><span class="hljs-comment"># PursuitWrapper に追加</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_obs</span>(<span class="hljs-params">self, agent</span>):
+    ...(既存の処理はそのまま)...
+    spatial_flat = semantic_obs.reshape(-<span class="hljs-number">1</span>)
+    action_history_flat = self.last_actions.reshape(-<span class="hljs-number">1</span>)
+
+    <span class="hljs-comment"># 🌟 追加: グローバル情報(観測範囲外)から、最寄り未捕獲preyへの相対方向を計算</span>
+    rel_vec = self._compute_relative_direction_to_nearest_prey(agent)  <span class="hljs-comment"># (dy, dx)を正規化した値</span>
+
+    full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+    <span class="hljs-keyword">return</span> full_obs
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_relative_direction_to_nearest_prey</span>(<span class="hljs-params">self, agent</span>) -&gt; np.ndarray:
+    raw_env = self.env.unwrapped
+    <span class="hljs-keyword">try</span>:
+        evader_positions = [(e.state[<span class="hljs-number">1</span>], e.state[<span class="hljs-number">0</span>]) <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> raw_env.evaders]
+        agent_obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+        ay, ax = agent_obj.state[<span class="hljs-number">1</span>], agent_obj.state[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> np.zeros(<span class="hljs-number">2</span>, dtype=np.float32)
+
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> evader_positions:
+        <span class="hljs-keyword">return</span> np.zeros(<span class="hljs-number">2</span>, dtype=np.float32)  <span class="hljs-comment"># 全捕獲済み</span>
+
+    ty, tx = <span class="hljs-built_in">min</span>(evader_positions, key=<span class="hljs-keyword">lambda</span> p: <span class="hljs-built_in">abs</span>(ay - p[<span class="hljs-number">0</span>]) + <span class="hljs-built_in">abs</span>(ax - p[<span class="hljs-number">1</span>]))
+    dy, dx = (ty - ay), (tx - ax)
+    <span class="hljs-comment"># マップサイズで正規化(方向のみを与え、絶対距離のスケールに依存しすぎないようにする)</span>
+    norm = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(dy), <span class="hljs-built_in">abs</span>(dx), <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> np.array([dy / norm, dx / norm], dtype=np.float32)
+</code></pre>
+<p><code>self.obs_dim</code> に <code>+2</code> を加え、<code>MATObsEncoder</code>側で <code>spatial_obs</code> と <code>action_history</code> に加えて、この2次元ベクトルも <code>feature_fuse</code> に連結するよう変更します。</p>
+<pre><code class="language-python"><span class="hljs-comment"># MATObsEncoder.__init__</span>
+self.feature_fuse = nn.Linear(d_model * <span class="hljs-number">2</span> + <span class="hljs-number">2</span>, d_model)  <span class="hljs-comment"># 🌟 +2</span>
+
+<span class="hljs-comment"># MATObsEncoder.forward</span>
+direction_feat = obs[:, -<span class="hljs-number">2</span>:]  <span class="hljs-comment"># 末尾2次元が方向ベクトル</span>
+fused = torch.cat([spatial_feature, act_emb, direction_feat], dim=-<span class="hljs-number">1</span>)
+<span class="hljs-keyword">return</span> self.feature_fuse(fused)
+</code></pre>
+<p><strong>これは「視界の外の情報を使って、視界の中の行動を決める」ことを直接可能にする変更</strong>で、局所観測とグローバル報酬シェイピングの間を埋める、最も直接的な対策です。</p>
+<h3 id="原因2-もう十分に人が集まっていることを判断する材料はあるが別の場所が手薄ことを示す材料がない">原因2: 「もう十分に人が集まっている」ことを判断する材料はあるが、「別の場所が手薄」ことを示す材料がない</h3>
+<p>一角に居座るのは、その場所の情報（味方の密度など）は見えていても、<strong>他の場所に敵がいるという情報が相対的に伝わりにくい</strong>ためとも考えられます。対策1でこれはある程度緩和されますが、さらに踏み込むなら「チーム全体でどこに散らばるべきか」を明示的に割り振る仕組みが有効です。</p>
+<p><strong>対策2: 訪問済みマップ（探索カバレッジ）による内発的報酬</strong></p>
+<p>「敵がいない」という消極的シグナルだけでなく、「まだ訪れていない場所に行くこと自体に価値がある」という内発的動機付け(intrinsic reward)を加えると、居座りに対してより強い力がかかります。</p>
+<pre><code class="language-python"><span class="hljs-comment"># PursuitWrapper に追加</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+    ...(既存)...
+    self.visit_counts = {}  <span class="hljs-comment"># {(y, x): 訪問回数}</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_exploration_bonus</span>(<span class="hljs-params">self, curr_pos</span>) -&gt; <span class="hljs-built_in">float</span>:
+    count = self.visit_counts.get(curr_pos, <span class="hljs-number">0</span>)
+    self.visit_counts[curr_pos] = count + <span class="hljs-number">1</span>
+    <span class="hljs-comment"># 訪問回数が少ないマスほど高いボーナス(count-based exploration)</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">1.0</span> / np.sqrt(count + <span class="hljs-number">1</span>)
+</code></pre>
+<p><code>step()</code>の索敵フェーズ内で、このボーナスを<code>search_approach_bonus</code>に加えて併用します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> has_moved:
+    individual_reward += self.search_stagnation_penalty
+<span class="hljs-keyword">else</span>:
+    exploration_bonus = self._get_exploration_bonus(curr_pos) * <span class="hljs-number">0.02</span>  <span class="hljs-comment"># 係数は調整</span>
+    individual_reward += exploration_bonus
+    ...(既存のsearch_approach_bonus判定)...
+</code></pre>
+<p>これは「敵に近づいたか」に関係なく、<strong>単純に「新しい場所に行った」ことを評価する</strong>ので、たとえ敵の手がかりが全くない状況でも、居座りから抜け出す動機になります。対策1（方向情報）と組み合わせると、「手がかりがあればそちらへ、なければ未探索エリアへ」という自然な振る舞いに近づけやすくなります。</p>
+<h3 id="原因3-モデル構造としてチーム内での役割分担を強制する仕組みがない">原因3: モデル構造として「チーム内での役割分担」を強制する仕組みがない</h3>
+<p>対策1・2は「個々のエージェントに情報を与える」アプローチですが、<strong>「8体全員が同じ情報に基づいて同じように&quot;近くに集まる&quot;最適化をしてしまう」リスク</strong>は残ります。全員が同じ観測(相対方向)を見て、全員が同じ最寄りターゲットを目指せば、結局同じ場所に集まってしまいかねません。</p>
+<p><strong>対策3: エージェントごとに異なる担当エリア/ターゲットを明示的に割り当てる</strong></p>
+<p>前回の<code>priority_agent_order</code>をベースに、<strong>割り当て(assignment)そのものをハンガリアン法などで最適化し、各エージェントに「自分が担当するターゲット」を固定して観測に含める</strong>ようにすると、この重複問題を根本的に避けられます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> scipy.optimize <span class="hljs-keyword">import</span> linear_sum_assignment
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_agent_target_assignment</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">dict</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    各pursuerに、重複しないよう1体ずつ異なる未捕獲preyを割り当てる(距離コストの最小化)。
+    prey数 &lt; agent数の場合、余ったagentは「最も近いprey」に複数人割り当てる。
+    &quot;&quot;&quot;</span>
+    raw_env = self.env.unwrapped
+    evader_positions = [(e.state[<span class="hljs-number">1</span>], e.state[<span class="hljs-number">0</span>]) <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> raw_env.evaders]
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> evader_positions:
+        <span class="hljs-keyword">return</span> {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+
+    agent_positions = []
+    valid_agents = []
+    <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents:
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">continue</span>
+        <span class="hljs-keyword">try</span>:
+            obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+            agent_positions.append((obj.state[<span class="hljs-number">1</span>], obj.state[<span class="hljs-number">0</span>]))
+            valid_agents.append(agent)
+        <span class="hljs-keyword">except</span> Exception:
+            <span class="hljs-keyword">continue</span>
+
+    cost_matrix = np.array([
+        [<span class="hljs-built_in">abs</span>(ay - py) + <span class="hljs-built_in">abs</span>(ax - px) <span class="hljs-keyword">for</span> (py, px) <span class="hljs-keyword">in</span> evader_positions]
+        <span class="hljs-keyword">for</span> (ay, ax) <span class="hljs-keyword">in</span> agent_positions
+    ])
+
+    <span class="hljs-comment"># prey数がagent数より少ない場合はタイル(繰り返し)してコスト行列を拡張</span>
+    n_agents, n_prey = cost_matrix.shape
+    <span class="hljs-keyword">if</span> n_prey &lt; n_agents:
+        reps = <span class="hljs-built_in">int</span>(np.ceil(n_agents / n_prey))
+        cost_matrix = np.tile(cost_matrix, (<span class="hljs-number">1</span>, reps))[:, :n_agents]
+
+    row_idx, col_idx = linear_sum_assignment(cost_matrix)
+    assignment = {}
+    <span class="hljs-keyword">for</span> r, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(row_idx, col_idx):
+        prey_idx = c % n_prey
+        assignment[valid_agents[r]] = evader_positions[prey_idx]
+
+    <span class="hljs-keyword">return</span> assignment
+</code></pre>
+<p>この割り当てを使って、対策1の「最寄りターゲットへの相対方向」を <strong>「最寄り」ではなく「自分に割り当てられたターゲット」への方向</strong>に差し替えると、<strong>エージェントが自然に散らばって別々のターゲットを追う</strong>ようになります。同じターゲットに全員が向かって過密になる、という現在の症状に対して、より直接的な効果が期待できます。</p>
+<h3 id="優先順位のまとめ">優先順位のまとめ</h3>
+<p>ここまで上げてきた原因と対策の期待する効果と、実装コストを比較してみました。
+仮説では情報不足だろうという考えをベースとした対策1+2と、自然な役割不足が難しいという考えをベースとした対策3に分かれます。
+期待する効果はおそらく同程度、実装コストからすると、対策3よりは対策1+2の方が楽だと考えられるため、今回は対策1+2を採用します。</p>
+<table>
+<thead>
+<tr>
+<th>対策</th>
+<th>期待する効果</th>
+<th>実装コスト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 方向情報を観測に追加</td>
+<td>「そもそもどちらに探索すべきか分からない」</td>
+<td>低</td>
+</tr>
+<tr>
+<td>2. 訪問カバレッジによる内発的報酬</td>
+<td>「手がかりがなくても居座らず動く」</td>
+<td>低〜中</td>
+</tr>
+<tr>
+<td>3. ハンガリアン法による明示的な担当割当</td>
+<td>「一角に全員集中してしまう」重複問題</td>
+<td>中〜高</td>
+</tr>
+</tbody>
+</table>
+<h2 id="実装">実装</h2>
+<p>対策1+2を実装していきます。
+ここまでのコードへの改修点についてまとめていきます。</p>
+<h3 id="修正点一覧">修正点一覧</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>修正対象</th>
+<th>変更内容</th>
+<th>変更の根拠</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>PursuitWrapper.__init__</code></td>
+<td><code>direction_dim = 2</code> を追加し、<code>obs_dim</code> の計算に <code>+ direction_dim</code> を含める</td>
+<td><code>get_obs()</code> が実際に返すベクトルの長さと <code>self.obs_dim</code> の宣言値を一致させるため</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>PursuitWrapper.get_obs()</code></td>
+<td>最寄り未捕獲 prey への相対方向ベクトル <code>(dy, dx)</code> を観測末尾に連結</td>
+<td>エージェントに「敵がどちらにあるか」の方向情報を与え、局所観測の情報不足を補うため</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>MATObsEncoder.forward()</code> のスライス処理</td>
+<td><code>spatial_obs</code> / <code>action_history</code> / <code>direction_feat</code> のスライス境界を明示的に区切る</td>
+<td>方向ベクトルの2次元が <code>action_history_embed</code>（40次元入力期待）に誤って混ざり、サイズ不一致エラーを起こすのを防ぐため</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>MATObsEncoder.__init__</code> の <code>feature_fuse</code></td>
+<td>入力次元を <code>d_model * 2 + 2</code> に変更</td>
+<td><code>spatial_feature</code> + <code>act_emb</code> + <code>direction_feat</code>（2次元）を連結して融合するため</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>PursuitWrapper</code> の探索報酬</td>
+<td>count-based exploration bonus（訪問回数に応じたボーナス）を索敵報酬に追加</td>
+<td>敵の手がかりがない状況でも「未探索エリアへ移動する」動機を与え、居座りを防ぐため</td>
+</tr>
+</tbody>
+</table>
+<h3 id="各修正点の詳細">各修正点の詳細</h3>
+<p><strong>修正1：<code>PursuitWrapper.__init__</code> の <code>obs_dim</code> 計算</strong></p>
+<p><strong>変更内容</strong>：</p>
+<pre><code class="language-python">self.direction_dim = <span class="hljs-number">2</span>
+self.obs_dim = self.spatial_dim + self.action_history_dim + self.direction_dim
+</code></pre>
+<p><strong>変更の根拠</strong>：</p>
+<ul>
+<li><code>get_obs()</code> が返すベクトルは「空間観測（196次元）+ アクション履歴（40次元）+ 方向ベクトル（2次元）= 238次元」です</li>
+<li><code>self.obs_dim</code> が 236 のままだと、<code>get_global_state()</code> 内の <code>reshape</code> で「238要素を236形状に変形できない」というエラーが発生します</li>
+<li>観測の生成側と参照側の次元数を一致させることが必須です</li>
+</ul>
+<p><strong>修正2：<code>PursuitWrapper.get_obs()</code> に方向ベクトルを追加</strong></p>
+<p><strong>変更内容</strong>：</p>
+<pre><code class="language-python">rel_vec = self._compute_relative_direction_to_nearest_prey(agent)  <span class="hljs-comment"># (2,)</span>
+full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+</code></pre>
+<p><strong>変更の根拠</strong>：</p>
+<ul>
+<li>7×7 の局所観測だけでは「敵が視界の外のどちらにいるか」が分かりません</li>
+<li>結果としてエージェントは「どちらへ動いても同じ」という状況になり、無難な狭い範囲の徘徊に収束します</li>
+<li>最寄り prey への正規化された相対方向 <code>(dy, dx)</code> を与えることで、「視界の外の情報に基づいて行動を決定できる」ようになります</li>
+</ul>
+<p><strong>修正3：<code>MATObsEncoder.forward()</code> のスライス境界の明示</strong></p>
+<p><strong>変更内容</strong>：</p>
+<pre><code class="language-python">spatial_obs = obs[:, :self.spatial_dim]
+action_history = obs[:, self.spatial_dim : self.spatial_dim + self.num_agents * <span class="hljs-number">5</span>]
+direction_feat = obs[:, self.spatial_dim + self.num_agents * <span class="hljs-number">5</span> :]
+</code></pre>
+<p><strong>変更の根拠</strong>：</p>
+<ul>
+<li>元のコードでは <code>action_history = obs[:, self.spatial_dim:]</code> と「残り全部」をスライスしていたため、方向ベクトルの2次元も <code>action_history_embed</code> に混ざっていました</li>
+<li><code>action_history_embed</code> は <code>nn.Linear(num_agents * 5, d_model)</code> であり、40次元の入力を期待しています</li>
+<li>42次元（40+2）が入力されるとサイズ不一致のランタイムエラーが発生します</li>
+<li>各特徴量の境界を明示的に区切ることで、誤った次元の混入を防ぎます</li>
+</ul>
+<p><strong>修正4：<code>MATObsEncoder.feature_fuse</code> の入力次元</strong></p>
+<p><strong>変更内容</strong>：</p>
+<pre><code class="language-python">self.feature_fuse = nn.Linear(d_model * <span class="hljs-number">2</span> + self.direction_dim, d_model)
+</code></pre>
+<p><strong>変更の根拠</strong>：</p>
+<ul>
+<li><code>forward()</code> 内で <code>spatial_feature</code>（<code>d_model</code> 次元）+ <code>act_emb</code>（<code>d_model</code> 次元）+ <code>direction_feat</code>（2次元）を連結して渡します</li>
+<li>融合層の入力次元は <code>d_model + d_model + 2 = d_model * 2 + 2</code> である必要があります</li>
+<li>この変更がないと、連結後のテンソル次元と <code>Linear</code> 層の期待入力次元が一致せず、エラーになります</li>
+</ul>
+<p><strong>修正5：探索報酬に count-based exploration bonus を追加</strong></p>
+<p><strong>変更内容</strong>：</p>
+<pre><code class="language-python"><span class="hljs-comment"># reset() に追加</span>
+self.visit_counts = {}
+
+<span class="hljs-comment"># 報酬計算に追加</span>
+exploration_bonus = self._get_exploration_bonus(curr_pos) * <span class="hljs-number">0.02</span>
+individual_reward += exploration_bonus
+</code></pre>
+<p><strong>変更の根拠</strong>：</p>
+<ul>
+<li>対策1によって「敵の方向」は分かるようになりますが、敵の手がかりが全くない状況では依然として居座りやすいです</li>
+<li>「敵がいない」という消極的シグナルだけでは、エージェントを広範囲に動かす動機が不十分です</li>
+<li>訪問回数が少ないマスへのボーナスを与えることで、「新しい場所に行くこと自体に価値がある」と学習させ、居座りを防ぎます</li>
+<li>対策1と組み合わせることで、「手がかりがあればそちらへ、なければ未探索エリアへ」という自然な振る舞いが期待できます</li>
+</ul>
+<h3 id="変更の全体像">変更の全体像</h3>
+<p>今回の改修は「観測に方向情報を追加する」という一つの目的ですが、<strong>次元数の整合性を保つための4箇所の連鎖的修正</strong>が必要です。</p>
+<ol>
+<li><strong>Wrapper側</strong>：<code>obs_dim</code> の宣言値を実際の観測長（238）に合わせる</li>
+<li><strong>Wrapper側</strong>：<code>get_obs()</code> で方向ベクトルを実際に生成して連結する</li>
+<li><strong>Encoder側</strong>：観測ベクトルを3つの特徴量に正しく分割する</li>
+<li><strong>Encoder側</strong>：分割後の特徴量を融合する層の入力次元を正しく設定する</li>
+<li><strong>報酬側</strong>：方向情報だけでは補えない「手がかりゼロ時の探索動機」を内発的報酬で補完する</li>
+</ol>
+<p>ということで変更コードはこちらに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat</a></p>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の経過">学習の経過</h3>
+<p>今回のエントロピ・報酬合計・捕獲数のみを抽出して比較した結果をまとめます。</p>
+<p><strong>全体比較（前回 vs 今回）</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>前回 (update 1001-1050)</th>
+<th>今回 (update 1051-1100)</th>
+<th>変化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>エントロピ（平均）</strong></td>
+<td>1.4031</td>
+<td>1.3752</td>
+<td>▼ 0.0279（低下）</td>
+</tr>
+<tr>
+<td><strong>報酬合計（平均）</strong></td>
+<td>116.22</td>
+<td>132.37</td>
+<td>▲ 16.15（改善）</td>
+</tr>
+<tr>
+<td><strong>捕獲数（平均）</strong></td>
+<td>32.0</td>
+<td>30.7</td>
+<td>▼ 1.3（微減）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>読み取れること</strong></p>
+<p><strong>1. エントロピは継続的に低下</strong></p>
+<p>前回前半 1.4162 → 前回後半 1.3894 → 今回前半 1.3763 → 今回後半 1.3741 と、<strong>方針（policy）が徐々に尖ってきています</strong>。これは探索が減り、特定の行動パターンに収束しつつあることを示しています。</p>
+<p><strong>2. 報酬合計は今回後半で大幅改善</strong></p>
+<p>今回後半の平均報酬 <strong>147.9</strong> は前回平均（116.22）を大きく上回っています。個別エピソードの最大報酬も <strong>223.91</strong>（update 1094）と、前回の最大（176.61）を大幅に更新しています。</p>
+<p><strong>3. 捕獲数はほぼ横ばい</strong></p>
+<p>平均捕獲数は前回 32.0 → 今回 30.7 と微減です。ただし今回後半は 31.8 と回復傾向にあり、最大捕獲数も前回 41 → 今回 42 と同等以上です。</p>
+<p><strong>4. 注意点：今回前半の性能低下</strong></p>
+<p>今回前半（update 1051-1075）は平均捕獲数 <strong>29.7</strong> と低下し、最低 <strong>17</strong>（update 1073）が記録されています。これはチェックポイント読み込み時に <code>feature_fuse.weight</code> の形状不一致（64×128 → 64×130）が発生し、<strong>オプティマイザが初期状態にリセットされた影響</strong>と考えられます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\19_global_action_v1\1787984838933.png" alt="1787984838933"></p>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習後のエージェントの動作です。
+途中まで偵察するエージェントがいる状態で、あるときにエージェントが集まって捕獲に集中している挙動が確認出来ます。
+中盤から後半に敵が視界に少なくなってからは場所を移ろうとする気配も確認出来ました。
+捕獲数は40体。</p>
+<p>期待を満足したわけではありませんが、以前よりも行動はあって欲しい状態へ改善したと考えます。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\19_global_action_v1\pursuit_mat_fixed (4).gif">
+<h2 id="総括">総括</h2>
+<p>以下、本質を簡潔に総括します。</p>
+<h3 id="前回問題の本質">前回問題の本質</h3>
+<p>MoEの偏りを解消しても、エージェントが一角に居座る問題が残ったのは、<strong>「7×7の局所観測だけでは、視界の外にある敵の方向が分からない」</strong> ためでした。索敵報酬で「動け」と促しても、モデルにとっては「どちらに動いても同じ」という情報不足の状態であり、結果としてリスクの低い狭い範囲の徘徊に収束していました。</p>
+<h3 id="打った手とその意図">打った手とその意図</h3>
+<table>
+<thead>
+<tr>
+<th>対策</th>
+<th>内容</th>
+<th>意図</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>方向情報の追加</strong></td>
+<td>最寄り未捕獲preyへの相対方向 <code>(dy, dx)</code> を観測末尾に連結</td>
+<td>視界の外の敵の方向をモデルに直接教え、探索の目的を与える</td>
+</tr>
+<tr>
+<td><strong>内発的報酬</strong></td>
+<td>未訪問マスへの count-based exploration bonus を追加</td>
+<td>敵の手がかりがない状況でも、居座りではなく新しい場所へ動く動機を作る</td>
+</tr>
+</tbody>
+</table>
+<h3 id="結果の評価">結果の評価</h3>
+<ul>
+<li><strong>報酬は大幅改善</strong>：今回後半の平均報酬は約148（前回約116）、最大は223.91と記録的な上昇</li>
+<li><strong>動作に改善の兆候</strong>：「偵察→集団で捕獲→敵が減ったら別エリアへ移動」という流れが確認できた</li>
+<li><strong>捕獲数は横ばい</strong>：平均30.7と微減。報酬は上がっているが、捕獲効率への転換はまだ不完全</li>
+<li><strong>エントロピの低下</strong>：方針が尖ってきており、探索と活用のバランスが今後の課題</li>
+</ul>
+<h3 id="結論">結論</h3>
+<p><strong>「敵の方向」という情報を観測に直接与えることで、無目的な徘徊から「意図を持った移動」への転換は実現できました。</strong> ただし、全員が同じ方向情報を見て同じターゲットに集まる「過密化」の問題は残っており、次のステップとして「エージェントごとの役割分担（対策3のハンガリアン法による担当割当）」を検討する価値があるかもしれません。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>

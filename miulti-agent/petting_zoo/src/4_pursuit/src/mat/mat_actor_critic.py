@@ -308,6 +308,7 @@ class MATObsEncoder(nn.Module):
         self.num_tokens = obs_range * obs_range
         self.spatial_dim = obs_range * obs_range * in_channels
         self.num_agents = num_agents
+        self.direction_dim = 2  # 🌟 追加
 
         self.embedding = nn.Linear(in_channels, d_model)
 
@@ -318,7 +319,8 @@ class MATObsEncoder(nn.Module):
             nn.Linear(num_agents * 5, d_model),
             nn.GELU(),
         )
-        self.feature_fuse = nn.Linear(d_model * 2, d_model)
+        # self.feature_fuse = nn.Linear(d_model * 2, d_model)
+        self.feature_fuse = nn.Linear(d_model * 2 + self.direction_dim, d_model)
 
         # 🌟 修正: 標準の Transformer を MoE 対応のレイヤーで構築
         self.layers = nn.ModuleList([
@@ -346,18 +348,20 @@ class MATObsEncoder(nn.Module):
     def forward(self, obs: torch.Tensor) -> torch.Tensor:
         B = obs.shape[0]
         spatial_obs = obs[:, :self.spatial_dim]
-        action_history = obs[:, self.spatial_dim:]
+        action_history = obs[:, self.spatial_dim : self.spatial_dim + self.num_agents * 5]
+        direction_feat = obs[:, self.spatial_dim + self.num_agents * 5 :]  # 🌟 追加: 末尾2次元
 
         x = spatial_obs.view(B, self.num_tokens, -1)
         x = self.embedding(x) + self.pos_embedding
 
-        # MoE 層を順に伝播
         for layer in self.layers:
             x = layer(x)
 
         spatial_feature = x.mean(dim=1)
         act_emb = self.action_history_embed(action_history)
-        fused = torch.cat([spatial_feature, act_emb], dim=-1)
+
+        # 🌟 修正: direction_featも連結
+        fused = torch.cat([spatial_feature, act_emb, direction_feat], dim=-1)
         return self.feature_fuse(fused)
 
 
@@ -461,8 +465,8 @@ class MATActorCritic(nn.Module):
         super().__init__()
         self.num_agents = num_agents
         self.action_dim = act_dim
-        self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5
-
+        # self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5
+        self.obs_dim = obs_range * obs_range * in_channels + num_agents * 5 + 2
         self.obs_encoder = MATObsEncoder(obs_range, in_channels, d_model, nhead,
                                          spatial_layers, num_agents)
         self.encoder = MATEncoder(num_agents, d_model, nhead, enc_layers)
@@ -534,7 +538,7 @@ class MATActorCritic(nn.Module):
 
 class MAT_PPO:
     def __init__(self, num_agents=8, obs_dim=236, action_dim=5,
-                 d_model=64, nhead=4, spatial_layers=2, enc_layers=2, dec_layers=2,
+                 d_model=64, nhead=4, spatial_layers=3, enc_layers=4, dec_layers=2,
                  lr=1e-4, gamma=0.99, gae_lambda=0.95,
                  clip_epsilon=0.2, value_coef=0.5, entropy_coef=0.01,
                  order_mode="random",
