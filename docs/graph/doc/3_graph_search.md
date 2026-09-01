@@ -89,14 +89,13 @@ __A*（A-star）__
 | 1957 | Leyzorek ら | ダイクストラ法に類似した方法を開発 |
 | 1958 | Bellman | 動的計画法に基づく最短経路アルゴリズムを体系化 |
 | 1959 | Dijkstra | **ダイクストラ法**を発表（非負の重みを持つグラフの最短経路） |
-| 1959 | Moore | **幅優先探索（BFS）**に相当する方法を提案 |
+| 1959 | Moore | **幅優先探索（BFS）** に相当する方法を提案 |
 
 > 特筆すべきは、1950年代に入ると**複数の研究者が独立にほぼ同じ手法**を開発したことです。これは「問題が成熟した」証拠でもあります。
 
 ### 4. 1968年：A*アルゴリズムの誕生（AIとの融合）
 
-1968年、**Peter Hart、Nils Nilsson、Bertram Raphael**（スタンフォード研究所）が論文 *"A Formal Basis for the Heuristic Determination of Minimum Cost Paths"* を発表し、**A*アルゴリズム**を提案しました。<source-chip title="Communications of the ACM" url="https://cacm.acm.org/opinion/a-search/" /><source-chip title="Algorithm Hall of Fame" url="https://www.algorithmhalloffame.org/algorithms/a-star-search/" />
-
+1968年、**Peter Hart、Nils Nilsson、Bertram Raphael**（スタンフォード研究所）が論文 *"A Formal Basis for the Heuristic Determination of Minimum Cost Paths"* を発表し、**A*アルゴリズム**を提案しました。[Communications of the ACM](https://cacm.acm.org/opinion/a-search/)[Algorithm Hall of Fame](https://www.algorithmhalloffame.org/algorithms/a-star-search/)
 このアルゴリズムは、**ダイクストラ法に「ヒューリスティック（推定値）」を組み合わせた**もので、ロボット「Shakey」の経路探索を目的に開発されました。
 
 > A*の重要な性質：ヒューリスティックが「許容的（admissible）」であれば、**最短経路を保証しながら探索範囲を最小化できる**ことが数学的に証明されました。
@@ -847,7 +846,181 @@ __探索結果の可視化__
 4  . + + + G 
 ```
 
+__Pythonコード__
+
+```python
+import heapq
+
+
+def astar(grid, start, goal):
+    """
+    A*アルゴリズムで迷路の最短経路を探索する。
+
+    Parameters:
+        grid: 2次元リスト (0=通路, 1=壁)
+        start: (行, 列) スタート位置
+        goal:  (行, 列) ゴール位置
+
+    Returns:
+        path: 最短経路座標リスト
+        cost: 総コスト
+        explored_count: 探索したセル数
+    """
+    rows = len(grid)
+    cols = len(grid[0])
+
+    def heuristic(a, b):
+        """マンハッタン距離（ヒューリスティック）"""
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    # 優先度付きキュー: (f値, g値, 位置)
+    heap = []
+    start_h = heuristic(start, goal)
+    heapq.heappush(heap, (start_h, 0, start))
+
+    g = {start: 0}        # 始点からの実コスト
+    came_from = {}         # 経路復元用
+    visited = set()        # 確定済みセル
+    explored = []          # 探索順記録
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    while heap:
+        f, g_val, current = heapq.heappop(heap)
+
+        if current in visited:
+            continue
+        visited.add(current)
+        explored.append(current)
+
+        if current == goal:
+            # 経路復元
+            path = []
+            node = goal
+            while node != start:
+                path.append(node)
+                node = came_from[node]
+            path.append(start)
+            path.reverse()
+            return path, g_val, len(explored)
+
+        for dr, dc in directions:
+            nr, nc = current[0] + dr, current[1] + dc
+            neighbor = (nr, nc)
+
+            # 範囲外または壁ならスキップ
+            if nr < 0 or nr >= rows or nc < 0 or nc >= cols:
+                continue
+            if grid[nr][nc] == 1:
+                continue
+
+            new_g = g_val + 1
+            if neighbor not in g or new_g < g[neighbor]:
+                g[neighbor] = new_g
+                f_val = new_g + heuristic(neighbor, goal)
+                heapq.heappush(heap, (f_val, new_g, neighbor))
+                came_from[neighbor] = current
+
+    return None, None, len(explored)
+
+
+def print_grid(grid, path=None, explored=None, start=None, goal=None):
+    """迷路を可視化して表示する"""
+    rows = len(grid)
+    cols = len(grid[0])
+
+    print("   ", end="")
+    for c in range(cols):
+        print(f"{c} ", end="")
+    print()
+
+    for r in range(rows):
+        print(f"{r}  ", end="")
+        for c in range(cols):
+            pos = (r, c)
+            if start and pos == start:
+                print("S ", end="")
+            elif goal and pos == goal:
+                print("G ", end="")
+            elif path and pos in path:
+                print("* ", end="")
+            elif explored and pos in explored:
+                print("+ ", end="")
+            elif grid[r][c] == 1:
+                print("# ", end="")
+            else:
+                print(". ", end="")
+        print()
+
+
+# ========== メイン処理 ==========
+if __name__ == "__main__":
+    # 迷路の定義 (0=通路, 1=壁)
+    grid = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0]
+    ]
+
+    start = (0, 0)
+    goal = (4, 4)
+
+    print("=" * 50)
+    print("A* アルゴリズム 最短経路探索")
+    print("=" * 50)
+    print()
+    print("【迷路】")
+    print("   S = スタート, G = ゴール, # = 壁, . = 通路")
+    print()
+    print_grid(grid, start=start, goal=goal)
+    print()
+
+    # A*で最短経路を探索
+    path, cost, explored_count = astar(grid, start, goal)
+
+    print("【結果】")
+    print(f"最短経路: {path}")
+    print(f"経路の長さ（総コスト）: {cost}")
+    print(f"探索したセル数: {explored_count}")
+    print()
+
+    print("【最短経路の可視化】")
+    print("   * = 最短経路")
+    print_grid(grid, path=path, start=start, goal=goal)
+
+```
+
+
 __解説__
+
+__コードの解説__
+
+A*のコードは、**7つのステップ**で作成しました。
+
+| ステップ | 内容 | ポイント |
+|----------|------|----------|
+| **0** | A*の全体像を理解 | ダイクストラ法 + ヒューリスティック |
+| **1** | 迷路データの表現 | 2次元リストで 0=通路、1=壁 |
+| **2** | 位置の表現 | (行, 列)のタプル、4方向の移動ベクトル |
+| **3** | ヒューリスティック関数 | マンハッタン距離 = abs(r1-r2) + abs(c1-c2) |
+| **4** | 優先度付きキュー | heapqで「f値最小」を効率的に取り出す |
+| **5** | メインループ | 取り出し→ゴール判定→隣接セル探索→ヒープ追加 |
+| **6** | 経路復元 | came_from辞書で「どこから来たか」を記録 |
+| **7** | 可視化 | 2重ループで迷路を描画、経路に*を付ける |
+
+
+A*のコードは、**「ダイクストラ法のコードにヒューリスティックを足すだけ」** です。
+
+```
+ダイクストラ法:  ヒープに (g値, 位置) を入れる
+A*:              ヒープに (g+h, g, 位置) を入れる
+                 　　　　　↑ この「h」が追加されただけ
+```
+
+この「h」があることで、**ゴールに近い方向が自動的に優先される**ため、無駄な探索が大幅に減ります。
+
 
 __なぜこの経路が選ばれたのか__
 
@@ -865,20 +1038,5 @@ __A*の効率性__
 | 探索効率 | 約78% |
 
 この迷路では**壁が多く、経路の選択肢が限られている**ため、A*でも比較的多くのセルを探索しています。もっと壁が少ない迷路では、A*の「ゴール方向への集中」という特性がより顕著に現れ、探索セル数が大幅に減ります。
-
-__確認の質問__
-
-以下の迷路では、最短経路の長さはいくつになるでしょうか？また、A*の探索セル数は増えるでしょうか、減るでしょうか？
-
-```
-   0 1 2 3 4
-0  S . . . . 
-1  . . . . . 
-2  . . # . . 
-3  . . # . . 
-4  . . # . G 
-```
-
-（ヒント：中央の壁に沿って迂回が必要になります）
 
 
