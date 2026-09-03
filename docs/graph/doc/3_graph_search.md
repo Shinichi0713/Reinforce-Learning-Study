@@ -411,6 +411,8 @@ __5. BFSの「波紋」のイメージ__
 
 まさに**池の波紋**のように、始点Aから同心円状に探索が広がっていきます。
 
+<img src="image/3_graph_search/1788382455525.png" width="600px" style="display: block; margin: 0 auto;">
+
 
 
 ## 深さ優先探索
@@ -524,7 +526,7 @@ __⑤ 2辺連結成分・関節点検出__
 
 ## ダイクストラ法
 
-ダイクストラ法（Dijkstra's algorithm）について、初心者にもわかりやすく説明いたします。
+ダイクストラ法（Dijkstra's algorithm）について、説明いたします。
 
 ### 1. 一言で言うと
 
