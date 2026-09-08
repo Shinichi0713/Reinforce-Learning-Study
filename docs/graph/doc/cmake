@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.18)
+project(libtorch_architecture)
+
+set(CMAKE_CXX_STANDARD 17)
+
+# LibTorchのパスを指定（ダウンロード済みの場合）
+set(Torch_DIR /path/to/libtorch/share/cmake/Torch)
+find_package(Torch REQUIRED)
+
+add_executable(model_arch main.cpp)
+target_link_libraries(model_arch "${TORCH_LIBRARIES}")
