@@ -971,6 +971,8 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import heapq
+from io import StringIO
 
 
 def dijkstra(N, edges):
@@ -1099,23 +1101,69 @@ def visualize_dijkstra(N, edges, visited_order, edge_relaxations, result_dist):
     print("画像を dijkstra_result.png に保存しました。")
 
 
+def dijkstra(N, edges):
+    """
+    ダイクストラ法で頂点1から頂点Nまでの最短距離を求める
+    """
+    # 隣接リストの構築（無向グラフ）
+    adj = [[] for _ in range(N + 1)]
+    for a, b, c in edges:
+        adj[a].append((b, c))
+        adj[b].append((a, c))
+    
+    INF = 1 << 60
+    dist = [INF] * (N + 1)
+    dist[1] = 0
+    
+    # 優先度付きキュー（距離, 頂点）
+    pq = [(0, 1)]
+    
+    while pq:
+        d, v = heapq.heappop(pq)
+        # 古いエントリならスキップ
+        if d > dist[v]:
+            continue
+        for to, cost in adj[v]:
+            if dist[to] > dist[v] + cost:
+                dist[to] = dist[v] + cost
+                heapq.heappush(pq, (dist[to], to))
+    
+    return dist[N] if dist[N] != INF else -1
+
+
+def solve(input_text):
+    """
+    入力文字列からグラフを読み込み、最短距離を出力する
+    """
+    lines = input_text.strip().split('\n')
+    N, M = map(int, lines[0].split())
+    
+    edges = []
+    for i in range(1, M + 1):
+        a, b, c = map(int, lines[i].split())
+        edges.append((a, b, c))
+    
+    result = dijkstra(N, edges)
+    return result
+
 # ==================== メイン処理 ====================
 if __name__ == "__main__":
     # 標準入力から読み込み
-    input = sys.stdin.readline
+    # サンプル1
+    test_input1 = """4 4
+    1 2 2
+    2 4 1
+    1 3 4
+    3 4 1"""
 
-    N, M = map(int, input().split())
-    edges = []
-    for _ in range(M):
-        a, b, c = map(int, input().split())
-        edges.append((a, b, c))
+    print(solve(test_input1))  # 出力: 3
 
-    result, visited_order, relaxations = dijkstra(N, edges)
-    print(result)
+    # サンプル2
+    test_input2 = """3 1
+    1 2 5"""
 
-    # 可視化（Nが小さい場合のみ）
-    if N <= 20:
-        visualize_dijkstra(N, edges, visited_order, relaxations, result)
+    print(solve(test_input2))  # 出力: -1
+    
 ```
 
 
