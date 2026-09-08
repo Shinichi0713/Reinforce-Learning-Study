@@ -906,6 +906,219 @@ __ポイントまとめ__
 2. **一度確定した地点の最短距離は変わらない**：これがダイクストラ法の核心です。負の辺があるとこの保証が崩れるため、ダイクストラ法は使えません。
 3. **直接つながっていなくても最短経路が求まる**：AとDは直接つながっていませんが、A → B → D が最短経路として求まりました。
 
+__例題:__
+
+ダイクストラ法を用いた例題を出題します。
+合わせてPythonで解いた場合、こうなるというコードも提示します。
+
+__問題文__
+
+$N$ 個の頂点と $M$ 本の無向辺からなる重み付きグラフが与えられます。頂点 $1$ から頂点 $N$ までの最短距離を求めてください。到達不可能な場合は `-1` を出力してください。
+
+__入力形式__
+```
+N M
+a_1 b_1 c_1
+a_2 b_2 c_2
+...
+a_M b_M c_M
+```
+- $a_i$, $b_i$：辺の両端の頂点
+- $c_i$：その辺の重み（$c_i \geq 1$）
+
+__制約__
+- $2 \leq N \leq 10^5$
+- $1 \leq M \leq 2 \times 10^5$
+- $1 \leq c_i \leq 10^9$
+
+__サンプル1__
+
+入力
+
+```
+4 4
+1 2 2
+2 4 1
+1 3 4
+3 4 1
+```
+
+出力
+
+```
+3
+```
+（経路：$1 \to 2 \to 4$）
+
+__サンプル2__
+
+入力
+
+```
+3 1
+1 2 5
+```
+
+出力
+
+```
+-1
+```
+
+```python
+import heapq
+import sys
+import networkx as nx
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+
+def dijkstra(N, edges):
+    """
+    ダイクストラ法で頂点1から頂点Nまでの最短距離を求める
+
+    Args:
+        N: 頂点数
+        edges: 辺のリスト [(a, b, c), ...]  無向辺
+
+    Returns:
+        最短距離（到達不可能なら -1）
+        確定順序
+        緩和ログ
+    """
+    # 隣接リストの構築
+    adj = [[] for _ in range(N + 1)]
+    for a, b, c in edges:
+        adj[a].append((b, c))
+        adj[b].append((a, c))  # 無向グラフ
+
+    INF = 1 << 60
+    dist = [INF] * (N + 1)
+    dist[1] = 0
+
+    # 優先度付きキュー (距離, 頂点)
+    pq = [(0, 1)]
+    visited_order = []
+    edge_relaxations = []
+
+    while pq:
+        d, v = heapq.heappop(pq)
+        if d > dist[v]:
+            continue
+        visited_order.append(v)
+        for to, cost in adj[v]:
+            if dist[to] > dist[v] + cost:
+                edge_relaxations.append((v, to, dist[to], dist[v] + cost))
+                dist[to] = dist[v] + cost
+                heapq.heappush(pq, (dist[to], to))
+
+    return dist[N] if dist[N] != INF else -1, visited_order, edge_relaxations
+
+
+def visualize_dijkstra(N, edges, visited_order, edge_relaxations, result_dist):
+    """
+    NetworkXとmatplotlibでダイクストラ法の探索過程を可視化
+    """
+    G = nx.Graph()
+
+    edge_weights = {}
+    for a, b, c in edges:
+        G.add_edge(a, b, weight=c)
+        edge_weights[(min(a, b), max(a, b))] = c
+
+    pos = nx.spring_layout(G, seed=42)
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # 左図: 元のグラフ
+    ax1 = axes[0]
+    ax1.set_title("元のグラフ", fontsize=14)
+    nx.draw_networkx_nodes(G, pos, ax=ax1, node_color="lightblue",
+                           node_size=800, edgecolors="black")
+    nx.draw_networkx_labels(G, pos, ax=ax1, font_size=12, font_weight="bold")
+    nx.draw_networkx_edges(G, pos, ax=ax1, edge_color="gray", width=2)
+    edge_labels = {(u, v): d["weight"] for u, v, d in G.edges(data=True)}
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, ax=ax1, font_size=11)
+    ax1.axis("off")
+
+    # 右図: 探索結果
+    ax2 = axes[1]
+    ax2.set_title(f"ダイクストラ法の探索結果\n(頂点1→頂点{N} の最短距離: {result_dist})", fontsize=14)
+
+    node_colors = []
+    for node in G.nodes():
+        if node == 1:
+            node_colors.append("lightgreen")
+        elif node == N:
+            node_colors.append("lightcoral")
+        elif node in visited_order:
+            node_colors.append("orange")
+        else:
+            node_colors.append("lightblue")
+
+    nx.draw_networkx_nodes(G, pos, ax=ax2, node_color=node_colors,
+                           node_size=800, edgecolors="black")
+    nx.draw_networkx_labels(G, pos, ax=ax2, font_size=12, font_weight="bold")
+
+    shortest_edges = set()
+    for v, to, old_dist, new_dist in edge_relaxations:
+        shortest_edges.add((min(v, to), max(v, to)))
+
+    edge_color_list = []
+    edge_width_list = []
+    for u, v in G.edges():
+        key = (min(u, v), max(u, v))
+        if key in shortest_edges:
+            edge_color_list.append("red")
+            edge_width_list.append(3)
+        else:
+            edge_color_list.append("gray")
+            edge_width_list.append(1.5)
+
+    nx.draw_networkx_edges(G, pos, ax=ax2, edge_color=edge_color_list,
+                           width=edge_width_list)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, ax=ax2, font_size=11)
+
+    order_text = "確定順序: " + " → ".join(map(str, visited_order))
+    ax2.text(0.5, -0.05, order_text, transform=ax2.transAxes,
+             ha="center", fontsize=11,
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="lightyellow"))
+    ax2.axis("off")
+
+    legend_elements = [
+        mpatches.Patch(color="lightgreen", label="出発点 (1)"),
+        mpatches.Patch(color="lightcoral", label=f"ゴール ({N})"),
+        mpatches.Patch(color="orange", label="確定済み頂点"),
+        mpatches.Patch(color="red", label="最短経路木の辺"),
+    ]
+    ax2.legend(handles=legend_elements, loc="upper right", fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig("dijkstra_result.png", dpi=150, bbox_inches="tight")
+    plt.show()
+    print("画像を dijkstra_result.png に保存しました。")
+
+
+# ==================== メイン処理 ====================
+if __name__ == "__main__":
+    # 標準入力から読み込み
+    input = sys.stdin.readline
+
+    N, M = map(int, input().split())
+    edges = []
+    for _ in range(M):
+        a, b, c = map(int, input().split())
+        edges.append((a, b, c))
+
+    result, visited_order, relaxations = dijkstra(N, edges)
+    print(result)
+
+    # 可視化（Nが小さい場合のみ）
+    if N <= 20:
+        visualize_dijkstra(N, edges, visited_order, relaxations, result)
+```
+
+
 ## PageRank
 
 
