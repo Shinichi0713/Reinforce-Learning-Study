@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>GRPO&#x3068;&#x306f;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>近年のLLMは指示学習した後に、<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/13/043000">強化学習により回答の質を向上するという学習法</a>が主流になっています。
+ですが、強化学習の手法としてメインで使われいた手法もDPOから別の手法が主流となってきています。
+その現在主流となりつつある強化学習法が2024年にDeepSeekから発表された方法GRPOです。</p>
+<p>本日テーマ：</p>
+<blockquote>
+<p>GRPOについて説明</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="grpoとは">GRPOとは</h2>
+<p>GRPO（Group Relative Policy Optimization）は、<strong>大規模言語モデル（LLM）の強化学習（RL）を効率的に行うためのポリシー最適化アルゴリズム</strong>です。DeepSeekなどのモデル学習で採用され、広く知られるようになりました。</p>
+<h3 id="報告論文">報告論文</h3>
+<p>2024年に発表されたGRPOの原論文である <strong>DeepSeekMath (arXiv:2402.03300)</strong> には、清華大学と北京大学の研究者が<strong>核心貢献者（Core contributors）</strong> として名を連ねています。</p>
+<p><strong>該当論文の明細</strong></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>タイトル</strong></td>
+<td>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</td>
+</tr>
+<tr>
+<td><strong>arXiv</strong></td>
+<td><a href="https://arxiv.org/abs/2402.03300">2402.03300</a></td>
+</tr>
+<tr>
+<td><strong>初版投稿日</strong></td>
+<td>2024年2月5日</td>
+</tr>
+<tr>
+<td><strong>最終版</strong></td>
+<td>v3（2024年4月27日）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心貢献者</strong></p>
+<table>
+<thead>
+<tr>
+<th>著者</th>
+<th>所属</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zhihong Shao</strong>（シャオ・ジホン）</td>
+<td>DeepSeek-AI / <strong>清華大学</strong></td>
+<td>核心貢献者（共著）</td>
+</tr>
+<tr>
+<td><strong>Peiyi Wang</strong>（ワン・ペイイ）</td>
+<td>DeepSeek-AI / <strong>北京大学</strong></td>
+<td>核心貢献者（共著）</td>
+</tr>
+<tr>
+<td><strong>Qihao Zhu</strong>（ジュー・チーハオ）</td>
+<td>DeepSeek-AI / <strong>北京大学</strong></td>
+<td>核心貢献者（共著）</td>
+</tr>
+</tbody>
+</table>
+<p>※ この3名は論文中で「Core contributors（核心貢献者）」として明示されており、GRPOのアルゴリズム設計と実験に中心的な役割を果たしました。また、いずれもDeepSeek-AIでの<strong>インターンシップ中</strong>に本研究を行ったことが注記されています。</p>
+<h3 id="grpoの基本アイデア">GRPOの基本アイデア</h3>
+<p>従来の<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/10/043000">PPO（Proximal Policy Optimization）</a>では、<strong>価値関数（Value Function / Critic）</strong> を別途学習し、それを基準にして各サンプルの良さ（アドバンテージ）を計算します。しかし、LLMでは：</p>
+<ul>
+<li>CriticもLLMと同等の巨大なモデルになり、<strong>メモリと計算コストが2倍</strong>になる</li>
+<li>生成テキストの価値を正確に推定するのが<strong>非常に困難</strong></li>
+</ul>
+<p>GRPOはこの問題を、<strong>「同じ問題に対して複数の回答を生成し、それら同士で相対評価をする」</strong> ことで解決します。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\blog\image\16_grpo\1788919396324.png" alt="1788919396324"></p>
+<h3 id="仕組み3ステップ">仕組み（3ステップ）</h3>
+<p><strong>1. グループサンプリング</strong></p>
+<p>1つの質問（プロンプト）に対し、現在の<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/03/043000">ポリシー</a>から<strong>G個の異なる回答をグループとして生成</strong>します。</p>
+<p><strong>2. 相対的報酬の正規化</strong></p>
+<p>生成されたG個の回答それぞれに報酬を与え、<strong>グループ内での相対位置</strong>で正規化します。</p>
+<pre><code>正規化報酬 = (報酬 - グループ平均) / グループ標準偏差
+</code></pre>
+<p>これにより、Criticなしで「この回答はグループ内で平均より良いか悪いか」を直接計算できます。</p>
+<p><strong>3. ポリシー更新</strong></p>
+<p>正規化された報酬を使い、PPOと同様のクリップ付き目的関数でポリシーを更新します。高報酬の回答の生成確率を上げ、低報酬の回答の確率を下げます。</p>
+<h3 id="ppoとの比較">PPOとの比較</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>PPO</th>
+<th>GRPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critic（価値関数）</strong></td>
+<td>必要（別モデル）</td>
+<td><strong>不要</strong></td>
+</tr>
+<tr>
+<td><strong>メモリ使用量</strong></td>
+<td>ポリシー + Criticの2倍</td>
+<td>ポリシーのみで済む</td>
+</tr>
+<tr>
+<td><strong>報酬の基準</strong></td>
+<td>Criticが推定した期待値</td>
+<td>グループ内の相対評価</td>
+</tr>
+<tr>
+<td><strong>サンプル効率</strong></td>
+<td>1プロンプトあたり1回答</td>
+<td>1プロンプトあたりG回答</td>
+</tr>
+<tr>
+<td><strong>計算コスト</strong></td>
+<td>高い</td>
+<td><strong>大幅に低減</strong></td>
+</tr>
+</tbody>
+</table>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\blog\image\16_grpo\1788919429945.png" alt="1788919429945"></p>
+<h3 id="なぜllmに適しているか">なぜLLMに適しているか</h3>
+<ul>
+<li><strong>Critic不要</strong>: テキスト生成の価値推定は本質的に難しく、相対評価の方が安定する</li>
+<li><strong>メモリ効率</strong>: 巨大なLLMを2つ載せる必要がなく、同じGPUで大きなモデルを学習可能</li>
+<li><strong>報酬モデルの多様性に強い</strong>: 絶対スコアではなく相対比較なので、報酬モデルのバイアスに頑健</li>
+</ul>
+<h3 id="一言でまとめると">一言でまとめると</h3>
+<blockquote>
+<p><strong>「同じ問題に対する複数回答をグループで生成し、互いの相対評価でCriticなしにポリシーを更新する、LLM向けの軽量・効率的な強化学習アルゴリズム」</strong></p>
+</blockquote>
+<p>これがGRPOです。</p>
+<h2 id="解決しようとした課題">解決しようとした課題</h2>
+<p>GRPOが解決しようとした課題は、<strong>大規模言語モデル（LLM）に従来のPPO（Proximal Policy Optimization）を適用した際に生じる3つの根本的な問題</strong>です。</p>
+<h3 id="課題1criticモデルの巨大なメモリ計算コスト">課題1：Criticモデルの巨大なメモリ・計算コスト</h3>
+<p>PPOでは、ポリシーモデル（Actor）と別に<strong>価値関数を推定するCriticモデル</strong>が必要です。</p>
+<ul>
+<li>LLMの場合、CriticもActorと<strong>同等の巨大なモデル</strong>になる</li>
+<li>結果、<strong>GPUメモリが2倍</strong>必要になり、大規模モデルの学習が現実的でなくなる</li>
+<li>学習時の計算コストも2倍に近く増大</li>
+</ul>
+<p>GRPOは<strong>Criticを完全に排除</strong>し、グループ内の相対評価で代用することで、この問題を解決しました。</p>
+<h3 id="課題2llmにおける価値推定の本質的困難さ">課題2：LLMにおける「価値推定」の本質的困難さ</h3>
+<p>Criticの役割は「現在の状態（プロンプト）から、どの程度の報酬が期待できるか」を推定することですが、<strong>テキスト生成タスクではこれが極めて困難</strong>です。</p>
+<ul>
+<li>1つのプロンプトに対し、<strong>正解は無数に存在</strong>する（数学問題でも複数の導出経路がありうる）</li>
+<li>部分生成列の価値を正確に見積もるのは、人間にも困困難な曖昧な問題</li>
+<li>Criticの推定誤差がそのままポリシー更新のノイズになる</li>
+</ul>
+<p>GRPOは「絶対的な価値推定」を放棄し、<strong>同じ問題に対する複数回答の相対比較</strong>に置き換えることで、この困難を回避しました。</p>
+<h3 id="課題3報酬モデルのバイアスとスケーリングの不安定さ">課題3：報酬モデルのバイアスとスケーリングの不安定さ</h3>
+<p>PPOではCriticが絶対的な基準を提供しますが、実際には：</p>
+<ul>
+<li>報酬モデル（人間の好みを学習したモデル）には<strong>バイアスや誤差</strong>が含まれる</li>
+<li>絶対スコアで学習すると、報酬モデルの傾向に<strong>過度に適合（over-optimize）</strong> するリスクがある</li>
+<li>スコアの絶対値が変動しても、Criticの基準との相対差が重要になるため、<strong>スケーリングの調整が難しい</strong></li>
+</ul>
+<p>GRPOはグループ内で<strong>平均ゼロ・分散1に正規化</strong>するため、報酬モデルの絶対的な傾向やスケールに頑健になります。</p>
+<h3 id="grpoが解決したこと">GRPOが解決したこと</h3>
+<table>
+<thead>
+<tr>
+<th>従来PPOの問題</th>
+<th>GRPOの解決策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Criticモデルがメモリ・計算を2倍にする</td>
+<td><strong>Criticを廃止</strong></td>
+</tr>
+<tr>
+<td>テキスト生成の価値推定が本質的に困難</td>
+<td><strong>相対評価に置き換え</strong></td>
+</tr>
+<tr>
+<td>報酬モデルのバイアス・スケールに敏感</td>
+<td><strong>グループ内正規化で頑健化</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>一言でまとめると</strong>：「LLMの強化学習において、巨大なCriticモデルを使わずに、安定して効率的にポリシーを改善する方法」をGRPOは提示しました。</p>
+</blockquote>
+<h2 id="grpoの原理">GRPOの原理</h2>
+<p>GRPOがなぜうまくいくのか、原理について説明していきます。</p>
+<h3 id="1-原理grpoは同じ問題の複数回答を互いに採点し合う">1. 原理：GRPOは「同じ問題の複数回答を、互いに採点し合う」</h3>
+<p><strong>具体例</strong></p>
+<p>数学の問題「1+1=？」に対し、モデルが5つの回答を生成したとします。</p>
+<table>
+<thead>
+<tr>
+<th>回答</th>
+<th>内容</th>
+<th>報酬</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>「1+1=2。なぜなら…」</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>B</td>
+<td>「1+1=2」</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>C</td>
+<td>「1+1=3」</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>D</td>
+<td>「2」</td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>E</td>
+<td>「答えは2です」</td>
+<td>0.85</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PPOの場合</strong>: Criticが「この問題に対する期待報酬は0.67です」と予測し、各回答がそれより良いか悪いかを個別に評価。しかしCriticも巨大なLLMで、予測に誤差が入りやすい。</p>
+<p><strong>GRPOの場合</strong>: 「このグループの平均報酬は0.67、標準偏差は0.3です」という<strong>統計量だけ</strong>を使い、各回答を相対評価。</p>
+<pre><code>Aの相対スコア = (0.9 - 0.67) / 0.3 = +0.77  ← 良い回答
+Cの相対スコア = (0.1 - 0.67) / 0.3 = -1.9   ← 悪い回答
+</code></pre>
+<p>そして、<strong>良い回答（A, B, E）の生成確率を上げ、悪い回答（C）の確率を下げる</strong>ようにポリシーを更新します。</p>
+<h3 id="2-なぜうまくいくのか3つの理由">2. なぜうまくいくのか：3つの理由</h3>
+<p><strong>理由①：「比較」は「絶対値予測」より遥かに簡単</strong></p>
+<p>人間にも当てはまりますが、<strong>「この絵画の価値はいくらか？」</strong> と聞かれるより、<strong>「AとBの絵画、どちらが良いか？」</strong> と聞かれる方が、はるかに正確に答えられます。</p>
+<p>PPOのCriticは「絶対的な価値」を予測しようとしますが、これはLLMの生成空間では本質的に困難です。GRPOは <strong>「どちらが良いか」という相対的な順序だけ</strong> を使うため、評価の信頼性が飛躍的に高まります。</p>
+<p><strong>理由②：報酬モデルの「傾き」や「バイアス」を自動的に打ち消す</strong></p>
+<p>報酬モデルは完璧ではなく、以下のような偏りを持つことがあります。</p>
+<ul>
+<li><strong>全体的に厳しい採点者</strong>: 全回答のスコアが0.1〜0.3に偏る</li>
+<li><strong>全体的に甘い採点者</strong>: 全回答のスコアが0.8〜0.9に偏る</li>
+<li><strong>特定の文体を好む</strong>: 「ですます調」を高評価しがち</li>
+</ul>
+<p>GRPOは<strong>グループ内で平均を引き、標準偏差で割る</strong>ため：</p>
+<pre><code>平均 0.2、標準偏差 0.05 の分布 → 正規化後は平均0、分散1
+平均 0.8、標準偏差 0.05 の分布 → 正規化後も平均0、分散1
+</code></pre>
+<p><strong>採点者の絶対的な基準や傾きが消え、純粋に「このグループ内での相対的な良さ」だけ</strong>が残ります。これが、報酬モデルのバイアスに対する強い頑健性を生み出します。</p>
+<p><strong>理由③：グループ内比較が「自然な勾配の分散削減」を生む</strong></p>
+<p>GRPOのポリシーグラディエントは、数学的に見ると<strong>U-statistic</strong>（一種の「ペア比較の平均」）になっています。</p>
+<p>直感的には、<strong>1つのサンプルではなくG個のサンプルを同時に比較することで、モンテカルロ推定の分散が自然に小さくなる</strong>のです。これは「1回の試行で得る情報量が増える」ことと同じで、より安定した学習が可能になります。</p>
+<h3 id="3-理論的な裏付けgrpoの本質">3. 理論的な裏付け：GRPOの「本質」</h3>
+<p>最近の研究で明らかになった重要な性質として、以下の2つがあります。</p>
+<p><strong>Oracle Property（神託的性質）</strong></p>
+<p>GRPOの推定対象である「最適な比較関数G*」を使うと、<strong>ポリシーの更新が「もし真の環境ダイナミクスを完全に知っていた場合」と同じ方向・同じスケールで進む</strong>ことが証明されています。</p>
+<p>つまり、GRPOは「不完全な情報から、統計学的に最適な方法で学習している」ということです。</p>
+<p><strong>U-statisticとしての性質</strong></p>
+<p>GRPOの勾配は、すべての回答ペアの比較を含む<strong>U-statistic</strong>です。これにより：</p>
+<ul>
+<li><strong>サンプル効率が高い</strong>: 同じデータから最大限の情報を引き出す</li>
+<li><strong>漸近的に最適な収束</strong>: データが増えると、真の勾配に確実に近づく</li>
+</ul>
+<h3 id="4-直感的なまとめgrpoのコツ">4. 直感的なまとめ：GRPOの「コツ」</h3>
+<p>GRPOの成功を一言で表すと：</p>
+<blockquote>
+<p><strong>「絶対的な正解を予測しようとするのではなく、同じ条件での複数試行を『内部で相対評価』することで、評価者のバイアスを排除し、安定した学習信号を得る」</strong></p>
+</blockquote>
+<p>これは人間の学習にも通じます。生徒が「自分の答案が100点満点で何点か？」を毎回正確に予測するのは難しいですが、「同じ問題を解いた5人の中で自分は上位か下位か？」を感じ取る方が、はるかに正確で、かつ役立つフィードバックになります。GRPOはまさにこの「相対的フィードバック」の力を、数学的に洗練させたアルゴリズムです。</p>
+<h2 id="実験">実験</h2>
+<p>GRPOの論文（主に <strong>DeepSeekMath</strong> (Shao et al., 2024) と <strong>DeepSeek-R1</strong> (Guo et al., 2025)）で報告されている実験設定と結果をまとめます。</p>
+<h3 id="実験設定">実験設定</h3>
+<p><strong>モデルとデータ</strong></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>DeepSeekMath</th>
+<th>DeepSeek-R1-Zero</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ベースモデル</strong></td>
+<td>DeepSeek-Coder-Base-v1.5 7B</td>
+<td>DeepSeek-V3-Base</td>
+</tr>
+<tr>
+<td><strong>モデルサイズ</strong></td>
+<td>7B</td>
+<td>671B（MoE）</td>
+</tr>
+<tr>
+<td><strong>訓練データ</strong></td>
+<td>英語インストラクションチューニングデータのサブセット</td>
+<td>推論タスク向けプロンプト（SFTなし）</td>
+</tr>
+<tr>
+<td><strong>事前学習</strong></td>
+<td>120B数学トークンで継続事前学習済み</td>
+<td>一般事前学習済み</td>
+</tr>
+</tbody>
+</table>
+<p><strong>GRPOのハイパーパラメータ</strong></p>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>設定値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>グループサイズ（G）</strong></td>
+<td>64（各プロンプトに対して64個の回答を生成）</td>
+</tr>
+<tr>
+<td><strong>KL係数</strong></td>
+<td>0.01程度（ポリシーが参照モデルから大きく逸脱しないよう制約）</td>
+</tr>
+<tr>
+<td><strong>報酬設計</strong></td>
+<td>回答の正解/不正解によるバイナリ報酬（数学問題）</td>
+</tr>
+<tr>
+<td><strong>最適化</strong></td>
+<td>AdamW、学習率はモデルサイズに応じて調整</td>
+</tr>
+<tr>
+<td><strong>学習ステップ</strong></td>
+<td>数千〜数万ステップ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>比較手法</strong></p>
+<ul>
+<li><strong>PPO</strong>: 従来のActor-Critic型（Criticモデルあり）</li>
+<li><strong>RFT (Rejection Sampling Fine-Tuning)</strong>: 高報酬サンプルでの教師あり学習</li>
+<li><strong>DPO (Direct Preference Optimization)</strong>: ペアワイズ比較による学習</li>
+<li><strong>SFTのみ</strong>: 教師ありファインチューニング（ベースライン）</li>
+</ul>
+<h3 id="実験結果">実験結果</h3>
+<p><strong>1. DeepSeekMath 7B の GRPO 適用結果</strong></p>
+<p>英語・中国語の数学ベンチマークで、<strong>同じインストラクションチューニングデータを使ったSFTモデルに対し、GRPOを追加適用</strong>した結果：</p>
+<table>
+<thead>
+<tr>
+<th>ベンチマーク</th>
+<th>SFTのみ (Instruct)</th>
+<th>SFT + GRPO</th>
+<th>改善幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GSM8K</strong>（小學算術）</td>
+<td>82.9%</td>
+<td><strong>88.2%</strong></td>
+<td>+5.3%</td>
+</tr>
+<tr>
+<td><strong>MATH</strong>（競技数学）</td>
+<td>46.8%</td>
+<td><strong>51.7%</strong></td>
+<td>+4.9%</td>
+</tr>
+<tr>
+<td><strong>CMATH</strong>（中国語算術）</td>
+<td>84.6%</td>
+<td><strong>88.8%</strong></td>
+<td>+4.2%</td>
+</tr>
+<tr>
+<td><strong>SAT-Math</strong></td>
+<td>84.1%</td>
+<td><strong>88.2%</strong></td>
+<td>+4.1%</td>
+</tr>
+<tr>
+<td><strong>MMLU-STEM</strong></td>
+<td>58.1%</td>
+<td><strong>60.6%</strong></td>
+<td>+2.5%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ポイント</strong>: 追加データなしで、<strong>既存のSFTモデルをGRPOだけで大幅に改善</strong>。特に競技レベルのMATHベンチマークで51.7%は、当時のオープンモデルで最高クラス。</p>
+<p><strong>2. DeepSeek-R1-Zero（純粋RL）の結果</strong></p>
+<p><strong>SFTを一切使わず、ベースモデルに直接GRPOを適用</strong>した場合：</p>
+<table>
+<thead>
+<tr>
+<th>ベンチマーク</th>
+<th>初期</th>
+<th>GRPO適用後</th>
+<th>改善幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AIME 2024</strong> (pass@1)</td>
+<td>15.6%</td>
+<td><strong>71.0%</strong></td>
+<td>+55.4%</td>
+</tr>
+<tr>
+<td><strong>AIME 2024</strong> ( majority vote@64)</td>
+<td>—</td>
+<td><strong>86.7%</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>MATH-500</strong></td>
+<td>—</td>
+<td><strong>約90%以上</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>驚くべき発見</strong>: 数千ステップのRLだけで、モデルは<strong>自己検証（self-verification）</strong> や<strong>反思（reflection）</strong> といった複雑な推論行動を<strong>自然に獲得</strong>しました。これは「教師なしで推論能力が湧き出る」ことを示しました。</p>
+<p><strong>3. PPO vs GRPO の比較</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>PPO</th>
+<th>GRPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>メモリ使用量</strong></td>
+<td>ポリシー + Criticで約2倍</td>
+<td><strong>ポリシーのみで済む</strong></td>
+</tr>
+<tr>
+<td><strong>GSM8K精度</strong></td>
+<td>約85%程度</td>
+<td><strong>88.2%</strong></td>
+</tr>
+<tr>
+<td><strong>学習安定性</strong></td>
+<td>Criticの価値推定誤差で不安定になりやすい</td>
+<td><strong>グループ内相対評価で安定</strong></td>
+</tr>
+<tr>
+<td><strong>訓練時間</strong></td>
+<td>長い</td>
+<td><strong>短い（Critic学習が不要）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. 追加実験：学習パラダイムの比較</strong></p>
+<p>DeepSeekMath論文では、以下の実験も行われています：</p>
+<table>
+<thead>
+<tr>
+<th>実験</th>
+<th>結論</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Online vs Offline</strong></td>
+<td>Online（生成と学習を繰り返す）の方がOffline（固定データ）より高精度</td>
+</tr>
+<tr>
+<td><strong>Outcome vs Process Supervision</strong></td>
+<td>最終回答の正解だけを報酬とするOutcome supervisionで十分。過程まで監督する必要なし</td>
+</tr>
+<tr>
+<td><strong>Single-turn vs Iterative RL</strong></td>
+<td>反復的なRL（複数ラウンド）でさらに改善の余地あり</td>
+</tr>
+<tr>
+<td><strong>GRPO vs DPO</strong></td>
+<td>GRPOが数学推論でDPOを上回る。DPOはペアデータが必要だがGRPOは不要</td>
+</tr>
+</tbody>
+</table>
+<h3 id="実験が示唆すること">実験が示唆すること</h3>
+<table>
+<thead>
+<tr>
+<th>主張</th>
+<th>実験的証拠</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critic不要でも高精度</strong></td>
+<td>GRPOがPPOと同等以上の精度で、メモリ半分</td>
+</tr>
+<tr>
+<td><strong>SFTなしで推論能力が湧く</strong></td>
+<td>DeepSeek-R1-ZeroがRLだけでAIME 71%達成</td>
+</tr>
+<tr>
+<td><strong>汎化性能も向上</strong></td>
+<td>英語で学習したGRPOが中国語数学（CMATH）も改善</td>
+</tr>
+<tr>
+<td><strong>報酬設計はシンプルで十分</strong></td>
+<td>正解/不正解のバイナリ報酬だけで強力な推論が学習可能</td>
+</tr>
+</tbody>
+</table>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/GBvnpowsPPg?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+            
+        </body>
+        </html>
