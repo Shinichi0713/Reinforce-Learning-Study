@@ -1417,15 +1417,158 @@ PageRankが使える場面は、以下の条件を満たすときです。
 - 「どのノードが重要か」を**リンクの構造だけで判断したい**
 - 単なる「数（被リンク数・被引用数・フォロワー数）」ではなく、**「誰からリンクされているか」の質も考慮したい**
 
-__4. 確認のための質問__
+__例題:__
 
-以下のケースのうち、PageRankを適用するのに最も適しているものはどれでしょうか？また、なぜそう思いますか？
+PageRankの例題を出題します。
 
-1. 学校内の生徒間で「誰が人気者か」を調べたい（生徒Aが生徒Bを「好き」と答えたアンケート結果がある）
-2. 図書館の本を「出版年」だけで並べ替えたい
-3. レストランの料理を「カロリー」だけで評価したい
+__問題__
 
-考えてみてください。わからなければ、一緒に考えていきましょう。
+以下の5ページのウェブサイトがあります。
+
+<img src="image/3_graph_search/1788987771307.png" width="550px" style="display: block; margin: 0 auto;">
+
+
+**リンク関係:**
+- A → B, A → C
+- B → C, B → D
+- C → A, C → D, C → E
+- D → B, D → E
+- E → （出リンクなし: ダングリングノード）
+
+**問1:** 減衰係数 `d = 0.85` としたとき、各ページのPageRankを計算してください。
+
+**問2:** なぜページEのPageRankが最も低くなると思いますか？理由を説明してください。
+
+**問3:** もしページAからページEへの直接リンクを追加したら、どのページのPageRankが最も変化すると思いますか？
+
+__解答のヒント__
+
+1. 各ページの初期値は `1/5 = 0.2` です
+2. ページEは「出リンクがない」ので、他のページからのリンクのみが寄与します
+3. 反復計算を行い、値が収束するまで繰り返します
+
+```python
+"""
+PageRank アルゴリズムの実装
+
+ウェブページの重要度を数値化するアルゴリズム
+"""
+
+import heapq
+
+
+def pagerank(graph, d=0.85, max_iter=100, tol=1e-6):
+    """
+    PageRankを反復法（Power Iteration）で計算する
+
+    Parameters:
+        graph: dict - 隣接リスト {ページ: [リンク先ページ, ...]}
+        d: float - 減衰係数（ダンピングファクタ、通常0.85）
+        max_iter: int - 最大反復回数
+        tol: float - 収束判定の閾値
+
+    Returns:
+        pr: dict - 各ページのPageRank値
+    """
+    N = len(graph)
+    pages = sorted(graph.keys())
+
+    # 各ページの出リンク数
+    out_links = {page: len(dests) for page, dests in graph.items()}
+
+    # 初期化: 全ペジのPageRankを 1/N に設定
+    pr = {page: 1.0 / N for page in pages}
+
+    for iteration in range(max_iter):
+        new_pr = {}
+
+        for page in pages:
+            # ランダムジャンプ成分
+            random_jump = (1 - d) / N
+
+            # リンクからの寄与を計算
+            link_contribution = 0
+            for other_page in pages:
+                if page in graph[other_page]:
+                    link_contribution += d * pr[other_page] / out_links[other_page]
+
+            new_pr[page] = random_jump + link_contribution
+
+        # 収束判定
+        diff = sum(abs(new_pr[p] - pr[p]) for p in pages)
+        pr = new_pr
+
+        if diff < tol:
+            break
+
+    return pr
+
+
+# ============================================
+# 使用例
+# ============================================
+if __name__ == "__main__":
+
+    # グラフの定義（隣接リスト）
+    graph = {
+        'A': ['B', 'C'],
+        'B': ['C', 'D'],
+        'C': ['A', 'D'],
+        'D': ['B']
+    }
+
+    pr = pagerank(graph, d=0.85)
+
+    print("=" * 50)
+    print("PageRank 結果")
+    print("=" * 50)
+    print()
+
+    # ランキング表示
+    sorted_pr = sorted(pr.items(), key=lambda x: x[1], reverse=True)
+    for rank, (page, score) in enumerate(sorted_pr, 1):
+        print(f"  {rank}位: ページ {page} | Score: {score:.6f}")
+```
+
+__問1：PageRankの計算結果__
+
+| 順位 | ページ | Score |
+|:---:|:---:|:---:|
+| 1位 | E | 0.2219 |
+| 2位 | D | 0.2200 |
+| 3位 | B | 0.2158 |
+| 4位 | C | 0.2140 |
+| 5位 | A | 0.1283 |
+
+__問2：なぜページAのPageRankが最も低いのか__
+
+**理由①：Aへのリンクが最も少ない**
+- Aにリンクしているのは「C」のみ（1つ）
+- 他のページへのリンクはすべて2つ
+
+**理由②：Aからの出リンクが多く、PRを分散させる**
+- Aの出リンク数は2（BとCへ）
+- 持っているPRを2つに分けて渡すため、各リンク先への投票力が半減
+
+**まとめ：** 「もらえるリンクが少ない」＋「出リンクが多くて分散する」→ AのPageRankが最も低くなる
+
+__問3：AからEへの直接リンクを追加した場合__
+
+| ページ | 変更前 | 変更後 | 変化 |
+|:---:|:---:|:---:|:---:|
+| A | 0.1283 | 0.1294 | +0.001 |
+| B | 0.2158 | 0.2019 | -0.014 |
+| C | 0.2140 | 0.1962 | -0.018 |
+| D | 0.2200 | 0.2151 | -0.005 |
+| E | 0.2219 | 0.2574 | **+0.036** |
+
+**答え：ページEのPageRankが最も大きく変化（増加）**
+
+**理由：**
+- AからEへの直接リンクが追加されると、Eは「Aからの直接の投票」を受ける
+- 一方でAの出リンク数が 2 → 3 に増加し、BとCに渡すPRが「1/2 → 1/3」に減少
+- 結果：EのPRが大幅に増加、BとCのPRが減少
+
 
 ## A*
 アクションRPGなどでNPCキャラクターが移動するときに、障害物をかわしながらプレーヤーを追いかけて来る動作を行うような場面があります。
