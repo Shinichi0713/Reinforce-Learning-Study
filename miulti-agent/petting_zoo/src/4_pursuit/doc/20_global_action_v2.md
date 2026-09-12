@@ -15,11 +15,11 @@
 
 ## 対策の骨組
 
-対策法について説明していきます。
+今回対策はエージェントが狙うターゲットの割り当てをハンガリアンアルゴリズムで行うというもので対策していきます。
+
 
 ### 対応する問題: 「一角の敵が少なくなった後もとどまろうとする味方がいる」
-
-この症状の背景には、これまでの調査で以下のような要因が積み重なっていることが分かってきました。
+一角に居座るという症状の背景には、これまでの調査で以下のような要因が積み重なっていることが原因だと想定しています。
 
 1. **MoEのcollapse**（一部のexpertしか使われず、状況に応じた行動の切り替えが学習されにくい）→ 負荷分散損失で対処
 2. **デコード順序の固定**（特定のエージェントが常に受動的な役割になる）→ ランダム順序化で対処
@@ -33,11 +33,9 @@
 
 という構造的な偏りが残ります。これは「居座り」というより正確には「**目が向いていない敵が放置される**」現象で、見た目には「捕獲が進まず、そこにとどまっているように見える」症状として現れていたと考えられます。ハンガリアン法は、この「全員が同じ判断をしてしまう」という構造的な原因そのものを解消するための対策です。
 
----
+### 対応していない問題: 「捕獲でまごまごする（何度も取り逃がす）」
 
-## 対応していない問題: 「捕獲でまごまごする（何度も取り逃がす）」
-
-こちらの症状については、以前お伝えした通り、**原因は全く別の場所**にあります。
+こちらの症状については、**原因は全く別の場所**にあります。
 
 > 現在のモデルは、各タイムステップの観測を独立したスナップショットとしてTransformerに通しています。獲物がどの方向に動いているか（速度・進行方向）の情報が一切ありません。
 
@@ -47,137 +45,123 @@
 - 時間方向の記憶（GRUなど）を導入し、複数ステップの動きのパターンを学習できるようにする
 - 未来位置予測を補助タスクとして学習させる
 
----
+### なぜハンガリアンを使うか
 
-## まとめ
+一言でいうと「**8体全員が同じ判断基準（最寄りのターゲット）で動くと、全員が同じ場所に集まってしまう**」という問題を、数学的に解決するために導入しました。
 
-| 症状 | ハンガリアン法の効果 | 主な対応策 |
-|---|---|---|
-| 一角の敵が少なくなっても居座る/放置される | **直接対応**：全員が同じ最寄りに集中する構造的な偏りを解消 | 今回のハンガリアン法による役割分担 |
-| 何度も取り逃がす（まごつき） | **対応しない**：追跡の精度自体は変えない | 獲物の動き情報の追加、時間記憶の導入など(未実装) |
 
-今回の対策で「居座り」の症状に改善が見られるかどうかを数百update学習して確認しつつ、並行して「まごつき」の方には、まだ手をつけていない「獲物の動き情報の追加」に着手するのが、次に取り組むべき自然な流れだと思います。
+__これまでの対策1（対策1：方向情報の追加）で何が足りなかったか__
 
-## 対応策
+対策1では、各エージェントに「一番近い未捕獲の敵はどっちの方向か」という情報を渡しました。しかしこれには構造的な欠陥があります。
 
-[前回の対応（MoE均等化、順序ランダム化、報酬修正）](https://yoshishinnze.hatenablog.com/entry/2026/09/26/043000)はいずれも「既にある仕組みの偏りを補正する」対策でした。
-これはMoEをうまく効率化することで捕獲と待機などの行動パターンをうまく切り替えるようになることを期待していたことによります。
-それでも改善しないということは、**モデルに「敵がいない場所を探しに行く」ための情報や仕組みそのものが構造的に欠けている**可能性が高いです。
+**8体のエージェントが全員、同じ計算式（`min(距離)`）を使っている**ため、もし敵が2体しか残っていない状況で、8体のうち5体にとって「一番近い敵」が偶然同じ1体だったとします。すると、その5体は全員「その敵の方向」を指し示され、**全員がそこに向かって集まってしまいます**。もう1体の敵は誰も見ていない、という状態が起きえます。これはまさに「一角に居座る/敵が少なくなっても捜索していかない」という報告いただいた症状と一致する構造的な原因です。
 
-ということで現状で考えられる問題の原因と対応策について検討します。
+つまり対策1は「どちらに動けばいいか」というヒントは与えましたが、**「チームとして手分けする」という発想は一切入っていなかった**のです。
 
-### 原因の本質: エージェントは「見えている範囲」でしか判断材料がない
+__ハンガリアン法が解決すること__
 
-`get_obs()` は7x7の局所観測だけを返します。索敵報酬(`search_stagnation_penalty`など)は改善しましたが、**「罰を避けるために何かしら動く」ことは学習できても、「どちらに向かえば敵がいるか」という方向情報自体が観測に含まれていません**。
-局所観測が空なら、モデルにとってはどちらへ動いても「見えている情報」としては同じです。結果、学習が収束するにつれて「無難な、リスクの低い狭い範囲での徘徊」に落ち着きやすくなります。現時点ではこのリスクを避けるための無難な徘徊をしているという仮説が一番確度が高いと考えています。
+ハンガリアン法（割当問題の最適解を求めるアルゴリズム）を使うことで、
 
-__対策1（最優先）: 「最寄り未捕獲ターゲットへの相対方向」を観測に直接追加する__
+> 「8体のエージェント」と「残っている敵」の組み合わせを、**全体の移動コスト（距離の合計）が最小になるように、重複なく割り振る**
 
-以前`order_mode="priority"`のために作った`compute_priority_scores`は、**順序決定だけに使われ、モデルの入力(観測)には渡っていません**。これをエージェントの観測特徴として直接与えます。
+という計算を毎ステップ行うようにしました。
+
+具体例で言うと：
+- エージェントA、Bが両方とも「敵Xが一番近い」と感じていても
+- 実は「AはXに、BはYに向かった方が、チーム全体としての移動コストの合計は少なくて済む」という組み合わせがあれば
+- ハンガリアン法はそちらを選びます
+
+これにより、**「全員が目先の最寄りに殺到する」のではなく、「チームとして手分けして効率よく散らばる」という動きが、計算上、最初から保証される**ようになります。
+
+__なぜこれが「モデルの学習に任せる」より優れているか__
+
+本来、「誰がどの敵を追うべきか」という役割分担は、強化学習のモデル自身に学習させたい理想的な能力です。しかし、これまで議論してきた通り：
+
+- Transformerのattentionによる暗黙的な学習には限界があり
+- MoEのcollapseや、デコード順序の固定など、様々な要因でこの「暗黙の役割分担」がうまく学習されていない状態が続いていました
+
+そこで今回は、**「役割分担」という組合せ最適化の部分だけは、学習に頼らず数学的に確実に解いてしまい、エージェント（モデル）には『割り当てられた1体を、具体的にどう追い込むか』という、より簡単で学習しやすい問題だけを解かせる**、という設計に切り替えました。
+
+これは前々回お伝えした「階層型設計」の考え方そのものです。
+
+> 複数エージェントが複数ターゲットに対して「誰がどこを追うか」を決めるのは、本質的に組合せ最適化問題（assignment problem）です。これをEnd-to-EndのRLだけに任せると、特にMARLでは学習が難しく、非効率な割当（重複追跡、放置ターゲット）に陥りやすい
+
+**「割り当てそのものはアルゴリズムに任せ、RLは低レベルの追跡動作だけに集中させる」** という役割分担を、今回のコードで実際に組み込んだ形になります。
+
+__期待される効果と、期待していないこと__
+
+**期待している効果**:
+- 敵が複数残っている状況で、エージェントが自然に分散して手分けするようになる
+- 「一角に居座る」「敵が少なくなっても他を探さない」という、まさに今回問題視されていた症状が、構造的に起きにくくなる
+
+**注意点として、これは万能ではありません**:
+- ハンガリアン法はあくまで「今この瞬間の距離」だけを見て割り振るので、**敵がどちらに逃げるかという動きの予測(以前議論した"まごつき"の問題)までは解決しません**
+- 敵の動きによって割り当てが頻繁に入れ替わる可能性がある（実装時に補足した「チャタリング」の懸念）ため、そこは追加のチューニングが必要になる場合があります
+- あくまで「pursuer側の座標」と「敵の座標」という、モデルの観測には含まれない特権的なグローバル情報を使って計算しているので、**実際にモデルが学習で獲得すべき「連携」の一部を、外側から補助している**という性質のものです。将来的にモデル自身がこうした役割分担を学習できるようになることが理想ですが、現状はそこまで到達していないための実務的な対応、という位置付けです
+
+
+## 実装
+以下、対策1（相対方向の観測追加）を土台に、**「最寄り」ではなく「自分に割り当てられたターゲット」への方向を使う**形に差し替えます。ハンガリアン法（`scipy.optimize.linear_sum_assignment`）で、pursuer-preyの距離コストを最小化する組み合わせを毎ステップ計算します。
+
+## 1. `PursuitWrapper.__init__` に依存関係を追加
 
 ```python
-# PursuitWrapper に追加
-def get_obs(self, agent):
-    ...(既存の処理はそのまま)...
-    spatial_flat = semantic_obs.reshape(-1)
-    action_history_flat = self.last_actions.reshape(-1)
+import numpy as np
+from pettingzoo.sisl import pursuit_v4
+from scipy.optimize import linear_sum_assignment  # 🌟 追加
+```
 
-    # 🌟 追加: グローバル情報(観測範囲外)から、最寄り未捕獲preyへの相対方向を計算
-    rel_vec = self._compute_relative_direction_to_nearest_prey(agent)  # (dy, dx)を正規化した値
+## 2. `reset()` に割り当てキャッシュ用の変数を追加
 
-    full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
-    return full_obs
+```python
+def reset(self):
+    self.env.reset()
+    self.prev_min_distances = {agent: None for agent in self.possible_agents}
+    self.prev_agent_positions = {agent: None for agent in self.possible_agents}
+    self.last_actions = np.zeros((self.num_agents, 5), dtype=np.float32)
+    self.last_actions[:, 4] = 1.0
+    self.capture_count = 0
+    self.captured_prey_ids = set()
 
-def _compute_relative_direction_to_nearest_prey(self, agent) -> np.ndarray:
+    self.prev_global_min_dist = {agent: None for agent in self.possible_agents}
+    self._search_approach_registry = {}
+    self._search_team_bonus_given_cycle = -1
+
+    # 🌟 追加: エージェントごとの担当ターゲット割り当てキャッシュ
+    #    毎ステップ計算すると同じ状態に対して重複計算になるため、
+    #    サイクル単位でキャッシュする
+    self._assignment_cache = {}
+    self._assignment_cache_cycle = -1
+```
+
+## 3. ハンガリアン法による割り当て計算メソッドを追加
+
+```python
+def _compute_agent_target_assignment(self) -> dict:
+    """
+    各pursuerに、重複しないよう1体ずつ異なる未捕獲preyを割り当てる
+    (マンハッタン距離コストの総和を最小化、ハンガリアン法)。
+
+    - 未捕獲preyがpursuer数より少ない場合は、preyをタイル(繰り返し)して
+      余ったpursuerも(重複を許して)最も割の良いpreyに割り当てる。
+    - 未捕獲preyが0体の場合、全pursuerに None を割り当てる。
+    - 座標取得に失敗したpursuerには None を割り当てる。
+
+    戻り値: {agent_name: (target_y, target_x) or None}
+    """
     raw_env = self.env.unwrapped
+
     try:
         evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
-        agent_obj = next(a for a in raw_env.agents if a.name == agent)
-        ay, ax = agent_obj.state[1], agent_obj.state[0]
     except Exception:
-        return np.zeros(2, dtype=np.float32)
+        return {agent: None for agent in self.possible_agents}
 
-    if not evader_positions:
-        return np.zeros(2, dtype=np.float32)  # 全捕獲済み
-
-    ty, tx = min(evader_positions, key=lambda p: abs(ay - p[0]) + abs(ax - p[1]))
-    dy, dx = (ty - ay), (tx - ax)
-    # マップサイズで正規化(方向のみを与え、絶対距離のスケールに依存しすぎないようにする)
-    norm = max(abs(dy), abs(dx), 1)
-    return np.array([dy / norm, dx / norm], dtype=np.float32)
-```
-
-`self.obs_dim` に `+2` を加え、`MATObsEncoder`側で `spatial_obs` と `action_history` に加えて、この2次元ベクトルも `feature_fuse` に連結するよう変更します。
-
-```python
-# MATObsEncoder.__init__
-self.feature_fuse = nn.Linear(d_model * 2 + 2, d_model)  # 🌟 +2
-
-# MATObsEncoder.forward
-direction_feat = obs[:, -2:]  # 末尾2次元が方向ベクトル
-fused = torch.cat([spatial_feature, act_emb, direction_feat], dim=-1)
-return self.feature_fuse(fused)
-```
-
-**これは「視界の外の情報を使って、視界の中の行動を決める」ことを直接可能にする変更**で、局所観測とグローバル報酬シェイピングの間を埋める、最も直接的な対策です。
-
-### 原因2: 「もう十分に人が集まっている」ことを判断する材料はあるが、「別の場所が手薄」ことを示す材料がない
-
-一角に居座るのは、その場所の情報（味方の密度など）は見えていても、**他の場所に敵がいるという情報が相対的に伝わりにくい**ためとも考えられます。対策1でこれはある程度緩和されますが、さらに踏み込むなら「チーム全体でどこに散らばるべきか」を明示的に割り振る仕組みが有効です。
-
-__対策2: 訪問済みマップ（探索カバレッジ）による内発的報酬__
-
-「敵がいない」という消極的シグナルだけでなく、「まだ訪れていない場所に行くこと自体に価値がある」という内発的動機付け(intrinsic reward)を加えると、居座りに対してより強い力がかかります。
-
-```python
-# PursuitWrapper に追加
-def reset(self):
-    ...(既存)...
-    self.visit_counts = {}  # {(y, x): 訪問回数}
-
-def _get_exploration_bonus(self, curr_pos) -> float:
-    count = self.visit_counts.get(curr_pos, 0)
-    self.visit_counts[curr_pos] = count + 1
-    # 訪問回数が少ないマスほど高いボーナス(count-based exploration)
-    return 1.0 / np.sqrt(count + 1)
-```
-
-`step()`の索敵フェーズ内で、このボーナスを`search_approach_bonus`に加えて併用します。
-
-```python
-if not has_moved:
-    individual_reward += self.search_stagnation_penalty
-else:
-    exploration_bonus = self._get_exploration_bonus(curr_pos) * 0.02  # 係数は調整
-    individual_reward += exploration_bonus
-    ...(既存のsearch_approach_bonus判定)...
-```
-
-これは「敵に近づいたか」に関係なく、**単純に「新しい場所に行った」ことを評価する**ので、たとえ敵の手がかりが全くない状況でも、居座りから抜け出す動機になります。対策1（方向情報）と組み合わせると、「手がかりがあればそちらへ、なければ未探索エリアへ」という自然な振る舞いに近づけやすくなります。
-
-### 原因3: モデル構造として「チーム内での役割分担」を強制する仕組みがない
-
-対策1・2は「個々のエージェントに情報を与える」アプローチですが、**「8体全員が同じ情報に基づいて同じように"近くに集まる"最適化をしてしまう」リスク**は残ります。全員が同じ観測(相対方向)を見て、全員が同じ最寄りターゲットを目指せば、結局同じ場所に集まってしまいかねません。
-
-__対策3: エージェントごとに異なる担当エリア/ターゲットを明示的に割り当てる__
-
-前回の`priority_agent_order`をベースに、**割り当て(assignment)そのものをハンガリアン法などで最適化し、各エージェントに「自分が担当するターゲット」を固定して観測に含める**ようにすると、この重複問題を根本的に避けられます。
-
-```python
-from scipy.optimize import linear_sum_assignment
-
-def compute_agent_target_assignment(self) -> dict:
-    """
-    各pursuerに、重複しないよう1体ずつ異なる未捕獲preyを割り当てる(距離コストの最小化)。
-    prey数 < agent数の場合、余ったagentは「最も近いprey」に複数人割り当てる。
-    """
-    raw_env = self.env.unwrapped
-    evader_positions = [(e.state[1], e.state[0]) for e in raw_env.evaders]
     if not evader_positions:
         return {agent: None for agent in self.possible_agents}
 
-    agent_positions = []
+    # 生存しているpursuerの座標を集める
     valid_agents = []
+    agent_positions = []
     for agent in self.possible_agents:
         if agent not in self.env.agents:
             continue
@@ -188,136 +172,182 @@ def compute_agent_target_assignment(self) -> dict:
         except Exception:
             continue
 
+    assignment = {agent: None for agent in self.possible_agents}
+    if not valid_agents:
+        return assignment
+
+    n_agents = len(valid_agents)
+    n_prey = len(evader_positions)
+
+    # コスト行列: (n_agents, n_prey)のマンハッタン距離
     cost_matrix = np.array([
         [abs(ay - py) + abs(ax - px) for (py, px) in evader_positions]
         for (ay, ax) in agent_positions
-    ])
+    ], dtype=np.float64)
 
-    # prey数がagent数より少ない場合はタイル(繰り返し)してコスト行列を拡張
-    n_agents, n_prey = cost_matrix.shape
+    # 🌟 pursuer数 > prey数の場合、コスト行列の列をタイルして
+    #    全pursuerに割り当てが行き渡るようにする
+    #    (同じpreyに複数pursuerが割り当てられることを許容する)
     if n_prey < n_agents:
         reps = int(np.ceil(n_agents / n_prey))
-        cost_matrix = np.tile(cost_matrix, (1, reps))[:, :n_agents]
-
-    row_idx, col_idx = linear_sum_assignment(cost_matrix)
-    assignment = {}
-    for r, c in zip(row_idx, col_idx):
-        prey_idx = c % n_prey
-        assignment[valid_agents[r]] = evader_positions[prey_idx]
+        tiled_cost = np.tile(cost_matrix, (1, reps))[:, :n_agents]
+        # linear_sum_assignmentは正方 or 長方行列どちらも扱えるが、
+        # ここでは「列数 >= 行数」にしておくと解釈がシンプルになる
+        row_idx, col_idx = linear_sum_assignment(tiled_cost)
+        for r, c in zip(row_idx, col_idx):
+            prey_idx = c % n_prey  # タイルした分を元のprey индексに戻す
+            assignment[valid_agents[r]] = evader_positions[prey_idx]
+    else:
+        # pursuer数 <= prey数の通常ケース: 1対1の最適割り当て
+        row_idx, col_idx = linear_sum_assignment(cost_matrix)
+        for r, c in zip(row_idx, col_idx):
+            assignment[valid_agents[r]] = evader_positions[c]
 
     return assignment
+
+def _get_agent_assignment(self, agent):
+    """
+    現在のサイクルの割り当て結果をキャッシュから取得する。
+    (毎ステップ・毎エージェントで同じ計算を繰り返さないための最適化)
+    """
+    current_cycle = getattr(self.env.unwrapped, 'cycles', 0)
+    if self._assignment_cache_cycle != current_cycle:
+        self._assignment_cache = self._compute_agent_target_assignment()
+        self._assignment_cache_cycle = current_cycle
+    return self._assignment_cache.get(agent)
 ```
 
-この割り当てを使って、対策1の「最寄りターゲットへの相対方向」を **「最寄り」ではなく「自分に割り当てられたターゲット」への方向**に差し替えると、**エージェントが自然に散らばって別々のターゲットを追う**ようになります。同じターゲットに全員が向かって過密になる、という現在の症状に対して、より直接的な効果が期待できます。
+## 4. 方向計算メソッドを「最寄り」から「割り当て先」に差し替え
 
-### 優先順位のまとめ
+前回実装した `_compute_relative_direction_to_nearest_prey` を置き換えます（メソッド名も実態に合わせて変更します）。
 
-ここまで上げてきた原因と対策の期待する効果と、実装コストを比較してみました。
-仮説では情報不足だろうという考えをベースとした対策1+2と、自然な役割不足が難しいという考えをベースとした対策3に分かれます。
-期待する効果はおそらく同程度、実装コストからすると、対策3よりは対策1+2の方が楽だと考えられるため、今回は対策1+2を採用します。
-
-| 対策 | 期待する効果 | 実装コスト |
-|---|---|---|
-| 1. 方向情報を観測に追加 | 「そもそもどちらに探索すべきか分からない」 | 低 |
-| 2. 訪問カバレッジによる内発的報酬 | 「手がかりがなくても居座らず動く」 | 低〜中 |
-| 3. ハンガリアン法による明示的な担当割当 | 「一角に全員集中してしまう」重複問題 | 中〜高 |
-
-## 実装
-対策1+2を実装していきます。
-ここまでのコードへの改修点についてまとめていきます。
-
-### 修正点一覧
-
-| # | 修正対象 | 変更内容 | 変更の根拠 |
-|---|---|---|---|
-| 1 | `PursuitWrapper.__init__` | `direction_dim = 2` を追加し、`obs_dim` の計算に `+ direction_dim` を含める | `get_obs()` が実際に返すベクトルの長さと `self.obs_dim` の宣言値を一致させるため |
-| 2 | `PursuitWrapper.get_obs()` | 最寄り未捕獲 prey への相対方向ベクトル `(dy, dx)` を観測末尾に連結 | エージェントに「敵がどちらにあるか」の方向情報を与え、局所観測の情報不足を補うため |
-| 3 | `MATObsEncoder.forward()` のスライス処理 | `spatial_obs` / `action_history` / `direction_feat` のスライス境界を明示的に区切る | 方向ベクトルの2次元が `action_history_embed`（40次元入力期待）に誤って混ざり、サイズ不一致エラーを起こすのを防ぐため |
-| 4 | `MATObsEncoder.__init__` の `feature_fuse` | 入力次元を `d_model * 2 + 2` に変更 | `spatial_feature` + `act_emb` + `direction_feat`（2次元）を連結して融合するため |
-| 5 | `PursuitWrapper` の探索報酬 | count-based exploration bonus（訪問回数に応じたボーナス）を索敵報酬に追加 | 敵の手がかりがない状況でも「未探索エリアへ移動する」動機を与え、居座りを防ぐため |
-
-### 各修正点の詳細
-
-__修正1：`PursuitWrapper.__init__` の `obs_dim` 計算__
-
-**変更内容**：
 ```python
-self.direction_dim = 2
-self.obs_dim = self.spatial_dim + self.action_history_dim + self.direction_dim
+def _compute_relative_direction_to_assigned_prey(self, agent) -> np.ndarray:
+    """
+    自分に割り当てられたターゲット(ハンガリアン法による)への相対方向を返す。
+    割り当てがない(全捕獲済み、または座標取得失敗)場合はゼロベクトル。
+    """
+    raw_env = self.env.unwrapped
+    try:
+        agent_obj = next(a for a in raw_env.agents if a.name == agent)
+        ay, ax = agent_obj.state[1], agent_obj.state[0]
+    except Exception:
+        return np.zeros(2, dtype=np.float32)
+
+    target = self._get_agent_assignment(agent)
+    if target is None:
+        return np.zeros(2, dtype=np.float32)
+
+    ty, tx = target
+    dy, dx = (ty - ay), (tx - ax)
+    norm = max(abs(dy), abs(dx), 1)
+    return np.array([dy / norm, dx / norm], dtype=np.float32)
 ```
 
-**変更の根拠**：
-- `get_obs()` が返すベクトルは「空間観測（196次元）+ アクション履歴（40次元）+ 方向ベクトル（2次元）= 238次元」です
-- `self.obs_dim` が 236 のままだと、`get_global_state()` 内の `reshape` で「238要素を236形状に変形できない」というエラーが発生します
-- 観測の生成側と参照側の次元数を一致させることが必須です
+## 5. `get_obs()` の呼び出し箇所を更新
 
-__修正2：`PursuitWrapper.get_obs()` に方向ベクトルを追加__
-
-**変更内容**：
 ```python
-rel_vec = self._compute_relative_direction_to_nearest_prey(agent)  # (2,)
-full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+def get_obs(self, agent):
+    ...(既存の処理はそのまま)...
+    spatial_flat = semantic_obs.reshape(-1)
+    action_history_flat = self.last_actions.reshape(-1)
+
+    # 🌟 変更: 最寄りターゲットではなく、割り当てられたターゲットへの方向を使う
+    rel_vec = self._compute_relative_direction_to_assigned_prey(agent)
+
+    full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+    return full_obs
 ```
 
-**変更の根拠**：
-- 7×7 の局所観測だけでは「敵が視界の外のどちらにいるか」が分かりません
-- 結果としてエージェントは「どちらへ動いても同じ」という状況になり、無難な狭い範囲の徘徊に収束します
-- 最寄り prey への正規化された相対方向 `(dy, dx)` を与えることで、「視界の外の情報に基づいて行動を決定できる」ようになります
+`self.obs_dim`（`spatial_dim + action_history_dim + direction_dim`）は前回修正済みなので、次元数自体に変更は不要です。
 
-__修正3：`MATObsEncoder.forward()` のスライス境界の明示__
+---
 
-**変更内容**：
+## 補足1: 割り当て結果を報酬シェイピングにも活用する（推奨）
+
+観測に方向を与えるだけでなく、既存の索敵報酬（`search_approach_bonus`）も「最寄り」ではなく「割り当てられたターゲット」に近づいたかどうかで評価するよう揃えると、観測と報酬の整合性が取れて学習が安定しやすくなります。
+
 ```python
-spatial_obs = obs[:, :self.spatial_dim]
-action_history = obs[:, self.spatial_dim : self.spatial_dim + self.num_agents * 5]
-direction_feat = obs[:, self.spatial_dim + self.num_agents * 5 :]
+def step(self, agent, action):
+    ...(既存)...
+
+    if current_min_dist is None:
+        ...
+        else:
+            # 🌟 変更: 最寄りではなく、割り当てられたターゲットへの距離で評価
+            current_global_dist = self._compute_global_dist_to_assigned_prey(agent)
+            prev_global_dist = self.prev_global_min_dist.get(agent)
+            ...(以下、既存ロジックと同様)...
 ```
 
-**変更の根拠**：
-- 元のコードでは `action_history = obs[:, self.spatial_dim:]` と「残り全部」をスライスしていたため、方向ベクトルの2次元も `action_history_embed` に混ざっていました
-- `action_history_embed` は `nn.Linear(num_agents * 5, d_model)` であり、40次元の入力を期待しています
-- 42次元（40+2）が入力されるとサイズ不一致のランタイムエラーが発生します
-- 各特徴量の境界を明示的に区切ることで、誤った次元の混入を防ぎます
-
-__修正4：`MATObsEncoder.feature_fuse` の入力次元__
-
-**変更内容**：
 ```python
-self.feature_fuse = nn.Linear(d_model * 2 + self.direction_dim, d_model)
+def _compute_global_dist_to_assigned_prey(self, agent) -> float | None:
+    raw_env = self.env.unwrapped
+    try:
+        agent_obj = next(a for a in raw_env.agents if a.name == agent)
+        ay, ax = agent_obj.state[1], agent_obj.state[0]
+    except Exception:
+        return None
+
+    target = self._get_agent_assignment(agent)
+    if target is None:
+        return None
+
+    ty, tx = target
+    return abs(ay - ty) + abs(ax - tx)
 ```
 
-**変更の根拠**：
-- `forward()` 内で `spatial_feature`（`d_model` 次元）+ `act_emb`（`d_model` 次元）+ `direction_feat`（2次元）を連結して渡します
-- 融合層の入力次元は `d_model + d_model + 2 = d_model * 2 + 2` である必要があります
-- この変更がないと、連結後のテンソル次元と `Linear` 層の期待入力次元が一致せず、エラーになります
+## 補足2: `order_mode="priority"` の優先度スコアも揃える
 
-__修正5：探索報酬に count-based exploration bonus を追加__
+以前実装した `compute_priority_scores`（MATのデコード順序決定用）も、同じ割り当て結果を使うよう統一しておくと、「観測」「報酬」「デコード順序」の3つが同じ"担当ターゲット"の概念で一貫します。
 
-**変更内容**：
 ```python
-# reset() に追加
-self.visit_counts = {}
-
-# 報酬計算に追加
-exploration_bonus = self._get_exploration_bonus(curr_pos) * 0.02
-individual_reward += exploration_bonus
+def compute_priority_scores(self) -> np.ndarray:
+    scores = np.full(self.num_agents, 1e6, dtype=np.float32)
+    for i, agent in enumerate(self.possible_agents):
+        if agent not in self.env.agents:
+            continue
+        d = self._compute_global_dist_to_assigned_prey(agent)
+        if d is not None:
+            scores[i] = d
+    return scores
 ```
 
-**変更の根拠**：
-- 対策1によって「敵の方向」は分かるようになりますが、敵の手がかりが全くない状況では依然として居座りやすいです
-- 「敵がいない」という消極的シグナルだけでは、エージェントを広範囲に動かす動機が不十分です
-- 訪問回数が少ないマスへのボーナスを与えることで、「新しい場所に行くこと自体に価値がある」と学習させ、居座りを防ぎます
-- 対策1と組み合わせることで、「手がかりがあればそちらへ、なければ未探索エリアへ」という自然な振る舞いが期待できます
+---
 
-### 変更の全体像
+## 注意点
 
-今回の改修は「観測に方向情報を追加する」という一つの目的ですが、**次元数の整合性を保つための4箇所の連鎖的修正**が必要です。
+### 1. 割り当ての不連続な切り替わり（チャタリング）に注意
 
-1. **Wrapper側**：`obs_dim` の宣言値を実際の観測長（238）に合わせる
-2. **Wrapper側**：`get_obs()` で方向ベクトルを実際に生成して連結する
-3. **Encoder側**：観測ベクトルを3つの特徴量に正しく分割する
-4. **Encoder側**：分割後の特徴量を融合する層の入力次元を正しく設定する
-5. **報酬側**：方向情報だけでは補えない「手がかりゼロ時の探索動機」を内発的報酬で補完する
+ハンガリアン法は「今この瞬間の距離コスト」だけで最適化するため、pursuerとpreyが移動するたびに**割り当て先が頻繁に入れ替わる**可能性があります（例えば2体のpreyまでの距離がほぼ同じ場合、わずかな移動で担当が入れ替わり続ける）。これが起きると、エージェントは方向を頻繁に変えさせられ、かえって非効率な動きになりかねません。
+
+気になる場合は、以下のようなヒステリシス（一定期間は前回の割り当てを維持する、または「持ち替えのコスト」を加える）を検討してください。
+
+```python
+# 簡易対策案: 一定サイクル数ごとにしか再割り当てしない
+def _get_agent_assignment(self, agent):
+    current_cycle = getattr(self.env.unwrapped, 'cycles', 0)
+    reassignment_interval = 5  # 🌟 5サイクルに1回だけ再計算
+    if (self._assignment_cache_cycle == -1 or
+            current_cycle - self._assignment_cache_cycle >= reassignment_interval):
+        self._assignment_cache = self._compute_agent_target_assignment()
+        self._assignment_cache_cycle = current_cycle
+    return self._assignment_cache.get(agent)
+```
+
+まずは毎サイクル再計算する版で学習し、報酬やcapturesの推移を見て、もし方向の頻繁な切り替わりが問題になっているようならこちらの間引き版を試してください。
+
+### 2. `scipy` の依存追加
+
+`from scipy.optimize import linear_sum_assignment` が実行環境に入っているか確認してください（Google Colab等では標準で利用可能なことが多いですが、念のため）。
+
+### 3. `n_prey < n_agents` のタイル処理について
+
+pursuerの数がpreyの数より多い場合（捕獲が進んで残りprey数が減った終盤など）、コスト行列を横に繰り返して全pursuerに割り当てが行き渡るようにしていますが、これは「余ったpursuerは最も近い(コストの低い)preyに重複して割り当てられやすい」という単純な近似です。厳密に「何人がどのpreyを担当すべきか」を最適化したい場合は、より高度な割り当てロジック（例えば「3人以上必要なpreyには優先的に3人を割り当てる」といった制約付き最適化）が必要になりますが、まずはこのシンプルな版で効果を確認し、必要であれば拡張することをお勧めします。
+
+---
+
+まずはこの実装で数百update学習し、「一角への居座り」「捕獲後の切り替え」の頻度がどう変化するか確認してみてください。割り当てが頻繁に切り替わりすぎているようであれば、上記のヒステリシス対策を追加で検討してください。
 
 ということで変更コードはこちらに保管しています。
 
