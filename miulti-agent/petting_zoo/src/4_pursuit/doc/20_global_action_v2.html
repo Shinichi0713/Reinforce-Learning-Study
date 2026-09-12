@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x8ab2;&#x984c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>前回<a href="https://yoshishinnze.hatenablog.com/entry/2026/09/26/043000">最寄りの敵の位置と、動作に対するモチベーションの実装</a>を対応しました。
+結果、一カ所の停滞が改善され、捕獲数にも改善が確認されました。
+ですが、以前居座り問題が続いていたため、改善できないか試行していきます。</p>
+<h2 id="課題">課題</h2>
+<p>前々回記事の考察を引用しますが。</p>
+<blockquote>
+<p>敵が近づいたときに味方で集団で上手に囲むため、1体の敵を上手に捕獲していきます。
+ですが、以前課題と感じていた待機型に戻っています。
+スコアは前回よりも良いですが、敵が多いところにわーと集団移動するような動作がなくなってしまった感があります。</p>
+</blockquote>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<p>この一角にエージェントが居座るという問題に対して改善することを考えています。</p>
+<h2 id="ハンガリアンアルゴリズム">ハンガリアンアルゴリズム</h2>
+<p>今回は対策にハンガリアンアルゴリズムという手法を用います。</p>
+<p><strong>ハンガリアンアルゴリズム（Hungarian Algorithm）</strong> は、組合せ最適化問題における <strong>「割り当て問題（Assignment Problem）」を効率よく（多項式時間で）解くためのアルゴリズム</strong>です。</p>
+<p>1955年にハロルド・クーン（Harold Kuhn）によって発表され、ハンガリーの数学者であるコーニグ（Dénes Kőnig）とエゲルヴァリ（Jenő Egerváry）の定理に基づいていることからこの名が付けられました。</p>
+<h3 id="1-どんな問題を解くのか">1. どんな問題を解くのか？</h3>
+<p>最も典型的な例は「タスクと人員の最適マッチング」です。</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 人の作業員と <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 個のタスクがある。</li>
+<li>各作業員が各タスクを実行するのにかかるコスト（時間や費用）が与えられている。</li>
+<li><strong>「全員に1つずつタスクを割り当てるとき、全体の総コストを最小化するにはどうすればよいか？」</strong></li>
+</ul>
+<p>すべての組み合わせをしらみつぶしに探すと <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false">!</mo></mrow><annotation encoding="application/x-tex">N!</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">!</span></span></span></span> （階乗）通りの探索が必要になり、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">N=20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> 程度で計算が破綻します。ハンガリアンアルゴリズムを使うと、<strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">O</mi><mo stretchy="false">(</mo><msup><mi>N</mi><mn>3</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathcal{O}(N^3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> の計算量</strong>で確実に最適解を求めることができます。</p>
+<h3 id="2-コスト行列の例">2. コスト行列の例</h3>
+<p>例として、3人の作業員（A, B, C）と3つのタスク（T1, T2, T3）のコスト行列を考えます。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>T1</th>
+<th>T2</th>
+<th>T3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>9</td>
+<td>2</td>
+<td>7</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>6</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>5</td>
+<td>8</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>この行列から、各行・各列で要素を重なりなく1つずつ選び、その和を最小にする組み合わせを見つけるのが目的です。</p>
+<h3 id="3-アルゴリズムの基本的なアイデア">3. アルゴリズムの基本的なアイデア</h3>
+<p>「コスト行列の特定の行や列全体から一定の値を引き算しても、最適となる割り当ての組み合わせは変化しない」という性質を利用します。</p>
+<p>引き算を繰り返すことで<strong>行列内に「0」を作り出し、「0」の位置だけで重なりのない割り当て（0の完全マッチング）を作ること</strong>を目指します。</p>
+<p><strong>基本ステップ</strong></p>
+<ol>
+<li><strong>行の減算</strong>: 各行の最小値を見つけ、その行のすべての要素から引き算する（各行に少なくとも1つの「0」ができる）。</li>
+<li><strong>列の減算</strong>: 各列の最小値を見つけ、その列のすべての要素から引き算する（各列に少なくとも1つの「0」ができる）。</li>
+<li><strong>最小被覆線の判定</strong>: 行列内のすべての「0」を覆うのに必要な「最小の直線（行または列）」の数をカウントする。</li>
+</ol>
+<ul>
+<li>直線の数が <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>本 に達した場合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> <strong>完了</strong>（「0」の位置だけで最適な割り当てが存在する）。</li>
+<li>直線の数が <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>本 未満の場合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> <strong>ステップ4へ</strong>。</li>
+</ul>
+<ol start="4">
+<li><strong>行列の更新</strong>: 直線で覆われていない要素の中から最小値 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> を選ぶ。</li>
+</ol>
+<ul>
+<li>直線で覆われていない要素から <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> を引く。</li>
+<li>直線が交差している要素に <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> を足す。</li>
+<li>ステップ3に戻る。</li>
+</ul>
+<h3 id="4-主な用途応用分野">4. 主な用途・応用分野</h3>
+<ul>
+<li><strong>リソース割り当て</strong>: 人員配置、タスクスケジューリング、機械への工数割り当て。</li>
+<li><strong>マルチオブジェクトトラッキング（MOT）</strong>: 自動運転や防犯カメラの映像解析において、「前フレームで検出した物体」と「現在のフレームで検出した物体」の同一性を判定（データ関連付け）する際によく使われます。</li>
+<li><strong>グラフ理論</strong>: 二部グラフにおける最大（最小）重み付きマッチング問題の解法。</li>
+</ul>
+<p>現代のプログラミングでは、<code>scipy.optimize.linear_sum_assignment</code>（Python）などの標準的なライブラリ関数として内部実装されているため、自作せずとも手軽に活用できます。</p>
+<h2 id="対策の骨組">対策の骨組</h2>
+<p>今回対策はエージェントが狙うターゲットの割り当てをハンガリアンアルゴリズムで行うというもので対策していきます。</p>
+<h3 id="対応する問題-一角の敵が少なくなった後もとどまろうとする味方がいる">対応する問題: 「一角の敵が少なくなった後もとどまろうとする味方がいる」</h3>
+<p>一角に居座るという症状の背景には、これまでの調査で以下のような要因が積み重なっていることが原因だと想定しています。</p>
+<ol>
+<li><strong>MoEのcollapse</strong>（一部のexpertしか使われず、状況に応じた行動の切り替えが学習されにくい）→ 負荷分散損失で対処</li>
+<li><strong>デコード順序の固定</strong>（特定のエージェントが常に受動的な役割になる）→ ランダム順序化で対処</li>
+<li><strong>索敵報酬の抜け穴</strong>（4人揃っていれば停滞が免除される等）→ 報酬ロジックの修正で対処</li>
+<li><strong>視界の外に手がかりがない</strong>（局所観測だけでは、どちらに敵がいるか分からない）→ 対策1（方向情報の追加）で対処</li>
+</ol>
+<p>しかし対策1を入れても、<strong>「全員が同じ最寄りターゲットに向かう」という判断基準そのものは変わっていません</strong>。敵が少なくなった終盤（例えば残り2体、味方8体）の状況では、</p>
+<ul>
+<li>8体中の多くが「一番近い敵はこっちだ」と同じ1体を指し示してしまい</li>
+<li>結果としてそのターゲットに集中し、<strong>もう1体の敵の方には誰も向かわない</strong></li>
+</ul>
+<p>という構造的な偏りが残ります。これは「居座り」というより正確には「<strong>目が向いていない敵が放置される</strong>」現象で、見た目には「捕獲が進まず、そこにとどまっているように見える」症状として現れていたと考えられます。ハンガリアン法は、この「全員が同じ判断をしてしまう」という構造的な原因そのものを解消するための対策です。</p>
+<h3 id="対応していない問題-捕獲でまごまごする何度も取り逃がす">対応していない問題: 「捕獲でまごまごする（何度も取り逃がす）」</h3>
+<p>こちらの症状については、<strong>原因は全く別の場所</strong>にあります。</p>
+<blockquote>
+<p>現在のモデルは、各タイムステップの観測を独立したスナップショットとしてTransformerに通しています。獲物がどの方向に動いているか（速度・進行方向）の情報が一切ありません。</p>
+</blockquote>
+<p>ハンガリアン法は「誰が、どのターゲットを追うべきか」という<strong>割り当ての最適化</strong>であり、「追っている最中に、逃げる敵にどう先回りするか」という<strong>追跡そのものの精度</strong>には一切関与しません。したがって、この症状に対しては、以前提案した以下のような対策が別途必要です。</p>
+<ul>
+<li>獲物の動き（速度・進行方向）を観測チャンネルに追加する</li>
+<li>時間方向の記憶（GRUなど）を導入し、複数ステップの動きのパターンを学習できるようにする</li>
+<li>未来位置予測を補助タスクとして学習させる</li>
+</ul>
+<h3 id="なぜハンガリアンアルゴリズムを使うか">なぜハンガリアンアルゴリズムを使うか</h3>
+<p>一言でいうと「<strong>8体全員が同じ判断基準（最寄りのターゲット）で動くと、全員が同じ場所に集まってしまう</strong>」という問題を、数学的に解決するために導入しました。</p>
+<p><strong>これまでの対策1（対策1：方向情報の追加）で何が足りなかったか</strong></p>
+<p>対策1では、各エージェントに「一番近い未捕獲の敵はどっちの方向か」という情報を渡しました。しかしこれには構造的な欠陥があります。</p>
+<p><strong>8体のエージェントが全員、同じ計算式（<code>min(距離)</code>）を使っている</strong>ため、もし敵が2体しか残っていない状況で、8体のうち5体にとって「一番近い敵」が偶然同じ1体だったとします。すると、その5体は全員「その敵の方向」を指し示され、<strong>全員がそこに向かって集まってしまいます</strong>。もう1体の敵は誰も見ていない、という状態が起きえます。これはまさに「一角に居座る/敵が少なくなっても捜索していかない」という報告いただいた症状と一致する構造的な原因です。</p>
+<p>つまり対策1は「どちらに動けばいいか」というヒントは与えましたが、<strong>「チームとして手分けする」という発想は一切入っていなかった</strong>のです。</p>
+<p><strong>ハンガリアン法が解決すること</strong></p>
+<p>ハンガリアン法（割当問題の最適解を求めるアルゴリズム）を使うことで、</p>
+<blockquote>
+<p>「8体のエージェント」と「残っている敵」の組み合わせを、<strong>全体の移動コスト（距離の合計）が最小になるように、重複なく割り振る</strong></p>
+</blockquote>
+<p>という計算を毎ステップ行うようにしました。</p>
+<p>具体例で言うと：</p>
+<ul>
+<li>エージェントA、Bが両方とも「敵Xが一番近い」と感じていても</li>
+<li>実は「AはXに、BはYに向かった方が、チーム全体としての移動コストの合計は少なくて済む」という組み合わせがあれば</li>
+<li>ハンガリアン法はそちらを選びます</li>
+</ul>
+<p>これにより、<strong>「全員が目先の最寄りに殺到する」のではなく、「チームとして手分けして効率よく散らばる」という動きが、計算上、最初から保証される</strong>ようになります。</p>
+<p><strong>なぜこれが「モデルの学習に任せる」より優れているか</strong></p>
+<p>本来、「誰がどの敵を追うべきか」という役割分担は、強化学習のモデル自身に学習させたい理想的な能力です。しかし、これまで議論してきた通り：</p>
+<ul>
+<li>Transformerのattentionによる暗黙的な学習には限界があり</li>
+<li>MoEのcollapseや、デコード順序の固定など、様々な要因でこの「暗黙の役割分担」がうまく学習されていない状態が続いていました</li>
+</ul>
+<p>そこで今回は、<strong>「役割分担」という組合せ最適化の部分だけは、学習に頼らず数学的に確実に解いてしまい、エージェント（モデル）には『割り当てられた1体を、具体的にどう追い込むか』という、より簡単で学習しやすい問題だけを解かせる</strong>、という設計に切り替えました。</p>
+<p>これは前々回お伝えした「階層型設計」の考え方そのものです。</p>
+<blockquote>
+<p>複数エージェントが複数ターゲットに対して「誰がどこを追うか」を決めるのは、本質的に組合せ最適化問題（assignment problem）です。これをEnd-to-EndのRLだけに任せると、特にMARLでは学習が難しく、非効率な割当（重複追跡、放置ターゲット）に陥りやすい</p>
+</blockquote>
+<p><strong>「割り当てそのものはアルゴリズムに任せ、RLは低レベルの追跡動作だけに集中させる」</strong> という役割分担を、今回のコードで実際に組み込んだ形になります。</p>
+<p><strong>期待される効果と、期待していないこと</strong></p>
+<p><strong>期待している効果</strong>:</p>
+<ul>
+<li>敵が複数残っている状況で、エージェントが自然に分散して手分けするようになる</li>
+<li>「一角に居座る」「敵が少なくなっても他を探さない」という、まさに今回問題視されていた症状が、構造的に起きにくくなる</li>
+</ul>
+<p><strong>注意点として、これは万能ではありません</strong>:</p>
+<ul>
+<li>ハンガリアン法はあくまで「今この瞬間の距離」だけを見て割り振るので、<strong>敵がどちらに逃げるかという動きの予測(以前議論した&quot;まごつき&quot;の問題)までは解決しません</strong></li>
+<li>敵の動きによって割り当てが頻繁に入れ替わる可能性がある（実装時に補足した「チャタリング」の懸念）ため、そこは追加のチューニングが必要になる場合があります</li>
+<li>あくまで「pursuer側の座標」と「敵の座標」という、モデルの観測には含まれない特権的なグローバル情報を使って計算しているので、<strong>実際にモデルが学習で獲得すべき「連携」の一部を、外側から補助している</strong>という性質のものです。将来的にモデル自身がこうした役割分担を学習できるようになることが理想ですが、現状はそこまで到達していないための実務的な対応、という位置付けです</li>
+</ul>
+<h2 id="実装">実装</h2>
+<p>以下、前回までに行った対策版コード（相対方向の観測追加）を土台に、<strong>「最寄り」ではなく「自分に割り当てられたターゲット」への方向を使う</strong>形に差し替えます。ハンガリアン法（<code>scipy.optimize.linear_sum_assignment</code>）で、pursuer-preyの距離コストを最小化する組み合わせを毎ステップ計算します。</p>
+<h3 id="改版">改版</h3>
+<p><strong>1. <code>PursuitWrapper.__init__</code> に依存関係を追加</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> pettingzoo.sisl <span class="hljs-keyword">import</span> pursuit_v4
+<span class="hljs-keyword">from</span> scipy.optimize <span class="hljs-keyword">import</span> linear_sum_assignment  <span class="hljs-comment"># 🌟 追加</span>
+</code></pre>
+<p><strong>2. <code>reset()</code> に割り当てキャッシュ用の変数を追加</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reset</span>(<span class="hljs-params">self</span>):
+    self.env.reset()
+    self.prev_min_distances = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self.prev_agent_positions = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self.last_actions = np.zeros((self.num_agents, <span class="hljs-number">5</span>), dtype=np.float32)
+    self.last_actions[:, <span class="hljs-number">4</span>] = <span class="hljs-number">1.0</span>
+    self.capture_count = <span class="hljs-number">0</span>
+    self.captured_prey_ids = <span class="hljs-built_in">set</span>()
+
+    self.prev_global_min_dist = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    self._search_approach_registry = {}
+    self._search_team_bonus_given_cycle = -<span class="hljs-number">1</span>
+
+    <span class="hljs-comment"># 🌟 追加: エージェントごとの担当ターゲット割り当てキャッシュ</span>
+    <span class="hljs-comment">#    毎ステップ計算すると同じ状態に対して重複計算になるため、</span>
+    <span class="hljs-comment">#    サイクル単位でキャッシュする</span>
+    self._assignment_cache = {}
+    self._assignment_cache_cycle = -<span class="hljs-number">1</span>
+</code></pre>
+<p><strong>3. ハンガリアン法による割り当て計算メソッドを追加</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_agent_target_assignment</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">dict</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    各pursuerに、重複しないよう1体ずつ異なる未捕獲preyを割り当てる
+    (マンハッタン距離コストの総和を最小化、ハンガリアン法)。
+
+    - 未捕獲preyがpursuer数より少ない場合は、preyをタイル(繰り返し)して
+      余ったpursuerも(重複を許して)最も割の良いpreyに割り当てる。
+    - 未捕獲preyが0体の場合、全pursuerに None を割り当てる。
+    - 座標取得に失敗したpursuerには None を割り当てる。
+
+    戻り値: {agent_name: (target_y, target_x) or None}
+    &quot;&quot;&quot;</span>
+    raw_env = self.env.unwrapped
+
+    <span class="hljs-keyword">try</span>:
+        evader_positions = [(e.state[<span class="hljs-number">1</span>], e.state[<span class="hljs-number">0</span>]) <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> raw_env.evaders]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> evader_positions:
+        <span class="hljs-keyword">return</span> {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+
+    <span class="hljs-comment"># 生存しているpursuerの座標を集める</span>
+    valid_agents = []
+    agent_positions = []
+    <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents:
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">continue</span>
+        <span class="hljs-keyword">try</span>:
+            obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+            agent_positions.append((obj.state[<span class="hljs-number">1</span>], obj.state[<span class="hljs-number">0</span>]))
+            valid_agents.append(agent)
+        <span class="hljs-keyword">except</span> Exception:
+            <span class="hljs-keyword">continue</span>
+
+    assignment = {agent: <span class="hljs-literal">None</span> <span class="hljs-keyword">for</span> agent <span class="hljs-keyword">in</span> self.possible_agents}
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> valid_agents:
+        <span class="hljs-keyword">return</span> assignment
+
+    n_agents = <span class="hljs-built_in">len</span>(valid_agents)
+    n_prey = <span class="hljs-built_in">len</span>(evader_positions)
+
+    <span class="hljs-comment"># コスト行列: (n_agents, n_prey)のマンハッタン距離</span>
+    cost_matrix = np.array([
+        [<span class="hljs-built_in">abs</span>(ay - py) + <span class="hljs-built_in">abs</span>(ax - px) <span class="hljs-keyword">for</span> (py, px) <span class="hljs-keyword">in</span> evader_positions]
+        <span class="hljs-keyword">for</span> (ay, ax) <span class="hljs-keyword">in</span> agent_positions
+    ], dtype=np.float64)
+
+    <span class="hljs-comment"># 🌟 pursuer数 &gt; prey数の場合、コスト行列の列をタイルして</span>
+    <span class="hljs-comment">#    全pursuerに割り当てが行き渡るようにする</span>
+    <span class="hljs-comment">#    (同じpreyに複数pursuerが割り当てられることを許容する)</span>
+    <span class="hljs-keyword">if</span> n_prey &lt; n_agents:
+        reps = <span class="hljs-built_in">int</span>(np.ceil(n_agents / n_prey))
+        tiled_cost = np.tile(cost_matrix, (<span class="hljs-number">1</span>, reps))[:, :n_agents]
+        <span class="hljs-comment"># linear_sum_assignmentは正方 or 長方行列どちらも扱えるが、</span>
+        <span class="hljs-comment"># ここでは「列数 &gt;= 行数」にしておくと解釈がシンプルになる</span>
+        row_idx, col_idx = linear_sum_assignment(tiled_cost)
+        <span class="hljs-keyword">for</span> r, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(row_idx, col_idx):
+            prey_idx = c % n_prey  <span class="hljs-comment"># タイルした分を元のprey индексに戻す</span>
+            assignment[valid_agents[r]] = evader_positions[prey_idx]
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># pursuer数 &lt;= prey数の通常ケース: 1対1の最適割り当て</span>
+        row_idx, col_idx = linear_sum_assignment(cost_matrix)
+        <span class="hljs-keyword">for</span> r, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(row_idx, col_idx):
+            assignment[valid_agents[r]] = evader_positions[c]
+
+    <span class="hljs-keyword">return</span> assignment
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_agent_assignment</span>(<span class="hljs-params">self, agent</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    現在のサイクルの割り当て結果をキャッシュから取得する。
+    (毎ステップ・毎エージェントで同じ計算を繰り返さないための最適化)
+    &quot;&quot;&quot;</span>
+    current_cycle = <span class="hljs-built_in">getattr</span>(self.env.unwrapped, <span class="hljs-string">&#x27;cycles&#x27;</span>, <span class="hljs-number">0</span>)
+    <span class="hljs-keyword">if</span> self._assignment_cache_cycle != current_cycle:
+        self._assignment_cache = self._compute_agent_target_assignment()
+        self._assignment_cache_cycle = current_cycle
+    <span class="hljs-keyword">return</span> self._assignment_cache.get(agent)
+</code></pre>
+<p><strong>4. 方向計算メソッドを「最寄り」から「割り当て先」に差し替え</strong></p>
+<p>前回実装した <code>_compute_relative_direction_to_nearest_prey</code> を置き換えます（メソッド名も実態に合わせて変更します）。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_relative_direction_to_assigned_prey</span>(<span class="hljs-params">self, agent</span>) -&gt; np.ndarray:
+    <span class="hljs-string">&quot;&quot;&quot;
+    自分に割り当てられたターゲット(ハンガリアン法による)への相対方向を返す。
+    割り当てがない(全捕獲済み、または座標取得失敗)場合はゼロベクトル。
+    &quot;&quot;&quot;</span>
+    raw_env = self.env.unwrapped
+    <span class="hljs-keyword">try</span>:
+        agent_obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+        ay, ax = agent_obj.state[<span class="hljs-number">1</span>], agent_obj.state[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> np.zeros(<span class="hljs-number">2</span>, dtype=np.float32)
+
+    target = self._get_agent_assignment(agent)
+    <span class="hljs-keyword">if</span> target <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-keyword">return</span> np.zeros(<span class="hljs-number">2</span>, dtype=np.float32)
+
+    ty, tx = target
+    dy, dx = (ty - ay), (tx - ax)
+    norm = <span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(dy), <span class="hljs-built_in">abs</span>(dx), <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> np.array([dy / norm, dx / norm], dtype=np.float32)
+</code></pre>
+<p><strong>5. <code>get_obs()</code> の呼び出し箇所を更新</strong></p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_obs</span>(<span class="hljs-params">self, agent</span>):
+    ...(既存の処理はそのまま)...
+    spatial_flat = semantic_obs.reshape(-<span class="hljs-number">1</span>)
+    action_history_flat = self.last_actions.reshape(-<span class="hljs-number">1</span>)
+
+    <span class="hljs-comment"># 🌟 変更: 最寄りターゲットではなく、割り当てられたターゲットへの方向を使う</span>
+    rel_vec = self._compute_relative_direction_to_assigned_prey(agent)
+
+    full_obs = np.concatenate([spatial_flat, action_history_flat, rel_vec])
+    <span class="hljs-keyword">return</span> full_obs
+</code></pre>
+<p><code>self.obs_dim</code>（<code>spatial_dim + action_history_dim + direction_dim</code>）は前回修正済みなので、次元数自体に変更は不要です。</p>
+<h3 id="補足">補足</h3>
+<p><strong>補足1: 割り当て結果を報酬シェイピングにも活用する</strong></p>
+<p>観測に方向を与えるだけでなく、既存の索敵報酬（<code>search_approach_bonus</code>）も「最寄り」ではなく「割り当てられたターゲット」に近づいたかどうかで評価するよう揃えると、観測と報酬の整合性が取れて学習が安定しやすくなります。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">step</span>(<span class="hljs-params">self, agent, action</span>):
+    ...(既存)...
+
+    <span class="hljs-keyword">if</span> current_min_dist <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        ...
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 🌟 変更: 最寄りではなく、割り当てられたターゲットへの距離で評価</span>
+            current_global_dist = self._compute_global_dist_to_assigned_prey(agent)
+            prev_global_dist = self.prev_global_min_dist.get(agent)
+            ...(以下、既存ロジックと同様)...
+</code></pre>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_compute_global_dist_to_assigned_prey</span>(<span class="hljs-params">self, agent</span>) -&gt; <span class="hljs-built_in">float</span> | <span class="hljs-literal">None</span>:
+    raw_env = self.env.unwrapped
+    <span class="hljs-keyword">try</span>:
+        agent_obj = <span class="hljs-built_in">next</span>(a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> raw_env.agents <span class="hljs-keyword">if</span> a.name == agent)
+        ay, ax = agent_obj.state[<span class="hljs-number">1</span>], agent_obj.state[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    target = self._get_agent_assignment(agent)
+    <span class="hljs-keyword">if</span> target <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    ty, tx = target
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">abs</span>(ay - ty) + <span class="hljs-built_in">abs</span>(ax - tx)
+</code></pre>
+<p><strong>補足2: <code>order_mode=&quot;priority&quot;</code> の優先度スコアも揃える</strong></p>
+<p>以前実装した <code>compute_priority_scores</code>（MATのデコード順序決定用）も、同じ割り当て結果を使うよう統一しておくと、「観測」「報酬」「デコード順序」の3つが同じ&quot;担当ターゲット&quot;の概念で一貫します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_priority_scores</span>(<span class="hljs-params">self</span>) -&gt; np.ndarray:
+    scores = np.full(self.num_agents, <span class="hljs-number">1e6</span>, dtype=np.float32)
+    <span class="hljs-keyword">for</span> i, agent <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(self.possible_agents):
+        <span class="hljs-keyword">if</span> agent <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> self.env.agents:
+            <span class="hljs-keyword">continue</span>
+        d = self._compute_global_dist_to_assigned_prey(agent)
+        <span class="hljs-keyword">if</span> d <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+            scores[i] = d
+    <span class="hljs-keyword">return</span> scores
+</code></pre>
+<h3 id="注意点">注意点</h3>
+<p><strong>1. 割り当ての不連続な切り替わり（チャタリング）に注意</strong></p>
+<p>ハンガリアン法は「今この瞬間の距離コスト」だけで最適化するため、pursuerとpreyが移動するたびに<strong>割り当て先が頻繁に入れ替わる</strong>可能性があります（例えば2体のpreyまでの距離がほぼ同じ場合、わずかな移動で担当が入れ替わり続ける）。これが起きると、エージェントは方向を頻繁に変えさせられ、かえって非効率な動きになりかねません。</p>
+<p>気になる場合は、以下のようなヒステリシス（一定期間は前回の割り当てを維持する、または「持ち替えのコスト」を加える）を検討してください。</p>
+<pre><code class="language-python"><span class="hljs-comment"># 簡易対策案: 一定サイクル数ごとにしか再割り当てしない</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_agent_assignment</span>(<span class="hljs-params">self, agent</span>):
+    current_cycle = <span class="hljs-built_in">getattr</span>(self.env.unwrapped, <span class="hljs-string">&#x27;cycles&#x27;</span>, <span class="hljs-number">0</span>)
+    reassignment_interval = <span class="hljs-number">5</span>  <span class="hljs-comment"># 🌟 5サイクルに1回だけ再計算</span>
+    <span class="hljs-keyword">if</span> (self._assignment_cache_cycle == -<span class="hljs-number">1</span> <span class="hljs-keyword">or</span>
+            current_cycle - self._assignment_cache_cycle &gt;= reassignment_interval):
+        self._assignment_cache = self._compute_agent_target_assignment()
+        self._assignment_cache_cycle = current_cycle
+    <span class="hljs-keyword">return</span> self._assignment_cache.get(agent)
+</code></pre>
+<p>まずは毎サイクル再計算する版で学習し、報酬やcapturesの推移を見て、もし方向の頻繁な切り替わりが問題になっているようならこちらの間引き版を試してください。</p>
+<p><strong>2. <code>scipy</code> の依存追加</strong></p>
+<p><code>from scipy.optimize import linear_sum_assignment</code> が実行環境に入っているか確認してください（Google Colab等では標準で利用可能なことが多いですが、念のため）。</p>
+<h3 id="実装コード">実装コード</h3>
+<p>変更コードはこちらに保管しています。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/miulti-agent/petting_zoo/src/4_pursuit/src/mat</a></p>
+<h2 id="学習の結果">学習の結果</h2>
+<h3 id="学習の経過">学習の経過</h3>
+<p>今回のエントロピ・報酬合計・捕獲数のみを抽出して比較した結果をまとめます。</p>
+<p><strong>1. 性能の向上が確認できる</strong></p>
+<p>今回（Update 1251-1300）は前回（Update 1051-1100）と比較して、<strong>Reward Sum が約 7% 増加</strong>（132.4 → 141.8）、<strong>Captures が約 17% 増加</strong>（29.4 → 34.4）しています。200 update 進んだ間に、エージェントがより多くの対象を捕獲し、高い報酬を得られる方策へと進化していることが分かります。</p>
+<p><strong>2. 探索の減少と活用の深化</strong></p>
+<p><strong>Entropy が 1.377 → 1.240 と約 10% 低下</strong>しています。強化学習ではエントロピーは方策の「ランダムさ」を表すため、これはエージェントが無作為な探索を減らし、<strong>すでに学習した有効な行動パターンをより積極的に活用するようになった</strong>ことを示しています。性能向上とエントロピー低下が同時に起きているため、方策が有益な方向へ収束していると考えられます。</p>
+<p>ただし、エントロピー 1.24 はまだ完全な決定的方策（deterministic policy）ではなく、<strong>一定の探索は残っている</strong>状態です。アクション空間のサイズにもよりますが、4 つの行動がある想定では最大エントロピーが log(4) ≈ 1.386 なので、まだ中程度の探索余地が保たれています。</p>
+<p><strong>3. 学習の安定性には改善の余地</strong></p>
+<p>今回の方が <strong>Reward Sum の標準偏差が大きく</strong>（37.6 → 45.5）、エピソードごとの性能ばらつきがやや拡大しています。考えられるところはこんなところでしょうか。</p>
+<ul>
+<li>方策が局所最適に近づく過程で、<strong>特定の状況では高性能だが別の状況では不安定</strong>という挙動になっている</li>
+<li>環境の確率的要素に対して、方策の頑健性がまだ十分でない</li>
+<li>200 update の差があるため、<strong>学習率や PPO のクリッピング等の影響で更新の揺らぎが大きくなった</strong>可能性</li>
+</ul>
+<p><strong>4. 損失関数から見える学習の状態</strong></p>
+<ul>
+<li><strong>actor_loss</strong> が負の値で推移しているのは、PPO の性質上、方策が改善方向に更新されていることを示唆します。</li>
+<li><strong>critic_loss</strong> は 0.07 〜 0.27 程度で比較的安定しており、価値関数の推定も大きく崩れていないようです。</li>
+<li><strong>moe_aux_loss</strong> が 1.00 〜 1.06 と安定しているのは、負荷分散の正則化が一貫して働いている証拠です。</li>
+</ul>
+<p>reward推移</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\20_global_action_v2\1789183204567.png" alt="1789183204567"></p>
+<p>捕獲数推移</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\20_global_action_v2\1789183256499.png" alt="1789183256499"></p>
+<p>エントロピ推移</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\20_global_action_v2\1789183285308.png" alt="1789183285308"></p>
+<h3 id="agentの動作">agentの動作</h3>
+<p>学習後のエージェントの動作です。
+うーん。。。
+前回より改善したという感じはしません。
+左上の一角に居座りエージェントがまた発生しています。
+前回の方がよかったですね。
+失敗と考えます。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\miulti-agent\petting_zoo\src\4_pursuit\doc\image\20_global_action_v2\pursuit_mat_fixed.gif">
+<h2 id="総括">総括</h2>
+<h3 id="今回の試行結果のまとめ">今回の試行結果のまとめ</h3>
+<p>結論から述べると、今回のハンガリアン法の導入は、<strong>学習指標上は一定の改善が見られたものの、「一角への居座りを解消する」という本来の目的は達成できなかった</strong>と評価するのが妥当です。</p>
+<p>ただし、完全な失敗というよりは、<strong>割り当てという考え方には可能性があるものの、現在の実装が Pursuit 環境の捕獲条件と十分に整合していない</strong>可能性があります。</p>
+<h3 id="数値上の比較">数値上の比較</h3>
+<p>最終更新の直後にはエピソード結果が記録されていないため、Rewardと捕獲数は両方に存在する49エピソードで比較しています。</p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align:right">前回<br>Update 1051–1100</th>
+<th style="text-align:right">今回<br>Update 1251–1300</th>
+<th style="text-align:right">変化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reward Sum平均</td>
+<td style="text-align:right">132.37</td>
+<td style="text-align:right">141.53</td>
+<td style="text-align:right"><strong>+6.9%</strong></td>
+</tr>
+<tr>
+<td>捕獲数平均</td>
+<td style="text-align:right">30.71</td>
+<td style="text-align:right">34.35</td>
+<td style="text-align:right"><strong>+11.8%</strong></td>
+</tr>
+<tr>
+<td>Reward標準偏差</td>
+<td style="text-align:right">40.58</td>
+<td style="text-align:right">45.88</td>
+<td style="text-align:right"><strong>ばらつき増加</strong></td>
+</tr>
+<tr>
+<td>Entropy平均</td>
+<td style="text-align:right">1.3755</td>
+<td style="text-align:right">1.2400</td>
+<td style="text-align:right"><strong>-9.8%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>したがって、記事中の「捕獲数が約17%改善」という記述は、貼り付けられたログから再計算すると、<strong>約12%改善</strong>がより正確です。</p>
+<p>一方、最後の10エピソードだけを比較すると、次のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align:right">前回・最後の10件</th>
+<th style="text-align:right">今回・最後の10件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reward Sum平均</td>
+<td style="text-align:right">180.26</td>
+<td style="text-align:right">152.75</td>
+</tr>
+<tr>
+<td>捕獲数平均</td>
+<td style="text-align:right">36.4</td>
+<td style="text-align:right">36.0</td>
+</tr>
+</tbody>
+</table>
+<p>全期間の平均値は今回の方が高いものの、<strong>学習終盤の性能は前回を上回っていません</strong>。動画でも居座りが再発していることから、「数値上は部分的に改善したが、行動品質は改善していない」という観察と整合していそうです。</p>
+<h3 id="特に確認すべき実装上の問題">特に確認すべき実装上の問題</h3>
+<p>実装してみて気になった点について振り返ります。</p>
+<h3 id="1-割り当てキャッシュが更新されていない可能性">1. 割り当てキャッシュが更新されていない可能性</h3>
+<p>今更かんがありますが、提示されたコードでは、現在サイクルを次のように取得しています。</p>
+<pre><code class="language-python">current_cycle = <span class="hljs-built_in">getattr</span>(self.env.unwrapped, <span class="hljs-string">&quot;cycles&quot;</span>, <span class="hljs-number">0</span>)
+</code></pre>
+<p>ところがPettingZoo Pursuitの公式実装では、AEC環境側は<code>steps</code>、内部環境側は<code>frames</code>で進行状況を管理しており、<code>cycles</code>という属性は確認できません。(<a href="https://raw.githubusercontent.com/Farama-Foundation/PettingZoo/master/pettingzoo/sisl/pursuit/pursuit.py">raw.githubusercontent.com</a>)</p>
+<p>その場合、<code>getattr(..., 0)</code>は毎回0を返すため、</p>
+<ol>
+<li>エピソード開始時に一度だけ割り当てを計算</li>
+<li><code>_assignment_cache_cycle</code>が0になる</li>
+<li>以後、終了まで割り当てを再計算しない</li>
+</ol>
+<p>という状態になります。</p>
+<p>さらにキャッシュしているのは敵のIDではなく、計算時点の座標です。</p>
+<pre><code class="language-python">assignment[valid_agents[r]] = evader_positions[prey_idx]
+</code></pre>
+<p>そのため、移動する敵ではなく、<strong>エピソード開始付近に敵がいた古い座標へ向かい続ける</strong>ことになります。これが起きていれば、一角への居座りを非常にうまく説明できます。</p>
+<p>まずは、次のように内部環境の<code>frames</code>を使う方法が考えられます。</p>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_current_cycle</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">int</span>:
+    raw_env = self.env.unwrapped
+
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(raw_env, <span class="hljs-string">&quot;env&quot;</span>) <span class="hljs-keyword">and</span> <span class="hljs-built_in">hasattr</span>(raw_env.env, <span class="hljs-string">&quot;frames&quot;</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(raw_env.env.frames)
+
+    <span class="hljs-keyword">if</span> <span class="hljs-built_in">hasattr</span>(raw_env, <span class="hljs-string">&quot;steps&quot;</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(raw_env.steps // self.num_agents)
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+</code></pre>
+<pre><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">_get_agent_assignment</span>(<span class="hljs-params">self, agent</span>):
+    current_cycle = self._get_current_cycle()
+
+    <span class="hljs-keyword">if</span> self._assignment_cache_cycle != current_cycle:
+        self._assignment_cache = self._compute_agent_target_assignment()
+        self._assignment_cache_cycle = current_cycle
+
+    <span class="hljs-keyword">return</span> self._assignment_cache.get(agent)
+</code></pre>
+<p>ということで過去見たはずという観測情報を頼みにしてもあまりあてにならないため、居座ることをベストアクションとしている可能性がありそうです。</p>
+<h3 id="2-1エージェント1ターゲットの割り当てが捕獲条件と合っていない">2. 1エージェント・1ターゲットの割り当てが捕獲条件と合っていない</h3>
+<p>現在のハンガリアン法は、敵の数が追跡エージェント以上の場合、各エージェントを別々の敵に割り当てます。</p>
+<p>SciPyの<code>linear_sum_assignment</code>は、各行と各列を重複させない線形割り当てを求めるため、例えば追跡者8体、敵30体なら、基本的には8体が別々の敵へ割り当てられます。(<a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html">docs.scipy.org</a>)</p>
+<p>しかし、Pursuit環境では敵を囲むために複数のエージェントが必要です。公式実装では、<code>surround=True</code>の場合、敵の周囲にある移動可能なマスを埋めることで捕獲が成立します。通常の場所では最大4体、端では3体、角では2体が必要です。(<a href="https://raw.githubusercontent.com/Farama-Foundation/PettingZoo/master/pettingzoo/sisl/pursuit/pursuit.py">raw.githubusercontent.com</a>)</p>
+<p>したがって現在の実装には、次の矛盾があります。</p>
+<blockquote>
+<p>手分けを強くしすぎると、各敵に1体ずつしか向かわず、誰も包囲を完成できない。</p>
+</blockquote>
+<p>捕獲数が改善したのは、モデルが割り当て方向を完全には信用せず、従来の局所観測や学習済み行動によって結果的に集合しているためかもしれません。</p>
+<h3 id="次に向けた改善案">次に向けた改善案</h3>
+<p><strong>改善案1：敵ではなく「包囲位置」を割り当てる</strong></p>
+<p>ハンガリアン法のタスクを敵そのものではなく、<strong>敵の周囲にある捕獲用のマス</strong>にします。</p>
+<p>例えば中央の敵なら、次の4タスクを生成します。</p>
+<pre><code class="language-text">       上
+左   敵   右
+       下
+</code></pre>
+<p>そしてコスト行列を次のようにします。</p>
+<pre><code class="language-text">各エージェント → 各包囲位置までの移動コスト
+</code></pre>
+<p>これにより、</p>
+<ul>
+<li>複数のエージェントが同じ敵を担当する</li>
+<li>ただし同じ包囲位置には重複しない</li>
+<li>それぞれが別方向から囲む</li>
+<li>捕獲に直接つながる役割分担になる</li>
+</ul>
+<p>という割り当てが可能になります。</p>
+<p>概念的には次の形です。</p>
+<pre><code class="language-python">capture_slots = []
+
+<span class="hljs-keyword">for</span> prey <span class="hljs-keyword">in</span> living_preys:
+    <span class="hljs-keyword">for</span> dy, dx <span class="hljs-keyword">in</span> [(-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), (<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>), (<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)]:
+        sy = prey_y + dy
+        sx = prey_x + dx
+
+        <span class="hljs-keyword">if</span> self._is_valid_capture_position(sy, sx):
+            capture_slots.append({
+                <span class="hljs-string">&quot;prey_id&quot;</span>: prey_id,
+                <span class="hljs-string">&quot;position&quot;</span>: (sy, sx),
+            })
+</code></pre>
+<p>ただし、すべての敵の包囲位置を一度に候補にすると、また各敵へ分散しすぎる可能性があります。先に捕獲対象を数体に絞り、その対象の包囲スロットだけをハンガリアン法へ渡す設計が良いかもしれません。</p>
+<p><strong>改善案2：マンハッタン距離を経路距離に変更する</strong></p>
+<p>現在のコストは次の式です。</p>
+<pre><code class="language-python"><span class="hljs-built_in">abs</span>(ay - py) + <span class="hljs-built_in">abs</span>(ax - px)
+</code></pre>
+<p>これは障害物や他のエージェントを考慮しません。</p>
+<p>例えば、マンハッタン距離では近くても中央障害物を迂回する必要がある場合、実際には遠いターゲットです。そこで、BFSやA*で求めた最短経路長をコストとして使用します。</p>
+<pre><code class="language-python">cost = shortest_path_distance(
+    agent_position,
+    capture_slot_position,
+    obstacle_map,
+)
+</code></pre>
+<p>さらに、同じ通路に味方が集中する場合は混雑コストを加えられます。</p>
+<pre><code class="language-python">total_cost = (
+    path_distance
+    + congestion_weight * expected_congestion
+    + switch_weight * target_switch
+)
+</code></pre>
+<p><strong>改善案3：敵のIDを保持し、現在座標を毎ステップ取得する</strong></p>
+<p>再割り当てを5サイクルに1回とする場合でも、敵の座標自体は毎サイクル更新する必要があります。</p>
+<p>現在のように座標をキャッシュするのではなく、</p>
+<pre><code class="language-python">assignment[agent] = prey_id
+</code></pre>
+<p>として敵のIDを保存します。</p>
+<p>方向計算時に現在位置を読み直します。</p>
+<pre><code class="language-python">prey_id = self._get_agent_assignment(agent)
+prey_position = self._get_current_prey_position(prey_id)
+</code></pre>
+<p>これなら担当を数サイクル固定しても、動いている敵の現在位置を追跡できます。</p>
+<p><strong>改善案4：再割り当て間隔より「持ち替えコスト」を導入する</strong></p>
+<p>単純に5サイクルごとに更新すると、その間に敵が捕獲されたり状況が大きく変わったりしても、古い担当を維持してしまいます。</p>
+<p>より自然なのは、前回と異なる敵へ切り替える際に追加コストを課す方法です。</p>
+<pre><code class="language-python"><span class="hljs-keyword">if</span> previous_target[agent] != candidate_prey_id:
+    cost += switch_penalty
+</code></pre>
+<p>こうすると、</p>
+<ul>
+<li>明確に有利なら担当を変更する</li>
+<li>差が小さい場合は現在の担当を継続する</li>
+<li>敵が捕獲されたら直ちに再割り当てする</li>
+</ul>
+<p>というヒステリシスを実現できます。</p>
+<p>あわせて、以下の場合は強制的に再割り当てします。</p>
+<ul>
+<li>担当した敵が捕獲された</li>
+<li>一定時間、担当地点への距離が縮まっていない</li>
+<li>担当した敵が取得不能になった</li>
+<li>エージェントが一定時間停止している</li>
+</ul>
+<h3 id="所感">所感</h3>
+<blockquote>
+<p>今回、複数のエージェントが同じ最寄りの敵へ集中する問題を解消するため、ハンガリアン法によるターゲット割り当てを導入しました。</p>
+<p>学習結果では、前回と比較してReward Sumの平均が約6.9%、捕獲数の平均が約11.8%向上しました。一方でRewardのばらつきは拡大し、学習終盤の10エピソードでは前回を上回る結果にはなりませんでした。実際の動作を確認したところ、問題としていた一角への居座りも再発しており、本来の目的を達成したとは言えません。</p>
+<p>原因として、現在のハンガリアン法が「1エージェントに1体の敵を割り当てる」構造になっており、複数のエージェントで敵を囲むPursuitの捕獲条件と一致していない点が考えられます。また、割り当てキャッシュの更新に使用しているサイクル番号が正しく取得できず、初期の敵座標を追い続けている可能性もあります。</p>
+<p>次回はキャッシュ更新を修正したうえで、敵そのものではなく、敵の周囲にある包囲位置を各エージェントへ割り当てる方式を試します。また、ターゲット切り替えコストと探索モードを導入し、捕獲後に一角へ残り続ける問題への対策を進めていこうと考えました。</p>
+</blockquote>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/3uTYZjJPP0I?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
