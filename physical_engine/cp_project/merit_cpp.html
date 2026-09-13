@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>C&plus;&plus;&#x3067;&#x5f37;&#x5316;&#x5b66;&#x7fd2;&#x3092;&#x4f7f;&#x3046;&#x30e1;&#x30ea;&#x30c3;&#x30c8;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>強化学習で学習したモデルを実際の機器に組み込む時、PCのようなリソースがリッチな環境ではない場合、どの様にしているのでしょうか。
+サイズが小さいAIモデルであればラズパイで動作させることも可能ですが、当然操作が複雑になってくるとラズパイでは動作させることが難しくなってきます。
+今日はそんな<strong>リソースが限られた環境でAIを動作させるための方法</strong>について説明していきます。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="cで強化学習を使うメリット">C++で強化学習を使うメリット</h2>
+<p>Pythonが強化学習のデファクトスタンダードである現在でも、<strong>C++で強化学習（および環境シミュレーション）を動かすメリットは明確かつ強力に存在します</strong>。</p>
+<p>結論から言うと、最大の理由は <strong>「実行速度とリソース効率（特に大規模並列処理）」</strong> であり、これが直接的に <strong>「実験サイクルの高速化」や「製品化（組み込み・リアルタイム制御）」</strong> に繋がるためです。</p>
+<p>主なメリットを3つの視点から詳しく解説します。</p>
+<h3 id="1-実行速度とリソース効率">1. 実行速度とリソース効率</h3>
+<p>Pythonは言語構造上（GIL: グローバルインタプリタロックや動的型付け）、マルチスレッド並列処理や細かいループ処理が苦手です。</p>
+<ul>
+<li><strong>環境シミュレーションの超高速化</strong>
+強化学習のボトルネックの8割以上は、実は「ニューラルネットワークの計算」ではなく「環境の <code>step()</code> 関数（物理計算、ゲームルール、状態更新）」です。この環境部分をC++で記述すると、Pythonの数倍〜数百倍のスピードで動作します。</li>
+<li><strong>大規模スレッド並列（CPUマルチコアの100%活用）</strong>
+C++ではGILのような制限がないため、何百〜何千ものエージェント環境をマルチスレッドで真の並列化（CPUコアをフル使用）して動かすことができます。</li>
+<li><strong>メモリフットプリントの削減</strong>
+大量のReplay Buffer（過去の遷移データ）を保持する際、Pythonのオブジェクトオーバーヘッドに比べてC++のネイティブメモリ（<code>std::vector</code> など）は劇的に省メモリです。</li>
+</ul>
+<h3 id="2-産業応用実製品組み込みリアルタイムへの直接展開">2. 産業応用・実製品（組み込み・リアルタイム）への直接展開</h3>
+<p>研究室や実験環境を超えて「実際のプロダクト」に強化学習を組み込む場合、C++の一強状態になります。</p>
+<ul>
+<li><strong>リアルタイム性の担保（低レイテンシ）</strong>
+自動運転、ロボット制御、高頻度取引（HFT）、ゲームエンジン（Unreal Engine等）では、<strong>数ミリ秒〜マイクロ秒単位</strong>での制御が必要です。Pythonのガベージコレクション（GC）による突然の処理遅延は許されないため、メモリ管理を厳密に行えるC++が必須となります。</li>
+<li><strong>Python非依存の単体実行環境</strong>
+C++でビルドしたバイナリは、Pythonインタープリタや巨大な依存ライブラリを必要とせず、小型の単体実行ファイルとして組み込み機器（Jetson, Raspberry Pi, 自動車のECUなど）にそのままデプロイ可能です。</li>
+</ul>
+<h3 id="3-pythonのフレームワークとの比較">3. Pythonのフレームワークとの比較</h3>
+<p>現在の強化学習におけるC++の位置づけをまとめると、以下の表のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>比較項目</th>
+<th>Python (PyTorch / RLlib)</th>
+<th>C++ (LibTorch / 自作 / Envs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>開発スピード</strong></td>
+<td>🚀 <strong>極めて早い</strong>（ライブラリ豊富）</td>
+<td>🐢 慎重（型定義やポインタ管理）</td>
+</tr>
+<tr>
+<td><strong>環境step速度</strong></td>
+<td>🐢 遅い（C拡張がない場合）</td>
+<td>🚀 <strong>極めて高速</strong></td>
+</tr>
+<tr>
+<td><strong>デプロイ性</strong></td>
+<td>⚠️ Python環境構築が必要</td>
+<td>⭕ <strong>バイナリ1つで完結</strong></td>
+</tr>
+<tr>
+<td><strong>リアルタイム性</strong></td>
+<td>⚠️ GCによる遅延リスクあり</td>
+<td>⭕ <strong>確定的なミリ秒制御が可能</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="最も現実的な選択ハイブリッド構成">最も現実的な選択：「ハイブリッド構成」</h3>
+<p>現在、多くの研究者や産業界のエンジニアは「100% C++」か「100% Python」かという極端な選択ではなく、<strong>それぞれの強みを活かしたハイブリッド構成</strong>を採用しています。</p>
+<ol>
+<li><strong>環境シミュレータ：C++ で作成</strong>（高速化と並列化のため）</li>
+<li><strong>バインディング：<code>pybind11</code> を使って C++ 環境を Python モジュール化</strong></li>
+<li><strong>学習ループ / MLモデル：Python（PyTorch / Stable-Baselines3）で記述</strong></li>
+</ol>
+<p>（※実際に Isaac Gym や Envpool、PettingZoo のバックエンドなど、現代の超高速強化学習ライブラリの多くはこの構成で作られています。）</p>
+<h2 id="実際のデファクトスタンダード">実際のデファクトスタンダード</h2>
+<p>学習段階はPythonで、実際に組み込んで動作させる場合はC++でということは、現在の産業界（自動運転、ロボット工学、ゲーム開発、高頻度取引など）における「デファクトスタンダード（標準的な手法）」として広く行われています。</p>
+<p>「学習（Training）」と「推論/制御（Inference / Control）」を明確に切り分け、それぞれの言語の強みを最大限に活かす設計です。</p>
+<h3 id="なぜこのアプローチが主流なのか">なぜこのアプローチが主流なのか？</h3>
+<p>強化学習のライフサイクルを2つのフェーズに分けると、求められる要件が真逆になるためです。</p>
+<pre><code>【学習フェーズ（Python）】             【推論・実装フェーズ（C++）】
+ ・柔軟な試行錯誤                     ・絶対的な実行速度
+ ・豊富なRLライブラリ (PyTorch / SB3)   ・低レイテンシ（数ミリ秒以下の確定応答）
+ ・GPUによる大規模並列計算              ・厳密なメモリ管理（GCのフリーズ回避）
+         │                                    ▲
+         └─────── [ ONNX / TensorRT ] ────────┘
+                    (モデルの変換・橋渡し)
+
+</code></pre>
+<ul>
+<li><strong>学習フェーズ（Python）</strong>
+PyTorch や Gymnasium、Stable-Baselines3 などの強力なエコシステムを活用し、シミュレータ上で何百万～何億ステップの学習を高速に試行錯誤します。</li>
+<li><strong>推論・実装フェーズ（C++）</strong>
+学習済みのニューラルネットワーク（ポリシー）の重みデータだけをエクスポートし、C++環境で読み込んで実機（ロボットや車載ECUなど）の制御ループに組み込みます。</li>
+</ul>
+<h3 id="実際に活用されている分野例">実際に活用されている分野・例</h3>
+<p><strong>1. 自動運転・高度運転支援（ADAS）</strong></p>
+<ul>
+<li><strong>学習</strong>: PC上のグラフィックシミュレータ（CARLAや自社環境）で、Python/PyTorchを使い大規模なマルチエージェント強化学習を実施。</li>
+<li><strong>実装</strong>: 学習したモデル（ONNX形式など）をC++ベースの車載ミドルウェア（ROS 2やAUTOSAR）に組み込み、<strong>TensorRT C++ API</strong> などを用いてミリ秒以下のレスポンスでステアリングやアクセルを制御。</li>
+</ul>
+<p><strong>2. 四足歩行ロボット・ヒューマノイド</strong></p>
+<ul>
+<li><strong>学習</strong>: NVIDIA Isaac Gym などを使い、Python環境で数千台のロボットを並列シミュレーションして歩行・跳躍ポリシーを学習。</li>
+<li><strong>実装</strong>: ロボットの実機（Jetsonなどの組み込みボード）上では、C++で記述された制御ループ内で軽量なC++推論ライブラリ（ONNX Runtime C++ や C++版LibTorch）を呼び出し、関節のモータ制御（100Hz〜1kHzの制御周期）を実施。</li>
+</ul>
+<p><strong>3. ゲームエンジン（Unreal Engine / Unity）</strong></p>
+<ul>
+<li><strong>学習</strong>: Python（ML-Agentsなど）と連携してNPCエージェントの強化学習を実行。</li>
+<li><strong>実装</strong>: ゲームのリリース時には、学習済みモデルをC++（Unreal Engineのネイティブコードなど）に組み込み、ゲームのフレームレート（60FPS/120FPS）を落とさずに敵NPCをリアルタイム動作させる。</li>
+</ul>
+<h3 id="pythonからcへ受け渡す具体的な技術スタック">PythonからC++へ受け渡す具体的な技術スタック</h3>
+<p>現場では、学習済みモデルを以下の中間フォーマットや推論エンジンを介してC++へ受け渡すのが一般的です。</p>
+<ol>
+<li><strong>ONNX (Open Neural Network Exchange) + ONNX Runtime (C++)</strong></li>
+</ol>
+<ul>
+<li><strong>最も標準的な方法。</strong> PyTorchで学習したモデルを <code>.onnx</code> ファイルとして書き出し、C++側は軽量な ONNX Runtime C++ API を呼ぶだけで推論できます。</li>
+</ul>
+<ol start="2">
+<li><strong>NVIDIA TensorRT (C++ API)</strong></li>
+</ol>
+<ul>
+<li>エッジデバイス（NVIDIA Jetson等）やGPUを積んだ実機環境で、<strong>極限まで推論速度（レイテンシ）を詰めたい場合</strong>に使われます。</li>
+</ul>
+<ol start="3">
+<li><strong>TensorFlow Lite for Microcontrollers (TFLite Micro)</strong></li>
+</ol>
+<ul>
+<li>OSすらない小さなマイコン（C/C++環境）に、強化学習の推論モデルを載せる際に利用されます。</li>
+</ul>
+<h2 id="実験">実験</h2>
+<p>Google Colab 上で 「CartPole（倒立振子）環境」 の強化学習（DQN）を Python で行い、作成されたモデルを ONNX 形式でエクスポートして C++ 側で超高速に推論・制御するという一連の体験を行うための実験を考えてみました。</p>
+<h3 id="実験のやっていること">実験のやっていること</h3>
+<p>今回の実験で実施する内容は、一言で言うと「強化学習で育てた AI の頭脳を、C++ という超高速なプログラム言語に移植して、実際に動かすシミュレーション」です。</p>
+<h3 id="全体のイメージ">全体のイメージ</h3>
+<ol>
+<li><strong>AIの特訓（Python）</strong></li>
+</ol>
+<ul>
+<li><strong>例え</strong>: パソコン上のシミュレーターで、ロボットに「ほうきを手のひらの上で倒さないように立たせる練習（CartPole）」を何百回もやらせて、上手なバランスの取り方を覚えさせます。</li>
+</ul>
+<ol start="2">
+<li><strong>頭脳の書き出し（ONNX エクスポート）</strong></li>
+</ol>
+<ul>
+<li><strong>例え</strong>: 特訓して賢くなった AI の「脳の構造と判断ルール」を、誰でも読める共通の設計図データ（<code>.onnx</code> ファイル）として保存します。</li>
+</ul>
+<ol start="3">
+<li><strong>超高速な現場への移植（C++）</strong></li>
+</ol>
+<ul>
+<li><strong>例え</strong>: 実際の製品やロボットには、重くて遅い Python ではなく、軽量で超高速に動くC++が使われます。設計図（ONNX）を C++ 側に読み込ませて、ミリ秒単位の超高速な判断でほうきを立てる制御をさせます。</li>
+</ul>
+<h3 id="実験内容">実験内容</h3>
+<p><strong>1. Python で AI を学習させた (PyTorch + DQN)</strong></p>
+<ul>
+<li><strong>対象課題</strong>: <code>CartPole</code>（カートの上に立ったポールが倒れないように、左右に動かしてバランスを取るゲーム）。</li>
+<li><strong>学習手法</strong>: Python上でDQN（Deep Q-Network）という強化学習アルゴリズムを使って、「今の状態（カートの位置・速度、ポールの角度・角速度）」を見て「左右どちらに動かすべきか」を正しく判断できるように試行錯誤させました。</li>
+</ul>
+<p><strong>2. AI モデルを汎用フォーマットに変換した (ONNX)</strong></p>
+<ul>
+<li>AI の学習には Python（PyTorch）が便利ですが、実際に組み込み機器やゲームエンジン、C++ アプリケーションで動かすには不向きです。</li>
+<li>そこで <strong>ONNX（Open Neural Network Exchange）</strong> という標準形式にモデルを書き出しました。これによって Python への依存を無くし、どんな環境でも同じ AI モデルを読み込める状態にします。</li>
+</ul>
+<p><strong>3. C++ 上で高速に推論・物理シミュレーションさせた (ONNX Runtime)</strong></p>
+<ul>
+<li><strong>C++</strong> のコード内で物理エンジン（カートとポールの運動方程式）を記述し、<strong>ONNX Runtime</strong> という C++ 用のライブラリを使って AI に次に取るべき行動を計算させます。</li>
+<li>1 ステップ（0.01秒ごと）の判断をマイクロ秒単位の超高速で処理しながら、倒れずに耐え切る制御。</li>
+<li>この際、ステップごとの動き（位置や角度）を <code>cartpole_log.csv</code> というデータファイルに記録、最終的にこのデータファイルをPythonで可視化します。</li>
+</ul>
+<h3 id="実装">実装</h3>
+<p><strong>Step 1: 環境構築</strong></p>
+<pre><code class="language-sh">!pip install -q onnx onnxscript
+</code></pre>
+<p><strong>Step 2: 【Python】DQN で CartPole を学習し ONNX 出力</strong></p>
+<p>Gymnasium の標準環境である CartPole-v1（カート上のポールを倒れないように左右に動かすタスク）の Q 学習を PyTorch で行い、実用に耐えるモデルを .onnx へ書き出します。</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> gymnasium <span class="hljs-keyword">as</span> gym
+<span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">import</span> torch.optim <span class="hljs-keyword">as</span> optim
+<span class="hljs-keyword">import</span> random
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> deque
+
+<span class="hljs-comment"># 1. CartPole 用の Q ネットワーク定義</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">QNetwork</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, state_dim=<span class="hljs-number">4</span>, action_dim=<span class="hljs-number">2</span></span>):
+        <span class="hljs-built_in">super</span>(QNetwork, self).__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(state_dim, <span class="hljs-number">64</span>),
+            nn.GELU(),
+            nn.Linear(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>),
+            nn.GELU(),
+            nn.Linear(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>),
+            nn.GELU(),
+            nn.Linear(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>),
+            nn.GELU(),
+            nn.Linear(<span class="hljs-number">64</span>, action_dim)
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        <span class="hljs-keyword">return</span> self.fc(x)
+
+<span class="hljs-comment"># 2. ミニ DQN 学習ループ</span>
+env = gym.make(<span class="hljs-string">&#x27;CartPole-v1&#x27;</span>)
+state_dim = env.observation_space.shape[<span class="hljs-number">0</span>]
+action_dim = env.action_space.n
+
+q_net = QNetwork(state_dim, action_dim)
+target_net = QNetwork(state_dim, action_dim)
+target_net.load_state_dict(q_net.state_dict())
+optimizer = optim.Adam(q_net.parameters(), lr=<span class="hljs-number">1e-3</span>)
+
+memory = deque(maxlen=<span class="hljs-number">10000</span>)
+batch_size = <span class="hljs-number">64</span>
+gamma = <span class="hljs-number">0.99</span>
+epsilon = <span class="hljs-number">1.0</span>
+epsilon_min = <span class="hljs-number">0.01</span>
+epsilon_decay = <span class="hljs-number">0.995</span>
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;--- PythonでDQN学習を開始 ---&quot;</span>)
+<span class="hljs-keyword">for</span> episode <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">450</span>):
+    state, _ = env.reset()
+    total_reward = <span class="hljs-number">0</span>
+    done = <span class="hljs-literal">False</span>
+    
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">not</span> done:
+        <span class="hljs-keyword">if</span> random.random() &lt; epsilon:
+            action = env.action_space.sample()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">with</span> torch.no_grad():
+                st_t = torch.FloatTensor(state).unsqueeze(<span class="hljs-number">0</span>)
+                action = q_net(st_t).argmax(dim=<span class="hljs-number">1</span>).item()
+        
+        next_state, reward, terminated, truncated, _ = env.step(action)
+        done = terminated <span class="hljs-keyword">or</span> truncated
+        memory.append((state, action, reward, next_state, done))
+        state = next_state
+        total_reward += reward
+        
+        <span class="hljs-comment"># Q値の更新</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(memory) &gt;= batch_size:
+            batch = random.sample(memory, batch_size)
+            s_b, a_b, r_b, ns_b, d_b = <span class="hljs-built_in">zip</span>(*batch)
+            
+            s_t = torch.FloatTensor(np.array(s_b))
+            a_t = torch.LongTensor(a_b).unsqueeze(<span class="hljs-number">1</span>)
+            r_t = torch.FloatTensor(r_b).unsqueeze(<span class="hljs-number">1</span>)
+            ns_t = torch.FloatTensor(np.array(ns_b))
+            d_t = torch.FloatTensor(d_b).unsqueeze(<span class="hljs-number">1</span>)
+            
+            q_val = q_net(s_t).gather(<span class="hljs-number">1</span>, a_t)
+            <span class="hljs-keyword">with</span> torch.no_grad():
+                max_ns_q = target_net(ns_t).<span class="hljs-built_in">max</span>(<span class="hljs-number">1</span>)[<span class="hljs-number">0</span>].unsqueeze(<span class="hljs-number">1</span>)
+                target_q = r_t + (<span class="hljs-number">1</span> - d_t) * gamma * max_ns_q
+                
+            loss = nn.MSELoss()(q_val, target_q)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+    epsilon = <span class="hljs-built_in">max</span>(epsilon_min, epsilon * epsilon_decay)
+    <span class="hljs-keyword">if</span> (episode + <span class="hljs-number">1</span>) % <span class="hljs-number">30</span> == <span class="hljs-number">0</span>:
+        target_net.load_state_dict(q_net.state_dict())
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Episode <span class="hljs-subst">{episode + <span class="hljs-number">1</span>}</span>/450 - Total Reward: <span class="hljs-subst">{total_reward}</span>&quot;</span>)
+
+env.close()
+
+<span class="hljs-comment"># 3. 学習済みモデルを ONNX 形式でエクスポート</span>
+q_net.<span class="hljs-built_in">eval</span>()
+dummy_input = torch.randn(<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, dtype=torch.float32)
+onnx_filename = <span class="hljs-string">&quot;cartpole_dqn.onnx&quot;</span>
+
+torch.onnx.export(
+    q_net,
+    dummy_input,
+    onnx_filename,
+    input_names=[<span class="hljs-string">&quot;state&quot;</span>],
+    output_names=[<span class="hljs-string">&quot;q_values&quot;</span>],
+    dynamic_axes={<span class="hljs-string">&quot;state&quot;</span>: {<span class="hljs-number">0</span>: <span class="hljs-string">&quot;batch_size&quot;</span>}, <span class="hljs-string">&quot;q_values&quot;</span>: {<span class="hljs-number">0</span>: <span class="hljs-string">&quot;batch_size&quot;</span>}}
+)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n✅ 学習完了: ONNXモデルをエクスポートしました -&gt; <span class="hljs-subst">{onnx_filename}</span>&quot;</span>)
+</code></pre>
+<p>実行するとこんなonnxファイルが出力されます。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\cp_project\image\merit_cpp\1789254688813.png" alt="1789254688813"></p>
+<p><strong>Step3. C++でモデルによる制御</strong></p>
+<p>cartpole_control.cpp を作成します。この C++ コードは以下の処理を完全ネイティブで行います。</p>
+<ul>
+<li>CartPole の物理方程式（質量、長さ、重力、運動方程式）を自作クラスとして実装。</li>
+<li>ONNX Runtime を用いて Python が出力した Q ネットワーク（.onnx）を読み込む。</li>
+<li>物理シミュレータの状態（位置、速度、角度、角速度）を ONNX モデルに流し込み、決定された行動（左押す/右押す）を取りながら制御ループを回す。</li>
+</ul>
+<pre><code class="language-cpp">%%writefile cartpole_control.cpp
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cmath&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;chrono&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;fstream&gt;</span> <span class="hljs-comment">// CSV出力用</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;onnxruntime_cxx_api.h&gt;</span></span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CartPoleEnv</span> {
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-type">double</span> x = <span class="hljs-number">0.0</span>;
+    <span class="hljs-type">double</span> x_dot = <span class="hljs-number">0.0</span>;
+    <span class="hljs-type">double</span> theta = <span class="hljs-number">0.05</span>;
+    <span class="hljs-type">double</span> theta_dot = <span class="hljs-number">0.0</span>;
+
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> gravity = <span class="hljs-number">9.8</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> masscart = <span class="hljs-number">1.0</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> masspole = <span class="hljs-number">0.1</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> total_mass = masscart + masspole;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> length = <span class="hljs-number">0.5</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> polemass_length = masspole * length;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> force_mag = <span class="hljs-number">10.0</span>;
+    <span class="hljs-type">const</span> <span class="hljs-type">double</span> tau = <span class="hljs-number">0.01</span>;
+
+    <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">step</span><span class="hljs-params">(<span class="hljs-type">int</span> action)</span> </span>{
+        <span class="hljs-type">double</span> force = (action == <span class="hljs-number">1</span>) ? force_mag : -force_mag;
+        <span class="hljs-type">double</span> costheta = std::<span class="hljs-built_in">cos</span>(theta);
+        <span class="hljs-type">double</span> sintheta = std::<span class="hljs-built_in">sin</span>(theta);
+
+        <span class="hljs-type">double</span> temp = (force + polemass_length * theta_dot * theta_dot * sintheta) / total_mass;
+        <span class="hljs-type">double</span> thetaacc = (gravity * sintheta - costheta * temp) / 
+                           (length * (<span class="hljs-number">4.0</span> / <span class="hljs-number">3.0</span> - masspole * costheta * costheta / total_mass));
+        <span class="hljs-type">double</span> xacc = temp - polemass_length * thetaacc * costheta / total_mass;
+
+        x += tau * x_dot;
+        x_dot += tau * xacc;
+        theta += tau * theta_dot;
+        theta_dot += tau * thetaacc;
+
+        <span class="hljs-type">bool</span> failed = (x &lt; <span class="hljs-number">-2.4</span> || x &gt; <span class="hljs-number">2.4</span> || theta &lt; <span class="hljs-number">-0.2095</span> || theta &gt; <span class="hljs-number">0.2095</span>);
+        <span class="hljs-keyword">return</span> !failed;
+    }
+
+    <span class="hljs-function">std::vector&lt;<span class="hljs-type">float</span>&gt; <span class="hljs-title">get_state</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+        <span class="hljs-keyword">return</span> { <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">float</span>&gt;(x), <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">float</span>&gt;(x_dot), 
+                 <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">float</span>&gt;(theta), <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">float</span>&gt;(theta_dot) };
+    }
+};
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function">Ort::Env <span class="hljs-title">env</span><span class="hljs-params">(ORT_LOGGING_LEVEL_WARNING, <span class="hljs-string">&quot;CartPoleInference&quot;</span>)</span></span>;
+    Ort::SessionOptions session_options;
+    session_options.<span class="hljs-built_in">SetIntraOpNumThreads</span>(<span class="hljs-number">1</span>);
+
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* model_path = <span class="hljs-string">&quot;cartpole_dqn.onnx&quot;</span>;
+    <span class="hljs-function">Ort::Session <span class="hljs-title">session</span><span class="hljs-params">(env, model_path, session_options)</span></span>;
+
+    CartPoleEnv cartpole;
+    <span class="hljs-keyword">auto</span> memory_info = Ort::MemoryInfo::<span class="hljs-built_in">CreateCpu</span>(OrtArenaAllocator, OrtMemTypeDefault);
+
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* input_names[] = {<span class="hljs-string">&quot;state&quot;</span>};
+    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* output_names[] = {<span class="hljs-string">&quot;q_values&quot;</span>};
+    std::vector&lt;<span class="hljs-type">int64_t</span>&gt; input_shape = {<span class="hljs-number">1</span>, <span class="hljs-number">4</span>};
+
+    <span class="hljs-comment">// CSV ファイルを開く</span>
+    <span class="hljs-function">std::ofstream <span class="hljs-title">log_file</span><span class="hljs-params">(<span class="hljs-string">&quot;cartpole_log.csv&quot;</span>)</span></span>;
+    log_file &lt;&lt; <span class="hljs-string">&quot;step,x,theta,action\n&quot;</span>;
+
+    <span class="hljs-type">int</span> steps = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">while</span> (steps &lt; <span class="hljs-number">500</span>) {
+        std::vector&lt;<span class="hljs-type">float</span>&gt; state = cartpole.<span class="hljs-built_in">get_state</span>();
+
+        <span class="hljs-comment">// ログ書き出し (ステップ数, カート位置, ポール角度)</span>
+        log_file &lt;&lt; steps &lt;&lt; <span class="hljs-string">&quot;,&quot;</span> &lt;&lt; cartpole.x &lt;&lt; <span class="hljs-string">&quot;,&quot;</span> &lt;&lt; cartpole.theta &lt;&lt; <span class="hljs-string">&quot;,0\n&quot;</span>;
+
+        Ort::Value input_tensor = Ort::Value::<span class="hljs-built_in">CreateTensor</span>&lt;<span class="hljs-type">float</span>&gt;(
+            memory_info, state.<span class="hljs-built_in">data</span>(), state.<span class="hljs-built_in">size</span>(), input_shape.<span class="hljs-built_in">data</span>(), input_shape.<span class="hljs-built_in">size</span>());
+
+        <span class="hljs-keyword">auto</span> output_tensors = session.<span class="hljs-built_in">Run</span>(
+            Ort::RunOptions{<span class="hljs-literal">nullptr</span>}, input_names, &amp;input_tensor, <span class="hljs-number">1</span>, output_names, <span class="hljs-number">1</span>);
+
+        <span class="hljs-type">float</span>* q_values = output_tensors[<span class="hljs-number">0</span>].<span class="hljs-built_in">GetTensorMutableData</span>&lt;<span class="hljs-type">float</span>&gt;();
+        <span class="hljs-type">int</span> action = (q_values[<span class="hljs-number">1</span>] &gt; q_values[<span class="hljs-number">0</span>]) ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>;
+
+        <span class="hljs-type">bool</span> alive = cartpole.<span class="hljs-built_in">step</span>(action);
+        steps++;
+
+        <span class="hljs-keyword">if</span> (!alive) <span class="hljs-keyword">break</span>;
+    }
+    log_file.<span class="hljs-built_in">close</span>();
+
+    std::cout &lt;&lt; <span class="hljs-string">&quot;ログ出力完了: &quot;</span> &lt;&lt; steps &lt;&lt; <span class="hljs-string">&quot; ステップ分のデータを出力しました。&quot;</span> &lt;&lt; std::endl;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</code></pre>
+<p>以下で作成したcppファイルをコンパイルしてcarpoleの制御を行います。</p>
+<pre><code class="language-bash">%%bash
+g++ -O3 cartpole_control.cpp -o cartpole_control \
+    -I./onnxruntime/include \
+    -L./onnxruntime/lib \
+    -lonnxruntime -std=c++17
+
+LD_LIBRARY_PATH=./onnxruntime/lib ./cartpole_control
+</code></pre>
+<p>この動作を可視化するとこんな感じになります。
+いきなり倒立振子が倒れてしまいますが、制御しようとしている様子が確認出来ます。</p>
+<img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\cp_project\image\merit_cpp\cartpole_result.gif" width="550px">
+<h2 id="総括">総括</h2>
+<p>今回の話の内容の主旨をまとめます。</p>
+<h3 id="1-なぜcなのか速度とリアルタイム性">1. なぜC++なのか：「速度」と「リアルタイム性」</h3>
+<p>強化学習の計算コストは、ニューラルネットの学習だけでなく<strong>環境シミュレーション（<code>step()</code>）</strong> にも大きく偏っています。C++を使う最大の理由は：</p>
+<ul>
+<li><strong>環境シミュレーションの高速化</strong>：Pythonに比べて数倍〜数百倍の速度向上</li>
+<li><strong>真の並列処理</strong>：GILの制約がなく、マルチコアをフル活用可能</li>
+<li><strong>リアルタイム制御</strong>：ガベージコレクション（GC）による遅延がなく、ミリ秒以下の確定的な応答が可能</li>
+<li><strong>組み込み展開</strong>：Pythonランタイムなしで、バイナリ単体としてECUや組み込みボードにデプロイ可能</li>
+</ul>
+<h3 id="2-産業界のデファクトスタンダードハイブリッド構成">2. 産業界のデファクトスタンダード：「ハイブリッド構成」</h3>
+<p>現代の強化学習の現場では、<strong>「学習はPython、実装はC++」</strong> という分業が標準です。</p>
+<table>
+<thead>
+<tr>
+<th>フェーズ</th>
+<th>言語</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>学習（Training）</strong></td>
+<td>Python</td>
+<td>豊富なライブラリ（PyTorch、Gymnasium）、高速な試行錯誤</td>
+</tr>
+<tr>
+<td><strong>推論・制御（Inference）</strong></td>
+<td>C++</td>
+<td>低レイテンシ、厳密なメモリ管理、組み込み対応</td>
+</tr>
+</tbody>
+</table>
+<p>この橋渡しには <strong>ONNX</strong> や <strong>TensorRT</strong> などの中間フォーマットが使われ、Pythonで育てたモデルをC++の実機に移植します。</p>
+<h3 id="3-実験の本質知識の移植">3. 実験の本質：「知識の移植」</h3>
+<p>提示されたCartPoleの実験は、上記のハイブリッド構成を具体的に体験するものです。</p>
+<ol>
+<li><strong>Pythonで「頭脳」を育てる</strong>：PyTorchでDQNを学習し、ポールのバランス制御を覚えさせる</li>
+<li><strong>ONNXで「設計図」に変換</strong>：言語に依存しない標準フォーマットでモデルを書き出す</li>
+<li><strong>C++で「現場」に実装</strong>：ONNX Runtimeを使ってC++上で超高速推論し、物理シミュレーションと組み合わせてリアルタイム制御を実行</li>
+</ol>
+<h3 id="結論">結論</h3>
+<p>この内容が示す本質的なメッセージは以下の一点です。</p>
+<blockquote>
+<p><strong>「強化学習はPythonで育て、C++で使う」</strong></p>
+</blockquote>
+<p>研究・開発の段階ではPythonの生産性を活かし、製品化・実装の段階ではC++のパフォーマンスとリアルタイム性を活かす。これが、自動運転、ロボット工学、ゲームAIなどの産業界における強化学習の現実的な姿です。</p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/3uTYZjJPP0I?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+        </body>
+        </html>
