@@ -1,7 +1,9 @@
 
+強化学習で学習したモデルを実際の機器に組み込む時、PCのようなリソースがリッチな環境ではない場合、どの様にしているのでしょうか。
+サイズが小さいAIモデルであればラズパイで動作させることも可能ですが、当然操作が複雑になってくるとラズパイでは動作させることが難しくなってきます。
+今日はそんな**リソースが限られた環境でAIを動作させるための方法**について説明していきます。
 
-
-## そもそもc++で強化学習メリット
+## C++で強化学習を使うメリット
 
 Pythonが強化学習のデファクトスタンダードである現在でも、**C++で強化学習（および環境シミュレーション）を動かすメリットは明確かつ強力に存在します**。
 
@@ -110,7 +112,55 @@ __3. ゲームエンジン（Unreal Engine / Unity）__
 
 
 ## 実験
+Google Colab 上で 「CartPole（倒立振子）環境」 の強化学習（DQN）を Python で行い、作成されたモデルを ONNX 形式でエクスポートして C++ 側で超高速に推論・制御するという一連の体験を行うための実験を考えてみました。
 
+### 実験のやっていること
+
+今回の実験で実施する内容は、一言で言うと「強化学習で育てた AI の頭脳を、C++ という超高速なプログラム言語に移植して、実際に動かすシミュレーション」です。
+
+### 全体のイメージ
+
+1. **AIの特訓（Python）**
+* **例え**: パソコン上のシミュレーターで、ロボットに「ほうきを手のひらの上で倒さないように立たせる練習（CartPole）」を何百回もやらせて、上手なバランスの取り方を覚えさせます。
+
+
+2. **頭脳の書き出し（ONNX エクスポート）**
+* **例え**: 特訓して賢くなった AI の「脳の構造と判断ルール」を、誰でも読める共通の設計図データ（`.onnx` ファイル）として保存します。
+
+
+3. **超高速な現場への移植（C++）**
+* **例え**: 実際の製品やロボットには、重くて遅い Python ではなく、軽量で超高速に動くC++が使われます。設計図（ONNX）を C++ 側に読み込ませて、ミリ秒単位の超高速な判断でほうきを立てる制御をさせます。
+
+### 実験内容
+
+__1. Python で AI を学習させた (PyTorch + DQN)__
+
+* **対象課題**: `CartPole`（カートの上に立ったポールが倒れないように、左右に動かしてバランスを取るゲーム）。
+* **学習手法**: Python上でDQN（Deep Q-Network）という強化学習アルゴリズムを使って、「今の状態（カートの位置・速度、ポールの角度・角速度）」を見て「左右どちらに動かすべきか」を正しく判断できるように試行錯誤させました。
+
+__2. AI モデルを汎用フォーマットに変換した (ONNX)__
+
+* AI の学習には Python（PyTorch）が便利ですが、実際に組み込み機器やゲームエンジン、C++ アプリケーションで動かすには不向きです。
+* そこで **ONNX（Open Neural Network Exchange）** という標準形式にモデルを書き出しました。これによって Python への依存を無くし、どんな環境でも同じ AI モデルを読み込める状態にします。
+
+__3. C++ 上で高速に推論・物理シミュレーションさせた (ONNX Runtime)__
+
+* **C++** のコード内で物理エンジン（カートとポールの運動方程式）を記述し、**ONNX Runtime** という C++ 用のライブラリを使って AI に次に取るべき行動を計算させます。
+* 1 ステップ（0.01秒ごと）の判断をマイクロ秒単位の超高速で処理しながら、倒れずに耐え切る制御。
+* この際、ステップごとの動き（位置や角度）を `cartpole_log.csv` というデータファイルに記録、最終的にこのデータファイルをPythonで可視化します。
+
+
+### 実装
+
+__Step 1: 環境構築__
+
+```sh
+!pip install -q onnx onnxscript
+```
+
+__Step 2: 【Python】DQN で CartPole を学習し ONNX 出力__
+
+Gymnasium の標準環境である CartPole-v1（カート上のポールを倒れないように左右に動かすタスク）の Q 学習を PyTorch で行い、実用に耐えるモデルを .onnx へ書き出します。
 
 ```python
 import gymnasium as gym
@@ -127,9 +177,13 @@ class QNetwork(nn.Module):
         super(QNetwork, self).__init__()
         self.fc = nn.Sequential(
             nn.Linear(state_dim, 64),
-            nn.ReLU(),
+            nn.GELU(),
             nn.Linear(64, 64),
-            nn.ReLU(),
+            nn.GELU(),
+            nn.Linear(64, 64),
+            nn.GELU(),
+            nn.Linear(64, 64),
+            nn.GELU(),
             nn.Linear(64, action_dim)
         )
 
@@ -154,7 +208,7 @@ epsilon_min = 0.01
 epsilon_decay = 0.995
 
 print("--- PythonでDQN学習を開始 ---")
-for episode in range(150):
+for episode in range(450):
     state, _ = env.reset()
     total_reward = 0
     done = False
@@ -197,7 +251,7 @@ for episode in range(150):
     epsilon = max(epsilon_min, epsilon * epsilon_decay)
     if (episode + 1) % 30 == 0:
         target_net.load_state_dict(q_net.state_dict())
-        print(f"Episode {episode + 1}/150 - Total Reward: {total_reward}")
+        print(f"Episode {episode + 1}/450 - Total Reward: {total_reward}")
 
 env.close()
 
@@ -216,4 +270,169 @@ torch.onnx.export(
 )
 print(f"\n✅ 学習完了: ONNXモデルをエクスポートしました -> {onnx_filename}")
 ```
+
+実行するとこんなonnxファイルが出力されます。
+
+![1789254688813](image/merit_cpp/1789254688813.png)
+
+__Step3. C++でモデルによる制御__
+
+cartpole_control.cpp を作成します。この C++ コードは以下の処理を完全ネイティブで行います。
+- CartPole の物理方程式（質量、長さ、重力、運動方程式）を自作クラスとして実装。
+- ONNX Runtime を用いて Python が出力した Q ネットワーク（.onnx）を読み込む。
+- 物理シミュレータの状態（位置、速度、角度、角速度）を ONNX モデルに流し込み、決定された行動（左押す/右押す）を取りながら制御ループを回す。
+
+```cpp
+%%writefile cartpole_control.cpp
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <chrono>
+#include <fstream> // CSV出力用
+#include <onnxruntime_cxx_api.h>
+
+class CartPoleEnv {
+public:
+    double x = 0.0;
+    double x_dot = 0.0;
+    double theta = 0.05;
+    double theta_dot = 0.0;
+
+    const double gravity = 9.8;
+    const double masscart = 1.0;
+    const double masspole = 0.1;
+    const double total_mass = masscart + masspole;
+    const double length = 0.5;
+    const double polemass_length = masspole * length;
+    const double force_mag = 10.0;
+    const double tau = 0.01;
+
+    bool step(int action) {
+        double force = (action == 1) ? force_mag : -force_mag;
+        double costheta = std::cos(theta);
+        double sintheta = std::sin(theta);
+
+        double temp = (force + polemass_length * theta_dot * theta_dot * sintheta) / total_mass;
+        double thetaacc = (gravity * sintheta - costheta * temp) / 
+                           (length * (4.0 / 3.0 - masspole * costheta * costheta / total_mass));
+        double xacc = temp - polemass_length * thetaacc * costheta / total_mass;
+
+        x += tau * x_dot;
+        x_dot += tau * xacc;
+        theta += tau * theta_dot;
+        theta_dot += tau * thetaacc;
+
+        bool failed = (x < -2.4 || x > 2.4 || theta < -0.2095 || theta > 0.2095);
+        return !failed;
+    }
+
+    std::vector<float> get_state() const {
+        return { static_cast<float>(x), static_cast<float>(x_dot), 
+                 static_cast<float>(theta), static_cast<float>(theta_dot) };
+    }
+};
+
+int main() {
+    Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "CartPoleInference");
+    Ort::SessionOptions session_options;
+    session_options.SetIntraOpNumThreads(1);
+
+    const char* model_path = "cartpole_dqn.onnx";
+    Ort::Session session(env, model_path, session_options);
+
+    CartPoleEnv cartpole;
+    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+    const char* input_names[] = {"state"};
+    const char* output_names[] = {"q_values"};
+    std::vector<int64_t> input_shape = {1, 4};
+
+    // CSV ファイルを開く
+    std::ofstream log_file("cartpole_log.csv");
+    log_file << "step,x,theta,action\n";
+
+    int steps = 0;
+    while (steps < 500) {
+        std::vector<float> state = cartpole.get_state();
+
+        // ログ書き出し (ステップ数, カート位置, ポール角度)
+        log_file << steps << "," << cartpole.x << "," << cartpole.theta << ",0\n";
+
+        Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
+            memory_info, state.data(), state.size(), input_shape.data(), input_shape.size());
+
+        auto output_tensors = session.Run(
+            Ort::RunOptions{nullptr}, input_names, &input_tensor, 1, output_names, 1);
+
+        float* q_values = output_tensors[0].GetTensorMutableData<float>();
+        int action = (q_values[1] > q_values[0]) ? 1 : 0;
+
+        bool alive = cartpole.step(action);
+        steps++;
+
+        if (!alive) break;
+    }
+    log_file.close();
+
+    std::cout << "ログ出力完了: " << steps << " ステップ分のデータを出力しました。" << std::endl;
+    return 0;
+}
+```
+
+以下で作成したcppファイルをコンパイルしてcarpoleの制御を行います。
+
+```bash
+%%bash
+g++ -O3 cartpole_control.cpp -o cartpole_control \
+    -I./onnxruntime/include \
+    -L./onnxruntime/lib \
+    -lonnxruntime -std=c++17
+
+LD_LIBRARY_PATH=./onnxruntime/lib ./cartpole_control
+```
+
+この動作を可視化するとこんな感じになります。
+いきなり倒立振子が倒れてしまいますが、制御しようとしている様子が確認出来ます。
+
+<img src="image/merit_cpp/cartpole_result.gif" width="550px">
+
+## 総括
+
+今回の話の内容の主旨をまとめます。
+
+### 1. なぜC++なのか：「速度」と「リアルタイム性」
+
+強化学習の計算コストは、ニューラルネットの学習だけでなく**環境シミュレーション（`step()`）** にも大きく偏っています。C++を使う最大の理由は：
+
+- **環境シミュレーションの高速化**：Pythonに比べて数倍〜数百倍の速度向上
+- **真の並列処理**：GILの制約がなく、マルチコアをフル活用可能
+- **リアルタイム制御**：ガベージコレクション（GC）による遅延がなく、ミリ秒以下の確定的な応答が可能
+- **組み込み展開**：Pythonランタイムなしで、バイナリ単体としてECUや組み込みボードにデプロイ可能
+
+### 2. 産業界のデファクトスタンダード：「ハイブリッド構成」
+
+現代の強化学習の現場では、**「学習はPython、実装はC++」** という分業が標準です。
+
+| フェーズ | 言語 | 理由 |
+|----------|------|------|
+| **学習（Training）** | Python | 豊富なライブラリ（PyTorch、Gymnasium）、高速な試行錯誤 |
+| **推論・制御（Inference）** | C++ | 低レイテンシ、厳密なメモリ管理、組み込み対応 |
+
+この橋渡しには **ONNX** や **TensorRT** などの中間フォーマットが使われ、Pythonで育てたモデルをC++の実機に移植します。
+
+### 3. 実験の本質：「知識の移植」
+
+提示されたCartPoleの実験は、上記のハイブリッド構成を具体的に体験するものです。
+
+1. **Pythonで「頭脳」を育てる**：PyTorchでDQNを学習し、ポールのバランス制御を覚えさせる
+2. **ONNXで「設計図」に変換**：言語に依存しない標準フォーマットでモデルを書き出す
+3. **C++で「現場」に実装**：ONNX Runtimeを使ってC++上で超高速推論し、物理シミュレーションと組み合わせてリアルタイム制御を実行
+
+### 結論
+
+この内容が示す本質的なメッセージは以下の一点です。
+
+> **「強化学習はPythonで育て、C++で使う」**
+
+研究・開発の段階ではPythonの生産性を活かし、製品化・実装の段階ではC++のパフォーマンスとリアルタイム性を活かす。これが、自動運転、ロボット工学、ゲームAIなどの産業界における強化学習の現実的な姿です。
 
