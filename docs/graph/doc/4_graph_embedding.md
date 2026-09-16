@@ -651,4 +651,235 @@ __4. グラフ理論の文脈で学習しているもの__
 | **頂点の役割** | 橋渡しノード（境界に位置する頂点）は、複数のコミュニティの間に配置される |
 | **次数の影響** | 次数の高い頂点は多くのウォークに出現し、ベクトルの性質に影響する |
 
+__例題:__
+
+以下に、Skip-gramの学習について確認する例題を出題します。
+
+
+__問題設定__
+
+語彙5語（猫、犬、走る、食べる、かわいい）の小さなコーパスで、Skip-gramをスクラッチ実装し、**単語ベクトルが共起パターンを反映すること**を確認します。
+
+__訓練データ__
+
+ウィンドウサイズ1で生成した16ペアの訓練データです。
+
+```
+  猫 → かわいい
+かわいい → 猫
+  犬 → かわいい
+かわいい → 犬
+  猫 → 走る
+  走る → 猫
+  犬 → 走る
+  走る → 犬
+  猫 → 食べる
+食べる → 猫
+  犬 → 食べる
+食べる → 犬
+  ...（計16ペア）
+```
+
+__学習結果__
+
+**学習後の単語ベクトル（2次元）:**
+
+| 単語 | 次元1 | 次元2 |
+|------|------|------|
+| 猫 | -0.8246 | 0.1613 |
+| 犬 | -0.8625 | 0.1689 |
+| 走る | 0.9275 | -0.1819 |
+| 食べる | 0.9167 | -0.1708 |
+| かわいい | 0.9166 | -0.1775 |
+
+**コサイン類似度行列:**
+
+| | 猫 | 犬 | 走る | 食べる | かわいい |
+|---|---|---|---|---|---|
+| **猫** | 1.0000 | 1.0000 | -1.0000 | -1.0000 | -1.0000 |
+| **犬** | 1.0000 | 1.0000 | -1.0000 | -1.0000 | -1.0000 |
+| **走る** | -1.0000 | -1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| **食べる** | -1.0000 | -1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| **かわいい** | -1.0000 | -1.0000 | 1.0000 | 1.0000 | 1.0000 |
+
+__pythonコード__
+
+```python
+"""
+============================================================
+Skip-gram 学習体験例題（クラッチ実装）
+============================================================
+【問題】
+語彙5語（猫、犬、走る、食べる、かわいい）の小さなコーパスで、
+Skip-gramの学習をスクラッチ実装し、単語ベクトルが共起パターンを
+反映することを確認する。
+
+【必要ライブラリ】
+  pip install numpy matplotlib
+============================================================
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------------------
+# 1. 語彙と訓練文章の定義
+# ------------------------------------------------------------
+vocab = ["猫", "犬", "走る", "食べる", "かわいい"]
+word2idx = {w: i for i, w in enumerate(vocab)}
+idx2word = {i: w for w, i in word2idx.items()}
+V = len(vocab)
+
+sentences = [
+    ["猫", "かわいい"],
+    ["犬", "かわいい"],
+    ["猫", "走る"],
+    ["犬", "走る"],
+    ["猫", "食べる"],
+    ["犬", "食べる"],
+    ["かわいい", "猫"],
+    ["かわいい", "犬"],
+]
+
+# ------------------------------------------------------------
+# 2. Skip-gram訓練データの生成
+# ------------------------------------------------------------
+def generate_skipgram_data(sentences, window_size=1):
+    data = []
+    for sent in sentences:
+        for i, center in enumerate(sent):
+            for j in range(max(0, i - window_size), min(len(sent), i + window_size + 1)):
+                if i != j:
+                    data.append((word2idx[center], word2idx[sent[j]]))
+    return data
+
+training_data = generate_skipgram_data(sentences, window_size=1)
+print("=== Skip-gram 訓練データ ===")
+for c, t in training_data:
+    print(f"  {idx2word[c]:>5s} → {idx2word[t]}")
+
+# ------------------------------------------------------------
+# 3. ネットワークの初期化
+# ------------------------------------------------------------
+EMB_DIM = 2
+lr = 0.1
+epochs = 500
+
+np.random.seed(42)
+W_in = np.random.randn(V, EMB_DIM) * 0.1
+W_out = np.random.randn(EMB_DIM, V) * 0.1
+
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))
+    return exp_x / np.sum(exp_x)
+
+# ------------------------------------------------------------
+# 4. 学習ループ
+# ------------------------------------------------------------
+loss_history = []
+
+for epoch in range(epochs):
+    total_loss = 0
+    np.random.shuffle(training_data)
+    for center_idx, context_idx in training_data:
+        # 順伝播
+        h = W_in[center_idx]
+        u = np.dot(W_out.T, h)
+        y_pred = softmax(u)
+        loss = -np.log(y_pred[context_idx] + 1e-8)
+        total_loss += loss
+
+        # 逆伝播
+        e = y_pred.copy()
+        e[context_idx] -= 1
+        dW_out = np.outer(h, e)
+        dW_in = np.dot(W_out, e)
+
+        # 更新
+        W_in[center_idx] -= lr * dW_in
+        W_out -= lr * dW_out
+
+    loss_history.append(total_loss / len(training_data))
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch:>3d} | Loss: {loss_history[-1]:.4f}")
+
+# ------------------------------------------------------------
+# 5. 結果の表示
+# ------------------------------------------------------------
+print("\n=== 学習後の単語ベクトル ===")
+for i, word in idx2word.items():
+    print(f"  {word:>5s}: [{W_in[i][0]:>8.4f}, {W_in[i][1]:>8.4f}]")
+
+# コサイン類似度
+def cos_sim(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-8)
+
+print("\n=== コサイン類似度行列 ===")
+print(f"{'':>5s}", end="")
+for w in vocab:
+    print(f"{w:>10s}", end="")
+print()
+for w1 in vocab:
+    print(f"{w1:>5s}", end="")
+    for w2 in vocab:
+        print(f"{cos_sim(W_in[word2idx[w1]], W_in[word2idx[w2]]):>10.4f}", end="")
+    print()
+
+# ------------------------------------------------------------
+# 6. 可視化
+# ------------------------------------------------------------
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+axes[0].plot(loss_history, color="#2c3e50")
+axes[0].set_title("Training Loss")
+axes[0].set_xlabel("Epoch")
+axes[0].set_ylabel("Cross-Entropy Loss")
+axes[0].grid(True, alpha=0.3)
+
+colors = {"猫": "#e74c3c", "犬": "#3498db", "走る": "#2ecc71",
+          "食べる": "#f39c12", "かわいい": "#9b59b6"}
+for i, word in idx2word.items():
+    x, y = W_in[i]
+    axes[1].scatter(x, y, c=colors[word], s=400, edgecolors="black", zorder=3)
+    axes[1].annotate(word, (x, y), textcoords="offset points", xytext=(8, 5),
+                     fontsize=14, fontweight="bold")
+axes[1].set_title("Skip-gram Embeddings (2D)")
+axes[1].axhline(0, color="gray", linestyle="--", alpha=0.3)
+axes[1].axvline(0, color="gray", linestyle="--", alpha=0.3)
+axes[1].grid(True, alpha=0.3)
+axes[1].set_aspect("equal", adjustable="datalim")
+
+plt.tight_layout()
+plt.savefig("skipgram_result.png", dpi=150)
+plt.show()
+```
+
+__結果の解釈__
+
+以下は学習の結果生成されたベクトルの結果を以下に示す。
+
+![1789506456801](image/4_graph_embedding/1789506456801.png)
+
+1. **「猫」と「犬」はほぼ同じベクトル位置に集まる**
+   - 両方とも「走る」「食べる」「かわいい」と同じように共起するため
+   - つまり「猫」と「犬」は**文脈上の役割が似ている**
+
+2. **「走る」「食べる」「かわいい」は別のクラスタを形成する**
+   - これらは「猫」「犬」と共起するが、互いに直接共起しない
+   - したがって「猫・犬」とは反対側のベクトル空間に配置される
+
+3. **損失（Loss）はエポックとともに減少する**
+   - 初期: 1.6116 → 最終: 0.8941
+   - ニューラルネットワークが共起パターンを学習している証拠
+
+__この例題で学べること__
+
+| 確認項目 | 結果 |
+|---------|------|
+| Skip-gramはニューラルネットワークか | **はい**（1隠れ層の浅いネットワーク） |
+| 何を学習するか | **入力重み行列**（各行が単語ベクトル） |
+| なぜ「猫」と「犬」が似るか | **共起パターンが同じ**（同じ単語と一緒に現れる） |
+| ベクトルの幾何学的距離は何を表すか | **共起確率の統計的関係** |
+
+
 
