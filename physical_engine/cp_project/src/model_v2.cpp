@@ -412,3 +412,154 @@ int main() {
     
     return 0;
 }
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+
+// Sigmoid活性化関数とその微分
+inline double sigmoid(double x) {
+    return 1.0 / (1.0 + std::exp(-x));
+}
+inline double sigmoid_derivative(double x) {
+    return x * (1.0 - x); // すでにSigmoid適用後の値を受け取る前提
+}
+
+class NeuralNetwork {
+private:
+    int input_nodes;
+    int hidden_nodes;
+    int output_nodes;
+    double learning_rate;
+
+    std::vector<std::vector<double>> weights_input_hidden;
+    std::vector<std::vector<double>> weights_hidden_output;
+    std::vector<double> bias_hidden;
+    std::vector<double> bias_output;
+
+    // 0~1のランダムな初期値を生成
+    double random_weight() {
+        return (double)rand() / RAND_MAX * 2.0 - 1.0; // -1.0 ~ 1.0
+    }
+
+public:
+    NeuralNetwork(int input, int hidden, int output, double lr = 0.5)
+        : input_nodes(input), hidden_nodes(hidden), output_nodes(output), learning_rate(lr) {
+        
+        std::srand(std::time(nullptr));
+
+        // 重み・バイアスの初期化
+        weights_input_hidden.resize(input_nodes, std::vector<double>(hidden_nodes));
+        for (int i = 0; i < input_nodes; ++i) {
+            for (int j = 0; j < hidden_nodes; ++j) {
+                weights_input_hidden[i][j] = random_weight();
+            }
+        }
+
+        weights_hidden_output.resize(hidden_nodes, std::vector<double>(output_nodes));
+        for (int i = 0; i < hidden_nodes; ++i) {
+            for (int j = 0; j < output_nodes; ++j) {
+                weights_hidden_output[i][j] = random_weight();
+            }
+        }
+
+        bias_hidden.resize(hidden_nodes);
+        for (int i = 0; i < hidden_nodes; ++i) bias_hidden[i] = random_weight();
+
+        bias_output.resize(output_nodes);
+        for (int i = 0; i < output_nodes; ++i) bias_output[i] = random_weight();
+    }
+
+    // 順伝播（Forward Pass）
+    std::vector<double> feedforward(const std::vector<double>& input, std::vector<double>& hidden_out) {
+        hidden_out.resize(hidden_nodes);
+        for (int j = 0; j < hidden_nodes; ++j) {
+            double sum = bias_hidden[j];
+            for (int i = 0; i < input_nodes; ++i) {
+                sum += input[i] * weights_input_hidden[i][j];
+            }
+            hidden_out[j] = sigmoid(sum);
+        }
+
+        std::vector<double> final_out(output_nodes);
+        for (int k = 0; k < output_nodes; ++k) {
+            double sum = bias_output[k];
+            for (int j = 0; j < hidden_nodes; ++j) {
+                sum += hidden_out[j] * weights_hidden_output[j][k];
+            }
+            final_out[k] = sigmoid(sum);
+        }
+        return final_out;
+    }
+
+    // 学習（Backpropagation）
+    void train(const std::vector<double>& input, const std::vector<double>& target) {
+        std::vector<double> hidden_out;
+        std::vector<double> final_out = feedforward(input, hidden_out);
+
+        // 出力層のエラーとデルタの計算
+        std::vector<double> output_deltas(output_nodes);
+        for (int k = 0; k < output_nodes; ++k) {
+            double error = target[k] - final_out[k];
+            output_deltas[k] = error * sigmoid_derivative(final_out[k]);
+        }
+
+        // 隠れ層のエラーとデルタの計算
+        std::vector<double> hidden_deltas(hidden_nodes);
+        for (int j = 0; j < hidden_nodes; ++j) {
+            double error = 0.0;
+            for (int k = 0; k < output_nodes; ++k) {
+                error += output_deltas[k] * weights_hidden_output[j][k];
+            }
+            hidden_deltas[j] = error * sigmoid_derivative(hidden_out[j]);
+        }
+
+        // 隠れ層 -> 出力層の重みとバイアスの更新
+        for (int j = 0; j < hidden_nodes; ++j) {
+            for (int k = 0; k < output_nodes; ++k) {
+                weights_hidden_output[j][k] += learning_rate * output_deltas[k] * hidden_out[j];
+            }
+        }
+        for (int k = 0; k < output_nodes; ++k) {
+            bias_output[k] += learning_rate * output_deltas[k];
+        }
+
+        // 入力層 -> 隠れ層の重みとバイアスの更新
+        for (int i = 0; i < input_nodes; ++i) {
+            for (int j = 0; j < hidden_nodes; ++j) {
+                weights_input_hidden[i][j] += learning_rate * hidden_deltas[j] * input[i];
+            }
+        }
+        for (int j = 0; j < hidden_nodes; ++j) {
+            bias_hidden[j] += learning_rate * hidden_deltas[j];
+        }
+    }
+};
+
+int main() {
+    // XOR問題を学習するサンプル
+    // 入力: 2, 隠れ層: 4, 出力: 1
+    NeuralNetwork nn(2, 4, 1, 0.5);
+
+    std::vector<std::vector<double>> inputs = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+    std::vector<std::vector<double>> targets = {{0}, {1}, {1}, {0}};
+
+    // トレーニングループ
+    for (int epoch = 0; epoch < 20000; ++epoch) {
+        for (size_t i = 0; i < inputs.size(); ++i) {
+            nn.train(inputs[i], targets[i]);
+        }
+    }
+
+    // 推論結果の評価
+    std::cout << "--- XOR Prediction Results ---" << std::endl;
+    std::vector<double> dummy_hidden;
+    for (size_t i = 0; i < inputs.size(); ++i) {
+        std::vector<double> out = nn.feedforward(inputs[i], dummy_hidden);
+        std::cout << inputs[i][0] << " XOR " << inputs[i][1] << " => " << out[0] << std::endl;
+    }
+
+    return 0;
+}
