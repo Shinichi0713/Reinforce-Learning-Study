@@ -1047,6 +1047,271 @@ Kloepfer et al. (2021) の論文 [Delving Into Deep Walkers](https://ar5iv.labs.
 - ランダムウォークの本数 $\gamma \to \infty$ の極限で、経験的共起確率は真の共起確率に収束する（大数の法則）
 - したがって、有限サンプルでのDeepWalk埋め込みは、**真の共起行列を分解した理想埋め込みに確率的に近づく**
 
+__例題:__
 
+以下に、DeepWalkの学習体験例題の完全版をまとめてご提示いたします。
 
+__問題設定__
+
+__グラフ__
+
+6頂点のグラフを考えます。2つのコミュニティ（AとB）を持ちます。
+
+- **コミュニティA**: 頂点 0, 1, 2（密に接続）
+- **コミュニティB**: 頂点 3, 4, 5（密に接続）
+- **橋渡し辺**: (2, 3) のみ（コミュニティ間は疎）
+
+```
+    0 --- 1         3 --- 4
+     \\   /           \\   /
+      \\ /             \\ /
+       2 -------------- 5
+```
+
+__問い__
+
+DeepWalk（ランダムウォーク + Skip-gram）で学習したベクトルにおいて、以下を確認せよ。
+
+1. 同じコミュニティの頂点同士の類似度は高いか？
+2. 異なるコミュニティの頂点間の類似度は低いか？
+3. ランダムウォークの共起統計とベクトルの配置の関係を説明せよ。
+
+__実行結果__
+
+__Step 1: グラフの可視化__
+
+以下絵をご確認ください。赤がコミュニティA、青がコミュニティBです。
+
+<img src="image/4_graph_embedding/1789678599773.png" width="500px" style="display: block; margin: 0 auto;">
+
+__Step 2: ランダムウォークの生成__
+
+各頂点から100回、長さ8のウォークを生成しました。
+
+**頂点0を含むウォークでの共起統計:**
+- 頂点2: 811回（最も共起）
+- 頂点1: 651回
+- 頂点3: 362回（橋渡し）
+- 頂点5: 154回
+- 頂点4: 147回
+
+頂点0はコミュニティA内の頂点（1, 2）と頻繁に共起し、コミュニティBの頂点とは稀にしか共起しません。
+
+__Step 3-4: Skip-gram学習後の結果__
+
+**学習後の頂点ベクトル（2次元）:**
+
+| 頂点 | コミュニティ | ベクトル |
+|------|------------|---------|
+| 0 | A | [-1.1422, 0.8348] |
+| 1 | A | [-1.1189, 0.9106] |
+| 2 | A | [-0.3054, 0.3441] |
+| 3 | B | [0.1197, -0.0358] |
+| 4 | B | [1.1496, 0.4631] |
+| 5 | B | [1.4056, 0.6538] |
+
+**コサイン類似度行列:**
+
+| | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| **0** | 1.000 | **0.999** | **0.977** | -0.942 | -0.528 | -0.483 |
+| **1** | **0.999** | 1.000 | **0.987** | -0.924 | -0.484 | -0.437 |
+| **2** | **0.977** | **0.987** | 1.000 | -0.850 | -0.336 | -0.286 |
+| **3** | -0.942 | -0.924 | -0.850 | 1.000 | **0.782** | **0.748** |
+| **4** | -0.528 | -0.484 | -0.336 | **0.782** | 1.000 | **0.999** |
+| **5** | -0.483 | -0.437 | -0.286 | **0.748** | **0.999** | 1.000 |
+
+__確認事項__
+
+1. **コミュニティA内（0, 1, 2）**: 類似度が 0.977〜0.999 と非常に高い
+2. **コミュニティB内（3, 4, 5）**: 類似度が 0.748〜0.999 と高い
+3. **コミュニティ間（A vs B）**: 類似度が負の値（-0.942〜-0.286）で、明確に分離
+
+__Step 5: 可視化__
+
+画像 `05_deepwalk_result.png` をご確認ください。2次元埋め込み空間上で、コミュニティA（赤）とコミュニティB（青）が明確に分離していることが確認できます。
+
+---
+
+## 解説
+
+この例題で確認できるDeepWalkの本質は以下の通りです。
+
+**ランダムウォークの統計的性質 → ベクトル空間の幾何学的性質**
+
+1. コミュニティA内は辺密度が高いため、ランダムウォークはA内を長く徘徊する
+2. したがって、頂点0, 1, 2はランダムウォーク内で頻繁に共起する
+3. Skip-gramは「共起する頂点は似たベクトルになる」と学習する
+4. 結果として、コミュニティAの頂点はベクトル空間で近くに集まる
+5. コミュニティ間は辺が疎なので共起確率が低く、ベクトルは遠ざかる
+
+これが、DeepWalkがランダムウォークでグラフのコミュニティ構造を学習できる数学的根拠の直感的な証明となります。
+
+---
+
+## 完全なPythonコード
+
+```python
+"""
+============================================================
+DeepWalk 学習体験例題（スクラッチ実装）
+============================================================
+【問題】
+6頂点のグラフ（2コミュニティ）で、DeepWalkをスクラッチ実装し、
+同じコミュニティの頂点がベクトル空間で近くなることを確認する。
+
+【必要ライブラリ】
+  pip install numpy matplotlib networkx scikit-learn
+============================================================
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import networkx as nx
+
+np.random.seed(42)
+
+# ------------------------------------------------------------
+# Step 1: グラフの作成
+# ------------------------------------------------------------
+# コミュニティA(0,1,2): 密, コミュニティB(3,4,5): 密
+# 橋渡し辺: (2,3) のみ
+
+edges = [
+    (0, 1), (0, 2), (1, 2),      # コミュニティA
+    (3, 4), (3, 5), (4, 5),      # コミュニティB
+    (2, 3),                       # 橋渡し
+]
+G = nx.Graph()
+G.add_nodes_from(range(6))
+G.add_edges_from(edges)
+
+community = {0: "A", 1: "A", 2: "A", 3: "B", 4: "B", 5: "B"}
+node_colors = ["#e74c3c" if community[n] == "A" else "#3498db" for n in G.nodes()]
+
+# グラフの可視化
+plt.figure(figsize=(7, 5))
+plt.title("Sample Graph: 2 Communities")
+pos = nx.spring_layout(G, seed=42)
+nx.draw(G, pos, with_labels=True, node_color=node_colors, edge_color="gray",
+        node_size=800, font_size=12, font_weight="bold")
+plt.savefig("04_deepwalk_graph.png", dpi=150)
+plt.show()
+
+# ------------------------------------------------------------
+# Step 2: ランダムウォーク
+# ------------------------------------------------------------
+
+def random_walk(graph, start, length):
+    walk = [start]
+    current = start
+    for _ in range(length - 1):
+        neighbors = list(graph.neighbors(current))
+        current = np.random.choice(neighbors)
+        walk.append(current)
+    return walk
+
+walks = []
+for node in G.nodes():
+    for _ in range(100):
+        walk = random_walk(G, node, 8)
+        walks.append([str(v) for v in walk])
+
+# ------------------------------------------------------------
+# Step 3: Skip-gram 学習
+# ------------------------------------------------------------
+
+V, EMB_DIM, lr, epochs = 6, 2, 0.1, 300
+W_in = np.random.randn(V, EMB_DIM) * 0.5
+W_out = np.random.randn(EMB_DIM, V) * 0.5
+
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))
+    return exp_x / np.sum(exp_x)
+
+# 訓練データ生成（ウィンドウサイズ2）
+training_data = []
+for walk in walks:
+    for i, c in enumerate(walk):
+        for j in range(max(0, i - 2), min(len(walk), i + 3)):
+            if i != j:
+                training_data.append((int(c), int(walk[j])))
+
+# 学習ループ
+loss_history = []
+for epoch in range(epochs):
+    total_loss = 0
+    np.random.shuffle(training_data)
+    for c_idx, t_idx in training_data:
+        h = W_in[c_idx]
+        u = np.dot(W_out.T, h)
+        y = softmax(u)
+        loss = -np.log(y[t_idx] + 1e-8)
+        total_loss += loss
+
+        e = y.copy()
+        e[t_idx] -= 1
+        W_in[c_idx] -= lr * np.dot(W_out, e)
+        W_out -= lr * np.outer(h, e)
+    loss_history.append(total_loss / len(training_data))
+
+# ------------------------------------------------------------
+# Step 4: 結果の確認
+# ------------------------------------------------------------
+
+print("=== 学習後の頂点ベクトル ===")
+for i in range(V):
+    print(f"  頂点{i} (コミュニティ{community[i]}): [{W_in[i][0]:.4f}, {W_in[i][1]:.4f}]")
+
+def cos_sim(v1, v2):
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-8)
+
+print("\n=== コサイン類似度行列 ===")
+for i in range(V):
+    print(f"頂点{i:>2d}: ", end="")
+    for j in range(V):
+        print(f"{cos_sim(W_in[i], W_in[j]):>7.3f}", end="")
+    print()
+
+# ------------------------------------------------------------
+# Step 5: 可視化
+# ------------------------------------------------------------
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+axes[0].plot(loss_history, color="#2c3e50")
+axes[0].set_title("Training Loss")
+axes[0].set_xlabel("Epoch")
+axes[0].set_ylabel("Loss")
+
+for i in range(V):
+    x, y = W_in[i]
+    color = "#e74c3c" if community[i] == "A" else "#3498db"
+    axes[1].scatter(x, y, c=color, s=400, edgecolors="black", zorder=3)
+    axes[1].annotate(f"{i}", (x, y), textcoords="offset points",
+                     xytext=(6, 4), fontsize=14, fontweight="bold")
+
+axes[1].set_title("DeepWalk Embeddings (2D)")
+axes[1].set_xlabel("Dimension 1")
+axes[1].set_ylabel("Dimension 2")
+axes[1].axhline(0, color="gray", linestyle="--", alpha=0.3)
+axes[1].axvline(0, color="gray", linestyle="--", alpha=0.3)
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig("05_deepwalk_result.png", dpi=150)
+plt.show()
+```
+
+---
+
+## 確認すべきポイント
+
+| 確認項目 | 期待される結果 |
+|---------|------------|
+| コミュニティA内の類似度 | 0.97以上（非常に高い） |
+| コミュニティB内の類似度 | 0.75以上（高い） |
+| コミュニティ間の類似度 | 負の値（明確に分離） |
+| 2次元可視化 | 赤と青のクラスタが分離している |
+
+この例題は、DeepWalkが「ランダムウォークの共起統計をSkip-gramで学習することで、グラフのコミュニティ構造をベクトル空間に反映する」という本質を、小さなグラフで具体的に体験できるものです。
 
