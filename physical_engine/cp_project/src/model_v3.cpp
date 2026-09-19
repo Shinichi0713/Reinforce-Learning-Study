@@ -106,3 +106,197 @@ int main() {
 
     return 0;
 }
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <chrono>
+#include <algorithm>
+#include <cstdint>
+
+// -------------------------------------------------------------
+// 1. 量子化ブロックのデータ構造定義
+// -------------------------------------------------------------
+
+// Q8_0: 32要素ごとに 1個の FP32 スケール因子(d) + 32個の INT8 重み(qs)
+struct BlockQ8_0 {
+    float d;            // スケール因子 (Scale Factor)
+    int8_t qs[32];      // 量子化された重み (8-bit)
+};
+
+// Q4_0: 32要素ごとに 1個の FP32 スケール因子(d) + 16個の UINT8 (ニブル分割で4-bit×32個分)
+struct BlockQ4_0 {
+    float d;            // スケール因子
+    uint8_t qs[16];     // 量子化された重み (下位4bit: 前半16個, 上位4bit: 後半16個)
+};
+
+// -------------------------------------------------------------
+// 2. 量子化（Quantize）関数
+// -------------------------------------------------------------
+
+// FP32 配列 -> Q8_0 ブロック配列
+void quantize_row_q8_0(const float* x, BlockQ8_0* y, int k) {
+    const int nb = k / 32; // ブロック数 (k は 32 の倍数であること)
+
+    for (int i = 0; i < nb; ++i) {
+        float amax = 0.0f;
+        for (int j = 0; j < 32; ++j) {
+            amax = std::max(amax, std::abs(x[i * 32 + j]));
+        }
+
+        const float d = amax / 127.0f;
+        const float id = d ? 1.0f / d : 0.0f;
+
+        y[i].d = d;
+        for (int j = 0; j < 32; ++j) {
+            const float val = x[i * 32 + j] * id;
+            y[i].qs[j] = static_cast<int8_t>(std::round(val));
+        }
+    }
+}
+
+// FP32 配列 -> Q4_0 ブロック配列
+void quantize_row_q4_0(const float* x, BlockQ4_0* y, int k) {
+    const int nb = k / 32;
+
+    for (int i = 0; i < nb; ++i) {
+        float amax = 0.0f;
+        for (int j = 0; j < 32; ++j) {
+            amax = std::max(amax, std::abs(x[i * 32 + j]));
+        }
+
+        const float d = amax / 7.0f; // -8 ~ +7 範囲へマッピング
+        const float id = d ? 1.0f / d : 0.0f;
+
+        y[i].d = d;
+        for (int j = 0; j < 16; ++j) {
+            // 前半 16 個 (下位 4 ビット)
+            const float x0 = x[i * 32 + j] * id;
+            const uint8_t q0 = static_cast<uint8_t>(std::clamped(static_cast<int>(std::round(x0)) + 8, 0, 15));
+
+            // 後半 16 個 (上位 4 ビット)
+            const float x1 = x[i * 32 + j + 16] * id;
+            const uint8_t q1 = static_cast<uint8_t>(std::clamped(static_cast<int>(std::round(x1)) + 8, 0, 15));
+
+            y[i].qs[j] = q0 | (q1 << 4);
+        }
+    }
+}
+
+// -------------------------------------------------------------
+// 3. 量子化重みを用いた 行列積（GEMV）演算カーネル
+// -------------------------------------------------------------
+
+// Q8_0 重みを用いた 順伝播 (Vector-Matrix Multiplication)
+// y = x * W
+void gemv_q8_0(const float* x, const BlockQ8_0* W, float* y, int in_f, int out_f) {
+    const int nb = in_f / 32;
+
+    #pragma omp parallel for schedule(static)
+    for (int j = 0; j < out_f; ++j) {
+        float sum = 0.0f;
+
+        for (int b = 0; b < nb; ++b) {
+            const BlockQ8_0& block = W[j * nb + b];
+            const float d = block.d;
+
+            float block_sum = 0.0f;
+            for (int i = 0; i < 32; ++i) {
+                block_sum += x[b * 32 + i] * static_cast<float>(block.qs[i]);
+            }
+            sum += block_sum * d; // 最後にスケール因子を積算
+        }
+        y[j] = sum;
+    }
+}
+
+// Q4_0 重みを用いた 順伝播
+void gemv_q4_0(const float* x, const BlockQ4_0* W, float* y, int in_f, int out_f) {
+    const int nb = in_f / 32;
+
+    #pragma omp parallel for schedule(static)
+    for (int j = 0; j < out_f; ++j) {
+        float sum = 0.0f;
+
+        for (int b = 0; b < nb; ++b) {
+            const BlockQ4_0& block = W[j * nb + b];
+            const float d = block.d;
+
+            float block_sum = 0.0f;
+            for (int i = 0; i < 16; ++i) {
+                const uint8_t packed = block.qs[i];
+                const int q0 = static_cast<int>(packed & 0x0F) - 8;
+                const int q1 = static_cast<int>(packed >> 4) - 8;
+
+                block_sum += x[b * 32 + i] * static_cast<float>(q0);
+                block_sum += x[b * 32 + i + 16] * static_cast<float>(q1);
+            }
+            sum += block_sum * d;
+        }
+        y[j] = sum;
+    }
+}
+
+// -------------------------------------------------------------
+// 4. 検証およびベンチマーク
+// -------------------------------------------------------------
+int main() {
+    const int in_features = 4096;
+    const int out_features = 4096;
+
+    std::cout << "=== Quantization (Q8_0 / Q4_0) Benchmark ===" << std::endl;
+    std::cout << "Matrix Size: " << in_features << " x " << out_features << std::endl;
+
+    // 元の重み (FP32)
+    std::vector<float> h_weights_fp32(in_features * out_features);
+    std::mt19937 gen(42);
+    std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
+    for (auto& w : h_weights_fp32) w = dis(gen);
+
+    // 入力ベクトル
+    std::vector<float> input(in_features, 1.0f);
+    std::vector<float> output_q8(out_features, 0.0f);
+    std::vector<float> output_q4(out_features, 0.0f);
+
+    // 重みの量子化
+    const int num_blocks_per_row = in_features / 32;
+    std::vector<BlockQ8_0> weights_q8(out_features * num_blocks_per_row);
+    std::vector<BlockQ4_0> weights_q4(out_features * num_blocks_per_row);
+
+    for (int j = 0; j < out_features; ++j) {
+        quantize_row_q8_0(&h_weights_fp32[j * in_features], &weights_q8[j * num_blocks_per_row], in_features);
+        quantize_row_q4_0(&h_weights_fp32[j * in_features], &weights_q4[j * num_blocks_per_row], in_features);
+    }
+
+    // メモリ消費量の比較
+    const size_t fp32_size = h_weights_fp32.size() * sizeof(float);
+    const size_t q8_size = weights_q8.size() * sizeof(BlockQ8_0);
+    const size_t q4_size = weights_q4.size() * sizeof(BlockQ4_0);
+
+    std::cout << "\n--- Memory Footprint ---" << std::endl;
+    std::cout << "FP32 Size: " << fp32_size / (1024.0 * 1024.0) << " MB (100%)" << std::endl;
+    std::cout << "Q8_0 Size: " << q8_size / (1024.0 * 1024.0) << " MB (" 
+              << (q8_size * 100.0 / fp32_size) << "%)" << std::endl;
+    std::cout << "Q4_0 Size: " << q4_size / (1024.0 * 1024.0) << " MB (" 
+              << (q4_size * 100.0 / fp32_size) << "%)" << std::endl;
+
+    // 推論速度の計測
+    auto start_q8 = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 50; ++i) {
+        gemv_q8_0(input.data(), weights_q8.data(), output_q8.data(), in_features, out_features);
+    }
+    auto end_q8 = std::chrono::high_resolution_clock::now();
+
+    auto start_q4 = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 50; ++i) {
+        gemv_q4_0(input.data(), weights_q4.data(), output_q4.data(), in_features, out_features);
+    }
+    auto end_q4 = std::chrono::high_resolution_clock::now();
+
+    std::cout << "\n--- Performance ---" << std::endl;
+    std::cout << "Q8_0 Avg Time: " << std::chrono::duration<double, std::milli>(end_q8 - start_q8).count() / 50.0 << " ms" << std::endl;
+    std::cout << "Q4_0 Avg Time: " << std::chrono::duration<double, std::milli>(end_q4 - start_q4).count() / 50.0 << " ms" << std::endl;
+
+    return 0;
+}
