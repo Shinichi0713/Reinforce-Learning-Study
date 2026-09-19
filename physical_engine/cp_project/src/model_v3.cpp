@@ -300,3 +300,262 @@ int main() {
 
     return 0;
 }
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <algorithm>
+#include <numeric>
+#include <iomanip>
+
+// GELU 活性化関数 (近似式)
+inline float gelu(float x) {
+    return 0.5f * x * (1.0f + std::tanh(std::sqrt(2.0f / M_PI) * (x + 0.044715f * std::pow(x, 3))));
+}
+
+// Softmax (数値安定化版: max引き)
+void softmax(float* x, int size) {
+    float max_val = *std::max_element(x, x + size);
+    float sum = 0.0f;
+    for (int i = 0; i < size; ++i) {
+        x[i] = std::exp(x[i] - max_val);
+        sum += x[i];
+    }
+    for (int i = 0; i < size; ++i) {
+        x[i] /= sum;
+    }
+}
+
+// 線形層 (Linear Layer / Fully Connected Layer)
+class Linear {
+public:
+    int in_features;
+    int out_features;
+    std::vector<float> weight; // Shape: [in_features x out_features]
+    std::vector<float> bias;   // Shape: [out_features]
+
+    Linear(int in_f, int out_f) : in_features(in_f), out_features(out_f),
+                                 weight(in_f * out_f), bias(out_f) {
+        std::mt19937 gen(42);
+        // Xavier/Glorot 初期化
+        float limit = std::sqrt(6.0f / (in_f + out_f));
+        std::uniform_real_distribution<float> dis(-limit, limit);
+
+        for (auto& w : weight) w = dis(gen);
+        for (auto& b : bias) b = 0.0f;
+    }
+
+    // Input: [N x in_features] -> Output: [N x out_features]
+    void forward(const float* input, float* output, int N) const {
+        for (int n = 0; n < N; ++n) {
+            for (int j = 0; j < out_features; ++j) {
+                float sum = bias[j];
+                for (int i = 0; i < in_features; ++i) {
+                    sum += input[n * in_features + i] * weight[i * out_features + j];
+                }
+                output[n * out_features + j] = sum;
+            }
+        }
+    }
+};
+
+// Layer Normalization
+class LayerNorm {
+public:
+    int dim;
+    std::vector<float> gamma;
+    std::vector<float> beta;
+    float eps;
+
+    LayerNorm(int dim, float eps = 1e-5f) : dim(dim), gamma(dim, 1.0f), beta(dim, 0.0f), eps(eps) {}
+
+    // Input/Output: [N x dim]
+    void forward(const float* input, float* output, int N) const {
+        for (int n = 0; n < N; ++n) {
+            const float* in_ptr = input + n * dim;
+            float* out_ptr = output + n * dim;
+
+            // 平均の計算
+            float mean = 0.0f;
+            for (int i = 0; i < dim; ++i) mean += in_ptr[i];
+            mean /= dim;
+
+            // 分散の計算
+            float var = 0.0f;
+            for (int i = 0; i < dim; ++i) {
+                float diff = in_ptr[i] - mean;
+                var += diff * diff;
+            }
+            var /= dim;
+
+            // 正規化 & アフィン変換
+            float inv_std = 1.0f / std::sqrt(var + eps);
+            for (int i = 0; i < dim; ++i) {
+                out_ptr[i] = gamma[i] * ((in_ptr[i] - mean) * inv_std) + beta[i];
+            }
+        }
+    }
+};
+
+// Feed-Forward Network (FFN)
+// Linear1 -> GELU -> Linear2
+class FeedForward {
+public:
+    Linear w1;
+    Linear w2;
+
+    FeedForward(int d_model, int d_ff) : w1(d_model, d_ff), w2(d_ff, d_model) {}
+
+    void forward(const float* input, float* output, int seq_len) const {
+        std::vector<float> hidden(seq_len * w1.out_features);
+        
+        // 1. w1: [seq_len x d_model] -> [seq_len x d_ff]
+        w1.forward(input, hidden.data(), seq_len);
+
+        // 2. GELU 活性化
+        for (auto& val : hidden) val = gelu(val);
+
+        // 3. w2: [seq_len x d_ff] -> [seq_len x d_model]
+        w2.forward(hidden.data(), output, seq_len);
+    }
+};
+
+class MultiHeadAttention {
+public:
+    int d_model;
+    int num_heads;
+    int head_dim;
+
+    Linear q_proj;
+    Linear k_proj;
+    Linear v_proj;
+    Linear out_proj;
+
+    MultiHeadAttention(int d_model, int num_heads)
+        : d_model(d_model), num_heads(num_heads), head_dim(d_model / num_heads),
+          q_proj(d_model, d_model), k_proj(d_model, d_model),
+          v_proj(d_model, d_model), out_proj(d_model, d_model) {}
+
+    void forward(const float* input, float* output, int seq_len) const {
+        std::vector<float> Q(seq_len * d_model);
+        std::vector<float> K(seq_len * d_model);
+        std::vector<float> V(seq_len * d_model);
+
+        // Q, K, V プロジェクション
+        q_proj.forward(input, Q.data(), seq_len);
+        k_proj.forward(input, K.data(), seq_len);
+        v_proj.forward(input, V.data(), seq_len);
+
+        std::vector<float> concat_attn_out(seq_len * d_model, 0.0f);
+        float scale = 1.0f / std::sqrt(static_cast<float>(head_dim));
+
+        // ヘッドごとの並行処理
+        for (int h = 0; h < num_heads; ++h) {
+            for (int i = 0; i < seq_len; ++i) { // Query Token
+                std::vector<float> attn_scores(seq_len, 0.0f);
+
+                // 1. Q * K^T / sqrt(d_k)
+                for (int j = 0; j < seq_len; ++j) { // Key Token
+                    float score = 0.0f;
+                    for (int d = 0; d < head_dim; ++d) {
+                        float q_val = Q[i * d_model + h * head_dim + d];
+                        float k_val = K[j * d_model + h * head_dim + d];
+                        score += q_val * k_val;
+                    }
+                    attn_scores[j] = score * scale;
+                }
+
+                // 2. Softmax(Scores)
+                softmax(attn_scores.data(), seq_len);
+
+                // 3. Attention Weight * V
+                for (int d = 0; d < head_dim; ++d) {
+                    float head_out = 0.0f;
+                    for (int j = 0; j < seq_len; ++j) {
+                        float v_val = V[j * d_model + h * head_dim + d];
+                        head_out += attn_scores[j] * v_val;
+                    }
+                    concat_attn_out[i * d_model + h * head_dim + d] = head_out;
+                }
+            }
+        }
+
+        // 最終出力のプロジェクション
+        out_proj.forward(concat_attn_out.data(), output, seq_len);
+    }
+};
+
+class TransformerBlock {
+public:
+    MultiHeadAttention mha;
+    LayerNorm norm1;
+    FeedForward ffn;
+    LayerNorm norm2;
+
+    TransformerBlock(int d_model, int num_heads, int d_ff)
+        : mha(d_model, num_heads), norm1(d_model), ffn(d_model, d_ff), norm2(d_model) {}
+
+    void forward(const float* input, float* output, int seq_len) const {
+        int total_size = seq_len * mha.d_model;
+
+        // --- 1. Multi-Head Attention Sub-layer ---
+        std::vector<float> attn_out(total_size);
+        mha.forward(input, attn_out.data(), seq_len);
+
+        // 残差接続 + LayerNorm (Pre-LN 構造)
+        std::vector<float> residual1(total_size);
+        for (int i = 0; i < total_size; ++i) residual1[i] = input[i] + attn_out[i];
+        
+        std::vector<float> norm1_out(total_size);
+        norm1.forward(residual1.data(), norm1_out.data(), seq_len);
+
+        // --- 2. Feed-Forward Sub-layer ---
+        std::vector<float> ffn_out(total_size);
+        ffn.forward(norm1_out.data(), ffn_out.data(), seq_len);
+
+        // 残差接続 + LayerNorm
+        std::vector<float> residual2(total_size);
+        for (int i = 0; i < total_size; ++i) residual2[i] = norm1_out[i] + ffn_out[i];
+
+        norm2.forward(residual2.data(), output, seq_len);
+    }
+};
+
+int main() {
+    // ハイパーパラメータ
+    const int seq_len = 4;     // トークン列長 (例: "I", "am", "a", "robot")
+    const int d_model = 16;    // 隠れ層の次元数
+    const int num_heads = 4;   // アテンションヘッド数
+    const int d_ff = 64;       // FFN中間層の次元数
+
+    std::cout << "=== Building Transformer Block in C++ ===" << std::endl;
+    std::cout << "Sequence Length: " << seq_len << std::endl;
+    std::cout << "d_model:         " << d_model << std::endl;
+    std::cout << "Heads:           " << num_heads << std::endl;
+
+    // 入力テンソルの作成 [seq_len x d_model]
+    std::vector<float> x(seq_len * d_model);
+    std::mt19937 gen(1337);
+    std::normal_distribution<float> dis(0.0f, 1.0f);
+    for (auto& val : x) val = dis(gen);
+
+    // Transformer ブロック構築・順伝播実行
+    TransformerBlock block(d_model, num_heads, d_ff);
+    std::vector<float> out(seq_len * d_model, 0.0f);
+
+    block.forward(x.data(), out.data(), seq_len);
+
+    std::cout << "\n--- Forward Pass Completed ---" << std::endl;
+    std::cout << "Output Tensor (First 2 Tokens, First 4 dimensions):" << std::endl;
+    for (int t = 0; t < 2; ++t) {
+        std::cout << "Token [" << t << "]: ";
+        for (int d = 0; d < 4; ++d) {
+            std::cout << std::fixed << std::setprecision(4) << out[t * d_model + d] << " ";
+        }
+        std::cout << "..." << std::endl;
+    }
+
+    return 0;
+}
