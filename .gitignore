@@ -178,3 +178,4 @@ cython_debug/
 *.pkl
 
 *luna-env/
+*.html
