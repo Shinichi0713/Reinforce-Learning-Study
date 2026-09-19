@@ -427,12 +427,6 @@ int main() {
     Adam adam1(actor.fc1), adam2(actor.fc2), adam3(actor.fc3);
   
     // ダミーデータ: 観測 -> 目標行動（教師ありで学習させるデモ）
-    std::vector<std::pair<std::vector<float>, float>> dataset = {
-        {{1.0f, 0.0f, 0.1f},  0.5f},
-        {{0.0f, 1.0f, -0.1f}, -0.3f},
-        {{-1.0f, 0.0f, 0.2f}, 0.8f},
-        {{0.0f, -1.0f, -0.2f}, -0.7f}
-    };
   
     std::cout << "=== C++ Actor Model Training Demo ===" << std::endl;
   
@@ -471,7 +465,6 @@ int main() {
     // 推論テスト
     std::cout << "\n=== Inference Test ===" << std::endl;
     Tensor test_input(1, 3);
-    test_input.data = {1.0f, 0.0f, 0.1f};
     Tensor result = actor.forward(test_input);
     std::cout << "Input: [1.0, 0.0, 0.1] -> Action: " << result(0, 0) << std::endl;
   
