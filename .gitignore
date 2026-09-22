@@ -179,3 +179,4 @@ cython_debug/
 
 *luna-env/
 *.html
+*.ipch
