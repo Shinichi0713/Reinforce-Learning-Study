@@ -263,27 +263,23 @@ const int BOARD_OFFSET_X = 50;
 const int BOARD_OFFSET_Y = 50;
 const int BOARD_PX_SIZE = CELL_SIZE * 9;
 
-// Colors as DWORD (0x00bbggrr)
-const unsigned long COL_BOARD = 0x005C8EA5; // RGB(165, 142, 92) wood tone -> actually 0x005C8EA5 is a blue-ish, let's use proper value
-// Actually using RGB macro via DWORD values below to avoid macro dependency
-const unsigned long COL_BOARD_BK = 0x005C8EA5; // dummy, we will use CreateSolidBrush directly in code if needed, but using constants is fine
-// Let me use exact values:
-const unsigned long C_BOARD = 0x005C8EA5; // RGB(165,142,92) -> 0x005C8EA5? No. RGB(165,142,92) = 0x005C8EA5? Let's compute: 92 + 142*256 + 165*65536 = 0x00A58E5C
-const unsigned long C_BOARD2 = 0x00A58E5C; // RGB(165, 142, 92)
-const unsigned long C_LINE = 0x00000000; // Black
-const unsigned long C_BLACK = 0x00000000; // Black
-const unsigned long C_WHITE = 0x00FFFFFF; // White
-const unsigned long C_RED = 0x000000FF; // Red
-const unsigned long C_GRAY = 0x00808080; // Gray
-const unsigned long C_HOSHI = 0x00000000; // Black
-const unsigned long C_LAST = 0x000000FF; // Red
-const unsigned long C_TEXT = 0x00000000; // Black
+const unsigned long C_BOARD2 = 0x00A58E5C;
+const unsigned long C_LINE = 0x00000000;
+const unsigned long C_BLACK = 0x00000000;
+const unsigned long C_WHITE = 0x00FFFFFF;
+const unsigned long C_RED = 0x000000FF;
+const unsigned long C_GRAY = 0x00808080;
+const unsigned long C_HOSHI = 0x00000000;
+const unsigned long C_TEXT = 0x00000000;
 
 // ===================== Global State =====================
 GoBoard g_board;
 RandomAgent g_ai(123);
-Stone g_human_color = Stone::BLACK;
-Stone g_current_turn = Stone::BLACK;
+
+// [CHANGED 1/3] Human plays WHITE, AI plays BLACK
+Stone g_human_color = Stone::WHITE;
+Stone g_current_turn = Stone::BLACK; // Black goes first
+
 bool g_ai_thinking = false;
 bool g_game_over = false;
 int g_pass_count = 0;
@@ -318,7 +314,7 @@ void DrawStone(HDC hdc, int bx, int by, Stone s) {
         HGDIOBJ old_pen = SelectObject(hdc, pen);
         Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
         FillRect(hdc, &rc, br);
-        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom); // redraw outline
+        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
         SelectObject(hdc, old_pen);
         DeleteObject(pen);
         DeleteObject(br);
@@ -326,14 +322,12 @@ void DrawStone(HDC hdc, int bx, int by, Stone s) {
 }
 
 void DrawBoard(HDC hdc) {
-    // Board background
     RECT brc = { BOARD_OFFSET_X, BOARD_OFFSET_Y,
                  BOARD_OFFSET_X + BOARD_PX_SIZE, BOARD_OFFSET_Y + BOARD_PX_SIZE };
     HBRUSH board_br = CreateSolidBrush(C_BOARD2);
     FillRect(hdc, &brc, board_br);
     DeleteObject(board_br);
 
-    // Grid lines
     HPEN pen = CreatePen(PS_SOLID, 1, C_LINE);
     HGDIOBJ old = SelectObject(hdc, pen);
     for (int i = 0; i < 9; ++i) {
@@ -352,7 +346,6 @@ void DrawBoard(HDC hdc) {
     SelectObject(hdc, old);
     DeleteObject(pen);
 
-    // Hoshi points (star points) for 9x9: (2,2), (2,6), (4,4), (6,2), (6,6)
     const int hoshi[5][2] = { {2,2}, {2,6}, {4,4}, {6,2}, {6,6} };
     HBRUSH hbr = CreateSolidBrush(C_HOSHI);
     for (int i = 0; i < 5; ++i) {
@@ -364,12 +357,10 @@ void DrawBoard(HDC hdc) {
     }
     DeleteObject(hbr);
 
-    // Stones
     for (int y = 0; y < 9; ++y)
         for (int x = 0; x < 9; ++x)
             DrawStone(hdc, x, y, g_board.get(x, y));
 
-    // Last move marker
     if (g_last_x != -1) {
         int px = ToPixelX(g_last_x);
         int py = ToPixelY(g_last_y);
@@ -384,7 +375,6 @@ void DrawBoard(HDC hdc) {
         DeleteObject(redpen);
     }
 
-    // Legal move hints for human
     if (!g_game_over && !g_ai_thinking && g_current_turn == g_human_color) {
         auto legals = g_board.get_legal_moves(g_human_color);
         HBRUSH gbr = CreateSolidBrush(C_GRAY);
@@ -398,7 +388,6 @@ void DrawBoard(HDC hdc) {
         DeleteObject(gbr);
     }
 
-    // Coordinates
     SetTextColor(hdc, C_TEXT);
     SetBkMode(hdc, TRANSPARENT);
     HFONT hf = CreateFont(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
@@ -409,7 +398,7 @@ void DrawBoard(HDC hdc) {
     for (int i = 0; i < 9; ++i) {
         wchar_t buf[2];
         buf[0] = L'A' + i; buf[1] = 0;
-        if (buf[0] >= L'I') buf[0]++; // skip I traditionally
+        if (buf[0] >= L'I') buf[0]++;
         int px = ToPixelX(i);
         RECT r1 = { px - 10, BOARD_OFFSET_Y - 20, px + 10, BOARD_OFFSET_Y };
         DrawText(hdc, buf, -1, &r1, DT_CENTER | DT_BOTTOM);
@@ -418,13 +407,12 @@ void DrawBoard(HDC hdc) {
 
         int py = ToPixelY(i);
         std::wstring num = std::to_wstring(9 - i);
-        RECT r3 = { BOARD_OFFSET_X - 20, py - 10, BOARD_OFFSET_X, py + 10 };
+        RECT r3 = { BOARD_OFFSET_Y - 20, py - 10, BOARD_OFFSET_Y, py + 10 };
         DrawText(hdc, num.c_str(), -1, &r3, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
-        RECT r4 = { BOARD_OFFSET_X + BOARD_PX_SIZE, py - 10, BOARD_OFFSET_X + BOARD_PX_SIZE + 20, py + 10 };
+        RECT r4 = { BOARD_OFFSET_Y + BOARD_PX_SIZE, py - 10, BOARD_OFFSET_Y + BOARD_PX_SIZE + 20, py + 10 };
         DrawText(hdc, num.c_str(), -1, &r4, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
     }
 
-    // Status text
     RECT rc = { BOARD_OFFSET_X, BOARD_OFFSET_Y + BOARD_PX_SIZE + 30,
                 BOARD_OFFSET_X + BOARD_PX_SIZE, BOARD_OFFSET_Y + BOARD_PX_SIZE + 80 };
     std::wstring status;
@@ -487,12 +475,6 @@ void DoAIMove() {
     g_current_turn = opponent_of(g_current_turn);
     g_ai_thinking = false;
     InvalidateRect(g_hWnd, NULL, FALSE);
-
-    // If AI vs AI loop not needed since human is one side
-    // But if human passed and AI has no move, it may pass again
-    if (!g_game_over && g_current_turn != g_human_color) {
-        // Chain AI move if needed? Not necessary for turn-based with human
-    }
 }
 
 void HandleLeftClick(int px, int py) {
@@ -514,8 +496,6 @@ void HandleLeftClick(int px, int py) {
     InvalidateRect(g_hWnd, NULL, FALSE);
 
     if (!g_game_over) {
-        // Trigger AI move via timer or direct? Direct with Sleep blocks message pump
-        // Use timer for better UI
         SetTimer(g_hWnd, 1, 10, NULL);
     }
 }
@@ -524,7 +504,6 @@ void HandleRightClick() {
     if (g_game_over || g_ai_thinking) return;
     if (g_current_turn != g_human_color) return;
 
-    // Pass
     g_board.play_move(GoBoard::PASS_MOVE, GoBoard::PASS_MOVE, g_human_color);
     g_pass_count++;
     CheckGameOver();
@@ -541,6 +520,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     switch (message) {
     case WM_CREATE:
         g_hWnd = hWnd;
+        // [CHANGED 2/3] Trigger AI move at startup since AI (Black) plays first
+        SetTimer(hWnd, 1, 500, NULL);
         return 0;
 
     case WM_PAINT: {
@@ -601,7 +582,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     int winW = BOARD_OFFSET_X * 2 + BOARD_PX_SIZE + 40;
     int winH = BOARD_OFFSET_Y * 2 + BOARD_PX_SIZE + 120;
 
-    HWND hWnd = CreateWindowExW(0, L"GoGUI", L"Go 9x9 (You: Black, AI: White)",
+    // [CHANGED 3/3] Window title updated
+    HWND hWnd = CreateWindowExW(0, L"GoGUI", L"Go 9x9 (You: White, AI: Black)",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, winW, winH,
         nullptr, nullptr, hInstance, nullptr);
