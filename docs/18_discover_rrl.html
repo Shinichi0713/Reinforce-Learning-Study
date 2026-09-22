@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x6982;&#x8981;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+</style>
+        
+        </head>
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+        <body class="vscode-body vscode-light">
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>Natureから投稿された強化学習の面白い論文があります。
+学習とは、今までは人が学習する仕組みを作り、データを与えて、データからの学習は自動で行うというのが通例だったと思います。
+しかし、仕組み自体も探索するという手法を提案しています。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+<h2 id="概要">概要</h2>
+<p><a href="https://www.nature.com/articles/s41586-025-09761-x">この論文</a>は、<strong>人間が設計した強化学習アルゴリズムを、機械が自分で発見できるか</strong>という問いに答えた研究です。以下に概要をまとめます。</p>
+<h3 id="研究の背景と動機">研究の背景と動機</h3>
+<p>現在の強化学習（RL）エージェントは、Q学習や<a href="https://yoshishinnze.hatenablog.com/entry/2026/08/10/043000">PPO</a>など、<strong>人間が手で設計した学習ルール</strong>を使っています。しかし、人間の学習メカニズムは生物の進化によって自然に発見されたものであり、人工的なRLアルゴリズムも同様に自動発見できれば、人間の知識や直感の限界を超えられるかもしれません。</p>
+<p>従来もアルゴリズム発見の試みはありましたが、探索空間が狭かったり（ハイパーパラメータや損失関数だけ）、単純な環境（グリッドワールドなど）でしか検証されていませんでした。</p>
+<h3 id="提案手法rlルールの自動発見">提案手法：RLルールの自動発見</h3>
+<p><strong>核心アイデア</strong></p>
+<p>「RLアルゴリズムの本質は、<strong>予測やポリシーをどのターゲットに向かって更新するか</strong>というルールである」という観察に基づき、この「ターゲットを決定する関数」自体を<strong>メタネットワーク</strong>として表現し、最適化します。</p>
+<p><strong>エージェントの構造</strong></p>
+<p>エージェントは以下の出力を持ちます：</p>
+<table>
+<thead>
+<tr>
+<th>出力</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>π</strong></td>
+<td>ポリシー（行動選択確率）</td>
+</tr>
+<tr>
+<td><strong>y(s)</strong></td>
+<td>観測条件付き予測ベクトル（サイズ任意）</td>
+</tr>
+<tr>
+<td><strong>z(s, a)</strong></td>
+<td>行動条件付き予測ベクトル（サイズ任意）</td>
+</tr>
+<tr>
+<td><strong>q(s, a)</strong></td>
+<td>行動価値関数（既知のセマンティクス）</td>
+</tr>
+<tr>
+<td><strong>p(s, a)</strong></td>
+<td>補助的なポリシー予測</td>
+</tr>
+</tbody>
+</table>
+<p><strong>y(s)</strong> と <strong>z(s, a)</strong> は、あらかじめ「価値関数」や「モデル」といった意味を与えず、<strong>メタネットワークがその意味（セマンティクス）を発見する</strong>ための予測です。</p>
+<p><strong>メタネットワーク</strong></p>
+<p>メタネットワークは、エージェントの軌跡（trajectory）・報酬・エピソード終了フラグを入力として受け取り、**エージェントの各予測とポリシーの「ターゲット」**を出力します。エージェントはこれらのターゲットに向かって自分のパラメータを更新します。</p>
+<p><strong>メタ最適化（Meta-Optimization）</strong></p>
+<p>多数のエージェントを並列に動かし、それぞれが異なる環境で学習します。メタネットワークのパラメータは、<strong>メタ勾配法</strong>を用いて更新されます。具体的には、エージェントの更新過程（θ₀ → θₙ）を通じて勾配を伝播させ、エージェント集団の累積報酬を最大化するようにメタネットワークを最適化します。</p>
+<h3 id="実験結果">実験結果</h3>
+<p><strong>1. Atariベンチマーク</strong></p>
+<p>発見された「<strong>DiscoRL</strong>」は、メタ学習に使ったAtariゲームで<strong>既存の全RLルールを上回る</strong>性能を示しました。</p>
+<p><strong>2. 未見の環境への汎化</strong></p>
+<p>DiscoRLは、<strong>発見時に全く見たことのないProcGen</strong>などの困難なベンチマークでも、多くの最先端RLアルゴリズムを凌駕するSOTA性能を達成しました。</p>
+<p><strong>3. スケーリング則</strong></p>
+<p>発見に使う環境が多様で複雑になるほど、DiscoRLの性能と汎化性が向上することが示されました。</p>
+<h3 id="最も注目すべき発見">最も注目すべき発見</h3>
+<p>論文の分析により、DiscoRLが発見した予測 <strong>y(s)</strong> と <strong>z(s, a)</strong> のセマンティクスは、<strong>既存のRL概念（価値関数、後継特徴、モデルなど）とは異なる、全く新しい概念</strong>であることが明らかになりました。</p>
+<p>これは単なる「既存アルゴリズムの再発見」ではなく、<strong>機械が人間の設計を超えた新しい学習原理を生み出した</strong>ことを示唆しています。</p>
+<h2 id="課題">課題</h2>
+<p>この研究が取り組んでいる課題は、大きく分けて<strong>3つの層</strong>に整理できます。</p>
+<h3 id="1-根本課題rlアルゴリズムは人間が手で設計するという限界">1. 根本課題：RLアルゴリズムは「人間が手で設計する」という限界</h3>
+<p>現在の強化学習の最大のボトルネックは、<strong>学習ルール自体が人間の知識と直感に依存している</strong>点です。</p>
+<ul>
+<li>Q学習、PPO、TD学習など、成功しているRLアルゴリズムはすべて研究者が手で設計したものです。</li>
+<li>これは<strong>遅く、労力がかかり、人間の創造性の限界に縛られます</strong>。</li>
+<li>一方、人間や動物の学習メカニズムは、進化という「自動化された探索」によって何世代にもわたって洗練されてきました。</li>
+</ul>
+<p><strong>つまり、「なぜ機械の学習ルールは機械に発見させないのか」という問いが、この研究の出発点です。</strong></p>
+<h3 id="2-従来研究の限界狭い探索空間と単純な環境">2. 従来研究の限界：「狭い探索空間」と「単純な環境」</h3>
+<p>アルゴリズム自動発見は過去にも試みられていましたが、以下の2つの点で不十分でした。</p>
+<p><strong>(a) 探索空間が狭い</strong></p>
+<ul>
+<li>従来は、ハイパーパラメータの調整や損失関数の形など、<strong>限られた設計空間</strong>の中で探索していました。</li>
+<li>本研究は、<strong>「予測のターゲットを決定する関数全体」</strong> をメタネットワークとして表現し、表現力の高い探索空間を構築しました。</li>
+</ul>
+<p><strong>(b) 検証環境が単純</strong></p>
+<ul>
+<li>従来のメタ学習研究は、グリッドワールドなどの<strong>単純な環境</strong>でしか検証されていませんでした。</li>
+<li>本研究は、<strong>Atariのような複雑で多様な環境</strong>でメタ学習を行い、実用的な性能を達成しました。</li>
+</ul>
+<h3 id="3-実用的課題汎化とスケーリング">3. 実用的課題：汎化とスケーリング</h3>
+<p>単に「既存アルゴリズムを再発見する」だけでは意味がありません。本研究が解決しようとした実用的な課題は：</p>
+<table>
+<thead>
+<tr>
+<th>課題</th>
+<th>本研究のアプローチ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>未見の環境への汎化</strong></td>
+<td>多様な環境でメタ学習することで、ProcGenなど未見環境でもSOTAを達成</td>
+</tr>
+<tr>
+<td><strong>発見のスケーリング</strong></td>
+<td>環境の多様性と複雑さを増やすほど、発見されたルールの性能と汎化性が向上</td>
+</tr>
+<tr>
+<td><strong>新規性の保証</strong></td>
+<td>発見された予測のセマンティクスが既存概念と異なることを分析で確認</td>
+</tr>
+</tbody>
+</table>
+<h2 id="提案手法">提案手法</h2>
+<p>本論文の提案内容は、<strong>「RLアルゴリズムをメタネットワークとして表現し、エージェント集団の経験からメタ勾配法で最適化する」</strong> という枠組みです。以下、構成要素から順に説明します。</p>
+<h3 id="1-核心アイデアrlルール--ターゲットを生成する関数">1. 核心アイデア：RLルール = 「ターゲットを生成する関数」</h3>
+<p>本研究は、既存のRLアルゴリズム（Q学習、PPO、TD学習など）の本質を以下のように捉えました：</p>
+<blockquote>
+<p><strong>「エージェントの予測やポリシーを、将来の報酬や予測に基づいた『ターゲット』に向かって更新するルール」</strong></p>
+</blockquote>
+<p>そして、この <strong>「ターゲットを決定する関数」自体をニューラルネットワーク（メタネットワーク）として表現し、その重みを学習する</strong>ことで、RLアルゴリズムを自動発見します。</p>
+<h3 id="2-エージェントの構造意味を固定しない予測空間">2. エージェントの構造：意味を固定しない予測空間</h3>
+<p>エージェントは以下の5つの出力を持ちます：</p>
+<table>
+<thead>
+<tr>
+<th>出力</th>
+<th>記号</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ポリシー</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false">(</mo><mi>a</mi><mi mathvariant="normal">∣</mi><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">π(a|s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord">∣</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></td>
+<td>行動選択確率</td>
+</tr>
+<tr>
+<td>観測条件付き予測</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo><mo>∈</mo><msup><mi mathvariant="normal">R</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">y(s) ∈ ℝⁿ</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6889em;"></span><span class="mord"><span class="mord amsrm">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span></span></td>
+<td><strong>意味を固定しない予測ベクトル</strong></td>
+</tr>
+<tr>
+<td>行動条件付き予測</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo><mo>∈</mo><msup><mi mathvariant="normal">R</mi><mi>m</mi></msup></mrow><annotation encoding="application/x-tex">z(s,a) ∈ ℝᵐ</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6889em;"></span><span class="mord"><span class="mord amsrm">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span></span></span></span></span></td>
+<td><strong>意味を固定しない予測ベクトル</strong></td>
+</tr>
+<tr>
+<td>行動価値関数</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">q(s,a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span></td>
+<td>既知のセマンティクスを持つ補助予測</td>
+</tr>
+<tr>
+<td>補助ポリシー予測</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">p(s,a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span></td>
+<td>既知のセマンティクスを持つ補助予測</td>
+</tr>
+</tbody>
+</table>
+<p><strong>なぜ「y(s)」と「z(s,a)」が重要か</strong></p>
+<ul>
+<li>既存のRLでは「価値関数」「モデル」など、<strong>予測の意味を人間があらかじめ定義</strong>します。</li>
+<li>本研究では、<strong>予測の意味（セマンティクス）も含めてメタネットワークに発見させます</strong>。</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">y(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> と <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">z(s,a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> の形式は、状態価値関数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">v(s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span> と行動価値関数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mo stretchy="false">(</mo><mi>s</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">q(s,a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span> の区別など、既存RLの多くの概念を表現できる一般性を持ちつつ、それに限定されない柔軟性があります。</li>
+</ul>
+<h3 id="3-メタネットワークターゲット生成器">3. メタネットワーク：ターゲット生成器</h3>
+<p>メタネットワークは、RLルールそのものを表現するネットワークです。</p>
+<p><strong>入力</strong></p>
+<ul>
+<li>エージェントの軌跡（各時刻での予測値・ポリシー出力）</li>
+<li>環境からの報酬</li>
+<li>エピソード終了フラグ</li>
+</ul>
+<p><strong>出力</strong></p>
+<ul>
+<li>エージェントの各予測（y, z, q, p）の<strong>ターゲット値</strong></li>
+<li>ポリシー π の<strong>ターゲット</strong></li>
+</ul>
+<p><strong>処理</strong></p>
+<p>メタネットワーク内部ではLSTMを用い、時系列の軌跡情報から「将来の報酬と予測に基づいたターゲット」を計算します。これは、TD学習やPPOなどが行う「ブートストラップターゲットの計算」を一般化したものです。</p>
+<h3 id="4-二重の最適化ループ">4. 二重の最適化ループ</h3>
+<p>本手法には、<strong>エージェント最適化</strong>と<strong>メタ最適化</strong>の2つのループが存在します。</p>
+<pre><code>【外側：メタ最適化】
+メタネットワークのパラメータ φ を更新
+        ↓
+【内側：エージェント最適化】
+エージェントのパラメータ θ を、メタネットワークが生成するターゲットに従って更新
+        ↓
+エージェントが環境と相互作用 → 累積報酬を獲得
+        ↓
+累積報酬を最大化するように、メタネットワークのパラメータ φ に勾配を伝播
+</code></pre>
+<p><strong>メタ勾配法</strong></p>
+<ul>
+<li>エージェントの更新過程 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mn>0</mn></msub><mo>→</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>→</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo>→</mo><msub><mi>θ</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">θ₀ → θ₁ → ... → θₙ</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mord">...</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> を<strong>展開して微分</strong>します。</li>
+<li>これにより、「どのターゲットを設定した結果、エージェントがどれだけ報酬を獲得したか」という因果関係を、メタネットワークの重みまで伝播させます。</li>
+</ul>
+<h3 id="5-大規模な発見プロセス">5. 大規模な発見プロセス</h3>
+<p><strong>エージェント集団</strong></p>
+<ul>
+<li><strong>多数のエージェント</strong>を並列に動作させ、それぞれが異なる環境インスタンスと相互作用します。</li>
+<li>環境はAtariなど、<strong>多様で複雑なタスク</strong>から構成されます。</li>
+</ul>
+<p><strong>スケーリング則</strong></p>
+<ul>
+<li>発見に使う環境が<strong>多様で複雑になるほど</strong>、発見されたRLルールの性能と汎化性が向上することが示されました。</li>
+<li>これは、「より豊かな経験からより優れた学習ルールが生まれる」という直感を実証したものです。</li>
+</ul>
+<h3 id="6-発見されたものdiscorl">6. 発見されたもの：DiscoRL</h3>
+<p>この枠組みによって発見されたRLルールは <strong>DiscoRL（Discovered RL rule）</strong> と名付けられました。</p>
+<p><strong>DiscoRLの特徴</strong></p>
+<ul>
+<li>Atariで既存の全手法を上回る</li>
+<li>未見のProcGen環境でもSOTAを達成</li>
+<li><strong>発見された予測 y(s) と z(s,a) のセマンティクスは、既存の価値関数・モデル・後継特徴などとは異なる新しい概念</strong></li>
+</ul>
+<h3 id="提案内容のまとめ図">提案内容のまとめ図</h3>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\docs\image\18_discover_rrl\1789793969133.png" alt="1789793969133"></p>
+<p>この枠組みにより、<strong>「どの予測を学ぶべきか」</strong> と <strong>「それをどのターゲットに向かって更新すべきか」</strong> という、RLアルゴリズムの最も本質的な部分を、人間ではなく機械が発見できるようになりました。<source-chip title="Nature" url="https://www.nature.com/articles/s41586-025-09761-x" /></p>
+<h2 id="効果">効果</h2>
+<p>本論文の実験結果は、<strong>「機械が発見したRLアルゴリズムが、人間が設計した最先端手法を上回る」</strong> ことを、複数のベンチマークと分析によって実証しています。以下に主要な結果をまとめます。</p>
+<h3 id="1-atari57既存手法を上回る性能">1. Atari57：既存手法を上回る性能</h3>
+<p>発見された <strong>Disco57</strong>（Atari57でメタ学習したルール）は、Atariベンチマークで以下の既存手法と比較されました：</p>
+<ul>
+<li>DQN（2015）</li>
+<li>IMPALA（2018）</li>
+<li>STACX（2020）</li>
+<li>Dreamer（2020）</li>
+<li>MEME（2022）</li>
+<li>MuZero（2020）</li>
+</ul>
+<p><strong>結果</strong>：Disco57は、これらの慎重に設計されたベースラインと同等か、それ以上の性能を達成しました。<source-chip title="rewire.it" url="https://rewire.it/blog/disco-rl-when-algorithms-learn-to-design-algorithms/" /> これは特筆すべきことで、PPOなどの各アルゴリズムは何年もの研究の積み重ねによって生まれましたが、DiscoRLは自動発見によってそれを凌駕しました。</p>
+<h3 id="2-未見環境への汎化atari以外でも強い">2. 未見環境への汎化：Atari以外でも強い</h3>
+<p>DiscoRLの重要な特徴は、<strong>メタ学習時に見たことのない環境でも高い性能を発揮する</strong>点です。</p>
+<p><strong>評価された未見環境</strong></p>
+<table>
+<thead>
+<tr>
+<th>環境</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ProcGen</strong></td>
+<td>手続き的に生成されるゲーム（汎化能力のテスト）</td>
+</tr>
+<tr>
+<td><strong>DMLab-30</strong></td>
+<td>3D認知タスク</td>
+</tr>
+<tr>
+<td><strong>Crafter</strong></td>
+<td>オープンワールド的なサバイバルタスク</td>
+</tr>
+<tr>
+<td><strong>NetHack</strong></td>
+<td>非常に複雑なローグライクゲーム</td>
+</tr>
+<tr>
+<td><strong>Sokoban</strong></td>
+<td>パズル/推論タスク</td>
+</tr>
+</tbody>
+</table>
+<p><strong>結果</strong>：DiscoRLは、観測空間や行動空間が根本的に異なるこれらの環境でも、強い性能を示しました。これは、発見されたルールが特定の環境に過学習していないことを示しています。<source-chip title="Google DeepMind" url="https://google-deepmind.github.io/disco_rl/" /></p>
+<h3 id="3-発見効率計算コストは現実的">3. 発見効率：計算コストは現実的</h3>
+<p>「こんなに大規模なメタ学習、計算量的に現実的なのか」という疑問に対し、論文は以下を示しています：</p>
+<ul>
+<li><strong>最適なDiscoRLルールは、各Atariゲームあたり約6億ステップ（約3回の完全なエージェント学習に相当）で発見された</strong></li>
+<li>これは「発見」が、単一のエージェントを最適化するコストの数倍程度で済むことを意味し、<strong>計算的に実現可能</strong>であることを示しています。<source-chip title="Temple University Presentation" url="https://cis.temple.edu/tagit/presentations/Discovering%20state-of-the-art%20reinforcement%20learning%20algorithms.pdf" /></li>
+</ul>
+<h3 id="4-スケーリング則環境が多いほど良いルールが生まれる">4. スケーリング則：環境が多いほど良いルールが生まれる</h3>
+<p>本研究の重要な発見の一つは、<strong>「発見に使う環境が多様で複雑になるほど、発見されたRLルールが強くなる」</strong> というスケーリング則です。</p>
+<ul>
+<li><strong>Disco57</strong>：57のAtari環境でメタ学習</li>
+<li><strong>Disco103</strong>：Atari + ProcGen + DMLab-30の計103環境でメタ学習</li>
+</ul>
+<p>Disco103はDisco57よりも未見のProcGen環境で高い性能を示し、<strong>環境の多様性と複雑さが、より汎用的で強力な学習ルールを生み出す</strong>ことが実証されました。<source-chip title="Nature" url="https://www.nature.com/articles/s41586-025-09761-x" /></p>
+<h3 id="5-アブレーションスタディ何が重要か">5. アブレーションスタディ：何が重要か</h3>
+<p>Atariで行われたアブレーション実験により、DiscoRLの各構成要素の重要性が明らかになりました：</p>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>価値関数(q)なし</strong></td>
+<td>性能が大きく低下 → 価値関数は依然として重要</td>
+</tr>
+<tr>
+<td><strong>学習予測(y, z)なし</strong></td>
+<td>性能が低下 → メタ学習した予測も重要</td>
+</tr>
+<tr>
+<td><strong>補助予測(p)なし</strong></td>
+<td>ある程度影響</td>
+</tr>
+<tr>
+<td><strong>小さなエージェント</strong></td>
+<td>性能低下 → モデルサイズも重要</td>
+</tr>
+<tr>
+<td><strong>おもちゃの環境のみ（グリッドワールド57）</strong></td>
+<td>大幅に低下 → <strong>多様で複雑な環境での発見が不可欠</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>結論</strong>：事前に定義された価値関数と、メタ学習によって発見された新しい予測の両方が重要であり、それらを多様な環境で学習させることが性能の鍵です。<source-chip title="Temple University Presentation" url="https://cis.temple.edu/tagit/presentations/Discovering%20state-of-the-art%20reinforcement%20learning%20algorithms.pdf" /></p>
+<h3 id="6-発見された予測の性質分析">6. 発見された予測の性質分析</h3>
+<p>最も興味深い結果の一つは、<strong>DiscoRLが発見した予測が何を学習しているか</strong>の分析です。</p>
+<p><strong>観察された現象</strong></p>
+<ul>
+<li><strong>予測の確信度が、重要なイベントの前に急上昇する</strong></li>
+<li>大きな報酬が得られる前に予測が活性化</li>
+<li>強い行動選択の前にも予測が変化</li>
+</ul>
+<p><strong>解釈</strong></p>
+<p>DiscoRLは、<strong>中期的な時間スケールで将来の重要なイベントを予測・識別</strong>する仕組みを自動的に発見しました。これは従来の価値関数（将来の割引報酬和）とは異なる、より豊かな予測セマンティクスを獲得したことを示唆しています。</p>
+<p>また、発見された予測ベクトル（30次元）は、情報量が豊富で、そこから元の価値関数をほぼ回復できることも確認されました。つまり、<strong>価値関数と同等かそれ以上の情報を、発見された表現が保持している</strong>のです。<source-chip title="rewire.it" url="https://rewire.it/blog/disco-rl-when-algorithms-learn-to-design-algorithms/" /></p>
+<h3 id="実験結果のまとめ">実験結果のまとめ</h3>
+<table>
+<thead>
+<tr>
+<th>評価項目</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Atari57</strong></td>
+<td>既存の全手法を凌駕または同等</td>
+</tr>
+<tr>
+<td><strong>未見環境（ProcGen等）</strong></td>
+<td>SOTA性能を達成</td>
+</tr>
+<tr>
+<td><strong>発見に必要な計算</strong></td>
+<td>各ゲーム約3回分の学習で実現可能</td>
+</tr>
+<tr>
+<td><strong>スケーリング</strong></td>
+<td>環境が多様で複雑になるほど性能向上</td>
+</tr>
+<tr>
+<td><strong>発見された予測</strong></td>
+<td>価値関数とは異なる新しいセマンティクスを獲得</td>
+</tr>
+</tbody>
+</table>
+<p>これらの結果は、<strong>「強化学習アルゴリズムの設計は、今後、自動化された方法によって主導される可能性がある」</strong> という本研究の主張を強く支持しています。<source-chip title="Google DeepMind" url="https://google-deepmind.github.io/disco_rl/" /></p>
+<h2 id="総括">総括</h2>
+<p>この論文の本質は、以下の3つのパラダイムシフトに集約されます。</p>
+<h3 id="1-学習するものから学習する方法そのものを学習する対象へ">1. 「学習するもの」から「学習する方法そのもの」を学習する対象へ</h3>
+<p>従来の機械学習は、<strong>「与えられたアルゴリズムでデータから何を学ぶか」</strong> が問いでした。</p>
+<p>この論文は、<strong>「アルゴリズム自体を学習の対象にする」</strong> というレベルを一段上げました。ポリシーや価値関数を学習するのではなく、<strong>「どうやってポリシーや価値関数を更新すべきか」という学習ルールそのもの</strong>を、メタネットワークが発見します。</p>
+<h3 id="2-人間の設計から機械の発見へ">2. 人間の「設計」から機械の「発見」へ</h3>
+<p>DQNやPPOは、人間の直感と理論によって「こう学習すべきだ」と設計されました。</p>
+<p>この論文は、<strong>人間が「価値関数とは何か」「TD学習とは何か」を定義するのではなく、機械が経験を通じて「何を予測すべきか」「どう更新すべきか」を独自に発見する</strong>ことを示しました。</p>
+<p>そして決定的なのは、発見されたものが<strong>既存の概念（価値関数、モデル、後継特徴など）の模倣ではなく、人間が思いつかなかった新しい予測セマンティクス</strong>だったことです。</p>
+<h3 id="3-進化が生物の学習を生んだようにメタ学習がaiの学習を生み出す">3. 進化が生物の学習を生んだように、メタ学習がAIの学習を生み出す</h3>
+<p>論文の冒頭で示された比喩が本質を捉えています。</p>
+<blockquote>
+<p>人間の学習メカニズムは、進化によって何世代にもわたる試行錯誤を通じて「発見」された。ならば、AIの学習メカニズムも同様に「発見」できないか。</p>
+</blockquote>
+<p>この研究は、その問いに <strong>「できる」</strong> と答えました。進化が生物に強力な学習能力を与えたように、<strong>大規模なメタ学習がAIに人間を超える学習能力を与えうる</strong>ことを、初めて実証的に示したのです。</p>
+<h3 id="一言で言えば">一言で言えば</h3>
+<blockquote>
+<p><strong>「強化学習の最も本質的な部分、すなわち『どう学ぶか』というルール自体を、人間の設計から解放し、機械の経験とスケールによって自動発見できる」</strong></p>
+</blockquote>
+<p>これが、この論文の本質です。アルゴリズムを「書く」のではなく「育てる」時代の到来を示唆しています。</p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/3uTYZjJPP0I?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+
+        </body>
+        </html>
