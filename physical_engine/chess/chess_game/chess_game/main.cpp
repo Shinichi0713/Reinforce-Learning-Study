@@ -1,4 +1,4 @@
-﻿// GoGUI.cpp
+// GoGUI_v2.cpp
 // Visual Studio 2022 / Win32 API / Unicode / Windows Subsystem
 
 #define NOMINMAX
@@ -34,8 +34,8 @@ private:
     mutable std::vector<int> liberties;
     mutable std::vector<int> group_size;
 
-    const int dx[4] = { 1, -1, 0, 0 };
-    const int dy[4] = { 0, 0, 1, -1 };
+    int dx[4] = { 1, -1, 0, 0 };
+    int dy[4] = { 0, 0, 1, -1 };
 
 public:
     GoBoard() : board(SIZE* SIZE, Stone::EMPTY), ko_pos(-1), last_captured_count(0) {
@@ -272,22 +272,26 @@ const unsigned long C_GRAY = 0x00808080;
 const unsigned long C_HOSHI = 0x00000000;
 const unsigned long C_TEXT = 0x00000000;
 
+// ===================== Game State =====================
+enum class GameState { MENU, PLAYING, GAME_OVER };
+
 // ===================== Global State =====================
 GoBoard g_board;
 RandomAgent g_ai(123);
-
-// [CHANGED 1/3] Human plays WHITE, AI plays BLACK
+GameState g_gameState = GameState::MENU;
 Stone g_human_color = Stone::WHITE;
-Stone g_current_turn = Stone::BLACK; // Black goes first
-
+Stone g_current_turn = Stone::BLACK;
 bool g_ai_thinking = false;
 bool g_game_over = false;
 int g_pass_count = 0;
 int g_last_x = -1;
 int g_last_y = -1;
+int g_hoverX = -1;
+int g_hoverY = -1;
+bool g_trackingMouse = false;
 HWND g_hWnd = NULL;
 
-// ===================== Drawing Helpers =====================
+// ===================== Helpers =====================
 int ToPixelX(int bx) { return BOARD_OFFSET_X + bx * CELL_SIZE + CELL_SIZE / 2; }
 int ToPixelY(int by) { return BOARD_OFFSET_Y + by * CELL_SIZE + CELL_SIZE / 2; }
 bool ToBoardCoord(int px, int py, int& bx, int& by) {
@@ -319,6 +323,51 @@ void DrawStone(HDC hdc, int bx, int by, Stone s) {
         DeleteObject(pen);
         DeleteObject(br);
     }
+}
+
+// NEW: Hover preview (pseudo-transparent)
+void DrawPreviewStone(HDC hdc, int bx, int by, Stone s) {
+    int px = ToPixelX(bx);
+    int py = ToPixelY(by);
+    int r = CELL_SIZE / 2 - 6;
+    RECT rc = { px - r, py - r, px + r, py + r };
+    if (s == Stone::BLACK) {
+        HBRUSH br = CreateSolidBrush(RGB(100, 100, 100)); // dim black
+        HGDIOBJ old = SelectObject(hdc, br);
+        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
+        FillRect(hdc, &rc, br);
+        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
+        SelectObject(hdc, old);
+        DeleteObject(br);
+    }
+    else {
+        HBRUSH br = CreateSolidBrush(RGB(220, 220, 220)); // dim white
+        HPEN pen = CreatePen(PS_SOLID, 1, RGB(120, 120, 120));
+        HGDIOBJ old_pen = SelectObject(hdc, pen);
+        HGDIOBJ old_br = SelectObject(hdc, br);
+        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
+        FillRect(hdc, &rc, br);
+        Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
+        SelectObject(hdc, old_br);
+        SelectObject(hdc, old_pen);
+        DeleteObject(pen);
+        DeleteObject(br);
+    }
+}
+
+// NEW: Invalid move mark (red X)
+void DrawInvalidMark(HDC hdc, int bx, int by) {
+    int px = ToPixelX(bx);
+    int py = ToPixelY(by);
+    int r = CELL_SIZE / 2 - 10;
+    HPEN pen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
+    HGDIOBJ old = SelectObject(hdc, pen);
+    MoveToEx(hdc, px - r, py - r, NULL);
+    LineTo(hdc, px + r, py + r);
+    MoveToEx(hdc, px + r, py - r, NULL);
+    LineTo(hdc, px - r, py + r);
+    SelectObject(hdc, old);
+    DeleteObject(pen);
 }
 
 void DrawBoard(HDC hdc) {
@@ -361,6 +410,19 @@ void DrawBoard(HDC hdc) {
         for (int x = 0; x < 9; ++x)
             DrawStone(hdc, x, y, g_board.get(x, y));
 
+    // NEW: Hover preview
+    if (g_gameState == GameState::PLAYING && !g_game_over && !g_ai_thinking &&
+        g_current_turn == g_human_color && g_hoverX != -1) {
+        if (g_board.get(g_hoverX, g_hoverY) == Stone::EMPTY) {
+            if (g_board.is_legal(g_hoverX, g_hoverY, g_human_color)) {
+                DrawPreviewStone(hdc, g_hoverX, g_hoverY, g_human_color);
+            }
+            else {
+                DrawInvalidMark(hdc, g_hoverX, g_hoverY);
+            }
+        }
+    }
+
     if (g_last_x != -1) {
         int px = ToPixelX(g_last_x);
         int py = ToPixelY(g_last_y);
@@ -375,7 +437,7 @@ void DrawBoard(HDC hdc) {
         DeleteObject(redpen);
     }
 
-    if (!g_game_over && !g_ai_thinking && g_current_turn == g_human_color) {
+    if (g_gameState == GameState::PLAYING && !g_game_over && !g_ai_thinking && g_current_turn == g_human_color) {
         auto legals = g_board.get_legal_moves(g_human_color);
         HBRUSH gbr = CreateSolidBrush(C_GRAY);
         for (size_t i = 0; i < legals.size(); ++i) {
@@ -416,7 +478,7 @@ void DrawBoard(HDC hdc) {
     RECT rc = { BOARD_OFFSET_X, BOARD_OFFSET_Y + BOARD_PX_SIZE + 30,
                 BOARD_OFFSET_X + BOARD_PX_SIZE, BOARD_OFFSET_Y + BOARD_PX_SIZE + 80 };
     std::wstring status;
-    if (g_game_over) {
+    if (g_gameState == GameState::GAME_OVER) {
         status = L"Game Over. ";
         auto sc = g_board.calculate_score();
         std::wstringstream wss;
@@ -424,6 +486,7 @@ void DrawBoard(HDC hdc) {
         if (sc.black_score > sc.white_score) wss << L"Black wins";
         else wss << L"White wins";
         status += wss.str();
+        status += L" | Click to return to menu";
     }
     else if (g_ai_thinking) {
         status = L"AI thinking...";
@@ -438,15 +501,68 @@ void DrawBoard(HDC hdc) {
     DeleteObject(hf);
 }
 
+// NEW: Menu screen
+void DrawMenuScreen(HDC hdc) {
+    RECT rc;
+    GetClientRect(g_hWnd, &rc);
+    int cx = (rc.left + rc.right) / 2;
+    int cy = (rc.top + rc.bottom) / 2;
+
+    FillRect(hdc, &rc, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+    SetTextColor(hdc, C_TEXT);
+    SetBkMode(hdc, TRANSPARENT);
+
+    HFONT hTitle = CreateFont(36, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Microsoft Sans Serif");
+    HFONT oldf = (HFONT)SelectObject(hdc, hTitle);
+    RECT rTitle = { rc.left, cy - 100, rc.right, cy - 60 };
+    DrawText(hdc, L"Go 9x9", -1, &rTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    SelectObject(hdc, oldf);
+    DeleteObject(hTitle);
+
+    HFONT hf = CreateFont(18, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Microsoft Sans Serif");
+    oldf = (HFONT)SelectObject(hdc, hf);
+
+    RECT rBlack = { cx - 130, cy - 20, cx + 130, cy + 20 };
+    HBRUSH br = CreateSolidBrush(RGB(240, 240, 240));
+    FillRect(hdc, &rBlack, br);
+    DeleteObject(br);
+    HPEN pen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+    HGDIOBJ oldp = SelectObject(hdc, pen);
+    Rectangle(hdc, rBlack.left, rBlack.top, rBlack.right, rBlack.bottom);
+    SelectObject(hdc, oldp);
+    DeleteObject(pen);
+    DrawText(hdc, L"Play as Black (First move)", -1, &rBlack, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+    RECT rWhite = { cx - 130, cy + 35, cx + 130, cy + 75 };
+    br = CreateSolidBrush(RGB(240, 240, 240));
+    FillRect(hdc, &rWhite, br);
+    DeleteObject(br);
+    pen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+    oldp = SelectObject(hdc, pen);
+    Rectangle(hdc, rWhite.left, rWhite.top, rWhite.right, rWhite.bottom);
+    SelectObject(hdc, oldp);
+    DeleteObject(pen);
+    DrawText(hdc, L"Play as White (Second move)", -1, &rWhite, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+    SelectObject(hdc, oldf);
+    DeleteObject(hf);
+}
+
 // ===================== Game Logic =====================
 void CheckGameOver() {
     if (g_pass_count >= 2) {
         g_game_over = true;
+        g_gameState = GameState::GAME_OVER;
     }
 }
 
 void DoAIMove() {
-    if (g_game_over) return;
+    if (g_game_over || g_gameState != GameState::PLAYING) return;
     if (g_current_turn == g_human_color) return;
 
     g_ai_thinking = true;
@@ -478,7 +594,7 @@ void DoAIMove() {
 }
 
 void HandleLeftClick(int px, int py) {
-    if (g_game_over || g_ai_thinking) return;
+    if (g_gameState != GameState::PLAYING || g_game_over || g_ai_thinking) return;
     if (g_current_turn != g_human_color) return;
 
     int bx = 0, by = 0;
@@ -501,7 +617,7 @@ void HandleLeftClick(int px, int py) {
 }
 
 void HandleRightClick() {
-    if (g_game_over || g_ai_thinking) return;
+    if (g_gameState != GameState::PLAYING || g_game_over || g_ai_thinking) return;
     if (g_current_turn != g_human_color) return;
 
     g_board.play_move(GoBoard::PASS_MOVE, GoBoard::PASS_MOVE, g_human_color);
@@ -515,32 +631,121 @@ void HandleRightClick() {
     }
 }
 
+// NEW: Menu click
+void HandleMenuClick(int px, int py) {
+    RECT rc;
+    GetClientRect(g_hWnd, &rc);
+    int cx = (rc.left + rc.right) / 2;
+    int cy = (rc.top + rc.bottom) / 2;
+
+    RECT rBlack = { cx - 130, cy - 20, cx + 130, cy + 20 };
+    RECT rWhite = { cx - 130, cy + 35, cx + 130, cy + 75 };
+    POINT pt = { px, py };
+
+    if (PtInRect(&rBlack, pt)) {
+        g_human_color = Stone::BLACK;
+        g_board = GoBoard();
+        g_current_turn = Stone::BLACK;
+        g_game_over = false;
+        g_pass_count = 0;
+        g_last_x = -1; g_last_y = -1;
+        g_hoverX = -1; g_hoverY = -1;
+        g_gameState = GameState::PLAYING;
+        SetWindowText(g_hWnd, L"Go 9x9 (You: Black, AI: White)");
+        InvalidateRect(g_hWnd, NULL, TRUE);
+    }
+    else if (PtInRect(&rWhite, pt)) {
+        g_human_color = Stone::WHITE;
+        g_board = GoBoard();
+        g_current_turn = Stone::BLACK;
+        g_game_over = false;
+        g_pass_count = 0;
+        g_last_x = -1; g_last_y = -1;
+        g_hoverX = -1; g_hoverY = -1;
+        g_gameState = GameState::PLAYING;
+        SetWindowText(g_hWnd, L"Go 9x9 (You: White, AI: Black)");
+        SetTimer(g_hWnd, 1, 500, NULL); // AI moves first
+        InvalidateRect(g_hWnd, NULL, TRUE);
+    }
+}
+
 // ===================== Window Procedure =====================
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
     case WM_CREATE:
         g_hWnd = hWnd;
-        // [CHANGED 2/3] Trigger AI move at startup since AI (Black) plays first
-        SetTimer(hWnd, 1, 500, NULL);
         return 0;
 
     case WM_PAINT: {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        DrawBoard(hdc);
+        if (g_gameState == GameState::MENU) {
+            DrawMenuScreen(hdc);
+        }
+        else {
+            DrawBoard(hdc);
+        }
         EndPaint(hWnd, &ps);
         return 0;
     }
 
+    case WM_MOUSEMOVE: {
+        if (g_gameState == GameState::PLAYING && !g_game_over && !g_ai_thinking &&
+            g_current_turn == g_human_color) {
+            int bx = 0, by = 0;
+            if (ToBoardCoord(LOWORD(lParam), HIWORD(lParam), bx, by)) {
+                if (bx != g_hoverX || by != g_hoverY) {
+                    g_hoverX = bx;
+                    g_hoverY = by;
+                    InvalidateRect(hWnd, NULL, FALSE);
+                }
+            }
+            else {
+                if (g_hoverX != -1) {
+                    g_hoverX = -1;
+                    g_hoverY = -1;
+                    InvalidateRect(hWnd, NULL, FALSE);
+                }
+            }
+        }
+        if (!g_trackingMouse) {
+            TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hWnd, 0 };
+            TrackMouseEvent(&tme);
+            g_trackingMouse = true;
+        }
+        return 0;
+    }
+
+    case WM_MOUSELEAVE:
+        g_trackingMouse = false;
+        if (g_hoverX != -1) {
+            g_hoverX = -1;
+            g_hoverY = -1;
+            InvalidateRect(hWnd, NULL, FALSE);
+        }
+        return 0;
+
     case WM_LBUTTONUP: {
         int x = LOWORD(lParam);
         int y = HIWORD(lParam);
-        HandleLeftClick(x, y);
+        if (g_gameState == GameState::MENU) {
+            HandleMenuClick(x, y);
+        }
+        else if (g_gameState == GameState::PLAYING) {
+            HandleLeftClick(x, y);
+        }
+        else if (g_gameState == GameState::GAME_OVER) {
+            g_gameState = GameState::MENU;
+            SetWindowText(g_hWnd, L"Go 9x9 - Select Color");
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
         return 0;
     }
 
     case WM_RBUTTONUP: {
-        HandleRightClick();
+        if (g_gameState == GameState::PLAYING) {
+            HandleRightClick();
+        }
         return 0;
     }
 
@@ -582,8 +787,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     int winW = BOARD_OFFSET_X * 2 + BOARD_PX_SIZE + 40;
     int winH = BOARD_OFFSET_Y * 2 + BOARD_PX_SIZE + 120;
 
-    // [CHANGED 3/3] Window title updated
-    HWND hWnd = CreateWindowExW(0, L"GoGUI", L"Go 9x9 (You: White, AI: Black)",
+    HWND hWnd = CreateWindowExW(0, L"GoGUI", L"Go 9x9 - Select Color",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, winW, winH,
         nullptr, nullptr, hInstance, nullptr);

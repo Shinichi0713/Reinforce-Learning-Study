@@ -178,5 +178,5 @@ cython_debug/
 *.pkl
 
 *luna-env/
-*.html
-*.ipch
+.html
+.ipch

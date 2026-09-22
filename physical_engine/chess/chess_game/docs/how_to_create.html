@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>C&plus;&plus;&#x3067;&#x7881;&#x306e;&#x5b9f;&#x88c5;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+/* 目次全体のコンテナ */
+nav {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0 40px 0;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 「目次」というタイトル */
+nav h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #0969da;
+    color: #24292f;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* タイトルの前にアイコン（絵文字）を追加 */
+nav h3::before {
+    content: "📖";
+    margin-right: 8px;
+}
+
+/* リストのスタイル調整 */
+#toc {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#toc li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* リンクのスタイル */
+#toc a {
+    color: #0969da;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#toc a:hover {
+    color: #cf222e;
+    transform: translateX(5px); /* ホバー時に少し右に動く */
+}
+
+/* h3（小見出し）がある場合のネスト表現（JSの修正も必要） */
+.toc-h3 {
+    padding-left: 20px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+
+/* 記事タイトル (h1) */
+h1 {
+    font-size: 2rem;
+    color: #24292f;
+    line-height: 1.3;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double #e1e4e8; /* 二重線で上品に */
+    text-align: center; /* タイトルを中央に寄せて特別感を出す */
+}
+
+/* セクション見出し (h2) */
+h2 {
+    font-size: 1.5rem;
+    color: #24292f;
+    padding: 0.5rem 1rem;
+    margin: 40px 0 20px 0;
+    background: linear-gradient(transparent 70%, #e8f0fe 70%); /* 下側に薄い色のアクセント */
+    border-left: 6px solid #0969da; /* 目次のテーマカラーと合わせる */
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* 強調文字 (strong) */
+strong {
+    font-weight: bold;
+    color: #cf222e; /* ホバー時の赤色と合わせて統一感を出す */
+    background: linear-gradient(transparent 60%, #fff2cc 60%); /* 黄色のマーカー風 */
+    padding: 0 2px;
+}
+
+/* 引用のコンテナ */
+blockquote {
+    position: relative;
+    padding: 20px 30px;
+    margin: 30px 0;
+    background-color: #f6f8fa; /* 目次の背景より少しだけ濃いグレー */
+    border-left: 5px solid #d0d7de; /* 落ち着いたグレーの境界線 */
+    color: #57606a; /* 文字色は少し薄くして引用らしさを出す */
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 引用符のアイコンを装飾として追加 */
+blockquote::before {
+    content: "“";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    font-size: 40px;
+    color: #d0d7de;
+    font-family: serif;
+    line-height: 1;
+}
+
+/* 読者になるボタンのデザイン */
+.btn-subscribe {
+    display: inline-block;
+    padding: 12px 35px; /* 横幅を広めにとって存在感を出します */
+    background-color: #383838; /* お好みの色に変更してください */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #555555;
+    text-decoration: none;
+}
+
+/* はてなブログで見えてしまう数式データを非表示にする */
+.katex-html {
+    display: none !important;
+}
+
+.katex-mathml {
+    display: inline !important;
+}
+/* Amazonカード型のオシャレなデザイン */
+.shop-card {
+    display: flex;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* マウスホップした時の動き */
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.shop-card-image {
+    width: 150px;
+    min-width: 150px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-card-image img {
+    max-width: 100%;
+    height: auto;
+    padding: 10px;
+}
+
+.shop-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop-card-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.shop-card-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Amazonらしいオレンジボタン */
+.shop-card-link a {
+    display: inline-block;
+    background-color: #ff9900;
+    color: #fff !important;
+    text-decoration: none !important;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.shop-card-link a:hover {
+    background-color: #e68a00;
+}
+
+/* スマホ対応：縦並びにする */
+@media (max-width: 480px) {
+    .shop-card {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .shop-card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+<nav>
+        <h3>目次</h3>
+        <ul id="toc"></ul> 
+</nav>
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<p>強化学習の練習をいつもやっているPythonではなく、C++で実装してみたいと思いました。
+今回はその一回目として碁をC++で実装するについて扱います。</p>
+<button id="bgm-trigger" style="padding: 10px 20px; font-size: 16px; background-color: #008cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  🎵 BGMを再生する
+</button>
+
+<h2 id="cで碁の実装">C++で碁の実装</h2>
+<p>以下、前回の <strong>Win32 API GUI 版囲碁（9路盤）</strong> のコードを、<strong>囲碁のルールと完全に対応させながら</strong>、構造と実装手順を解説いたします。</p>
+<h3 id="1-プロジェクト作成visual-studio-2022">1. プロジェクト作成（Visual Studio 2022）</h3>
+<p><strong>Step 1: 新規プロジェクト</strong></p>
+<ol>
+<li><strong>「新しいプロジェクトの作成」</strong> → <strong>「空のプロジェクト」</strong>（C++）→ 名前: <code>GoGUI</code></li>
+<li><strong>ソースファイル</strong> を右クリック → <strong>「追加」</strong> → <strong>「新しい項目」</strong> → <code>main.cpp</code></li>
+</ol>
+<p><strong>Step 2: プロパティ設定（必須）</strong></p>
+<ol>
+<li>プロジェクトを右クリック → <strong>「プロパティ」</strong></li>
+<li><strong>リンカー</strong> → <strong>システム</strong> → <strong>サブシステム</strong> → <strong>「Windows (/SUBSYSTEM:WINDOWS)」</strong></li>
+<li><strong>C/C++</strong> → <strong>言語</strong> → <strong>C++言語標準</strong> → <strong>「ISO C++17 標準」</strong>（または C++14）</li>
+</ol>
+<h3 id="2-コード全体の構造">2. コード全体の構造</h3>
+<p>囲碁のルールをプログラムで再現するために、コードは以下の4つの層に分かれています。</p>
+<table>
+<thead>
+<tr>
+<th>層</th>
+<th>ファイル内の位置</th>
+<th>囲碁における役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ルール層</strong></td>
+<td><code>GoBoard</code> クラス</td>
+<td>石を打つ、連、気、コウ、捕獲、地計算</td>
+</tr>
+<tr>
+<td><strong>思考層</strong></td>
+<td><code>RandomAgent</code> クラス</td>
+<td>次の一手を選ぶ（今回はランダム）</td>
+</tr>
+<tr>
+<td><strong>表現層</strong></td>
+<td><code>DrawBoard</code>, <code>DrawStone</code></td>
+<td>盤・石・星の目・座標を画面に描画</td>
+</tr>
+<tr>
+<td><strong>制御層</strong></td>
+<td><code>WndProc</code>, <code>wWinMain</code></td>
+<td>手番管理、マウス入力、AIの非同期実行</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-ルールとコードの対応解説">3. ルールとコードの対応解説</h3>
+<p><strong>3.1 盤面と石の表現</strong></p>
+<p><strong>囲碁のルール</strong>: 碁盤は縦横9路の交点に、黒または白の石を置く。交点には最大1個の石しか置けない。</p>
+<pre><code class="language-cpp"><span class="hljs-keyword">enum class</span> <span class="hljs-title class_">Stone</span> { EMPTY = <span class="hljs-number">0</span>, BLACK = <span class="hljs-number">1</span>, WHITE = <span class="hljs-number">2</span> };
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GoBoard</span> {
+    std::vector&lt;Stone&gt; board;  <span class="hljs-comment">// 81マス（9x9）を1次元配列で管理</span>
+</code></pre>
+<ul>
+<li><code>board[y * SIZE + x]</code> で交点 <code>(x, y)</code> の状態を保持します。</li>
+<li><code>EMPTY</code>（空点）、<code>BLACK</code>（黒）、<code>WHITE</code>（白）の3状態を <code>enum class</code> で厳密に区別しています。</li>
+</ul>
+<p><strong>3.2 連（いわし）の管理</strong></p>
+<p><strong>囲碁のルール</strong>: 隣接する同色の石は「連」になり、まとめて扱われる。</p>
+<pre><code class="language-cpp"><span class="hljs-keyword">mutable</span> std::vector&lt;<span class="hljs-type">int</span>&gt; parent;  <span class="hljs-comment">// Union-Find（併合集合）の親配列</span>
+</code></pre>
+<ul>
+<li><strong>Union-Find（素集合データ構造）</strong> を使い、隣接する同色の石を自動的に1つの「連」としてグループ化します。</li>
+<li><code>unite()</code> で連を結合、<code>find_root()</code> で所属する連の代表を取得します。</li>
+</ul>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">unite</span><span class="hljs-params">(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> <span class="hljs-type">const</span> </span>{
+    a = <span class="hljs-built_in">find_root</span>(a); b = <span class="hljs-built_in">find_root</span>(b);
+    <span class="hljs-keyword">if</span> (a == b) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">if</span> (a &gt; b) std::<span class="hljs-built_in">swap</span>(a, b);
+    parent[b] = a;  <span class="hljs-comment">// bの連をaの連に統合</span>
+}
+</code></pre>
+<p><strong>3.3 気（liberties）の計算</strong></p>
+<p><strong>囲碁のルール</strong>: 連のまわりの空点の数が「気」。気が0になるとその連は盤上から取り除かれる（捕獲）。</p>
+<pre><code class="language-cpp"><span class="hljs-keyword">mutable</span> std::vector&lt;<span class="hljs-type">int</span>&gt; liberties;  <span class="hljs-comment">// 各連の気の数</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">reset_union_find</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+    <span class="hljs-comment">// 1. 各石を独立した連として初期化</span>
+    <span class="hljs-comment">// 2. 隣接する同色の石をuniteで統合</span>
+    <span class="hljs-comment">// 3. 各空点について、隣接する連の気を+1</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> r : roots) liberties[r]++;
+}
+</code></pre>
+<ul>
+<li>着手のたびに盤面全体から気を再計算します（9路盤なので十分高速です）。</li>
+<li><code>liberties[root]</code> がその連の生きる余地（気の数）になります。</li>
+</ul>
+<p><strong>3.4 着手と捕獲</strong></p>
+<p><strong>囲碁のルール</strong>: 石を打つと、まず隣接する相手の連の気が0になっていないか確認する。0になっていればその連を盤から取り除く。</p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">place_stone_raw</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y, Stone color, <span class="hljs-type">int</span>&amp; out_captured, <span class="hljs-type">int</span>&amp; out_new_ko)</span> </span>{
+    board[idx] = color;  <span class="hljs-comment">// 仮に石を置く</span>
+    
+    <span class="hljs-comment">// 4方向の相手の連をチェック</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> d = <span class="hljs-number">0</span>; d &lt; <span class="hljs-number">4</span>; ++d) {
+        <span class="hljs-type">int</span> root = <span class="hljs-built_in">find_root</span>(nidx);
+        <span class="hljs-keyword">if</span> (liberties[root] == <span class="hljs-number">0</span>) {
+            <span class="hljs-comment">// この連の石をすべてEMPTYにする（捕獲）</span>
+            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; SIZE * SIZE; ++i)
+                <span class="hljs-keyword">if</span> (<span class="hljs-built_in">find_root</span>(i) == root) board[i] = Stone::EMPTY;
+        }
+    }
+}
+</code></pre>
+<ul>
+<li>石を置いた直後に <code>reset_union_find()</code> を呼び、相手の連の気を再評価します。</li>
+<li>気が0の連は <code>Stone::EMPTY</code> に戻され、盤上から消えます。</li>
+</ul>
+<p><strong>3.5 自殺手（自殺点）の禁止</strong></p>
+<p><strong>囲碁のルール</strong>: 自分の石を置いた結果、自分の連の気が0になる着手は禁止（自殺手）。</p>
+<pre><code class="language-cpp"><span class="hljs-comment">// 自殺手チェック</span>
+<span class="hljs-built_in">reset_union_find</span>();
+<span class="hljs-type">int</span> my_root = <span class="hljs-built_in">find_root</span>(idx);
+<span class="hljs-keyword">if</span> (liberties[my_root] == <span class="hljs-number">0</span>) {
+    board = backup_board;  <span class="hljs-comment">// 元に戻す</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;          <span class="hljs-comment">// 着手失敗</span>
+}
+</code></pre>
+<ul>
+<li>相手の捕獲後、今度は自分の連の気が0になっていないか確認します。</li>
+<li>0になっていればバックアップから復元し、着手を拒否します。</li>
+</ul>
+<p><strong>3.6 コウ（劫）</strong></p>
+<p><strong>囲碁のルール</strong>: 1手前に1石だけを取った場合、その取られた位置に次の手番で即座に戻ると循環になるため、1手だけ着手禁止（コウ）。</p>
+<pre><code class="language-cpp"><span class="hljs-type">int</span> ko_pos;  <span class="hljs-comment">// コウの位置（-1でなし）</span>
+
+<span class="hljs-keyword">if</span> (out_captured == <span class="hljs-number">1</span>) {
+    out_new_ko = captured_indices[<span class="hljs-number">0</span>];  <span class="hljs-comment">// 取られた1石の位置を記録</span>
+}
+
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">is_legal</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y, Stone color)</span> <span class="hljs-type">const</span> </span>{
+    <span class="hljs-keyword">if</span> (idx == ko_pos) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;  <span class="hljs-comment">// コウ点への着手を禁止</span>
+}
+</code></pre>
+<ul>
+<li>1石だけ捕獲した場合、その位置を <code>ko_pos</code> に保存します。</li>
+<li>次の手番でその位置への着手を <code>is_legal()</code> で弾きます。</li>
+<li>パスや他の場所への着手が入ると <code>ko_pos = -1</code> で解除されます。</li>
+</ul>
+<p><strong>3.7 パスと終局</strong></p>
+<p><strong>囲碁のルール</strong>: 手を打つ代わりに「パス」できる。黒白連続でパスすれば対局終了。</p>
+<pre><code class="language-cpp"><span class="hljs-comment">// 人間の右クリックでパス</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HandleRightClick</span><span class="hljs-params">()</span> </span>{
+    g_board.<span class="hljs-built_in">play_move</span>(GoBoard::PASS_MOVE, GoBoard::PASS_MOVE, g_human_color);
+    g_pass_count++;
+    <span class="hljs-built_in">CheckGameOver</span>();  <span class="hljs-comment">// pass_count &gt;= 2 で終局</span>
+}
+</code></pre>
+<ul>
+<li><code>PASS_MOVE = -1</code> を特別な値として定義し、盤面は変更せず手番だけ交代します。</li>
+<li>グローバル変数 <code>g_pass_count</code> で連続パスをカウントし、2回で <code>g_game_over = true</code> になります。</li>
+</ul>
+<p><strong>3.8 地の計算（領域 + 石数）</strong></p>
+<p><strong>囲碁のルール</strong>: 終局後、各プレイヤーの「領域」（囲んだ空点）と「生存している石数」を合計し、コミを加算して勝敗を決める。</p>
+<pre><code class="language-cpp"><span class="hljs-function">Score <span class="hljs-title">calculate_score</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{
+    <span class="hljs-comment">// BFSで空領域を探索</span>
+    <span class="hljs-keyword">while</span> (!q.<span class="hljs-built_in">empty</span>()) {
+        <span class="hljs-comment">// 領域の周囲に黒だけが隣接 → 黒の領域</span>
+        <span class="hljs-comment">// 領域の周囲に白だけが隣接 → 白の領域</span>
+    }
+    s.black_score = black_territory + black_stones;
+    s.white_score = white_territory + white_stones + KOMI;  <span class="hljs-comment">// 白にはコミ6.5点</span>
+}
+</code></pre>
+<ul>
+<li>空点の塊（領域）に対して、<strong>幅優先探索（BFS）</strong> を行います。</li>
+<li>その領域に隣接する石の色が黒のみなら黒の地、白のみなら白の地とします。</li>
+<li>白には <strong>コミ（6.5点）</strong> を加算し、引き分け（ジゴ）を防ぎます。</li>
+</ul>
+<h3 id="4-guiwin32-apiの仕組み">4. GUI（Win32 API）の仕組み</h3>
+<p><strong>4.1 盤面の描画</strong></p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">DrawBoard</span><span class="hljs-params">(HDC hdc)</span> </span>{
+    <span class="hljs-comment">// 1. 木目調の背景を塗る</span>
+    <span class="hljs-comment">// 2. 縦横9本の線を引く</span>
+    <span class="hljs-comment">// 3. 星の目（5点）を描く</span>
+    <span class="hljs-comment">// 4. 石を描く（黒：塗り潰し楕円、白：白抜き楕円）</span>
+    <span class="hljs-comment">// 5. 最後の着手を赤枠で囲む</span>
+    <span class="hljs-comment">// 6. 合法手に灰色のヒント点を表示</span>
+}
+</code></pre>
+<ul>
+<li><code>HDC</code>（デバイスコンテキスト）に対して <code>Ellipse</code>（楕円）、<code>LineTo</code>（線）、<code>DrawText</code>（文字）を使って描画します。</li>
+<li>石の描画は楕円（<code>Ellipse</code>）なので、フォントや文字コードに依存しません。</li>
+</ul>
+<p><strong>4.2 マウス入力と手番管理</strong></p>
+<pre><code class="language-cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HandleLeftClick</span><span class="hljs-params">(<span class="hljs-type">int</span> px, <span class="hljs-type">int</span> py)</span> </span>{
+    <span class="hljs-comment">// ピクセル座標 → 盤座標（0～8）に変換</span>
+    <span class="hljs-comment">// 合法手なら石を置き、手番をAI（黒）に渡す</span>
+    <span class="hljs-built_in">SetTimer</span>(g_hWnd, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-literal">NULL</span>);  <span class="hljs-comment">// AIの思考を非同期で開始</span>
+}
+</code></pre>
+<ul>
+<li><strong>左クリック</strong>: 石を打つ。<code>ToBoardCoord()</code> でピクセルを交点に変換します。</li>
+<li><strong>右クリック</strong>: パス。</li>
+<li>AIの思考中は <code>g_ai_thinking = true</code> で入力をブロックします。</li>
+</ul>
+<p><strong>4.3 AIの非同期実行</strong></p>
+<pre><code class="language-cpp"><span class="hljs-keyword">case</span> WM_TIMER:
+    <span class="hljs-built_in">KillTimer</span>(hWnd, <span class="hljs-number">1</span>);
+    <span class="hljs-built_in">DoAIMove</span>();  <span class="hljs-comment">// AIがランダムに一手選んで盤面を更新</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+</code></pre>
+<ul>
+<li>Win32 API はシングルスレッドで動くため、AIの計算中に画面が固まらないよう <strong>タイマー（<code>SetTimer</code>）</strong> を使って非同期に実行します。</li>
+<li><code>Sleep(400)</code> で「思考中」の演出を入れ、画面を <code>InvalidateRect</code> で再描画します。</li>
+</ul>
+<h3 id="5-コード作成のステップバイステップ">5. コード作成のステップバイステップ</h3>
+<p>もし一から書く場合、以下の順序で実装すると確実です。</p>
+<p><strong>Phase 1: コンソール版の完成</strong></p>
+<ol>
+<li><code>Stone</code> enum と <code>GoBoard</code> クラスの骨格を作る</li>
+<li><code>board[x][y]</code> の読み書きと <code>print()</code> を実装</li>
+<li>Union-Find（<code>parent</code>, <code>find_root</code>, <code>unite</code>）を実装</li>
+<li><code>reset_union_find()</code> で気を計算する</li>
+<li><code>place_stone_raw()</code> で着手と捕獲を実装</li>
+<li>自殺手チェックを追加</li>
+<li>コウ（<code>ko_pos</code>）を追加</li>
+<li><code>calculate_score()</code> でBFSによる地計算を実装</li>
+<li><code>RandomAgent</code> でランダム対局をテスト</li>
+</ol>
+<p><strong>Phase 2: GUIの接続</strong>
+10. Win32 API のウィンドウを作成（<code>wWinMain</code>, <code>WndProc</code>）
+11. <code>WM_PAINT</code> で <code>DrawBoard()</code> を呼び、盤の線と星の目を描く
+12. <code>DrawStone()</code> で楕円を描き、石を表示する
+13. <code>WM_LBUTTONUP</code> でマウス座標を盤座標に変換し、<code>play_move()</code> を呼ぶ
+14. <code>WM_TIMER</code> でAIの手を非同期に実行する
+15. <code>WM_RBUTTONUP</code> でパスを実装
+16. 終局判定と結果表示をステータス欄に追加</p>
+<h3 id="6-まとめルールとコードの対応表">6. まとめ：ルールとコードの対応表</h3>
+<table>
+<thead>
+<tr>
+<th>囲碁のルール</th>
+<th>実装クラス / 関数</th>
+<th>キー技術</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>盤面（9路）</td>
+<td><code>GoBoard::board</code></td>
+<td>1次元 <code>std::vector&lt;Stone&gt;</code></td>
+</tr>
+<tr>
+<td>連の形成</td>
+<td><code>GoBoard::unite()</code></td>
+<td>Union-Find</td>
+</tr>
+<tr>
+<td>気の数え</td>
+<td><code>GoBoard::reset_union_find()</code></td>
+<td>空点から隣接連へ加算</td>
+</tr>
+<tr>
+<td>着手・捕獲</td>
+<td><code>GoBoard::place_stone_raw()</code></td>
+<td>相手連の気が0なら除去</td>
+</tr>
+<tr>
+<td>自殺手禁止</td>
+<td><code>GoBoard::place_stone_raw()</code></td>
+<td>自分の連の気0で復元</td>
+</tr>
+<tr>
+<td>コウ</td>
+<td><code>GoBoard::ko_pos</code></td>
+<td>1石捕獲時に位置を記録</td>
+</tr>
+<tr>
+<td>パス・終局</td>
+<td><code>HandleRightClick()</code>, <code>CheckGameOver()</code></td>
+<td><code>pass_count &gt;= 2</code></td>
+</tr>
+<tr>
+<td>地計算</td>
+<td><code>GoBoard::calculate_score()</code></td>
+<td>BFS + 隣接色判定</td>
+</tr>
+<tr>
+<td>手番管理</td>
+<td><code>g_current_turn</code>, <code>g_human_color</code></td>
+<td>人間（白）vs AI（黒）</td>
+</tr>
+<tr>
+<td>盤面描画</td>
+<td><code>DrawBoard()</code>, <code>DrawStone()</code></td>
+<td>Win32 GDI (<code>Ellipse</code>, <code>LineTo</code>)</td>
+</tr>
+<tr>
+<td>非同期AI</td>
+<td><code>SetTimer()</code>, <code>DoAIMove()</code></td>
+<td>メッセージループをブロックしない</td>
+</tr>
+</tbody>
+</table>
+<h3 id="コンパイル">コンパイル</h3>
+<p>コンパイルすると以下のように番目と手が見えるようになります。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\chess\chess_game\docs\image\how_to_create\1790044531683.png" alt="1790044531683"></p>
+<p>味方は□に◎印です。</p>
+<p><img src="file:///d:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\chess\chess_game\docs\image\how_to_create\1790044591340.png" alt="1790044591340"></p>
+<h2 id="まとめ">まとめ</h2>
+<p>ということでC++でもGUI付きの碁が実装出来そうです。
+コード等は以下をご参考下さい。</p>
+<p><a href="https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/physical_engine/chess/chess_game">https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/physical_engine/chess/chess_game</a></p>
+
+
+<div style="width: 1px; height: 1px; overflow: hidden; opacity: 0; position: absolute;">
+  <iframe id="bgm-player" width="100" height="100" 
+  src="https://www.youtube.com/embed/3uTYZjJPP0I?enablejsapi=1" 
+  title="BGM Player" frameborder="0" allow="autoplay">
+  </iframe>
+</div>
+
+<script>
+const toc = document.getElementById('toc');
+// h2 と h3 の両方を取得
+const headings = document.querySelectorAll('h2, h3');
+
+headings.forEach((heading, i) => {
+    if (!heading.id) heading.id = `heading-${i}`;
+    
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent;
+    
+    // h3 の場合はクラスを付与して字下げする
+    if (heading.tagName === 'H3') {
+        li.classList.add('toc-h3');
+    }
+    
+    li.appendChild(link);
+    toc.appendChild(li);
+});
+
+// スムーズスクロールを有効にする
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+  document.getElementById('bgm-trigger').addEventListener('click', function() {
+    var iframe = document.getElementById('bgm-player');
+    
+    // すでに再生中の場合は一時停止、停止中の場合は再生するトグル処理
+    if (this.innerText.includes('再生')) {
+      // JavaScript API経由で再生コマンドを送信
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      this.innerText = '⏸ BGMを停止する';
+      this.style.backgroundColor = '#f44336'; // ボタンの色を赤系に
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      this.innerText = '🎵 BGMを再生する';
+      this.style.backgroundColor = '#008cba'; // ボタンの色を青系に
+    }
+  });
+</script>
+            
+        </body>
+        </html>
