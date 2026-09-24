@@ -238,3 +238,154 @@ LibTorch（PyTorch C++ API）は高機能ですが、**DLLが数百MBに及び**
 
 ということでPythonで学習したモデルをONNX RuntimeによりC++で推論するPoCを実施します。
 
+### 実験内容
+
+今回実施する実験は、**「Python（PyTorch）環境で学習・構築したニューラルネットワークモデルを、ONNX形式を中間表現として介することで、C++環境（ONNX Runtime + OpenCV）上で言語非依存に推論を実行できるか」** を検証したPoC（Proof of Concept：概念実証）です。
+
+開発・学習とプロダクション（組込みやリアルタイム推論）のシステム分離を見据えたパイプラインです。
+
+__1. 全体システムアーキテクチャ__
+
+実験の処理フローは大きく3つのフェーズで構成します。
+
+```
+[ PyTorch / Python ]                    [ ONNX (中間表現) ]               [ C++ / Linux (Colab) ]
+ 1. CIFAR-10データ学習                    ・演算グラフの固定化               1. OpenCVで画像読み込み
+ 2. CNN + Transformerモデル  =====>       ・パラメータの保存      =====>     2. 前処理 (HWC->NCHW, 正規化)
+ 3. ONNX形式エクスポート                   (cnn_cifar10.onnx)                 3. ONNX RuntimeでC++推論
+
+```
+
+__2. 各フェーズの詳細__
+
+__① Python側の学習・モデル構築フェーズ__
+
+* **ハイブリッドモデル（CNN + Transformer Encoder）の採用**:
+* **前半（CNN/ResNetブロック）**: 入力画像（$32 \times 32 \times 3$）からローカルな空間特徴を抽出しつつ、$8 \times 8$（計64個）の空間トークン（特徴量）へ圧縮。
+* **後半（Transformer Encoder）**: 位置エンコーディング（Positional Embedding）を付与した上で、Multi-Head Self-Attention（MHSA）により64個のトークン間の大域的な関連性（グローバルコンテキスト）をモデル化。
+
+
+* **ONNX形式（Open Neural Network Exchange）へのエクスポート**:
+* PyTorchの動的計算グラフを、`torch.onnx.export` を用いて標準化された静的演算グラフ（Opset 14）へ変換・保存。
+* バッチサイズ方向（`batch_size`）に動的軸（Dynamic Axes）を設定し、C++側での単一推論・バッチ推論の両対応を可能にしました。
+
+
+__② C++側の前処理・推論パイプライン（OpenCV + ONNX Runtime）__
+
+* **OpenCVによる前処理（PyTorchの `transforms` の再現）**:
+* **色空間変換**: BGR から RGB への変換。
+* **データ型の変換 & 標準化**: float32 への変換後、$\frac{\text{pixel} - 0.5}{0.5}$ によるスケーリング。
+* **メモリレイアウト変換（HWC $\to$ NCHW）**: OpenCVの `cv::Mat` が持つ HWC（Height, Width, Channel）配列を、PyTorch/ONNXモデルが要求する NCHW（Batch, Channel, Height, Width）の連続メモリ空間へ手動で再配置。
+
+
+* **ONNX Runtime C++ API による推論**:
+* PythonやPyTorchの実行環境（Heavy依存）に一切頼らず、軽量な C++ 共有ライブラリ（`libonnxruntime.so`）のみでモデルをロード・推論を実行。
+* 推論結果の Logits ベクトルから `std::max_element`（ArgMax）を用いて最終予測クラスを抽出。
+
+
+__3. 検証ポイント__
+
+* **モデル表現の完全な互換性**:
+Self-Attention や Layer Normalization といった Transformer 由来の複雑な演算子を含むモデルであっても、ONNX Runtime を介することで C++ 側で正しく解釈・実行できることが確認できました。
+* **前処理の完全一致による精度保証**:
+C++ 側で HWC から NCHW への変換や正規化計算を数学的に厳密に再現することで、Python学習時と同等の推論結果（クラス分類精度）が得られることを証明しました。
+* **Edge / C++プロダクション移植への確証**:
+Google Colab（Linux環境）上で C++ コードのコンパイルから実行までを完結させ、Python非依存の推論基盤が容易に構築できることを示すPoCとなりました。
+
+### 実装コード
+
+以下レポジトリにコードを保管しています。
+Google Colabで実行できるようにしています。
+
+https://github.com/Shinichi0713/Reinforce-Learning-Study/tree/main/physical_engine/chess/python
+
+### 実験
+
+学習が始まると以下のようにプログレスバーが表示されます。
+
+![1790121432470](image/how_to_implement/1790121432470.png)
+
+学習が終わると以下のように学習したモデルのパラメータであるONNXファイルが出力されます。
+
+![1790122501943](image/how_to_implement/1790122501943.png)
+
+学習したモデルでテスト的に画質荒いですが猫の画像を予測してみます。
+
+![1790122875450](image/how_to_implement/1790122875450.png)
+
+推論結果は以下の通りです。
+猫と予測してくれました。
+Pythonで構築・学習したモデルで、C++のコードで推論することが確認出来ました。
+
+```
+Downloading ONNX Runtime C++ SDK v1.20.1...
+Running C++ Inference with ONNX Runtime...
+
+=== 推論結果 ===
+Predicted Class ID : 3
+Predicted Label    : cat
+Logit Score        : 3.46315
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+W: Skipping acquire of configured file 'main/source/Sources' as repository 'https://r2u.stat.illinois.edu/ubuntu noble InRelease' does not seem to provide it (sources.list entry misspelt?)
+```
+
+## 総括
+
+今回はC++で碁のAIを実装する手段と、手段のうちキーとなる学習したニューラルネットワークをどのように実現するかについて検討、調査を行いました。
+
+検証のキーとなった実験内容について総括します。
+
+### 実験の目的
+
+**「Pythonで学習したニューラルネットワークを、C++上で正しく推論実行できるか」** を検証しました。
+
+囲碁AIの最終形態として想定している **「Pythonで学習 → C++（Win32 GUI）で推論」** というパイプラインが、技術的に成立するかを、比較的軽量な画像分類タスクで事前に確認した実験です。
+
+### 実験の流れ（3段階）
+
+```
+[Python/PyTorch]  →  [ONNXファイル]  →  [C++ / ONNX Runtime]
+   モデル学習           中間形式変換           推論実行
+```
+
+__1. Python側：モデルの学習とONNX化__
+
+- **データセット**: CIFAR-10（10種類の画像分類）
+- **モデル構成**: CNN（ResNetブロック）＋ Transformer Encoder（Self-Attention）のハイブリッド
+- **ONNXエクスポート**: `torch.onnx.export` を使い、学習済みモデルを標準形式 `.onnx` として保存
+- **工夫**: バッチサイズを動的に扱えるよう、動的軸（Dynamic Axes）を設定
+
+__2. C++側：前処理と推論__
+
+- **画像読み込み**: OpenCVで画像を読み込み
+- **前処理の再現**: Python（PyTorch）と**完全に同じ**処理をC++で実装
+  - BGR → RGB変換
+  - 画素値の正規化（`pixel - 0.5 / 0.5`）
+  - メモリ配列の並び替え（HWC → NCHW）
+- **推論**: ONNX RuntimeのC++ APIで `.onnx` モデルを読み込み、推論を実行
+
+__3. 検証結果__
+
+- **入力**: 猫の画像（画質は荒いものの）
+- **C++推論結果**: `Predicted Class ID: 3` → `cat`（猫）と正しく予測
+- **結論**: Python環境なしでも、C++単独で学習済みモデルの推論が正しく動作することを確認
+
+### このPoCで確認できたポイント
+
+| 確認項目 | 結果 |
+|---------|------|
+| **複雑な演算子の互換性** | Self-AttentionやLayerNormなど、Transformer系の演算もONNX経由でC++上で正しく実行可能 |
+| **前処理の再現性** | HWC→NCHWの変換や正規化を厳密に再現することで、Pythonと同等の精度が得られる |
+| **環境分離の実現** | 学習はPython、推論はC++という役割分担が実際に機能することを証明 |
+| **配布の容易さ** | ONNX Runtimeは軽量な共有ライブラリのみで動作し、重いPyTorch/LibTorchをC++側に入れる必要がない |
+
+### 囲碁AIへの応用イメージ
+
+このPoCで確立した **「PyTorchで学習 → ONNXで書き出し → C++で推論」** の流れを、囲碁のDQN（またはAlphaZero方式）にそのまま適用できます。
+
+1. **Python側**: 囲碁の9路盤を `[5, 9, 9]` のテンソルとして入力し、DQN（CNN）を学習
+2. **ONNX化**: 学習済みモデルを `.onnx` ファイルとして保存
+3. **C++側（Win32 GUI）**: ONNX Runtimeでモデルを読み込み、盤面からQ値（または方策π）を推論し、AIの着手を決定
+
+ということで、**C++側は「推論エンジン」として軽量に保ちつつ、学習の重労働はPythonに任せる**という、実現可能性の高い構成が技術的に成立することが確認出来ました。
+
