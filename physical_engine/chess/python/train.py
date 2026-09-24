@@ -1,3 +1,5 @@
+# !pip install -q onnx onnxscript
+
 # ---------------------------------------------------------
 # 3. 学習と ONNX エクスポート
 # ---------------------------------------------------------
@@ -44,3 +46,36 @@ torch.onnx.export(
 )
 
 print("\nONNXモデルを出力しました: cnn_cifar10.onnx")
+
+
+import torchvision
+import torchvision.transforms as transforms
+import cv2
+import numpy as np
+
+# 1. CIFAR-10 のテストデータセットをロード（Transformなしで生の画像データ（PIL Image）を取得）
+testset = torchvision.datasets.CIFAR10(
+    root='./data', 
+    train=False, 
+    download=True
+)
+
+# CIFAR-10 のクラス名一覧
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 
+           'dog', 'frog', 'horse', 'ship', 'truck')
+
+# 2. テストデータから 1 枚選択（例: インデックス 0 番目の画像）
+image_idx = 0
+pil_img, label = testset[image_idx]
+
+print(f"Selected image index: {image_idx}")
+print(f"Ground Truth Label: {label} ({classes[label]})")
+
+# 3. OpenCV 形式 (BGR) に変換して保存
+# PIL (RGB) -> NumPy array (RGB) -> BGR
+img_np = np.array(pil_img)
+img_bgr = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+
+# 画像を保存
+cv2.imwrite("test_image.png", img_bgr)
+print("Saved real test image as 'test_image.png'")
