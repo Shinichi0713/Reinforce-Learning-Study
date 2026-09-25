@@ -176,7 +176,7 @@ cython_debug/
 *.pt
 *.bin
 *.pkl
-
 *luna-env/
-.html
-.ipch
+*.html
+*.ipch
+/physical_engine/chess/chess_game/.vs/chess_game/v17/ipch/*
