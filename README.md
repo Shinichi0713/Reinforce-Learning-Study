@@ -171,13 +171,17 @@ __1. Intuitive reasons why delayed rewards are hard__
 __2. Mathematical explanation (MDP perspective)__
 
 - In an MDP, the discounted return is  
-  $$
-  G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}.
-  $$
+
+$$
+G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}.
+
+$$
 - If a large reward $R_T$ only appears after many steps $T$, then  
-  $$
-  G_0 \approx \gamma^{T-1} R_T.
-  $$
+
+$$
+G_0 \approx \gamma^{T-1} R_T.
+$$
+
 - With discount factor $\gamma < 1$, $\gamma^{T-1}$ decays quickly as $T$ grows:
   - Large $T$ → small $G_0$ → weak value function signal.
 - TD error $\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$ becomes dominated by value differences rather than rewards, reducing the influence of actual reward feedback.
@@ -186,9 +190,11 @@ __2. Mathematical explanation (MDP perspective)__
 __3. Policy gradient perspective__
 
 - Policy gradient updates scale roughly with $G_t$:
-  $$
-  \nabla_\theta J(\theta) \propto \mathbb{E}_\pi[G_t \nabla_\theta \log \pi_\theta(A_t \mid S_t)].
-  $$
+
+$$
+\nabla_\theta J(\theta) \propto \mathbb{E}_\pi[G_t \nabla_\theta \log \pi_\theta(A_t \mid S_t)].
+$$
+
 - If $G_t$ is small (due to delayed rewards), gradients are small → slow learning.
 - Variance also increases, making learning unstable.
 
@@ -237,7 +243,7 @@ with using QMIX, the agents doesn't work.
 
 with using HASAC, lulti-agent systems have started to operate in coordination with each other.
 
-<img src="miulti-agent/src/exe-2/doc/trained_agents.gif" alt="jssp-3" width="500px" height="auto">
+<img src="miulti-agent/src/exe-4/doc/image/3_mappo_improvement/uav_delivery_mappo_v2.gif" alt="jssp-3" width="500px" height="auto">
 
 #### MARL adventure
 
