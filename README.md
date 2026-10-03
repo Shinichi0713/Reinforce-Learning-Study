@@ -174,8 +174,8 @@ __2. Mathematical explanation (MDP perspective)__
 
 $$
 G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}.
-
 $$
+
 - If a large reward $R_T$ only appears after many steps $T$, then  
 
 $$

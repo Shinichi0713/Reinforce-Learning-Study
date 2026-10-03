@@ -57,6 +57,8 @@ $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}} \left[ \sum_{t
 - 状態価値関数: $V^\pi(s) = \sum_a \pi_\theta(a|s) Q^\pi(s,a)$
 - **割引状態訪問分布**: $d^\pi(s) = \sum_{t=0}^{\infty} \gamma^t P(S_t=s \mid S_0 \sim \mu, \pi)$
 
+ここで $\theta$ は方策（Policy）を定義するパラメータ（重み）の集合で、例えばDQNの中では方策を出力するニューラルネットワークそのものを意味します。
+
 ---
 
 __上式の導出__
@@ -117,6 +119,7 @@ $$\boxed{\sum_s \mu(s) V^{\pi_\theta}(s) = \sum_{s_t} d^{\pi_\theta}(s_t) \sum_{
 
 ---
 
+ということで目的関数の数式は以下のように整理されます。
 
 ここで $\mu$ は初期状態分布です。$d^\pi(s)$ は「初期状態から discounted な確率質量」として解釈できます。
 
@@ -214,4 +217,183 @@ $$\nabla_\theta J(\theta) = \mathbb{E}_{s \sim d^{\pi_\theta}, \, a \sim \pi_\th
 
 この構造により、価値関数を介さずに方策を直接最適化できることが保証されます。
 
+## コードに実装すると
 
+方策勾配法の代表的なアルゴリズムである **REINFORCE** を PyTorch で実装する場合のコード構成を、CartPole を例に説明します。
+
+### REINFORCE アルゴリズムの流れ
+
+1. エピソードを1つ完了させ、状態・行動・報酬の系列を記録する
+2. 各時刻の**割引累積報酬（リターン）** $G_t$ を計算する
+3. 損失関数 $\text{Loss} = -\sum_t \log \pi_\theta(a_t|s_t) \cdot G_t$ を計算する
+4. 勾配を求めてパラメータ $\theta$ を更新する
+5. 上記を繰り返す
+
+### PyTorch 実装コード
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.distributions import Categorical
+import gymnasium as gym  # または import gym
+
+
+# ============================
+# 1. 方策ネットワークの定義
+# ============================
+class PolicyNetwork(nn.Module):
+    """
+    状態 s を入力として、各行動 a の選択確率を出力するネットワーク。
+    このネットワークの重み・バイアスが「θ」に相当する。
+    """
+    def __init__(self, state_dim, action_dim, hidden_dim=128):
+        super().__init__()
+        self.fc1 = nn.Linear(state_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, action_dim)
+
+    def forward(self, state):
+        x = torch.relu(self.fc1(state))
+        logits = self.fc2(x)  # 未正規化のスコア
+        return logits
+
+    def select_action(self, state):
+        """
+        状態から行動を確率的に選択し、その対数確率も返す。
+        """
+        logits = self.forward(state)
+        probs = torch.softmax(logits, dim=-1)       # π_θ(a|s)
+        dist = Categorical(probs)                    # カテゴリカル分布
+        action = dist.sample()                      # 行動をサンプリング
+        log_prob = dist.log_prob(action)             # log π_θ(a|s)
+        return action.item(), log_prob
+
+
+# ============================
+# 2. 割引累積報酬（リターン）の計算
+# ============================
+def compute_returns(rewards, gamma):
+    """
+    rewards: 1エピソードの即時報酬リスト [r_0, r_1, ..., r_T]
+    gamma  : 割引率
+    戻り値 : G_t のリスト（各時刻の割引累積報酬）
+    """
+    returns = []
+    G = 0
+    # エピソード末尾から逆順に計算
+    for r in reversed(rewards):
+        G = r + gamma * G
+        returns.insert(0, G)
+    returns = torch.tensor(returns, dtype=torch.float32)
+    # 平均0・分散1に正規化（学習の安定化）
+    returns = (returns - returns.mean()) / (returns.std() + 1e-9)
+    return returns
+
+
+# ============================
+# 3. メイン学習ループ
+# ============================
+def train():
+    env = gym.make("CartPole-v1")
+    state_dim = env.observation_space.shape[0]  # 4
+    action_dim = env.action_space.n             # 2
+
+    policy = PolicyNetwork(state_dim, action_dim)
+    optimizer = optim.Adam(policy.parameters(), lr=0.01)
+
+    gamma = 0.99
+    num_episodes = 1000
+
+    for episode in range(num_episodes):
+        state, _ = env.reset()
+        log_probs = []   # log π_θ(a_t|s_t) を保存
+        rewards = []     # r_t を保存
+        done = False
+
+        # ---- 1エピソードの実行 ----
+        while not done:
+            state_tensor = torch.tensor(state, dtype=torch.float32)
+            action, log_prob = policy.select_action(state_tensor)
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+
+            log_probs.append(log_prob)
+            rewards.append(reward)
+            state = next_state
+
+        # ---- リターンの計算 ----
+        returns = compute_returns(rewards, gamma)
+
+        # ---- 損失関数の計算 ----
+        # Loss = - Σ_t log π_θ(a_t|s_t) * G_t
+        loss = 0
+        for log_prob, Gt in zip(log_probs, returns):
+            loss -= log_prob * Gt
+
+        # ---- 勾配更新 ----
+        optimizer.zero_grad()
+        loss.backward()   # ∇_θ J(θ) を計算
+        optimizer.step()  # θ ← θ + α ∇_θ J(θ)
+
+        # 進捗表示
+        total_reward = sum(rewards)
+        if episode % 50 == 0:
+            print(f"Episode {episode}, Total Reward: {total_reward}")
+
+    env.close()
+
+
+if __name__ == "__main__":
+    train()
+```
+
+### コードのポイント解説
+
+| 部分 | 数式との対応 | 説明 |
+|------|-------------|------|
+| `PolicyNetwork` | $\pi_\theta(a\|s)$ | パラメータ $\theta$ を持つ方策をニューラルネットワークで表現 |
+| `select_action` | $a \sim \pi_\theta(\cdot\|s)$ | 方策から確率的に行動をサンプリング |
+| `dist.log_prob(action)` | $\log \pi_\theta(a\|s)$ | 選択した行動の対数確率を取得 |
+| `compute_returns` | $G_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k}$ | 各時刻の割引累積報酬を計算 |
+| `loss -= log_prob * Gt` | $-\log \pi_\theta(a\|s) \cdot G_t$ | 方策勾配定理に基づく損失関数 |
+| `loss.backward()` | $\nabla_\theta J(\theta)$ | PyTorch が自動で勾配を計算 |
+| `optimizer.step()` | $\theta \leftarrow \theta + \alpha \nabla_\theta J(\theta)$ | 勾配方向にパラメータを更新 |
+
+### 損失関数の符号について
+
+通常の機械学習では損失関数を**最小化**しますが、方策勾配法では期待報酬を**最大化**したいため、損失関数として $-\log \pi_\theta(a|s) \cdot G_t$ を使います。
+
+- $G_t > 0$（良い行動）のとき: 損失を減らす方向に学習するため、その行動の確率が増加
+- $G_t < 0$（悪い行動）のとき: 損失を増やす方向に学習するため、その行動の確率が減少
+
+### 参考文献
+
+- [GitHub - REINFORCE CartPole PyTorch](https://github.com/ProfessorDong/Deep-Learning-Course-Examples/blob/master/DRL_Examples/REINFORCE_CartPole_PyTorch.py)
+- [Zenn - 強化学習をPyTorchで実装 方策勾配法編](https://zenn.dev/takesan150/articles/5e5e86638f4c3d)
+- [OpenAI Spinning Up - Policy Gradients](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html)
+
+## 総括
+
+### 方策勾配法の本質
+
+強化学習において、エージェントの行動ルール（方策）を**価値関数を介さず直接最適化する手法**です。方策 $\pi_\theta(a|s)$ をニューラルネットワークなどのパラメータ $\theta$ で表現し、期待報酬 $J(\theta)$ を最大化する方向に勾配法で $\theta$ を更新します。
+
+$$\theta \leftarrow \theta + \alpha \nabla_\theta J(\theta)$$
+
+
+### 方策勾配定理の本質
+
+期待報酬の勾配を、以下の形で表現できることを示した定理です。
+
+$$\nabla_\theta J(\theta) = \sum_s d^{\pi_\theta}(s) \sum_a \nabla_\theta \pi_\theta(a|s) \, Q^{\pi_\theta}(s,a)$$
+
+これを対数導関数で書き換えると：
+
+$$\nabla_\theta J(\theta) = \mathbb{E}_{s \sim d^{\pi_\theta}, \, a \sim \pi_\theta(\cdot|s)} \left[ \nabla_\theta \log \pi_\theta(a|s) \, Q^{\pi_\theta}(s,a) \right]$$
+
+**核心の直感**: 「良い行動（$Q$ 値が高い）を選んだ確率を増やし、悪い行動を選んだ確率を減らす」。対数確率の勾配に $Q$ 値を重みとして掛けることで、報酬に応じた方策の更新が可能になります。
+
+
+### まとめ
+
+方策勾配法とは、**方策をパラメータ化して勾配法で直接学習する**強化学習のアプローチであり、その理論的基盤となる方策勾配定理により、**期待報酬の勾配を方策の対数確率と行動価値の積の期待値として計算できる**ことが保証されます。これにより、連続行動空間への対応や確率的な行動選択が自然に実現でき、深層強化学習において Actor-Critic などの発展的手法の基礎となっています。
