@@ -974,3 +974,107 @@ int main() {
     return 0;
 }
 
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <stdexcept>
+
+class RotaryPositionEmbedding {
+private:
+    size_t dim;            // 各ヘッドの次元数 (d_model / num_heads)
+    size_t max_seq_len;    // 事前計算する最大シーケンス長
+    float base;            // 周波数計算のベース値 (通常 10000.0)
+
+    // 回転行列用の Cos / Sin キャッシュ
+    // 形状: [max_seq_len, dim / 2]
+    std::vector<float> cos_cache;
+    std::vector<float> sin_cache;
+
+    void precompute_freqs() {
+        size_t half_dim = dim / 2;
+        cos_cache.resize(max_seq_len * half_dim);
+        sin_cache.resize(max_seq_len * half_dim);
+
+        for (size_t pos = 0; pos < max_seq_len; ++pos) {
+            for (size_t i = 0; i < half_dim; ++i) {
+                // theta_i = base ^ (-2i / dim)
+                float freq = 1.0f / std::pow(base, static_cast<float>(2 * i) / static_cast<float>(dim));
+                float val = static_cast<float>(pos) * freq;
+
+                size_t idx = pos * half_dim + i;
+                cos_cache[idx] = std::cos(val);
+                sin_cache[idx] = std::sin(val);
+            }
+        }
+    }
+
+public:
+    RotaryPositionEmbedding(size_t dim, size_t max_seq_len = 2048, float base = 10000.0f)
+        : dim(dim), max_seq_len(max_seq_len), base(base) {
+        if (dim % 2 != 0) {
+            throw std::invalid_argument("Dimension must be even for RoPE.");
+        }
+        precompute_freqs();
+    }
+
+    // クエリ/キーテンソルに RoPE を適用するメソッド
+    // x: [seq_len, num_heads, dim] をフラットにした1次元配列
+    void forward(std::vector<float>& x, size_t seq_len, size_t num_heads, size_t start_pos = 0) const {
+        if (start_pos + seq_len > max_seq_len) {
+            throw std::out_of_range("Sequence length exceeds precomputed max_seq_len.");
+        }
+
+        size_t half_dim = dim / 2;
+
+        for (size_t pos = 0; pos < seq_len; ++pos) {
+            size_t cache_pos = start_pos + pos;
+            size_t cache_offset = cache_pos * half_dim;
+
+            for (size_t h = 0; h < num_heads; ++h) {
+                size_t base_idx = (pos * num_heads + h) * dim;
+
+                for (size_t i = 0; i < half_dim; ++i) {
+                    float cos_val = cos_cache[cache_offset + i];
+                    float sin_val = sin_cache[cache_offset + i];
+
+                    // ペアとなる成分 x[2i] と x[2i+1] を回転させる
+                    float x0 = x[base_idx + 2 * i];
+                    float x1 = x[base_idx + 2 * i + 1];
+
+                    x[base_idx + 2 * i]     = x0 * cos_val - x1 * sin_val;
+                    x[base_idx + 2 * i + 1] = x0 * sin_val + x1 * cos_val;
+                }
+            }
+        }
+    }
+};
+
+int main() {
+    constexpr size_t seq_len = 2;
+    constexpr size_t num_heads = 2;
+    constexpr size_t head_dim = 4;
+
+    // ダミー入力データ [seq_len=2, num_heads=2, head_dim=4]
+    std::vector<float> query = {
+        // Position 0
+        1.0f, 0.0f, 2.0f, 1.0f,  // Head 0
+        0.5f, 1.5f, 0.0f, 1.0f,  // Head 1
+        // Position 1
+        1.0f, 0.0f, 2.0f, 1.0f,  // Head 0
+        0.5f, 1.5f, 0.0f, 1.0f   // Head 1
+    };
+
+    RotaryPositionEmbedding rope(head_dim, 512);
+
+    std::cout << "--- Before RoPE ---" << std::endl;
+    std::cout << "Pos 1, Head 0: [" << query[8] << ", " << query[9] << ", " << query[10] << ", " << query[11] << "]" << std::endl;
+
+    // RoPEの適用（インプレース変換）
+    rope.forward(query, seq_len, num_heads);
+
+    std::cout << "\n--- After RoPE ---" << std::endl;
+    std::cout << "Pos 0, Head 0: [" << query[0] << ", " << query[1] << ", " << query[2] << ", " << query[3] << "]" << std::endl;
+    std::cout << "Pos 1, Head 0: [" << query[8] << ", " << query[9] << ", " << query[10] << ", " << query[11] << "]" << std::endl;
+
+    return 0;
+}
