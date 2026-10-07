@@ -4,7 +4,15 @@
 #include <cmath>
 #include <random>
 #include <Eigen/Dense>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <numeric>
+#include <algorithm>
+#include <iomanip>
 
+// 行列の型定義 (2次元 vector)
+using Matrix = std::vector<std::vector<float>>;
 using Matrix = Eigen::MatrixXf;
 using Vector = Eigen::RowVectorXf;
 
@@ -181,6 +189,145 @@ int main() {
                   << " -> Pred: " << final_preds(i, 0)
                   << " (Target: " << Y(i, 0) << ")" << std::endl;
     }
+
+    return 0;
+}
+
+
+
+
+// ----------------------------------------------------------------------
+// 1. 行列の掛け算: A (M x K) * B (K x N) -> C (M x N)
+// ----------------------------------------------------------------------
+Matrix matmul(const Matrix& A, const Matrix& B) {
+    size_t M = A.size();
+    size_t K = A[0].size();
+    size_t N = B[0].size();
+
+    Matrix C(M, std::vector<float>(N, 0.0f));
+    for (size_t i = 0; i < M; ++i) {
+        for (size_t k = 0; k < K; ++k) {
+            for (size_t j = 0; j < N; ++j) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return C;
+}
+
+// ----------------------------------------------------------------------
+// 2. 行列の転置: A (M x N) -> A^T (N x M)
+// ----------------------------------------------------------------------
+Matrix transpose(const Matrix& A) {
+    size_t M = A.size();
+    size_t N = A[0].size();
+
+    Matrix At(N, std::vector<float>(M));
+    for (size_t i = 0; i < M; ++i) {
+        for (size_t j = 0; j < N; ++j) {
+            At[j][i] = A[i][j];
+        }
+    }
+    return At;
+}
+
+// ----------------------------------------------------------------------
+// 3. 数値的に安定な Softmax (行ごとに適用)
+// ----------------------------------------------------------------------
+Matrix softmax(const Matrix& input) {
+    Matrix output = input;
+    for (size_t i = 0; i < input.size(); ++i) {
+        // オーバーフロー防止のため行内の最大値を抽出
+        float max_val = *std::max_element(input[i].begin(), input[i].end());
+        
+        float sum = 0.0f;
+        for (size_t j = 0; j < input[i].size(); ++j) {
+            output[i][j] = std::exp(input[i][j] - max_val);
+            sum += output[i][j];
+        }
+        
+        // 確率の和が 1 になるよう正規化
+        for (size_t j = 0; j < input[i].size(); ++j) {
+            output[i][j] /= sum;
+        }
+    }
+    return output;
+}
+
+// ----------------------------------------------------------------------
+// 4. Scaled Dot-Product Attention の本体
+// ----------------------------------------------------------------------
+Matrix scaled_dot_product_attention(
+    const Matrix& Q, // [Seq_Len, D_k]
+    const Matrix& K, // [Seq_Len, D_k]
+    const Matrix& V  // [Seq_Len, D_v]
+) {
+    size_t d_k = Q[0].size();
+    float scale = 1.0f / std::sqrt(static_cast<float>(d_k));
+
+    // Step 1: Q * K^T の計算 [Seq_Len, Seq_Len]
+    Matrix K_T = transpose(K);
+    Matrix scores = matmul(Q, K_T);
+
+    // Step 2: スケーリング (sqrt(d_k) で割る)
+    for (size_t i = 0; i < scores.size(); ++i) {
+        for (size_t j = 0; j < scores[0].size(); ++j) {
+            scores[i][j] *= scale;
+        }
+    }
+
+    // Step 3: Softmax (アテンションウェイトの算出)
+    Matrix attn_weights = softmax(scores);
+
+    // Step 4: Attention Weights * V の計算 [Seq_Len, D_v]
+    Matrix output = matmul(attn_weights, V);
+
+    return output;
+}
+
+// ユーティリティ: 行列の表示
+void print_matrix(const std::string& name, const Matrix& mat) {
+    std::cout << "=== " << name << " ===" << std::endl;
+    for (const auto& row : mat) {
+        for (float val : row) {
+            std::cout << std::setw(8) << std::fixed << std::setprecision(4) << val << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+// ----------------------------------------------------------------------
+// 5. 動作確認用 main 関数
+// ----------------------------------------------------------------------
+int main() {
+    // シーケンス長 = 3, 次元数 d_k = 4, d_v = 4 のダミーデータ
+    Matrix Q = {
+        {1.0f, 0.0f, 1.0f, 0.0f},
+        {0.0f, 2.0f, 0.0f, 2.0f},
+        {1.0f, 1.0f, 0.0f, 0.0f}
+    };
+
+    Matrix K = {
+        {1.0f, 0.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f}
+    };
+
+    Matrix V = {
+        {0.1f, 0.2f, 0.3f, 0.4f},
+        {0.5f, 0.6f, 0.7f, 0.8f},
+        {0.9f, 1.0f, 1.1f, 1.2f}
+    };
+
+    print_matrix("Query (Q)", Q);
+    print_matrix("Key (K)", K);
+    print_matrix("Value (V)", V);
+
+    // アテンション計算の実行
+    Matrix output = scaled_dot_product_attention(Q, K, V);
+
+    print_matrix("Attention Output", output);
 
     return 0;
 }
