@@ -1078,3 +1078,135 @@ int main() {
 
     return 0;
 }
+
+
+#include <torch/torch.h>
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+// ----------------------------------------------------------------------
+// 1. 早期終了用の分類器 (Early Exit Head)
+// ----------------------------------------------------------------------
+struct EarlyExitHeadImpl : torch::nn::Module {
+    torch::nn::Linear dense{nullptr};
+    torch::nn::LayerNorm layer_norm{nullptr};
+    torch::nn::Linear classifier{nullptr};
+
+    EarlyExitHeadImpl(int64_t hidden_size, int64_t num_classes) {
+        dense = register_module("dense", torch::nn::Linear(hidden_size, hidden_size));
+        layer_norm = register_module("layer_norm", torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size})));
+        classifier = register_module("classifier", torch::nn::Linear(hidden_size, num_classes));
+    }
+
+    torch::Tensor forward(torch::Tensor hidden_states) {
+        // [Batch, Seq_Len, Hidden] -> 先頭トークン [CLS] の表現を抽出
+        auto cls_repr = hidden_states.select(1, 0);
+        auto x = torch::tanh(dense->forward(cls_repr));
+        x = layer_norm->forward(x);
+        return classifier->forward(x); // [Batch, Num_Classes]
+    }
+};
+TORCH_MODULE(EarlyExitHead);
+
+// ----------------------------------------------------------------------
+// 2. DeeBERT 全体構造
+// ----------------------------------------------------------------------
+struct DeeBERTImpl : torch::nn::Module {
+    torch::nn::Embedding word_embeddings{nullptr};
+    std::vector<torch::nn::TransformerEncoderLayer> layers;
+    std::vector<EarlyExitHead> exit_heads;
+    int64_t num_layers;
+
+    DeeBERTImpl(int64_t vocab_size, int64_t hidden_size, int64_t num_heads, 
+                int64_t num_layers, int64_t num_classes) : num_layers(num_layers) {
+        
+        word_embeddings = register_module("word_embeddings", torch::nn::Embedding(vocab_size, hidden_size));
+
+        for (int64_t i = 0; i < num_layers; ++i) {
+            // Transformer Encoder Layer
+            auto layer_options = torch::nn::TransformerEncoderLayerOptions(hidden_size, num_heads)
+                                    .dim_feedforward(hidden_size * 4)
+                                    .batch_first(true);
+            auto layer = torch::nn::TransformerEncoderLayer(layer_options);
+            layers.push_back(register_module("layer_" + std::to_string(i), layer));
+
+            // 各層に配置する Early Exit Head
+            auto exit_head = EarlyExitHead(hidden_size, num_classes);
+            exit_heads.push_back(register_module("exit_head_" + std::to_string(i), exit_head));
+        }
+    }
+
+    // 確率分布のエントロピー計算関数 H(P) = - sum(p * log(p))
+    double calculate_entropy(const torch::Tensor& probs) {
+        auto log_probs = torch::log(probs + 1e-12);
+        auto entropy = -torch::sum(probs * log_probs, -1);
+        return entropy.item<double>();
+    }
+
+    // DeeBERT の動的早期終了推論関数
+    std::pair<torch::Tensor, int> infer_with_early_exit(torch::Tensor input_ids, double entropy_threshold) {
+        auto hidden_states = word_embeddings->forward(input_ids);
+
+        for (int i = 0; i < num_layers; ++i) {
+            // 1. 現在の Transformer Layer を実行
+            hidden_states = layers[i]->forward(hidden_states);
+
+            // 2. 現在の層の Early Exit Head で予測 Logits を計算
+            auto logits = exit_heads[i]->forward(hidden_states);
+            auto probs = torch::softmax(logits, -1);
+
+            // 3. 予測の不確実性（エントロピー）を判定
+            double entropy = calculate_entropy(probs[0]); // Batch size 1 と仮定
+
+            std::cout << "Layer [" << (i + 1) << "/" << num_layers << "] - Entropy: " << entropy << std::endl;
+
+            // エントロピーが閾値以下（予測に十分自信がある）ならば、ここで推論を早期終了
+            if (entropy < entropy_threshold) {
+                std::cout << ">>> Early Exit triggered at Layer " << (i + 1) << "! <<<\n";
+                return {logits, i + 1};
+            }
+        }
+
+        // 最終層まで到達した場合
+        auto final_logits = exit_heads[num_layers - 1]->forward(hidden_states);
+        return {final_logits, static_cast<int>(num_layers)};
+    }
+};
+TORCH_MODULE(DeeBERT);
+
+// ----------------------------------------------------------------------
+// 3. エントリポイント & 推論テスト関数
+// ----------------------------------------------------------------------
+int main() {
+    torch::NoGradGuard no_grad; // 推論時の勾配計算無効化
+
+    int64_t vocab_size = 30000;
+    int64_t hidden_size = 256;
+    int64_t num_heads = 4;
+    int64_t num_layers = 6;
+    int64_t num_classes = 2; // 二値分類タスク（例: 感情分析）
+
+    DeeBERT model(vocab_size, hidden_size, num_heads, num_layers, num_classes);
+    model->eval();
+
+    // 入力データ作成 (Batch Size: 1, Sequence Length: 16)
+    auto input_ids = torch::randint(0, vocab_size, {1, 16});
+
+    // 閾値を設定して推論を実行 (エントロピー閾値: 0.25)
+    double entropy_threshold = 0.25;
+    std::cout << "Starting DeeBERT Inference (Entropy Threshold = " << entropy_threshold << ")...\n\n";
+
+    auto result = model->infer_with_early_exit(input_ids, entropy_threshold);
+    
+    torch::Tensor logits = result.first;
+    int exited_layer = result.second;
+
+    auto predicted_class = torch::argmax(logits, -1).item<int64_t>();
+
+    std::cout << "\nInference Complete:" << std::endl;
+    std::cout << "- Exited Layer   : " << exited_layer << " / " << num_layers << std::endl;
+    std::cout << "- Predicted Class: " << predicted_class << std::endl;
+
+    return 0;
+}
