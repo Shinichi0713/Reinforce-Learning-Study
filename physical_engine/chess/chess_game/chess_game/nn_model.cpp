@@ -10,6 +10,14 @@
 #include <numeric>
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iomanip>
+
+using Matrix = std::vector<std::vector<float>>;
+using Tensor3D = std::vector<std::vector<std::vector<float>>>; // [Height, Width, Channels]
 
 // 行列の型定義 (2次元 vector)
 using Matrix = std::vector<std::vector<float>>;
@@ -329,5 +337,207 @@ int main() {
 
     print_matrix("Attention Output", output);
 
+    return 0;
+}
+
+
+
+// ----------------------------------------------------------------------
+// 1. 基本的な線形代数 & 数学関数
+// ----------------------------------------------------------------------
+Matrix matmul(const Matrix& A, const Matrix& B) {
+    size_t M = A.size(), K = A[0].size(), N = B[0].size();
+    Matrix C(M, std::vector<float>(N, 0.0f));
+    for (size_t i = 0; i < M; ++i) {
+        for (size_t k = 0; k < K; ++k) {
+            for (size_t j = 0; j < N; ++j) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return C;
+}
+
+Matrix transpose(const Matrix& A) {
+    size_t M = A.size(), N = A[0].size();
+    Matrix At(N, std::vector<float>(M));
+    for (size_t i = 0; i < M; ++i)
+        for (size_t j = 0; j < N; ++j)
+            At[j][i] = A[i][j];
+    return At;
+}
+
+Matrix softmax(const Matrix& input) {
+    Matrix output = input;
+    for (size_t i = 0; i < input.size(); ++i) {
+        float max_val = *std::max_element(input[i].begin(), input[i].end());
+        float sum = 0.0f;
+        for (size_t j = 0; j < input[i].size(); ++j) {
+            output[i][j] = std::exp(input[i][j] - max_val);
+            sum += output[i][j];
+        }
+        for (size_t j = 0; j < input[i].size(); ++j) {
+            output[i][j] /= sum;
+        }
+    }
+    return output;
+}
+
+// ----------------------------------------------------------------------
+// 2. 簡易 CNN 演算 (2D Convolution)
+// ----------------------------------------------------------------------
+Tensor3D conv2d_simple(const Tensor3D& input, size_t out_channels) {
+    size_t in_h = input.size();
+    size_t in_w = input[0].size();
+    size_t in_c = input[0][0].size();
+
+    // 3x3 フィルタ, Stride=1, Padding=1 (サイズ変更なし)
+    size_t out_h = in_h;
+    size_t out_w = in_w;
+
+    Tensor3D output(out_h, std::vector<std::vector<float>>(out_w, std::vector<float>(out_channels, 0.0f)));
+
+    // ダミーの畳み込み重み（固定値で模擬）
+    for (size_t h = 0; h < out_h; ++h) {
+        for (size_t w = 0; w < out_w; ++w) {
+            for (size_t oc = 0; oc < out_channels; ++oc) {
+                float val = 0.0f;
+                // 周辺3x3のカーネル演算
+                for (int dh = -1; dh <= 1; ++dh) {
+                    for (int dw = -1; dw <= 1; ++dw) {
+                        int ih = static_cast<int>(h) + dh;
+                        int iw = static_cast<int>(w) + dw;
+                        if (ih >= 0 && ih < static_cast<int>(in_h) && iw >= 0 && iw < static_cast<int>(in_w)) {
+                            for (size_t ic = 0; ic < in_c; ++ic) {
+                                float weight = 0.1f * (oc + 1) * (dh + dw + 2);
+                                val += input[ih][iw][ic] * weight;
+                            }
+                        }
+                    }
+                }
+                // ReLU アクティベーション
+                output[h][w][oc] = std::max(0.0f, val);
+            }
+        }
+    }
+    return output;
+}
+
+// ----------------------------------------------------------------------
+// 3. CNN 特徴マップからトークン系列への変換
+// ----------------------------------------------------------------------
+// [H, W, C] -> [H * W, C] (空間グリッドをトークン化)
+Matrix flatten_feature_map(const Tensor3D& feat_map) {
+    size_t H = feat_map.size();
+    size_t W = feat_map[0].size();
+    size_t C = feat_map[0][0].size();
+
+    Matrix tokens(H * W, std::vector<float>(C, 0.0f));
+    for (size_t h = 0; h < H; ++h) {
+        for (size_t w = 0; w < W; ++w) {
+            size_t token_idx = h * W + w;
+            for (size_t c = 0; c < C; ++c) {
+                tokens[token_idx][c] = feat_map[h][w][c];
+            }
+        }
+    }
+    return tokens;
+}
+
+// ----------------------------------------------------------------------
+// 4. Scaled Dot-Product Attention (空間アテンション)
+// ----------------------------------------------------------------------
+std::pair<Matrix, Matrix> spatial_attention(const Matrix& X) {
+    // X: [N, C]  (N = H * W トークン数, C = チャネル数)
+    size_t N = X.size();
+    size_t C = X[0].size();
+
+    // Query, Key, Value への射影（手動での重み乗算）
+    Matrix Q = X;
+    Matrix K = X;
+    Matrix V = X;
+
+    // Q * K^T の計算 -> [N, N] (各領域同士の関心度)
+    Matrix K_T = transpose(K);
+    Matrix scores = matmul(Q, K_T);
+
+    float scale = 1.0f / std::sqrt(static_cast<float>(C));
+    for (size_t i = 0; i < N; ++i) {
+        for (size_t j = 0; j < N; ++j) {
+            scores[i][j] *= scale;
+        }
+    }
+
+    // Softmax でアテンションマップ生成
+    Matrix attn_weights = softmax(scores);
+
+    // アテンション重みを Value に適用 -> [N, C]
+    Matrix attn_output = matmul(attn_weights, V);
+
+    return {attn_output, attn_weights};
+}
+
+// ----------------------------------------------------------------------
+// 5. CNN + Attention 統合モデルによる推論パイプライン
+// ----------------------------------------------------------------------
+void run_cnn_attention_pipeline() {
+    std::cout << "=== 1. 入力画像の準備 (H=4, W=4, C=3) ===" << std::endl;
+    size_t H = 4, W = 4, C = 3;
+    Tensor3D image(H, std::vector<std::vector<float>>(W, std::vector<float>(C, 0.0f)));
+
+    // 中心付近 (h=2, w=2) に高い画素値（特定オブジェクト）を配置
+    image[2][2] = {1.0f, 0.8f, 0.9f};
+    image[2][1] = {0.7f, 0.6f, 0.5f};
+
+    std::cout << "=== 2. CNN による空間特徴量の抽出 ===" << std::endl;
+    size_t cnn_out_channels = 8;
+    Tensor3D feature_map = conv2d_simple(image, cnn_out_channels);
+    std::cout << "CNN Feature Map Shape: [" << H << ", " << W << ", " << cnn_out_channels << "]\n\n";
+
+    std::cout << "=== 3. 特徴マップのトークン系列化 (Flatten) ===" << std::endl;
+    Matrix tokens = flatten_feature_map(feature_map); // [16, 8]
+    std::cout << "Tokens Shape: [" << tokens.size() << ", " << tokens[0].size() << "]\n\n";
+
+    std::cout << "=== 4. 空間アテンション機構の適用 ===" << std::endl;
+    auto [attn_out, attn_weights] = spatial_attention(tokens);
+
+    std::cout << "Attention Weights Matrix [16 x 16] (部分表示):\n";
+    for (size_t i = 0; i < 4; ++i) {
+        for (size_t j = 0; j < 4; ++j) {
+            std::cout << std::setw(7) << std::fixed << std::setprecision(3) << attn_weights[i][j] << " ";
+        }
+        std::cout << "...\n";
+    }
+    std::cout << "...\n\n";
+
+    std::cout << "=== 5. グローバル集約 & 分類 (Linear Classifier) ===" << std::endl;
+    // トークン方向に平均プール（Global Average Pooling）して1つの特徴ベクトルに縮約
+    std::vector<float> global_vector(cnn_out_channels, 0.0f);
+    for (size_t i = 0; i < attn_out.size(); ++i) {
+        for (size_t c = 0; c < cnn_out_channels; ++c) {
+            global_vector[c] += attn_out[i][c] / attn_out.size();
+        }
+    }
+
+    // クラス出力層 (2クラス分類の Logits を計算)
+    Matrix W_cls = {
+        {0.5f, -0.2f, 0.1f, 0.8f, -0.5f, 0.3f, 0.1f, -0.4f}, // Class 0
+        {-0.3f, 0.6f, 0.4f, -0.1f, 0.9f, -0.2f, 0.5f, 0.7f}   // Class 1
+    };
+
+    std::vector<float> logits(2, 0.0f);
+    for (size_t cls = 0; cls < 2; ++cls) {
+        for (size_t c = 0; c < cnn_out_channels; ++c) {
+            logits[cls] += W_cls[cls][c] * global_vector[c];
+        }
+    }
+
+    std::cout << "Logits (Class 0 / Class 1): " << logits[0] << " / " << logits[1] << std::endl;
+    int predicted_class = (logits[1] > logits[0]) ? 1 : 0;
+    std::cout << ">>> 最終予測クラス: " << predicted_class << " <<<\n";
+}
+
+int main() {
+    run_cnn_attention_pipeline();
     return 0;
 }
