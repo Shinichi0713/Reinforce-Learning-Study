@@ -1,0 +1,2 @@
+D:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\chess\chess_game\x64\Debug\onnxruntime.dll
+D:\PycharmProjects\RL_research\Reinforce-Learning-Study\physical_engine\chess\chess_game\x64\Debug\onnxruntime_providers_shared.dll

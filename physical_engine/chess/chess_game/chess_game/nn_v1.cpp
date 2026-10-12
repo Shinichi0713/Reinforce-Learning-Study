@@ -1210,3 +1210,125 @@ int main() {
 
     return 0;
 }
+
+from dataclasses import dataclass, field
+from typing import List, Dict, Any
+from datetime import datetime
+
+@dataclass
+class Message:
+    """1つの発話を表すデータクラス"""
+    role: str       # "User" または "Assistant"
+    content: str
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+class MemoryManager:
+    """外部ライブラリに依存しないメモリ管理クラス"""
+    def __init__(self, short_term_limit: int = 4):
+        # 1. 短期記憶（直近の会話履歴を保持するウィンドウ）
+        self.short_term: List[Message] = []
+        self.short_term_limit = short_term_limit
+        
+        # 2. 長期記憶（重要な事実をキー・バリュー形式で永続化するストア）
+        self.long_term: Dict[str, str] = {}
+
+    def add_short_term(self, role: str, content: str):
+        """短期記憶にメッセージを追加し、上限を超えたら古いものを削除"""
+        self.short_term.append(Message(role=role, content=content))
+        if len(self.short_term) > self.short_term_limit:
+            self.short_term.pop(0) # 最も古い履歴を削除
+
+    def add_long_term(self, key: str, value: str):
+        """長期記憶に重要な知識や属性を保存"""
+        self.long_term[key] = value
+
+    def search_long_term(self, query: str) -> List[str]:
+        """クエリに関連する長期記憶をキーワードマッチで検索"""
+        results = []
+        for key, value in self.long_term.items():
+            if key.lower() in query.lower() or value.lower() in query.lower() or "すべて" in query:
+                results.append(f"【記憶 - {key}】: {value}")
+        return results
+
+    def build_context(self, current_query: str) -> str:
+        """LLMのプロンプトに渡すためのコンテキスト文字列を組み立てる"""
+        context_parts = []
+        
+        # 長期記憶から関連情報を検索して付与
+        relevant_memories = self.search_long_term(current_query)
+        if relevant_memories:
+            context_parts.append("--- [長期記憶・ユーザープロファイル] ---")
+            context_parts.extend(relevant_memories)
+            
+        # 短期記憶（直近の対話履歴）を付与
+        if self.short_term:
+            context_parts.append("--- [直近の会話履歴] ---")
+            for msg in self.short_term:
+                context_parts.append(f"{msg.role}: {msg.content}")
+                
+        return "\n".join(context_parts)
+
+
+class MemoryAgent:
+    """メモリ管理システムを内蔵したエージェントモデル"""
+    def __init__(self, name: str):
+        self.name = name
+        self.memory = MemoryManager(short_term_limit=4)
+
+    def step(self, user_input: str) -> str:
+        """ユーザーからの入力を受け取り、メモリを交えて思考・応答する"""
+        
+        # 1. ユーザー入力を短期記憶に記録
+        self.memory.add_short_term("User", user_input)
+
+        # 2. メモリシステムから現在のコンテキスト（履歴や長期記憶）を構築
+        context = self.memory.build_context(user_input)
+
+        # 3. エージェントの推論処理（LLMのシミュレーション）
+        # ※実際のプロダクションでは、ここで context と user_input をLLM APIに送信します
+        response = self._simulate_llm_processing(context, user_input)
+
+        # 4. エージェントの応答を短期記憶に記録
+        self.memory.add_short_term("Assistant", response)
+
+        return response
+
+    def _simulate_llm_processing(self, context: str, user_input: str) -> str:
+        """LLMの挙動を模した内部処理（情報の抽出と記憶の更新）"""
+        
+        # ユーザーが名前を教えてくれた場合、自動的に長期記憶に保存するエージェントの振る舞い
+        if "私の名前は" in user_input:
+            try:
+                name = user_input.split("私の名前は")[1].split("です")[0].strip()
+                self.memory.add_long_term("ユーザーの名前", name)
+                return f"承知いたしました！ あなたの名前を「{name}」として記憶しました。"
+            except IndexError:
+                pass
+
+        # 長期記憶にアクセスする質問への対応
+        if "私の名前を知ってる" in user_input or "名前は何だっけ" in user_input:
+            memories = self.memory.search_long_term("ユーザーの名前")
+            if memories:
+                return f"はい、覚えていますよ。{memories[0]}ですね！"
+            return "まだあなたのお名前を伺っていません。"
+
+        # 通常の応答（コンテキストを考慮した返答）
+        return f"ご入力ありがとうございます。（保持しているコンテキストに基づき処理中...）\n[受け取った入力]: {user_input}"
+
+
+# --- 実行・動作確認テスト ---
+if __name__ == "__main__":
+    agent = MemoryAgent("CoreAgent")
+
+    print("=== ターン 1 ===")
+    print(f"User: こんにちは、私の名前は佐藤健一です。")
+    print(f"Agent: {agent.step('こんにちは、私の名前は佐藤健一です。')}\n")
+
+    print("=== ターン 2 ===")
+    print(f"User: 今日は良い天気ですね。")
+    print(f"Agent: {agent.step('今日は良い天気ですね。')}\n")
+
+    print("=== ターン 3 ===")
+    print(f"User: 私の名前を知っていますか？")
+    print(f"Agent: {agent.step('私の名前を知っていますか？')}\n")

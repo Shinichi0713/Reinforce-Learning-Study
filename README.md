@@ -273,7 +273,7 @@ __Learning Objectives and Cooperation Points__
 
 <img src="image/README/marl_agent_adventure.gif" alt="jssp-3" width="500px" height="auto">
 
-<img src="miulti-agent/src/exe-3/doc/image/rollout.gif" alt="jssp-3" width="500px" height="auto">
+<img src="miulti-agent/src/exe-3/doc/image/2_with_a2po/rollout (1).gif" alt="jssp-3" width="500px" height="auto">
 
 ## Fundamental Knowledge
 
