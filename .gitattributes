@@ -6,3 +6,6 @@
 # Jupyter Notebookを除外
 *.ipynb linguist-vendored
 *.ipynb linguist-detectable=false
+
+*.html linguist-vendored
+*.html linguist-detectable=false
