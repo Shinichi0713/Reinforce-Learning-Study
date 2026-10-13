@@ -181,3 +181,7 @@ cython_debug/
 *.ipch
 /physical_engine/chess/chess_game/.vs/chess_game/v17/ipch/*
 *.onnx
+*.nupkg
+*.zip
+*.dylib
+/physical_engine/chess/chess_game/.vs/chess_game/v17/ipch/AutoPCH/370e3d00f340ec69/MAIN.ipch
